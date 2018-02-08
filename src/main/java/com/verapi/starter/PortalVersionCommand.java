@@ -8,7 +8,6 @@ import io.vertx.core.impl.launcher.commands.VersionCommand;
 import io.vertx.core.spi.launcher.DefaultCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.lang.management.ManagementFactory;
 
 
 @Name("version")
@@ -19,8 +18,8 @@ public class PortalVersionCommand extends DefaultCommand {
 
     @Override
     public void run() throws CLIException {
-        logger.info("Portal " + ManagementFactory.getRuntimeMXBean().getName());
-        logger.info("Vert.x " + VersionCommand.getVersion());
+        logger.info("Portal : " + new java.io.File(PortalVersionCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+        logger.info("Vert.x : " + VersionCommand.getVersion());
     }
 
 }

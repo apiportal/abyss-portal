@@ -15,7 +15,7 @@ public class InitVerticle extends AbstractVerticle {
 
         vertx.deployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setHa(true), res -> {
             if (res.succeeded()) {
-                logger.info("MainVerticle deployVerticle completed..." + res.succeeded());
+                logger.info(System.getProperty("abyss-jar.name")+" MainVerticle deployVerticle completed..." + res.succeeded());
                 start.complete();
             } else {
                 logger.error("MainVerticle deployVerticle failed..." + res.cause());

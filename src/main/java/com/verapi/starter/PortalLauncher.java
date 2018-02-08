@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PortalLauncher extends VertxCommandLauncher implements VertxLifecycleHooks {
-    private static Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void main(String[] args) {
 
@@ -18,10 +17,14 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         if (null == System.getProperty("vertx.logger-delegate-factory-class-name"))
             System.setProperty("vertx.logger-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
 
+        System.setProperty("abyss-jar.name", new java.io.File(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+
         new PortalLauncher()
                 .register(PortalVersionCommand.class)
                 .dispatch(args);
     }
+
+    private Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void executeCommand(String cmd, String... args) {
         new PortalLauncher().execute(cmd, args);
