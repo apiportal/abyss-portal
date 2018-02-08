@@ -14,3 +14,6 @@ buildNumber.properties
 *.log
 .idea/libraries/
 .idea/workspace.xml
+redeploy.sh
+.idea/uiDesigner.xml
+.idea/abyss-portal.iml
