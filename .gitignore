@@ -12,3 +12,5 @@ buildNumber.properties
 .settings/
 .vertx/
 *.log
+.idea/libraries/
+.idea/workspace.xml
