@@ -3,11 +3,15 @@ package com.verapi.starter;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.shiro.ShiroAuth;
+import io.vertx.ext.auth.shiro.ShiroAuthOptions;
+import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.LoggerFormat;
-import io.vertx.ext.web.handler.LoggerHandler;
-import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.handler.*;
+import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +50,11 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> start) {
 
+        AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
+                .setType(ShiroAuthRealmType.PROPERTIES)
+                .setConfig(new JsonObject()
+                        .put("properties_path", "classpath:users.properties")));
+
         // To simplify the development of the web components we use a Router to route all HTTP requests
         // to organize our code in a reusable way.
         final Router router = Router.router(vertx);
@@ -53,8 +62,37 @@ public class MainVerticle extends AbstractVerticle {
         //log HTTP requests
         router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
-        // Entry point to the application, this will render a custom Thymeleaf template.
-        router.route("/full-width-light/login").handler(this::loginHandler);
+        //firstly install cookie handler
+        //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
+        router.route().handler(CookieHandler.create());
+
+        //secondly install body handler
+        //A handler which gathers the entire request body and sets it on the RoutingContext
+        //It also handles HTTP file uploads and can be used to limit body sizes
+        router.route().handler(BodyHandler.create());
+
+        //thirdly install session handler
+        //A handler that maintains a Session for each browser session
+        //The session is available on the routing context with RoutingContext.session()
+        //The session handler requires a CookieHandler to be on the routing chain before it
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+
+        //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
+        //It requires that the session handler is already present on previous matching routes
+        //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
+        router.route().handler(UserSessionHandler.create(auth));
+
+        //An auth handler that's used to handle auth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
+        AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
+
+        //install authHandler for all routes where authentication is required
+        router.route("/full-width-light/").handler(authHandler);
+        router.route("/full-width-light/index").handler(authHandler);
+
+        // Entry point to the application, this will render a custom Thymeleaf template
+        router.get("/full-width-light/login").handler(this::loginHandler);
+
+        router.post("/login-auth").handler(FormLoginHandler.create(auth));
 
         router.route()
                 .handler(StaticHandler.create());
