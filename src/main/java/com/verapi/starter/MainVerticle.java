@@ -2,6 +2,7 @@ package com.verapi.starter;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
@@ -12,8 +13,14 @@ import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.*;
+import io.vertx.ext.web.handler.impl.FormLoginHandlerImpl;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +32,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
 
-    private AuthProvider auth;
+    //private AuthProvider auth;
 
 /*
   public static void main(String... args) {
@@ -53,10 +60,14 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> start) {
 
-        auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
+    	AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
                 .setType(ShiroAuthRealmType.PROPERTIES)
                 .setConfig(new JsonObject()
                         .put("properties_path", "classpath:users.properties")));
+        
+
+        
+        
 
         // To simplify the development of the web components we use a Router to route all HTTP requests
         // to organize our code in a reusable way.
@@ -95,7 +106,9 @@ public class MainVerticle extends AbstractVerticle {
         // Entry point to the application, this will render a custom Thymeleaf template
         router.get("/full-width-light/login").handler(this::loginHandler);
 
-        router.post("/login-auth").handler(this::loginAuthHandler);
+        router.post("/login-auth").handler(new SpecialLoginHandler(auth));
+        
+        router.post("/login-auth2").handler(FormLoginHandler.create(auth));
 
         router.route()
                 .handler(StaticHandler.create());
@@ -232,17 +245,97 @@ public class MainVerticle extends AbstractVerticle {
         }
     }
 
-    private void loginAuthHandler(RoutingContext context) {
-        logger.info("loginAuthHandler invoked..");
-        JsonObject creds = new JsonObject()
-                .put("email", context.request().getHeader("email"))
-                .put("password", context.request().getHeader("password"));
-        auth.authenticate(creds, authResult -> {
-            if (authResult.succeeded()) {
-                User user = authResult.result();
-            } else {
-                context.fail(401);
-            }
-        });
+    
+    class SpecialLoginHandler implements FormLoginHandler {
+
+    	//private final Logger log = LoggerFactory.getLogger(FormLoginHandlerImpl.class);
+
+    	private final AuthProvider authProvider;
+    	
+		public SpecialLoginHandler(AuthProvider authProvider) {
+			this.authProvider = authProvider;
+		}
+
+
+		/* (non-Javadoc)
+		 * @see io.vertx.core.Handler#handle(java.lang.Object)
+		 */
+		@Override
+		public void handle(RoutingContext context) {
+			logger.info("loginAuthHandler invoked..");
+			
+			String username = context.request().getFormAttribute("username");
+			String password = context.request().getFormAttribute("password");
+			
+			logger.info("Received user:"+username+":hdr:"+context.request().getHeader("username"));
+			logger.info("Received pass:"+password+":hdr:"+context.request().getHeader("password"));
+			
+            JsonObject creds = new JsonObject()
+                    .put("username", username)
+                    .put("password", password);
+            
+            //Direct Method
+/*            Subject currentUser = SecurityUtils.getSubject();
+            
+            UsernamePasswordToken userToken = new UsernamePasswordToken(username, password, "127.0.0.1");
+            
+            currentUser.login(userToken);
+            logger.info("User [" + username + "] logged in successfully.");
+
+            logger.info("Logged in user: " + ((User)currentUser.getPrincipal()).principal().encodePrettily());
+*/            
+            //Previous Method
+            authProvider.authenticate(creds, authResult -> {
+                if (authResult.succeeded()) {
+                    User user = authResult.result();
+                    logger.info("Logged in user: " + user.principal().encodePrettily());
+                } else {
+                    context.fail(401);
+                }
+            });
+		}
+
+
+		/* (non-Javadoc)
+		 * @see io.vertx.ext.web.handler.FormLoginHandler#setDirectLoggedInOKURL(java.lang.String)
+		 */
+		@Override
+		public FormLoginHandler setDirectLoggedInOKURL(String arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+
+		/* (non-Javadoc)
+		 * @see io.vertx.ext.web.handler.FormLoginHandler#setPasswordParam(java.lang.String)
+		 */
+		@Override
+		public FormLoginHandler setPasswordParam(String arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+
+		/* (non-Javadoc)
+		 * @see io.vertx.ext.web.handler.FormLoginHandler#setReturnURLParam(java.lang.String)
+		 */
+		@Override
+		public FormLoginHandler setReturnURLParam(String arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+
+		/* (non-Javadoc)
+		 * @see io.vertx.ext.web.handler.FormLoginHandler#setUsernameParam(java.lang.String)
+		 */
+		@Override
+		public FormLoginHandler setUsernameParam(String arg0) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+    	
     }
+    
 }

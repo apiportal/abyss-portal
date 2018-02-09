@@ -61,14 +61,16 @@
 											<form action="/login-auth" method="POST">
 												<div class="form-group">
 													<label class="control-label mb-10" for="exampleInputEmail_2">Email address</label>
-													<input type="email" class="form-control" required="" id="exampleInputEmail_2" placeholder="Enter email">
+													<input type="email" name="username" class="form-control" required="" id="exampleInputEmail_2" placeholder="Enter email">
 												</div>
 												<div class="form-group">
 													<label class="pull-left control-label mb-10" for="exampleInputpwd_2">Password</label>
 													<a class="capitalize-font txt-primary block mb-10 pull-right font-12" href="forgot-password.html">forgot password ?</a>
 													<div class="clearfix"></div>
-													<input type="password" class="form-control" required="" id="exampleInputpwd_2" placeholder="Enter pwd">
+													<input type="password" name="password" class="form-control" required="" id="exampleInputpwd_2" placeholder="Enter pwd">
 												</div>
+
+												<input type="hidden" name="return_url" value="/full-width-light/index">
 
 												<div class="form-group">
 													<div class="checkbox checkbox-primary pr-10 pull-left">
@@ -78,10 +80,30 @@
 													<div class="clearfix"></div>
 												</div>
 												<div class="form-group text-center">
-													<button type="submit" class="btn btn-info btn-rounded">sign in</button>
+													<button type="submit" class="btn btn-primary btn-rounded">Sign In</button>
 												</div>
 											</form>
 										</div>
+
+										<div class="form-wrap">
+											<form action="/login-auth2" method="POST">
+												<div class="form-group">
+													<label class="control-label mb-10" for="exampleInputEmail_3">Username</label>
+													<input type="text" name="username" class="form-control" required="required" id="exampleInputEmail_3" placeholder="Enter username">
+
+													<label class="pull-left control-label mb-10" for="exampleInputpwd_3">Password</label>
+													<a class="capitalize-font txt-primary block mb-10 pull-right font-12" href="forgot-password.html">forgot password ?</a>
+													
+													<div class="clearfix"></div>
+													<input type="password" name="password" class="form-control" required="required" id="exampleInputpwd_3" placeholder="Enter password">
+													
+													<input type="hidden" name="return_url" value="/full-width-light/index">
+
+													<button type="submit" class="btn btn-primary btn-rounded">Login</button>
+												</div>
+											</form>
+										</div>
+
 									</div>
 								</div>
 							</div>
