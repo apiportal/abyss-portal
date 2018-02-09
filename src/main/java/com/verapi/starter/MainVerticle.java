@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
@@ -23,6 +24,8 @@ import org.slf4j.LoggerFactory;
 public class MainVerticle extends AbstractVerticle {
 
     private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+
+    private AuthProvider auth;
 
 /*
   public static void main(String... args) {
@@ -50,7 +53,7 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> start) {
 
-        AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
+        auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
                 .setType(ShiroAuthRealmType.PROPERTIES)
                 .setConfig(new JsonObject()
                         .put("properties_path", "classpath:users.properties")));
@@ -86,13 +89,13 @@ public class MainVerticle extends AbstractVerticle {
         AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
 
         //install authHandler for all routes where authentication is required
-        router.route("/full-width-light/").handler(authHandler);
+        //router.route("/full-width-light/").handler(authHandler);
         router.route("/full-width-light/index").handler(authHandler);
 
         // Entry point to the application, this will render a custom Thymeleaf template
         router.get("/full-width-light/login").handler(this::loginHandler);
 
-        router.post("/login-auth").handler(FormLoginHandler.create(auth));
+        router.post("/login-auth").handler(this::loginAuthHandler);
 
         router.route()
                 .handler(StaticHandler.create());
@@ -229,4 +232,17 @@ public class MainVerticle extends AbstractVerticle {
         }
     }
 
+    private void loginAuthHandler(RoutingContext context) {
+        logger.info("loginAuthHandler invoked..");
+        JsonObject creds = new JsonObject()
+                .put("email", context.request().getHeader("email"))
+                .put("password", context.request().getHeader("password"));
+        auth.authenticate(creds, authResult -> {
+            if (authResult.succeeded()) {
+                User user = authResult.result();
+            } else {
+                context.fail(401);
+            }
+        });
+    }
 }
