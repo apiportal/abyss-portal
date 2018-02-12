@@ -1,5 +1,6 @@
 package com.verapi.starter;
 
+import com.verapi.starter.handler.Login;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -16,6 +17,7 @@ import io.vertx.ext.web.handler.*;
 import io.vertx.ext.web.handler.impl.FormLoginHandlerImpl;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
+
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
@@ -66,12 +68,11 @@ public class MainVerticle extends AbstractVerticle {
                         .put("properties_path", "classpath:users.properties")));
         
 
-        
-        
+        logger.info("AuthProvider created.. " + auth.toString());
 
         // To simplify the development of the web components we use a Router to route all HTTP requests
         // to organize our code in a reusable way.
-        final Router router = Router.router(vertx);
+        Router router = Router.router(vertx);
 
         //log HTTP requests
         router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
@@ -83,13 +84,13 @@ public class MainVerticle extends AbstractVerticle {
         //secondly install body handler
         //A handler which gathers the entire request body and sets it on the RoutingContext
         //It also handles HTTP file uploads and can be used to limit body sizes
-        router.route().handler(BodyHandler.create());
+        //router.route().handler(BodyHandler.create());
 
         //thirdly install session handler
         //A handler that maintains a Session for each browser session
         //The session is available on the routing context with RoutingContext.session()
         //The session handler requires a CookieHandler to be on the routing chain before it
-        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx,"abyss.session")).setSessionCookieName("abyss.session"));
 
         //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
         //It requires that the session handler is already present on previous matching routes
@@ -97,24 +98,28 @@ public class MainVerticle extends AbstractVerticle {
         router.route().handler(UserSessionHandler.create(auth));
 
         //An auth handler that's used to handle auth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
-        AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
+        AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login", "/full-width-light/index");
 
         //install authHandler for all routes where authentication is required
         //router.route("/full-width-light/").handler(authHandler);
-        router.route("/full-width-light/index").handler(authHandler);
+        router.route("/full-width-light/index").handler(authHandler).failureHandler(this::failureHandler);
 
         // Entry point to the application, this will render a custom Thymeleaf template
-        router.get("/full-width-light/login").handler(this::loginHandler);
+        //router.get("/full-width-light/login").handler(this::loginHandler);
+        Login login = new Login(auth);
+        router.get("/full-width-light/login").handler(login::pageRender).failureHandler(this::failureHandler);
+        router.post("/login-auth").handler(login).failureHandler(this::failureHandler);
 
-        router.post("/login-auth").handler(new SpecialLoginHandler(auth));
+        //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
         
-        router.post("/login-auth2").handler(FormLoginHandler.create(auth));
+        //router.post("/login-auth2").handler(FormLoginHandler.create(auth));
 
-        router.route()
-                .handler(StaticHandler.create());
+        router.get("/img/*").handler(StaticHandler.create("/img"));
+        router.get("/vendors/*").handler(StaticHandler.create("/vendors"));
+        router.get("/full-width-light/dist/*").handler(StaticHandler.create("/full-width-light/dist"));
         //.failureHandler(this::failureHandler);
 
-        router.route().failureHandler(this::failureHandler);
+        //router.route().failureHandler(this::failureHandler);
     /*router.route().failureHandler(failureRoutingContext -> {
 
       int statusCode = failureRoutingContext.statusCode();
@@ -125,9 +130,9 @@ public class MainVerticle extends AbstractVerticle {
 
     });*/
 
-        router.get("/full-width-light/404").handler(this::p404Handler);
+        router.get("/full-width-light/404").handler(this::p404Handler).failureHandler(this::failureHandler);
 
-        router.get("/full-width-light/500").handler(this::p500Handler);
+        router.get("/full-width-light/500").handler(this::p500Handler).failureHandler(this::failureHandler);
 
         router.route().handler(ctx -> {
             ctx.fail(404);
@@ -241,7 +246,7 @@ public class MainVerticle extends AbstractVerticle {
         if (context.statusCode() == 404) {
             context.response().putHeader("location", "/full-width-light/404").setStatusCode(302).end();
         } else {
-            context.reroute("/full-width-light/500");
+            context.response().putHeader("location", "/full-width-light/500").setStatusCode(302).end();
         }
     }
 

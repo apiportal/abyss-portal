@@ -31,10 +31,9 @@
     <!--<appender-ref ref="ASYNC_FILE" />-->
   </logger>
 
-  <!--<logger name="*" level="TRACE">
-    <appender-ref ref="STDOUT" />
-    <appender-ref ref="FILE" />
-  </logger>-->
+  <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="INFO">
+    <appender-ref ref="ASYNC_FILE" />
+  </logger>
 
   <root level="TRACE">
     <appender-ref ref="ASYNC_FILE" />
