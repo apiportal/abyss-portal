@@ -1,9 +1,9 @@
 package com.verapi.starter;
 
+import com.verapi.starter.handler.Index;
 import com.verapi.starter.handler.Login;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
@@ -14,15 +14,8 @@ import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.*;
-import io.vertx.ext.web.handler.impl.FormLoginHandlerImpl;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
-
-
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.subject.Subject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +59,6 @@ public class MainVerticle extends AbstractVerticle {
                 .setType(ShiroAuthRealmType.PROPERTIES)
                 .setConfig(new JsonObject()
                         .put("properties_path", "classpath:users.properties")));
-        
-
         logger.info("AuthProvider created.. " + auth.toString());
 
         // To simplify the development of the web components we use a Router to route all HTTP requests
@@ -84,13 +75,13 @@ public class MainVerticle extends AbstractVerticle {
         //secondly install body handler
         //A handler which gathers the entire request body and sets it on the RoutingContext
         //It also handles HTTP file uploads and can be used to limit body sizes
-        //router.route().handler(BodyHandler.create());
+        router.route().handler(BodyHandler.create());
 
         //thirdly install session handler
         //A handler that maintains a Session for each browser session
         //The session is available on the routing context with RoutingContext.session()
         //The session handler requires a CookieHandler to be on the routing chain before it
-        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx,"abyss.session")).setSessionCookieName("abyss.session"));
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx,"abyss.session")).setSessionCookieName("abyss.session").setCookieHttpOnlyFlag(true));
 
         //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
         //It requires that the session handler is already present on previous matching routes
@@ -98,11 +89,11 @@ public class MainVerticle extends AbstractVerticle {
         router.route().handler(UserSessionHandler.create(auth));
 
         //An auth handler that's used to handle auth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
-        AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login", "/full-width-light/index");
+        AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
 
         //install authHandler for all routes where authentication is required
         //router.route("/full-width-light/").handler(authHandler);
-        router.route("/full-width-light/index").handler(authHandler).failureHandler(this::failureHandler);
+        router.route("/full-width-light/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
 
         // Entry point to the application, this will render a custom Thymeleaf template
         //router.get("/full-width-light/login").handler(this::loginHandler);
@@ -110,6 +101,8 @@ public class MainVerticle extends AbstractVerticle {
         router.get("/full-width-light/login").handler(login::pageRender).failureHandler(this::failureHandler);
         router.post("/login-auth").handler(login).failureHandler(this::failureHandler);
 
+        Index index = new Index(auth);
+        router.get("/full-width-light/index").handler(index::pageRender).failureHandler(this::failureHandler);
         //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
         
         //router.post("/login-auth2").handler(FormLoginHandler.create(auth));

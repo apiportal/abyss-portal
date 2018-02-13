@@ -36,9 +36,9 @@ public class Login implements Handler<RoutingContext> {
         authProvider.authenticate(creds, authResult -> {
             if (authResult.succeeded()) {
                 User user = authResult.result();
+                routingContext.setUser(user);
                 logger.info("Logged in user: " + user.principal().encodePrettily());
-                routingContext.put("username", routingContext.user().principal().getString("username"));
-                //routingContext.put("username", routingContext.request().getFormAttribute("username"));
+                routingContext.put("username", user.principal().getString("username"));
                 routingContext.response().putHeader("location", "/full-width-light/index").setStatusCode(302).end();
                 logger.info("redirected../full-width-light/index");
             } else {
