@@ -154,9 +154,13 @@
             <artifactId>vertx-auth-shiro</artifactId>
         </dependency>
         <dependency>
-        	<groupId>org.apache.shiro</groupId>
-        	<artifactId>shiro-core</artifactId>
-        	<version>1.4.0</version>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-config</artifactId>
         </dependency>
     </dependencies>
 

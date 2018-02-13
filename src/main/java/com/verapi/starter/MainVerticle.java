@@ -1,5 +1,6 @@
 package com.verapi.starter;
 
+import com.verapi.starter.common.Config;
 import com.verapi.starter.handler.Index;
 import com.verapi.starter.handler.Login;
 import io.vertx.core.AbstractVerticle;
@@ -7,7 +8,6 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
@@ -142,16 +142,19 @@ public class MainVerticle extends AbstractVerticle {
         logger.warn("http server is running in plaintext mode. Enable SSL in config for production deployments.");
         vertx.createHttpServer(httpServerOptions.setCompressionSupported(true))
                 .requestHandler(router::accept)
-                .listen(8081, result -> {
-                    if (result.succeeded()) {
-                        logger.info("http server started..." + result.succeeded());
-                        start.complete();
-                    } else {
-                        logger.error("http server starting failed..." + result.cause());
-                        start.fail(result.cause());
-                    }
-                });
+                .listen(Config.getInstance().getConfigJsonObject().getInteger("port")
+                        , Config.getInstance().getConfigJsonObject().getString("host")
+                        , result -> {
+                            if (result.succeeded()) {
+                                logger.info("http server started..." + result.succeeded());
+                                start.complete();
+                            } else {
+                                logger.error("http server starting failed..." + result.cause());
+                                start.fail(result.cause());
+                            }
+                        });
 
+        logger.debug("loaded config : " + Config.getInstance().getConfigJsonObject().encodePrettily());
 
 /*
     ClusterManager mgr = new HazelcastClusterManager(new Config());
