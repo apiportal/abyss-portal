@@ -86,6 +86,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         } catch (TimeoutException e) {
             logger.error(e.getLocalizedMessage());
         }
+        retriever.listen(configChange -> {
+            Config config = Config.getInstance().setConfig(configChange.getNewConfiguration());
+            logger.debug("Config changed and reloaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+
+        });
     }
 
     @Override
