@@ -1,5 +1,9 @@
 package com.verapi.starter;
 
+import com.verapi.starter.common.Config;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
+import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
@@ -8,6 +12,11 @@ import io.vertx.core.impl.launcher.VertxLifecycleHooks;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class PortalLauncher extends VertxCommandLauncher implements VertxLifecycleHooks {
 
@@ -46,6 +55,42 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         logger.info(String.format("%s vertx started", vertx.toString()));
         logger.info(String.format("vertx is clustered : %s", vertx.isClustered()));
         logger.info(String.format("vertx is metric enabled : %s", vertx.isMetricsEnabled()));
+        ConfigStoreOptions file = new ConfigStoreOptions()
+                .setType("file")
+                .setFormat("properties")
+                .setConfig(new JsonObject().put("path", "abyss-portal-config.properties"));
+        ConfigRetrieverOptions options = new ConfigRetrieverOptions()
+                .addStore(file)
+                .setScanPeriod(10000);
+        logger.debug("ConfigRetrieverOptions set OK..");
+        ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
+        logger.debug("ConfigRetriever OK..");
+        CompletableFuture future = new CompletableFuture();
+        retriever.getConfig(ar -> {
+            if (ar.failed()) {
+                future.completeExceptionally(ar.cause());
+                logger.error("afterStartingVertx ConfigRetriever getConfig failed " + ar.cause());
+            } else {
+                Config config = Config.getInstance().setConfig(ar.result());
+                future.complete(ar.result());
+                logger.debug("afterStartingVertx ConfigRetriever getConfig OK..");
+                logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+            }
+        });
+        try {
+            future.get(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.error(e.getLocalizedMessage());
+        } catch (ExecutionException e) {
+            logger.error(e.getLocalizedMessage());
+        } catch (TimeoutException e) {
+            logger.error(e.getLocalizedMessage());
+        }
+        retriever.listen(configChange -> {
+            Config config = Config.getInstance().setConfig(configChange.getNewConfiguration());
+            logger.debug("Config changed and reloaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+
+        });
     }
 
     @Override
