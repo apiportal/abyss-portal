@@ -55,7 +55,7 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> start) {
 
-    	AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
+        AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
                 .setType(ShiroAuthRealmType.PROPERTIES)
                 .setConfig(new JsonObject()
                         .put("properties_path", "classpath:users.properties")));
@@ -81,7 +81,7 @@ public class MainVerticle extends AbstractVerticle {
         //A handler that maintains a Session for each browser session
         //The session is available on the routing context with RoutingContext.session()
         //The session handler requires a CookieHandler to be on the routing chain before it
-        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx,"abyss.session")).setSessionCookieName("abyss.session").setCookieHttpOnlyFlag(true));
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session"));
 
         //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
         //It requires that the session handler is already present on previous matching routes
@@ -104,12 +104,12 @@ public class MainVerticle extends AbstractVerticle {
         Index index = new Index(auth);
         router.get("/full-width-light/index").handler(index::pageRender).failureHandler(this::failureHandler);
         //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
-        
+
         //router.post("/login-auth2").handler(FormLoginHandler.create(auth));
 
-        router.get("/img/*").handler(StaticHandler.create("/img"));
-        router.get("/vendors/*").handler(StaticHandler.create("/vendors"));
-        router.get("/full-width-light/dist/*").handler(StaticHandler.create("/full-width-light/dist"));
+        router.get("/img/*").handler(StaticHandler.create("/img").setWebRoot("webroot/img"));
+        router.get("/vendors/*").handler(StaticHandler.create("/vendors").setWebRoot("webroot/vendors"));
+        router.get("/full-width-light/dist/*").handler(StaticHandler.create("/full-width-light/dist").setWebRoot("webroot/full-width-light/dist"));
         //.failureHandler(this::failureHandler);
 
         //router.route().failureHandler(this::failureHandler);
@@ -127,7 +127,12 @@ public class MainVerticle extends AbstractVerticle {
 
         router.get("/full-width-light/500").handler(this::p500Handler).failureHandler(this::failureHandler);
 
+        //only rendering page routings' failures shall be handled by using regex
+        //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
+        router.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
+
         router.route().handler(ctx -> {
+            logger.info("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
             ctx.fail(404);
         });
 
@@ -243,97 +248,5 @@ public class MainVerticle extends AbstractVerticle {
         }
     }
 
-    
-    class SpecialLoginHandler implements FormLoginHandler {
 
-    	//private final Logger log = LoggerFactory.getLogger(FormLoginHandlerImpl.class);
-
-    	private final AuthProvider authProvider;
-    	
-		public SpecialLoginHandler(AuthProvider authProvider) {
-			this.authProvider = authProvider;
-		}
-
-
-		/* (non-Javadoc)
-		 * @see io.vertx.core.Handler#handle(java.lang.Object)
-		 */
-		@Override
-		public void handle(RoutingContext context) {
-			logger.info("loginAuthHandler invoked..");
-			
-			String username = context.request().getFormAttribute("username");
-			String password = context.request().getFormAttribute("password");
-			
-			logger.info("Received user:"+username+":hdr:"+context.request().getHeader("username"));
-			logger.info("Received pass:"+password+":hdr:"+context.request().getHeader("password"));
-			
-            JsonObject creds = new JsonObject()
-                    .put("username", username)
-                    .put("password", password);
-            
-            //Direct Method
-/*            Subject currentUser = SecurityUtils.getSubject();
-            
-            UsernamePasswordToken userToken = new UsernamePasswordToken(username, password, "127.0.0.1");
-            
-            currentUser.login(userToken);
-            logger.info("User [" + username + "] logged in successfully.");
-
-            logger.info("Logged in user: " + ((User)currentUser.getPrincipal()).principal().encodePrettily());
-*/            
-            //Previous Method
-            authProvider.authenticate(creds, authResult -> {
-                if (authResult.succeeded()) {
-                    User user = authResult.result();
-                    logger.info("Logged in user: " + user.principal().encodePrettily());
-                } else {
-                    context.fail(401);
-                }
-            });
-		}
-
-
-		/* (non-Javadoc)
-		 * @see io.vertx.ext.web.handler.FormLoginHandler#setDirectLoggedInOKURL(java.lang.String)
-		 */
-		@Override
-		public FormLoginHandler setDirectLoggedInOKURL(String arg0) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-
-		/* (non-Javadoc)
-		 * @see io.vertx.ext.web.handler.FormLoginHandler#setPasswordParam(java.lang.String)
-		 */
-		@Override
-		public FormLoginHandler setPasswordParam(String arg0) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-
-		/* (non-Javadoc)
-		 * @see io.vertx.ext.web.handler.FormLoginHandler#setReturnURLParam(java.lang.String)
-		 */
-		@Override
-		public FormLoginHandler setReturnURLParam(String arg0) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-
-		/* (non-Javadoc)
-		 * @see io.vertx.ext.web.handler.FormLoginHandler#setUsernameParam(java.lang.String)
-		 */
-		@Override
-		public FormLoginHandler setUsernameParam(String arg0) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-    	
-    }
-    
 }
