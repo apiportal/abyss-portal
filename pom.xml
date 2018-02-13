@@ -58,7 +58,7 @@
     </issueManagement>
 
     <properties>
-        <vertx.version>3.5.1-SNAPSHOT</vertx.version>
+        <vertx.version>3.5.1</vertx.version>
         <main.verticle>com.verapi.starter.InitVerticle</main.verticle>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>4.12</junit.version>
@@ -152,12 +152,34 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-auth-shiro</artifactId>
+            <version>3.5.0</version>
         </dependency>
         <dependency>
         	<groupId>org.apache.shiro</groupId>
         	<artifactId>shiro-core</artifactId>
         	<version>1.4.0</version>
         </dependency>
+        
+        <dependency>
+		  <groupId>io.vertx</groupId>
+		  <artifactId>vertx-auth-common</artifactId>
+		</dependency>
+        
+        <dependency>
+		  <groupId>io.vertx</groupId>
+		  <artifactId>vertx-jdbc-client</artifactId>
+		</dependency>
+        
+        <dependency>
+		  <groupId>io.vertx</groupId>
+		  <artifactId>vertx-auth-jdbc</artifactId>
+		</dependency>
+        
+		<dependency>
+		  <groupId>io.vertx</groupId>
+		  <artifactId>vertx-auth-jwt</artifactId>
+		</dependency>        
+		        
     </dependencies>
 
     <build>

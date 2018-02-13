@@ -5,12 +5,18 @@ import com.verapi.starter.handler.Login;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jdbc.JDBCAuth;
+import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.auth.shiro.ShiroAuth;
 import io.vertx.ext.auth.shiro.ShiroAuthOptions;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
+import io.vertx.ext.jdbc.JDBCClient;
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.*;
@@ -26,6 +32,10 @@ import org.slf4j.LoggerFactory;
 public class MainVerticle extends AbstractVerticle {
 
     private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+    
+    private JDBCClient jdbcClient;
+    
+    private JDBCAuth authProvider;
 
     //private AuthProvider auth;
 
@@ -55,6 +65,45 @@ public class MainVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> start) {
 
+    	/*
+    	You can set the default search_path at the database level:
+
+    		ALTER DATABASE <database_name> SET search_path TO schema1,schema2;
+    	
+    	Or at the user or role level:
+
+    		ALTER ROLE <role_name> SET search_path TO schema1,schema2;
+    		
+    	Or add parameter to connection URL:
+    	
+    		https://jdbc.postgresql.org/documentation/head/connect.html
+    		
+    	*/
+    	
+    	JsonObject jdbcClientConfig = new JsonObject()
+    			  .put("url", "jdbc:postgresql://192.168.10.40:5432/abyssportal?currentSchema=portalschema")
+    			  .put("driver_class", "org.postgresql.Driver")
+    			  .put("user", "postgres")//"abyssuser")
+    			  .put("password", "postgres")//"User007")
+    			  .put("max_pool_size", 30);    
+    	
+    	jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
+    	logger.info("JDBCClient created... " + jdbcClient.toString() );
+
+    	authProvider = JDBCAuth.create(vertx, jdbcClient);
+    	
+    	logger.info("JDBCAuthProvider created... " + authProvider.toString());
+    	
+    	//authProvider.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.USER WHERE USERNAME = ?");
+    	//authProvider.setPermissionsQuery("SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE");
+    	//authProvider.setRolesQuery("SELECT ROLE FROM portalschema.USER_ROLES WHERE USERNAME = ?");
+    	authProvider.setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx));
+    	//authProvider.setNonces();
+    	logger.info("JDBCAuthProvider configuration done... ");
+    	
+    	
+    	
+    	
         AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
                 .setType(ShiroAuthRealmType.PROPERTIES)
                 .setConfig(new JsonObject()
@@ -91,6 +140,8 @@ public class MainVerticle extends AbstractVerticle {
         //An auth handler that's used to handle auth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
         AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
 
+        router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
+        
         //install authHandler for all routes where authentication is required
         //router.route("/full-width-light/").handler(authHandler);
         router.route("/full-width-light/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
@@ -106,6 +157,8 @@ public class MainVerticle extends AbstractVerticle {
         //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
 
         //router.post("/login-auth2").handler(FormLoginHandler.create(auth));
+        
+        
 
         router.get("/img/*").handler(StaticHandler.create("/img").setWebRoot("webroot/img"));
         router.get("/vendors/*").handler(StaticHandler.create("/vendors").setWebRoot("webroot/vendors"));
@@ -122,6 +175,8 @@ public class MainVerticle extends AbstractVerticle {
       response.setStatusCode(statusCode).end("Sorry! Not today");
 
     });*/
+        
+        
 
         router.get("/full-width-light/404").handler(this::p404Handler).failureHandler(this::failureHandler);
 
@@ -179,6 +234,58 @@ public class MainVerticle extends AbstractVerticle {
     });
 */
     }
+
+	/**
+	 * @param authProvider
+	 */
+	private void createUser(RoutingContext routingContext) {
+		
+        String username = routingContext.request().getParam("username");
+        String password = routingContext.request().getParam("password");
+
+        logger.info("Received user:" + username);
+        logger.info("Received pass:" + password);
+
+		
+		jdbcClient.getConnection(resConn -> {
+			if (resConn.succeeded()) {
+
+				SQLConnection connection = resConn.result();
+				
+				connection.queryWithParams("SELECT * FROM USER WHERE USERNAME = ?", new JsonArray().add(username), resQuery -> {
+					if (resQuery.succeeded()) {
+						ResultSet rs = resQuery.result();
+						// Do something with results
+						if (rs.getNumRows() > 0) {
+							logger.info("user found: " + rs.toJson().encodePrettily());
+						} else {
+							logger.info("user NOT found, creating ...");
+							String salt = authProvider.generateSalt();
+							String hash = authProvider.computeHash(password, salt);
+							// save to the database
+							connection.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add(username).add(hash).add(salt), resUpdate -> {
+								if (resUpdate.succeeded()) {
+									logger.info("user created successfully");
+								} else {
+									logger.error("user create error: " + resUpdate.cause().getLocalizedMessage());
+									resUpdate.failed();
+								}
+							});
+						}
+					} else {
+						logger.error("SELECT user failed: " + resQuery.cause().getLocalizedMessage());
+						connection.close();
+						//jdbcClient.close();
+					}
+				});
+			} else {
+				// Failed to get connection - deal with it
+				logger.error("JDBC getConnection failed: " + resConn.cause().getLocalizedMessage());
+				resConn.failed();
+				//jdbcClient.close();
+			}
+		});
+	}
 
     private void loginHandler(RoutingContext context) {
 
@@ -248,5 +355,13 @@ public class MainVerticle extends AbstractVerticle {
         }
     }
 
-
+	/* (non-Javadoc)
+	 * @see io.vertx.core.AbstractVerticle#stop()
+	 */
+	@Override
+	public void stop() throws Exception {
+		// TODO Auto-generated method stub
+		super.stop();
+		jdbcClient.close();
+	}
 }
