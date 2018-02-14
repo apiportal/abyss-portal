@@ -53,9 +53,10 @@
 								<div class="row">
 									<div class="col-sm-12 col-xs-12">
 										<div class="mb-30">
-											<span class="block error-head text-center txt-info mb-10">500</span>
-											<span class="text-center nonecase-font mb-20 block error-comment">Oops! Internal Server Error</span>
-											<p class="text-center">There was an Error. Please try again later. That's all we know.</p>
+											<span class="block error-head text-center txt-info mb-10" th:text="${context.get('http.statusCode')}">???</span>
+											<span class="text-center nonecase-font mb-20 block error-comment" th:text="${context.get('http.errorMessage')}">???</span>
+											<span class="text-center nonecase-font mb-20 block error-comment" th:text="${context.get('context.failureMessage')}">???</span>
+											<p class="text-center" th:text="${context.get('http.url')}">???</p>
 										</div>	
 									</div>	
 								</div>
