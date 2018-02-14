@@ -3,18 +3,16 @@ package com.verapi.starter;
 import com.verapi.starter.common.Config;
 import com.verapi.starter.handler.Index;
 import com.verapi.starter.handler.Login;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
-import io.vertx.ext.auth.shiro.ShiroAuth;
-import io.vertx.ext.auth.shiro.ShiroAuthOptions;
-import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
 import io.vertx.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.SQLConnection;
@@ -32,7 +30,27 @@ import org.slf4j.LoggerFactory;
  */
 public class MainVerticle extends AbstractVerticle {
 
-    private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+    /**
+	 * 
+	 */
+	private static final String CONTEXT_FAILURE_MESSAGE = "context.failureMessage";
+
+	/**
+	 * 
+	 */
+	private static final String HTTP_ERRORMESSAGE = "http.errorMessage";
+
+	/**
+	 * 
+	 */
+	private static final String HTTP_URL = "http.url";
+
+	/**
+	 * 
+	 */
+	private static final String HTTP_STATUSCODE = "http.statusCode";
+
+	private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
     
     private JDBCClient jdbcClient;
     
@@ -103,13 +121,6 @@ public class MainVerticle extends AbstractVerticle {
     	logger.info("JDBCAuthProvider configuration done... ");
     	
     	
-    	
-    	
-//        AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
-//                .setType(ShiroAuthRealmType.PROPERTIES)
-//                .setConfig(new JsonObject()
-//                        .put("properties_path", "classpath:users.properties")));
-//        logger.info("AuthProvider created.. " + auth.toString());
 
         // To simplify the development of the web components we use a Router to route all HTTP requests
         // to organize our code in a reusable way.
@@ -178,13 +189,9 @@ public class MainVerticle extends AbstractVerticle {
 
     });*/
         
+        router.routeWithRegex("^/full-width-light/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
         
-
-        router.get("/full-width-light/403").handler(this::p403Handler).failureHandler(this::failureHandler);
-
-        router.get("/full-width-light/404").handler(this::p404Handler).failureHandler(this::failureHandler);
-        
-        router.get("/full-width-light/500").handler(this::p500Handler).failureHandler(this::failureHandler);
+        router.get("/full-width-light/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
         //only rendering page routings' failures shall be handled by using regex
         //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
@@ -319,92 +326,72 @@ public class MainVerticle extends AbstractVerticle {
         });
 	}
 	
-    private void loginHandler(RoutingContext context) {
-
-        logger.info("login handler invoked...");
-
+    private void pGenericHttpStatusCodeHandler(RoutingContext context) {
+    	
+    	logger.info("pGenericHttpStatusCodeHandler invoked...");
+    	Integer statusCode = context.session().get(HTTP_STATUSCODE);
+        logger.info("pGenericHttpStatusCodeHandler - status code: " + statusCode);
+        
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
 
-        // we define a hardcoded title for our application
-        context.put("signin", "Sign in Abyss");
+        context.put(HTTP_STATUSCODE, statusCode);
+        context.put(HTTP_URL, context.session().get(HTTP_URL));
+        context.put(HTTP_ERRORMESSAGE, context.session().get(HTTP_ERRORMESSAGE));
+        context.put(CONTEXT_FAILURE_MESSAGE, context.session().get(CONTEXT_FAILURE_MESSAGE));
+        
+        
+        String templateFileName = "httperror.html";
+        
+        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {
+        	templateFileName = statusCode+".html";
+        }
+        
         // and now delegate to the engine to render it.
-        engine.render(context, "src/main/resources/webroot/full-width-light/", "login.html", res -> {
+		engine.render(context, "src/main/resources/webroot/full-width-light/", templateFileName, res -> {
             if (res.succeeded()) {
                 context.response().putHeader("Content-Type", "text/html");
+                context.response().setStatusCode(statusCode);
                 context.response().end(res.result());
             } else {
-                context.fail(res.cause());
-            }
-        });
-    }
-
-    private void p403Handler(RoutingContext context) {
-        logger.info("p403Handler invoked..");
-        // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
-        // we define a hardcoded title for our application
-        context.put("signin", "403 Error");
-        // and now delegate to the engine to render it.
-        engine.render(context, "src/main/resources/webroot/full-width-light/", "403.html", res -> {
-            if (res.succeeded()) {
-                context.response().putHeader("Content-Type", "text/html");
-                context.response().setStatusCode(403);
-                context.response().end(res.result());
-            } else {
+            	logger.error("pGenericHttpStatusCodeHandler - engine render failed with cause:" + res.cause().getLocalizedMessage());
                 context.fail(res.cause());
             }
         });
     }
     
-    private void p404Handler(RoutingContext context) {
-        logger.info("p404Handler invoked..");
-        // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
-        // we define a hardcoded title for our application
-        context.put("signin", "404 Error");
-        // and now delegate to the engine to render it.
-        engine.render(context, "src/main/resources/webroot/full-width-light/", "404.html", res -> {
-            if (res.succeeded()) {
-                context.response().putHeader("Content-Type", "text/html");
-                context.response().setStatusCode(404);
-                context.response().end(res.result());
-            } else {
-                context.fail(res.cause());
-            }
-        });
-    }
-
-    private void p500Handler(RoutingContext context) {
-        logger.info("p500Handler invoked..");
-        // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
-
-        // we define a hardcoded title for our application
-        context.put("signin", "500 Error");
-        // and now delegate to the engine to render it.
-        engine.render(context, "src/main/resources/webroot/full-width-light/", "500.html", res -> {
-            if (res.succeeded()) {
-                context.response().putHeader("Content-Type", "text/html");
-                context.response().setStatusCode(500);
-                context.response().end(res.result());
-            } else {
-                context.fail(res.cause());
-            }
-        });
-    }
-
     private void failureHandler(RoutingContext context) {
         logger.info("failureHandler invoked.. statusCode: "+ context.statusCode());
         //logger.info("failureHandler failure message: " + context.failure().getLocalizedMessage());
         //logger.debug("failureHandler context data: " + context.data().toString());
         
-        if (context.statusCode() == 403) {
-            context.response().putHeader("location", "/full-width-light/403").setStatusCode(302).end();
-        } else if (context.statusCode() == 404) {
-                context.response().putHeader("location", "/full-width-light/404").setStatusCode(302).end();
+//        context.put(HTTP_STATUSCODE, new Integer(context.statusCode()));
+//        logger.info("http.statuscode :" + context.get(HTTP_STATUSCODE));
+        
+//        vertx.getOrCreateContext().put(HTTP_STATUSCODE, new Integer(context.statusCode()));
+//        logger.info("http.statuscode is put in vertx context:" + vertx.getOrCreateContext().get(HTTP_STATUSCODE));
+        
+        //Use user's session for storage 
+        context.session().put(HTTP_STATUSCODE, new Integer(context.statusCode()));
+        logger.info(HTTP_STATUSCODE+" is put in context session:" + context.session().get(HTTP_STATUSCODE));
+        
+        context.session().put(HTTP_URL, context.request().path());
+        logger.info(HTTP_URL+" is put in context session:" + context.session().get(HTTP_URL));
+        
+        context.session().put(HTTP_ERRORMESSAGE, HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase());
+        logger.info(HTTP_ERRORMESSAGE+" is put in context session:" + context.session().get(HTTP_ERRORMESSAGE));
+        
+        context.session().put(CONTEXT_FAILURE_MESSAGE, context.failure().getLocalizedMessage());
+        logger.info(CONTEXT_FAILURE_MESSAGE+" is put in context session:" + context.session().get(CONTEXT_FAILURE_MESSAGE));
+
+        
+        String strStatusCode = String.valueOf(context.statusCode());
+        
+        //if (strStatusCode.matches("[4|5][0|1]\")) //TODO: In the future...
+        if (strStatusCode.matches("400|401|403|404|500")) {
+        	context.response().putHeader("location", "/full-width-light/"+strStatusCode).setStatusCode(302).end();
         } else {
-            context.response().putHeader("location", "/full-width-light/500").setStatusCode(302).end();
+            context.response().putHeader("location", "/full-width-light/httperror").setStatusCode(302).end();
         }
     }
 
