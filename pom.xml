@@ -182,8 +182,14 @@
 		<dependency>
 		  <groupId>io.vertx</groupId>
 		  <artifactId>vertx-auth-jwt</artifactId>
-		</dependency>        
-		        
+		</dependency>
+
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.1</version>
+<!-- 			<type>bundle</type> -->
+		</dependency>
     </dependencies>
 
     <build>

@@ -36,7 +36,7 @@ public class MainVerticle extends AbstractVerticle {
     
     private JDBCClient jdbcClient;
     
-    private JDBCAuth authProvider;
+    private JDBCAuth auth;
 
     //private AuthProvider auth;
 
@@ -84,32 +84,32 @@ public class MainVerticle extends AbstractVerticle {
     	JsonObject jdbcClientConfig = new JsonObject()
     			  .put("url", "jdbc:postgresql://192.168.10.40:5432/abyssportal?currentSchema=portalschema")
     			  .put("driver_class", "org.postgresql.Driver")
-    			  .put("user", "postgres")//"abyssuser")
-    			  .put("password", "postgres")//"User007")
+    			  .put("user", "abyssuser")
+    			  .put("password", "User007")
     			  .put("max_pool_size", 30);    
     	
     	jdbcClient = JDBCClient.createShared(vertx, jdbcClientConfig);
     	logger.info("JDBCClient created... " + jdbcClient.toString() );
 
-    	authProvider = JDBCAuth.create(vertx, jdbcClient);
+    	auth = JDBCAuth.create(vertx, jdbcClient);
     	
-    	logger.info("JDBCAuthProvider created... " + authProvider.toString());
+    	logger.info("JDBCAuthProvider created... " + auth.toString());
     	
-    	//authProvider.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.USER WHERE USERNAME = ?");
-    	//authProvider.setPermissionsQuery("SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE");
-    	//authProvider.setRolesQuery("SELECT ROLE FROM portalschema.USER_ROLES WHERE USERNAME = ?");
-    	authProvider.setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx));
-    	//authProvider.setNonces();
+    	auth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.USER WHERE USERNAME = ?");
+    	auth.setPermissionsQuery("SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE");
+    	auth.setRolesQuery("SELECT ROLE FROM portalschema.USER_ROLES WHERE USERNAME = ?");
+    	auth.setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx));
+    	//TODO: authProvider.setNonces();
     	logger.info("JDBCAuthProvider configuration done... ");
     	
     	
     	
     	
-        AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
-                .setType(ShiroAuthRealmType.PROPERTIES)
-                .setConfig(new JsonObject()
-                        .put("properties_path", "classpath:users.properties")));
-        logger.info("AuthProvider created.. " + auth.toString());
+//        AuthProvider auth = ShiroAuth.create(vertx, new ShiroAuthOptions()
+//                .setType(ShiroAuthRealmType.PROPERTIES)
+//                .setConfig(new JsonObject()
+//                        .put("properties_path", "classpath:users.properties")));
+//        logger.info("AuthProvider created.. " + auth.toString());
 
         // To simplify the development of the web components we use a Router to route all HTTP requests
         // to organize our code in a reusable way.
@@ -142,6 +142,7 @@ public class MainVerticle extends AbstractVerticle {
         AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
 
         router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
+        router.get("/auth_user").handler(this::authenticateUser).failureHandler(this::failureHandler);
         
         //install authHandler for all routes where authentication is required
         //router.route("/full-width-light/").handler(authHandler);
@@ -179,8 +180,10 @@ public class MainVerticle extends AbstractVerticle {
         
         
 
-        router.get("/full-width-light/404").handler(this::p404Handler).failureHandler(this::failureHandler);
+        router.get("/full-width-light/403").handler(this::p403Handler).failureHandler(this::failureHandler);
 
+        router.get("/full-width-light/404").handler(this::p404Handler).failureHandler(this::failureHandler);
+        
         router.get("/full-width-light/500").handler(this::p500Handler).failureHandler(this::failureHandler);
 
         //only rendering page routings' failures shall be handled by using regex
@@ -240,15 +243,17 @@ public class MainVerticle extends AbstractVerticle {
     }
 
 	/**
-	 * @param authProvider
+	 * @param auth
 	 */
 	private void createUser(RoutingContext routingContext) {
+		
+		logger.info("executing createUser...");
 		
         String username = routingContext.request().getParam("username");
         String password = routingContext.request().getParam("password");
 
         logger.info("Received user:" + username);
-        logger.info("Received pass:" + password);
+        logger.trace("Received pass:" + password);
 
 		
 		jdbcClient.getConnection(resConn -> {
@@ -256,7 +261,7 @@ public class MainVerticle extends AbstractVerticle {
 
 				SQLConnection connection = resConn.result();
 				
-				connection.queryWithParams("SELECT * FROM USER WHERE USERNAME = ?", new JsonArray().add(username), resQuery -> {
+				connection.queryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(username), resQuery -> {
 					if (resQuery.succeeded()) {
 						ResultSet rs = resQuery.result();
 						// Do something with results
@@ -264,10 +269,10 @@ public class MainVerticle extends AbstractVerticle {
 							logger.info("user found: " + rs.toJson().encodePrettily());
 						} else {
 							logger.info("user NOT found, creating ...");
-							String salt = authProvider.generateSalt();
-							String hash = authProvider.computeHash(password, salt);
+							String salt = auth.generateSalt();
+							String hash = auth.computeHash(password, salt);
 							// save to the database
-							connection.updateWithParams("INSERT INTO user VALUES (?, ?, ?)", new JsonArray().add(username).add(hash).add(salt), resUpdate -> {
+							connection.updateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(username).add(hash).add(salt), resUpdate -> {
 								if (resUpdate.succeeded()) {
 									logger.info("user created successfully");
 								} else {
@@ -291,6 +296,29 @@ public class MainVerticle extends AbstractVerticle {
 		});
 	}
 
+	private void authenticateUser(RoutingContext routingContext) {
+
+		logger.info("executing authenticateUser...");
+		
+        String username = routingContext.request().getParam("username");
+        String password = routingContext.request().getParam("password");
+
+        logger.info("Received user:" + username);
+        logger.trace("Received pass:" + password);
+
+        JsonObject authInfo = new JsonObject().put("username", username).put("password", password);
+
+        auth.authenticate(authInfo, res -> {
+          if (res.succeeded()) {
+            User user = res.result();
+            logger.info("user authentication successful for : "+ user.principal().encodePrettily());
+          } else {
+        	logger.error("user authentication unsuccessful for : "+ username + " with cause: " + res.cause().getLocalizedMessage());  
+            // Failed!
+          }
+        });
+	}
+	
     private void loginHandler(RoutingContext context) {
 
         logger.info("login handler invoked...");
@@ -311,6 +339,24 @@ public class MainVerticle extends AbstractVerticle {
         });
     }
 
+    private void p403Handler(RoutingContext context) {
+        logger.info("p403Handler invoked..");
+        // In order to use a Thymeleaf template we first need to create an engine
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        // we define a hardcoded title for our application
+        context.put("signin", "403 Error");
+        // and now delegate to the engine to render it.
+        engine.render(context, "src/main/resources/webroot/full-width-light/", "403.html", res -> {
+            if (res.succeeded()) {
+                context.response().putHeader("Content-Type", "text/html");
+                context.response().setStatusCode(403);
+                context.response().end(res.result());
+            } else {
+                context.fail(res.cause());
+            }
+        });
+    }
+    
     private void p404Handler(RoutingContext context) {
         logger.info("p404Handler invoked..");
         // In order to use a Thymeleaf template we first need to create an engine
@@ -349,11 +395,14 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     private void failureHandler(RoutingContext context) {
-        logger.info("failureHandler invoked..");
-        logger.debug(context.toString());
-        logger.info(context.toString());
-        if (context.statusCode() == 404) {
-            context.response().putHeader("location", "/full-width-light/404").setStatusCode(302).end();
+        logger.info("failureHandler invoked.. statusCode: "+ context.statusCode());
+        //logger.info("failureHandler failure message: " + context.failure().getLocalizedMessage());
+        //logger.debug("failureHandler context data: " + context.data().toString());
+        
+        if (context.statusCode() == 403) {
+            context.response().putHeader("location", "/full-width-light/403").setStatusCode(302).end();
+        } else if (context.statusCode() == 404) {
+                context.response().putHeader("location", "/full-width-light/404").setStatusCode(302).end();
         } else {
             context.response().putHeader("location", "/full-width-light/500").setStatusCode(302).end();
         }
