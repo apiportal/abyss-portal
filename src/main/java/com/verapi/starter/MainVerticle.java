@@ -99,6 +99,7 @@ public class MainVerticle extends AbstractVerticle {
     		
     	*/
     	
+    	//TODO: Put into config
     	JsonObject jdbcClientConfig = new JsonObject()
     			  .put("url", "jdbc:postgresql://192.168.10.40:5432/abyssportal?currentSchema=portalschema")
     			  .put("driver_class", "org.postgresql.Driver")
@@ -153,7 +154,6 @@ public class MainVerticle extends AbstractVerticle {
         AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
 
         router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
-        router.get("/auth_user").handler(this::authenticateUser).failureHandler(this::failureHandler);
         
         //install authHandler for all routes where authentication is required
         //router.route("/full-width-light/").handler(authHandler);
@@ -222,31 +222,7 @@ public class MainVerticle extends AbstractVerticle {
 
         logger.debug("loaded config : " + Config.getInstance().getConfigJsonObject().encodePrettily());
 
-/*
-    ClusterManager mgr = new HazelcastClusterManager(new Config());
 
-    VertxOptions options = new VertxOptions()
-      .setClusterManager(mgr)
-      .setClusterHost("192.168.21.99")
-      .setClusterPort(8081)
-      .setClustered(true)
-      .setHAEnabled(true);
-
-    logger.info("Vertx.clusteredVertx is being invoked..");
-
-    Vertx.clusteredVertx(options, res -> {
-      if (res.succeeded()) {
-        this.vertx = res.result();
-
-        // start a HTTP web server on port 8080
-        ///vertx.createHttpServer().requestHandler(router::accept).listen(8081);
-        logger.info("http server started..." + res.succeeded());
-
-      } else {
-        logger.error("http server starting failed..." + res.cause());
-      }
-    });
-*/
     }
 
 	/**
@@ -303,28 +279,6 @@ public class MainVerticle extends AbstractVerticle {
 		});
 	}
 
-	private void authenticateUser(RoutingContext routingContext) {
-
-		logger.info("executing authenticateUser...");
-		
-        String username = routingContext.request().getParam("username");
-        String password = routingContext.request().getParam("password");
-
-        logger.info("Received user:" + username);
-        logger.trace("Received pass:" + password);
-
-        JsonObject authInfo = new JsonObject().put("username", username).put("password", password);
-
-        auth.authenticate(authInfo, res -> {
-          if (res.succeeded()) {
-            User user = res.result();
-            logger.info("user authentication successful for : "+ user.principal().encodePrettily());
-          } else {
-        	logger.error("user authentication unsuccessful for : "+ username + " with cause: " + res.cause().getLocalizedMessage());  
-            // Failed!
-          }
-        });
-	}
 	
     private void pGenericHttpStatusCodeHandler(RoutingContext context) {
     	
@@ -381,7 +335,7 @@ public class MainVerticle extends AbstractVerticle {
         context.session().put(HTTP_ERRORMESSAGE, HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase());
         logger.info(HTTP_ERRORMESSAGE+" is put in context session:" + context.session().get(HTTP_ERRORMESSAGE));
         
-        context.session().put(CONTEXT_FAILURE_MESSAGE, context.failure().getLocalizedMessage());
+        context.session().put(CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
         logger.info(CONTEXT_FAILURE_MESSAGE+" is put in context session:" + context.session().get(CONTEXT_FAILURE_MESSAGE));
 
         
