@@ -1,5 +1,6 @@
 package com.verapi.portal.common;
 
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public class Config {
@@ -7,7 +8,7 @@ public class Config {
     public static Config instance = null;
     public JsonObject config;
 
-    protected Config() {
+    private Config() {
     }
 
     public static Config getInstance() {
