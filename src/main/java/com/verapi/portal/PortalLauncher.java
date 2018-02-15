@@ -1,6 +1,6 @@
-package com.verapi.starter;
+package com.verapi.portal;
 
-import com.verapi.starter.common.Config;
+import com.verapi.portal.common.Config;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;

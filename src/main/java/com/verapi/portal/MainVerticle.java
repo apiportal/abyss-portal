@@ -1,8 +1,8 @@
-package com.verapi.starter;
+package com.verapi.portal;
 
-import com.verapi.starter.common.Config;
-import com.verapi.starter.handler.Index;
-import com.verapi.starter.handler.Login;
+import com.verapi.portal.common.Config;
+import com.verapi.portal.handler.Index;
+import com.verapi.portal.handler.Login;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;

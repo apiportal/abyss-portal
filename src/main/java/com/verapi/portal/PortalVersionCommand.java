@@ -1,4 +1,4 @@
-package com.verapi.starter;
+package com.verapi.portal;
 
 import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;

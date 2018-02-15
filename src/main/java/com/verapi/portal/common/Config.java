@@ -1,4 +1,4 @@
-package com.verapi.starter.common;
+package com.verapi.portal.common;
 
 import io.vertx.core.json.JsonObject;
 

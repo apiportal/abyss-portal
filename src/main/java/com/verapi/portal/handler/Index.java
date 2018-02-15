@@ -1,9 +1,7 @@
-package com.verapi.starter.handler;
+package com.verapi.portal.handler;
 
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;

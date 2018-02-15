@@ -1,7 +1,7 @@
 @echo off
 
-SET LAUNCHER="com.verapi.starter.PortalLauncher"
-SET VERTICLE="com.verapi.starter.InitVerticle"
+SET LAUNCHER="PortalLauncher"
+SET VERTICLE="InitVerticle"
 SET CMD="mvn compile"
 SET VERTX_CMD="run"
 SET CMD_LINE_ARGS=%*

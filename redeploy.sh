@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export LAUNCHER="com.verapi.starter.PortalLauncher"
-export VERTICLE="com.verapi.starter.InitVerticle"
+export LAUNCHER="PortalLauncher"
+export VERTICLE="InitVerticle"
 export CMD="mvn compile"
 export VERTX_CMD="run"
 

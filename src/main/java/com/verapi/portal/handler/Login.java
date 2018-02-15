@@ -1,6 +1,5 @@
-package com.verapi.starter.handler;
+package com.verapi.portal.handler;
 
-import com.verapi.starter.MainVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;

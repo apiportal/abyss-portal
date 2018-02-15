@@ -5,9 +5,16 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>com.verapi.abyss</groupId>
+        <artifactId>abyss</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../abyss/pom.xml</relativePath>
+    </parent>
+
     <groupId>com.verapi.abyss.portal</groupId>
     <artifactId>abyss-portal</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Verapi Web Abyss API Portal Project</name>
@@ -58,25 +65,18 @@
     </issueManagement>
 
     <properties>
-        <vertx.version>3.5.1</vertx.version>
-        <main.verticle>com.verapi.starter.InitVerticle</main.verticle>
+        <main.verticle>com.verapi.portal.InitVerticle</main.verticle>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>4.12</junit.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <logback.version>1.2.3</logback.version>
-        <hazelcast.version>3.9.2</hazelcast.version>
     </properties>
     <reporting>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.9</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.0</version>
                 <configuration>
                     <show>private</show>
                     <nohelp>true</nohelp>
@@ -91,13 +91,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>io.vertx</groupId>
-                <artifactId>vertx-dependencies</artifactId>
-                <version>${vertx.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -109,12 +102,6 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-codegen</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -133,7 +120,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
@@ -143,7 +129,6 @@
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
-            <version>${hazelcast.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -151,45 +136,41 @@
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-auth-shiro</artifactId>
-            <version>3.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.shiro</groupId>
-            <artifactId>shiro-core</artifactId>
-            <version>1.4.0</version>
+            <artifactId>vertx-config</artifactId>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-config</artifactId>
+            <artifactId>vertx-auth-common</artifactId>
         </dependency>
-        
         <dependency>
-		  <groupId>io.vertx</groupId>
-		  <artifactId>vertx-auth-common</artifactId>
-		</dependency>
-        
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-jdbc-client</artifactId>
+        </dependency>
         <dependency>
-		  <groupId>io.vertx</groupId>
-		  <artifactId>vertx-jdbc-client</artifactId>
-		</dependency>
-        
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-sql-common</artifactId>
+        </dependency>
         <dependency>
-		  <groupId>io.vertx</groupId>
-		  <artifactId>vertx-auth-jdbc</artifactId>
-		</dependency>
-        
-		<dependency>
-		  <groupId>io.vertx</groupId>
-		  <artifactId>vertx-auth-jwt</artifactId>
-		</dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-auth-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-auth-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<version>42.2.1</version>
-<!-- 			<type>bundle</type> -->
-		</dependency>
     </dependencies>
 
     <build>
@@ -203,7 +184,6 @@
             <plugins>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.6.2</version>
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
@@ -221,7 +201,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.0.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -230,7 +209,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.3</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -242,7 +220,7 @@
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
-                                        <Main-Class>com.verapi.starter.PortalLauncher</Main-Class>
+                                        <Main-Class>com.verapi.portal.PortalLauncher</Main-Class>
                                         <Main-Verticle>${main.verticle}</Main-Verticle>
                                     </manifestEntries>
                                 </transformer>
@@ -263,7 +241,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -272,7 +249,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.verapi.starter.PortalLauncher</mainClass>
+                    <mainClass>com.verapi.portal.PortalLauncher</mainClass>
                     <arguments>
                         <argument>run</argument>
                         <argument>${main.verticle}</argument>
