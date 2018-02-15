@@ -56,31 +56,6 @@ public class MainVerticle extends AbstractVerticle {
     
     private JDBCAuth auth;
 
-    //private AuthProvider auth;
-
-/*
-  public static void main(String... args) {
-
-    ClusterManager mgr = new HazelcastClusterManager(new Config());
-    logger.info("HazelcastClusterManager created");
-
-    VertxOptions options = new VertxOptions()
-      .setHAEnabled(true);
-    logger.info("VertxOptions created");
-
-    Vertx.clusteredVertx(options, res -> {
-        if (res.succeeded()) {
-          res.result().deployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setHa(true));
-          logger.info("deployVerticle completed..." + res.succeeded());
-        } else {
-          logger.error("deployVerticle failed..." + res.cause());
-        }
-      }
-    );
-    logger.info("VertxOptions created");
-  }
-*/
-
     @Override
     public void start(Future<Void> start) {
 
@@ -176,19 +151,7 @@ public class MainVerticle extends AbstractVerticle {
         router.get("/img/*").handler(StaticHandler.create("/img").setWebRoot("webroot/img"));
         router.get("/vendors/*").handler(StaticHandler.create("/vendors").setWebRoot("webroot/vendors"));
         router.get("/full-width-light/dist/*").handler(StaticHandler.create("/full-width-light/dist").setWebRoot("webroot/full-width-light/dist"));
-        //.failureHandler(this::failureHandler);
 
-        //router.route().failureHandler(this::failureHandler);
-    /*router.route().failureHandler(failureRoutingContext -> {
-
-      int statusCode = failureRoutingContext.statusCode();
-
-      // Status code will be 500 for the RuntimeException or 403 for the other failure
-      HttpServerResponse response = failureRoutingContext.response();
-      response.setStatusCode(statusCode).end("Sorry! Not today");
-
-    });*/
-        
         router.routeWithRegex("^/full-width-light/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
         
         router.get("/full-width-light/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
@@ -316,15 +279,7 @@ public class MainVerticle extends AbstractVerticle {
     
     private void failureHandler(RoutingContext context) {
         logger.info("failureHandler invoked.. statusCode: "+ context.statusCode());
-        //logger.info("failureHandler failure message: " + context.failure().getLocalizedMessage());
-        //logger.debug("failureHandler context data: " + context.data().toString());
-        
-//        context.put(HTTP_STATUSCODE, new Integer(context.statusCode()));
-//        logger.info("http.statuscode :" + context.get(HTTP_STATUSCODE));
-        
-//        vertx.getOrCreateContext().put(HTTP_STATUSCODE, new Integer(context.statusCode()));
-//        logger.info("http.statuscode is put in vertx context:" + vertx.getOrCreateContext().get(HTTP_STATUSCODE));
-        
+
         //Use user's session for storage 
         context.session().put(HTTP_STATUSCODE, new Integer(context.statusCode()));
         logger.info(HTTP_STATUSCODE+" is put in context session:" + context.session().get(HTTP_STATUSCODE));
@@ -354,8 +309,7 @@ public class MainVerticle extends AbstractVerticle {
 	 */
 	@Override
 	public void stop() throws Exception {
-		// TODO Auto-generated method stub
-		super.stop();
 		jdbcClient.close();
+        super.stop();
 	}
 }
