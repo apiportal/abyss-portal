@@ -1,3 +1,14 @@
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 2 2018
+ *
+ */
+
 package com.verapi.portal;
 
 import com.verapi.portal.common.AbyssServiceDiscovery;
@@ -22,9 +33,6 @@ import io.vertx.ext.web.handler.*;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 import io.vertx.servicediscovery.Record;
-import io.vertx.servicediscovery.ServiceDiscovery;
-import io.vertx.servicediscovery.ServiceDiscoveryOptions;
-import io.vertx.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.types.JDBCDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
