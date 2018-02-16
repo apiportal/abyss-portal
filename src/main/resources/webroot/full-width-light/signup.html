@@ -54,30 +54,39 @@
 								<div class="row">
 									<div class="col-sm-12 col-xs-12">
 										<div class="mb-30">
-											<h3 class="text-center txt-dark mb-10">Sign up to Doodle</h3>
+											<h3 class="text-center txt-dark mb-10">Sign up to Abyss</h3>
 											<h6 class="text-center nonecase-font txt-grey">Enter your details below</h6>
 										</div>	
 										<div class="form-wrap">
-											<form action="#">
+											<form action="/sign-up" method="POST">
 												<div class="form-group">
-													<label class="control-label mb-10" for="exampleInputName_1">Username</label>
-													<input type="email" class="form-control" required="" id="exampleInputName_1" placeholder="Username">
+													<label class="control-label mb-10" for="exampleInputName_0">First Name</label>
+													<input type="text" name="firstname" class="form-control" required="" id="exampleInputName_0" placeholder="John">
+												</div>
+												<div class="form-group">
+													<label class="control-label mb-10" for="exampleInputSurname_0">Last Name</label>
+													<input type="text" name="lastname" class="form-control" required="" id="exampleInputName_0" placeholder="Doe">
+												</div>
+											
+												<div class="form-group">
+													<label class="control-label mb-10" for="exampleInputUserName_1">Username</label>
+													<input type="text" name="username" class="form-control" required="" id="exampleInputUserName_1" placeholder="john.doe">
 												</div>
 												<div class="form-group">
 													<label class="control-label mb-10" for="exampleInputEmail_2">Email address</label>
-													<input type="email" class="form-control" required="" id="exampleInputEmail_2" placeholder="Enter email">
+													<input type="email" name="email" class="form-control" required="" id="exampleInputEmail_2" placeholder="john.doe@mail.com">
 												</div>
 												<div class="form-group">
 													<label class="pull-left control-label mb-10" for="exampleInputpwd_2">Password</label>
-													<input type="password" class="form-control" required="" id="exampleInputpwd_2" placeholder="Enter pwd">
+													<input type="password" name="password" class="form-control" required="" id="exampleInputpwd_2" placeholder="please enter a secret">
 												</div>
 												<div class="form-group">
 													<label class="pull-left control-label mb-10" for="exampleInputpwd_3">Confirm Password</label>
-													<input type="password" class="form-control" required="" id="exampleInputpwd_3" placeholder="Enter pwd">
+													<input type="password" name="password2" class="form-control" required="" id="exampleInputpwd_3" placeholder="please enter the same secret again">
 												</div>
 												<div class="form-group">
 													<div class="checkbox checkbox-primary pr-10 pull-left">
-														<input id="checkbox_2" required="" type="checkbox">
+														<input id="checkbox_2" name="isAgreedToTerms" required="" type="checkbox">
 														<label for="checkbox_2"> I agree to all <span class="txt-primary">Terms</span></label>
 													</div>
 													<div class="clearfix"></div>

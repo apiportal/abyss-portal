@@ -1,8 +1,10 @@
 package com.verapi.portal;
 
 import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import com.verapi.portal.handler.Index;
 import com.verapi.portal.handler.Login;
+import com.verapi.portal.handler.Signup;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
@@ -30,27 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MainVerticle extends AbstractVerticle {
 
-    /**
-	 * 
-	 */
-	private static final String CONTEXT_FAILURE_MESSAGE = "context.failureMessage";
-
-	/**
-	 * 
-	 */
-	private static final String HTTP_ERRORMESSAGE = "http.errorMessage";
-
-	/**
-	 * 
-	 */
-	private static final String HTTP_URL = "http.url";
-
-	/**
-	 * 
-	 */
-	private static final String HTTP_STATUSCODE = "http.statusCode";
-
-	private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+    private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
     
     private JDBCClient jdbcClient;
     
@@ -154,6 +136,10 @@ public class MainVerticle extends AbstractVerticle {
         AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
 
         router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
+        
+        Signup signup = new Signup(auth, jdbcClient);
+        router.get("/full-width-light/signup").handler(signup::pageRender).failureHandler(this::failureHandler);
+        router.post("/sign-up").handler(signup).failureHandler(this::failureHandler);
         
         //install authHandler for all routes where authentication is required
         //router.route("/full-width-light/").handler(authHandler);
@@ -283,16 +269,16 @@ public class MainVerticle extends AbstractVerticle {
     private void pGenericHttpStatusCodeHandler(RoutingContext context) {
     	
     	logger.info("pGenericHttpStatusCodeHandler invoked...");
-    	Integer statusCode = context.session().get(HTTP_STATUSCODE);
+    	Integer statusCode = context.session().get(Constants.HTTP_STATUSCODE);
         logger.info("pGenericHttpStatusCodeHandler - status code: " + statusCode);
         
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
 
-        context.put(HTTP_STATUSCODE, statusCode);
-        context.put(HTTP_URL, context.session().get(HTTP_URL));
-        context.put(HTTP_ERRORMESSAGE, context.session().get(HTTP_ERRORMESSAGE));
-        context.put(CONTEXT_FAILURE_MESSAGE, context.session().get(CONTEXT_FAILURE_MESSAGE));
+        context.put(Constants.HTTP_STATUSCODE, statusCode);
+        context.put(Constants.HTTP_URL, context.session().get(Constants.HTTP_URL));
+        context.put(Constants.HTTP_ERRORMESSAGE, context.session().get(Constants.HTTP_ERRORMESSAGE));
+        context.put(Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
         
         
         String templateFileName = "httperror.html";
@@ -326,17 +312,17 @@ public class MainVerticle extends AbstractVerticle {
 //        logger.info("http.statuscode is put in vertx context:" + vertx.getOrCreateContext().get(HTTP_STATUSCODE));
         
         //Use user's session for storage 
-        context.session().put(HTTP_STATUSCODE, new Integer(context.statusCode()));
-        logger.info(HTTP_STATUSCODE+" is put in context session:" + context.session().get(HTTP_STATUSCODE));
+        context.session().put(Constants.HTTP_STATUSCODE, new Integer(context.statusCode()));
+        logger.info(Constants.HTTP_STATUSCODE+" is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
         
-        context.session().put(HTTP_URL, context.request().path());
-        logger.info(HTTP_URL+" is put in context session:" + context.session().get(HTTP_URL));
+        context.session().put(Constants.HTTP_URL, context.request().path());
+        logger.info(Constants.HTTP_URL+" is put in context session:" + context.session().get(Constants.HTTP_URL));
         
-        context.session().put(HTTP_ERRORMESSAGE, HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase());
-        logger.info(HTTP_ERRORMESSAGE+" is put in context session:" + context.session().get(HTTP_ERRORMESSAGE));
+        context.session().put(Constants.HTTP_ERRORMESSAGE, HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase());
+        logger.info(Constants.HTTP_ERRORMESSAGE+" is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
         
-        context.session().put(CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
-        logger.info(CONTEXT_FAILURE_MESSAGE+" is put in context session:" + context.session().get(CONTEXT_FAILURE_MESSAGE));
+        context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
+        logger.info(Constants.CONTEXT_FAILURE_MESSAGE+" is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
         
         String strStatusCode = String.valueOf(context.statusCode());
@@ -354,8 +340,7 @@ public class MainVerticle extends AbstractVerticle {
 	 */
 	@Override
 	public void stop() throws Exception {
-		// TODO Auto-generated method stub
-		super.stop();
 		jdbcClient.close();
+		super.stop();
 	}
 }
