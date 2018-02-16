@@ -28,4 +28,11 @@ public class AbyssServiceDiscovery {
         return serviceDiscovery;
     }
 
+    @Override
+    public void finalize() {
+        if (instance != null) {
+            instance.getServiceDiscovery().close();
+        }
+    }
+
 }
