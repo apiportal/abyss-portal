@@ -1,0 +1,171 @@
+= Development Notes
+Doc Writer <doc.writer@verapi.com>
+v1.0,
+:toc:
+
+Verapi (R)(TM)
+
+:uri-project: https://apiportal.com
+:uri-twitter: https://twitter.com/Verapiyazilim
+:uri-twitter-hash: https://twitter.com/hashtag/verapi?src=hash
+:icons: font
+
+== JDBC URL içinde db şema verilmesi
+
+java code sample;
+[source,java,indent=0]
+----
+JsonObject jdbcClientConfig = new JsonObject()
+                .put("url", "jdbc:postgresql://192.168.10.40:5432/abyssportal?currentSchema=portalschema")}
+----
+You can set the default search_path at the database level:
+
+[source,sql,indent=0]
+----
+ALTER DATABASE <database_name> SET search_path TO schema1,schema2;
+----
+
+Or at the user or role level:
+[source,sql,indent=0]
+----
+ALTER ROLE <role_name> SET search_path TO schema1,schema2;
+----
+Or add parameter to connection URL:
+
+https://jdbc.postgresql.org/documentation/head/connect.html[https://jdbc.postgresql.org/documentation/head/connect.html]
+
+---
+== Service Discovery kullanımı
+=== service discovery oluşturulması
+[source,java,indent=0]
+----
+    private AbyssServiceDiscovery(Vertx vertx) {
+        this.vertx = vertx;
+        serviceDiscovery = ServiceDiscovery.create(vertx,
+                new ServiceDiscoveryOptions()
+                        .setAnnounceAddress("abyss-services-announce")
+                        .setName("abyss-service-discovery"));
+    }
+----
+.Verticle stop olurken Service Discovery kapatılması unutulmamalı!
+[WARNING]
+====
+[source,java,indent=0]
+----
+AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().close();
+----
+====
+
+=== discovery record yaratılması
+
+[source,java,indent=0]
+----
+Record record = JDBCDataSource.createRecord(
+        Constants.PORTAL_DATA_SOURCE_SERVICE,
+        new JsonObject().put("url", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_URL)),
+        new JsonObject().put("driver_class", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_DRIVER_CLASS))
+                .put("user", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_NAME))
+                .put("password", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_PASSWORD))
+                .put("max_pool_size", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBCONN_MAX_POOL_SIZE))
+);
+----
+
+=== record publish edilmesi
+
+[source,java,indent=0]
+----
+AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().publish(record, asyncResult -> {
+    if (asyncResult.succeeded()) {
+        logger.info("serviceDiscovery.publish OK..." + asyncResult.succeeded());
+    } else {
+        logger.error("serviceDiscovery.publish failed..." + asyncResult.cause());
+        start.fail(asyncResult.cause());
+    }
+});
+----
+=== discovery'den record olarak service lookup yapılması
+==== yöntem 1
+[source,java,indent=0]
+----
+AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().getRecord(
+        new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE),
+        asyncResult -> {
+            if (asyncResult.succeeded() && asyncResult.result() != null) {
+                // Retrieve the service reference
+                ServiceReference serviceReference = AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().getReference(asyncResult.result());
+
+                // Retrieve the service object
+                JDBCClient client = serviceReference.getAs(JDBCClient.class);
+
+
+                //...
+
+                serviceReference.release();
+            }
+        }
+);
+----
+==== yöntem 2
+[source,java,indent=0]
+----
+JDBCDataSource.<JsonObject>getJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(),
+        new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE),
+        ar -> {
+            if (ar.succeeded()) {
+                JDBCClient client = ar.result();
+                //JDBCClient jdbcClient = JDBCClient.createShared(vertx, new JsonObject(),ar.toString());
+
+                // ...
+
+                // Dont' forget to release the service
+                ServiceDiscovery.releaseServiceObject(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), client);
+
+            }
+        });
+----
+
+TIP: Faik, please write it down here for the next tip!
+
+---
+== Roadmap
+
+The <<roadmap.adoc#,roadmap>> provides the current development direction and schedule for Abyss pipeline, CLI, and UI.
+
+== Getting Help
+
+Abyss is designed to help you easily write and publish your documentation.
+However, we can't fully realize this goal without your feedback!
+We encourage you to report issues, ask questions, share ideas, or discuss other aspects of this project using the communication tools provided below.
+
+=== Social
+
+If you want to share your experience with Verapi or help promote it, we encourage you to post about it on social media.
+When you talk about Verapi on Twitter, you can mention the official account for the project:
+
+* {uri-twitter}[@Verapiyazilim] (Twitter) -- The official Verapi account on Twitter.
+
+You can also use the {uri-twitter-hash}[#verapi] hashtag to help promote the project or discover other people talking about it.
+
+If you decide you want to get involved to help improve the project, then you'll be interested in the information provided in the <<Contributing>> section.
+
+== Contributing
+
+If you are interested in contributing to this project, please refer to the <<contributing.adoc#,contributing guide>>.
+In this guide, you'll learn how to:
+
+* <<contributing.adoc#set-up-workspace,set up your development workspace>>
+* <<contributing.adoc#build-project,build the project>>
+* <<contributing.adoc#project-rq,submit a merge request>>
+
+Thanks in advance for helping to make this project a success!
+
+== Copyright and License
+
+Copyright (C) 2016-2018 Verapi Software Technologies AS and the Abyss Project.
+
+Use of this software is granted under the terms of the https://www.mozilla.org/en-US/MPL/2.0/[Mozilla Public License Version 2.0] (MPL-2.0).
+See link:LICENSE[] to find the full license text.
+
+== Authors
+
+Development of Antora is led and sponsored by {uri-project}[Verapi Software Technologies AS].

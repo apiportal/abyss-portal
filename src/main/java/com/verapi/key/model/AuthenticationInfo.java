@@ -6,9 +6,9 @@ package com.verapi.key.model;
 import java.io.Serializable;
 //import java.time.LocalDateTime;
 //import java.time.ZonedDateTime;
+//import org.joda.time.DateTime;
 import java.time.Instant;
 
-import org.joda.time.DateTime;
 
 /**
  * @author faik.saglar

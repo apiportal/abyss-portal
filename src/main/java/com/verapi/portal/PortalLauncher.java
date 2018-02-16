@@ -1,3 +1,14 @@
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 2 2018
+ *
+ */
+
 package com.verapi.portal;
 
 import com.verapi.portal.common.Config;
@@ -5,6 +16,7 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.impl.launcher.VertxCommandLauncher;
@@ -90,6 +102,14 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             Config config = Config.getInstance().setConfig(configChange.getNewConfiguration());
             logger.debug("Config changed and reloaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
 
+        });
+        vertx.exceptionHandler((Throwable event) -> {
+            logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + event.getStackTrace());
+            try {
+                throw event;
+            } catch (Throwable throwable) {
+                logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + throwable.getStackTrace());
+            }
         });
     }
 
