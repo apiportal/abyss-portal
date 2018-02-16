@@ -26,5 +26,11 @@ public class Config {
         return this;
     }
 
+    @Override
+    public void finalize() {
+        if (config != null) {
+            config.clear();
+        }
+    }
 
 }
