@@ -59,7 +59,7 @@ public class MainVerticle extends AbstractVerticle {
                 new JsonObject().put("driver_class", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_DRIVER_CLASS))
                         .put("user", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_NAME))
                         .put("password", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_PASSWORD))
-                        .put("max_pool_size", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBCONN_MAX_POOL_SIZE))
+                        .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE))
         );
 
         AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().publish(record, asyncResult -> {
@@ -71,7 +71,13 @@ public class MainVerticle extends AbstractVerticle {
             }
         });
 
-        JDBCClient jdbcClient = JDBCClient.createShared(vertx, new JsonObject(), Constants.PORTAL_DATA_SOURCE_SERVICE);
+        JsonObject jdbcConfig = new JsonObject().put("url", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_URL))
+        .put("driver_class", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_DRIVER_CLASS))
+        .put("user", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_NAME))
+        .put("password", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_PASSWORD))
+        .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE));
+        
+        JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcConfig, Constants.PORTAL_DATA_SOURCE_SERVICE);
         logger.info("JDBCClient created... " + jdbcClient.toString());
 
         auth = JDBCAuth.create(vertx, jdbcClient);
