@@ -65,6 +65,7 @@
     <interfaces enabled="true">
       <interface>192.168.21.99</interface>
       <interface>192.168.21.139</interface>
+      <interface>192.168.10.46</interface>
     </interfaces>
     <ssl enabled="false"/>
     <socket-interceptor enabled="false"/>
