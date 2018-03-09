@@ -151,8 +151,8 @@ public class MainVerticle extends AbstractVerticle {
 
 
 	            router.get("/img/*").handler(StaticHandler.create("webroot/img"));
-	            router.get("/vendors/*").handler(StaticHandler.create("/vendors").setWebRoot("webroot/vendors"));
-	            router.get("/full-width-light/dist/*").handler(StaticHandler.create("/full-width-light/dist").setWebRoot("webroot/full-width-light/dist"));
+	            router.get("/vendors/*").handler(StaticHandler.create("webroot/vendors"));
+	            router.get("/full-width-light/dist/*").handler(StaticHandler.create("webroot/full-width-light/dist"));
 
 	            router.routeWithRegex("^/full-width-light/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
