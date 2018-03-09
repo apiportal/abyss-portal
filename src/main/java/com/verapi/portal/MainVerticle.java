@@ -34,6 +34,7 @@ import io.vertx.ext.web.handler.*;
 import io.vertx.ext.web.sstore.LocalSessionStore;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 import io.vertx.servicediscovery.Record;
+import io.vertx.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.types.JDBCDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,7 +137,8 @@ public class MainVerticle extends AbstractVerticle {
 	            
 	            //install authHandler for all routes where authentication is required
 	            //router.route("/").handler(authHandler);
-	            router.route("/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
+	            //router.route("/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
+	            router.route("/index").handler(authHandler).failureHandler(this::failureHandler);
 
 	            // Entry point to the application, this will render a custom Thymeleaf template
 	            //router.get("/login").handler(this::loginHandler);
@@ -146,6 +148,16 @@ public class MainVerticle extends AbstractVerticle {
 
 	            Index index = new Index(auth);
 	            router.get("/index").handler(index::pageRender).failureHandler(this::failureHandler);
+	            
+	            router.route("/logout").handler(context-> {
+	            	context.clearUser();
+	            	context.response().putHeader("location", "/index").setStatusCode(302).end();
+	            });
+	            
+	            router.route("/").handler(context-> {
+	            	context.response().putHeader("location", "/index").setStatusCode(302).end();
+	            });	            
+	            
 	            //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
 
 	            //router.post("/login-auth2").handler(FormLoginHandler.create(auth));
@@ -272,9 +284,9 @@ public class MainVerticle extends AbstractVerticle {
 
         String templateFileName = Constants.HTTPERROR_HTML;
 
-        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {
-            templateFileName = statusCode + ".html";
-        }
+//        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {
+//            templateFileName = statusCode + ".html";
+//        }
 
         // and now delegate to the engine to render it.
         engine.render(context, "webroot/", templateFileName, res -> {
@@ -309,11 +321,11 @@ public class MainVerticle extends AbstractVerticle {
         String strStatusCode = String.valueOf(context.statusCode());
 
         //if (strStatusCode.matches("[4|5][0|1]\")) //TODO: In the future...
-        if (strStatusCode.matches("400|401|403|404|500")) {
-            context.response().putHeader("location", "/" + strStatusCode).setStatusCode(302).end();
-        } else {
+//        if (strStatusCode.matches("400|401|403|404|500")) {
+//            context.response().putHeader("location", "/" + strStatusCode).setStatusCode(302).end();
+//        } else {
             context.response().putHeader("location", "/httperror").setStatusCode(302).end();
-        }
+//        }
     }
 
     private void configureThymeleafEngine(ThymeleafTemplateEngine engine) {
@@ -331,6 +343,7 @@ public class MainVerticle extends AbstractVerticle {
      */
     @Override
     public void stop() throws Exception {
+    	ServiceDiscovery.releaseServiceObject(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), jdbcClient);
         jdbcClient.close();
         AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().close();
         super.stop();

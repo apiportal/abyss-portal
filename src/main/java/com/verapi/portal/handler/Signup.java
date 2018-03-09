@@ -85,7 +85,7 @@ public class Signup implements Handler<RoutingContext> {
 				});
 				
 				
-				connection.queryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(username), resQuery -> {
+				connection.queryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(email), resQuery -> {
 					if (resQuery.succeeded()) {
 						ResultSet rs = resQuery.result();
 						// Do something with results
@@ -99,7 +99,7 @@ public class Signup implements Handler<RoutingContext> {
 							String salt = authProvider.generateSalt();
 							String hash = authProvider.computeHash(password, salt);
 							// save user to the database
-							connection.updateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(username).add(hash).add(salt), resUpdate -> {
+							connection.updateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(email).add(hash).add(salt), resUpdate -> {
 								if (resUpdate.succeeded()) {
 									logger.info("user created successfully: " + resUpdate.result().getKeys().encodePrettily());
 									
@@ -107,12 +107,12 @@ public class Signup implements Handler<RoutingContext> {
 									Token tokenGenerator = new Token();
 									AuthenticationInfo authInfo = null;
 									try {
-										authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), username, routingContext.vertx());
+										authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx());
 										logger.info("activation token is created successfully: " + authInfo.getToken());
 									} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
 										logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
 									}
-									connection.updateWithParams("INSERT INTO portalschema.user_activation (username, expire_date, token) VALUES (?, ?, ?)", new JsonArray().add(username).add(authInfo.getExpireDate()).add(authInfo.getToken()), resUpdateActivation -> {
+									connection.updateWithParams("INSERT INTO portalschema.user_activation (username, expire_date, token) VALUES (?, ?, ?)", new JsonArray().add(email).add(authInfo.getExpireDate()).add(authInfo.getToken()), resUpdateActivation -> {
 										if (resUpdate.succeeded()) {
 											connection.commit(handler -> {
 												if (handler.failed()) {
@@ -121,8 +121,12 @@ public class Signup implements Handler<RoutingContext> {
 												}
 											});
 											logger.info("activation token is created and persisted successfully");
-											generateResponse(routingContext, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
+											//generateResponse(routingContext, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
 											//TODO: Send email to user
+											
+											routingContext.session().put("isUserActivated", true);
+											routingContext.response().putHeader("location", "/login").setStatusCode(302).end();
+											
 										} else {
 											logger.error("user_activation create error: " + resUpdateActivation.cause().getLocalizedMessage());
 											connection.rollback(handler -> {

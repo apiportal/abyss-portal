@@ -30,6 +30,7 @@ public class Index implements Handler<RoutingContext> {
 
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
+        routingContext.put("user.name", routingContext.user().principal().getValue("username"));
         // and now delegate to the engine to render it.
         engine.render(routingContext, "webroot/", "index.html", res -> {
             if (res.succeeded()) {

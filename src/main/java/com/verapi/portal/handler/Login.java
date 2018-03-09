@@ -52,12 +52,17 @@ public class Login implements Handler<RoutingContext> {
     public void pageRender(RoutingContext routingContext) {
         logger.info("Login.pageRender invoked...");
 
+        Boolean isUserActivated = routingContext.session().get("isUserActivated");
+        if (isUserActivated == null) {
+        	isUserActivated = new Boolean(false);
+        }
+        
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
         //configureThymeleafEngine(engine);
 
-        // we define a hardcoded title for our application
-        routingContext.put("signin", "Sign in Abyss");
+        
+        routingContext.put("isUserActivated", isUserActivated);
         // and now delegate to the engine to render it.
         engine.render(routingContext, "webroot/", "login.html", res -> {
             if (res.succeeded()) {
