@@ -176,7 +176,7 @@ public class Signup implements Handler<RoutingContext> {
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/full-width-light/", "signup.html", res -> {
+        engine.render(routingContext, "webroot/", "signup.html", res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());
@@ -196,7 +196,7 @@ public class Signup implements Handler<RoutingContext> {
         context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
         
-        context.response().putHeader("location", "/full-width-light/httperror").setStatusCode(302).end();
+        context.response().putHeader("location", "/httperror").setStatusCode(302).end();
     }
     
 }

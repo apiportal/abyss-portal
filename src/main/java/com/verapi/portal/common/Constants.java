@@ -27,4 +27,7 @@ public class Constants {
     public static final String PORTAL_DBUSER_PASSWORD = "portal.dbuser.password";
     public static final String PORTAL_DBCONN_MAX_POOL_SIZE= "portal.dbconn_max_pool_size";
     public static final String PORTAL_DATA_SOURCE_SERVICE = "portal-data-source-service";
+    
+	public static final String TEMPLATE_PREFIX = "webroot/";
+	public static final String TEMPLATE_SUFFIX = ".html";
 }

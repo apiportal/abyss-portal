@@ -37,6 +37,7 @@ import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.JDBCDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 
 /**
@@ -125,38 +126,38 @@ public class MainVerticle extends AbstractVerticle {
 	            router.route().handler(UserSessionHandler.create(auth));
 
 	            //An auth handler that's used to handle auth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
-	            AuthHandler authHandler = RedirectAuthHandler.create(auth, "/full-width-light/login");
+	            AuthHandler authHandler = RedirectAuthHandler.create(auth, "/login");
 
 	            router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
 	            
 	            Signup signup = new Signup(auth, jdbcClient);
-	            router.get("/full-width-light/signup").handler(signup::pageRender).failureHandler(this::failureHandler);
+	            router.get("/signup").handler(signup::pageRender).failureHandler(this::failureHandler);
 	            router.post("/sign-up").handler(signup).failureHandler(this::failureHandler);
 	            
 	            //install authHandler for all routes where authentication is required
-	            //router.route("/full-width-light/").handler(authHandler);
-	            router.route("/full-width-light/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
+	            //router.route("/").handler(authHandler);
+	            router.route("/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
 
 	            // Entry point to the application, this will render a custom Thymeleaf template
-	            //router.get("/full-width-light/login").handler(this::loginHandler);
+	            //router.get("/login").handler(this::loginHandler);
 	            Login login = new Login(auth);
-	            router.get("/full-width-light/login").handler(login::pageRender).failureHandler(this::failureHandler);
+	            router.get("/login").handler(login::pageRender).failureHandler(this::failureHandler);
 	            router.post("/login-auth").handler(login).failureHandler(this::failureHandler);
 
 	            Index index = new Index(auth);
-	            router.get("/full-width-light/index").handler(index::pageRender).failureHandler(this::failureHandler);
+	            router.get("/index").handler(index::pageRender).failureHandler(this::failureHandler);
 	            //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
 
 	            //router.post("/login-auth2").handler(FormLoginHandler.create(auth));
 
 
-	            router.get("/img/*").handler(StaticHandler.create("webroot/img"));
-	            router.get("/vendors/*").handler(StaticHandler.create("webroot/vendors"));
-	            router.get("/full-width-light/dist/*").handler(StaticHandler.create("webroot/full-width-light/dist"));
+	            //router.get("/img/*").handler(StaticHandler.create("webroot/img"));
+	            //router.get("/vendors/*").handler(StaticHandler.create("webroot/vendors"));
+	            router.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
 
-	            router.routeWithRegex("^/full-width-light/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+	            router.routeWithRegex("^/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
-	            router.get("/full-width-light/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+	            router.get("/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
 	            //only rendering page routings' failures shall be handled by using regex
 	            //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
@@ -261,6 +262,7 @@ public class MainVerticle extends AbstractVerticle {
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        //configureThymeleafEngine(engine);
 
         context.put(Constants.HTTP_STATUSCODE, statusCode);
         context.put(Constants.HTTP_URL, context.session().get(Constants.HTTP_URL));
@@ -275,7 +277,7 @@ public class MainVerticle extends AbstractVerticle {
         }
 
         // and now delegate to the engine to render it.
-        engine.render(context, "webroot/full-width-light/", templateFileName, res -> {
+        engine.render(context, "webroot/", templateFileName, res -> {
             if (res.succeeded()) {
                 context.response().putHeader("Content-Type", "text/html");
                 context.response().setStatusCode(statusCode);
@@ -308,12 +310,22 @@ public class MainVerticle extends AbstractVerticle {
 
         //if (strStatusCode.matches("[4|5][0|1]\")) //TODO: In the future...
         if (strStatusCode.matches("400|401|403|404|500")) {
-            context.response().putHeader("location", "/full-width-light/" + strStatusCode).setStatusCode(302).end();
+            context.response().putHeader("location", "/" + strStatusCode).setStatusCode(302).end();
         } else {
-            context.response().putHeader("location", "/full-width-light/httperror").setStatusCode(302).end();
+            context.response().putHeader("location", "/httperror").setStatusCode(302).end();
         }
     }
 
+    private void configureThymeleafEngine(ThymeleafTemplateEngine engine) {
+        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+        templateResolver.setPrefix(Constants.TEMPLATE_PREFIX);
+        templateResolver.setSuffix(Constants.TEMPLATE_SUFFIX);
+        engine.getThymeleafTemplateEngine().setTemplateResolver(templateResolver);
+
+//        CustomMessageResolver customMessageResolver = new CustomMessageResolver();
+//        engine.getThymeleafTemplateEngine().setMessageResolver(customMessageResolver);
+    }    
+    
     /* (non-Javadoc)
      * @see io.vertx.core.AbstractVerticle#stop()
      */

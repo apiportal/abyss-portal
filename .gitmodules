@@ -1,0 +1,3 @@
+[submodule "src/main/resources/webroot"]
+	path = src/main/resources/webroot
+	url = https://faik.saglar@bitbucket.verapi.com:17991/scm/abyss/abyss-view.git

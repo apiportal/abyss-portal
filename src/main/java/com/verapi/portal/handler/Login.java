@@ -8,6 +8,9 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+
+import com.verapi.portal.common.Constants;
 
 public class Login implements Handler<RoutingContext> {
 
@@ -38,8 +41,8 @@ public class Login implements Handler<RoutingContext> {
                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context? 
                 logger.info("Logged in user: " + user.principal().encodePrettily());
                 routingContext.put("username", user.principal().getString("username"));
-                routingContext.response().putHeader("location", "/full-width-light/index").setStatusCode(302).end();
-                logger.info("redirected../full-width-light/index");
+                routingContext.response().putHeader("location", "/index").setStatusCode(302).end();
+                logger.info("redirected../index");
             } else {
                 routingContext.fail(401);
             }
@@ -51,11 +54,12 @@ public class Login implements Handler<RoutingContext> {
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        //configureThymeleafEngine(engine);
 
         // we define a hardcoded title for our application
         routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/full-width-light/", "login.html", res -> {
+        engine.render(routingContext, "webroot/", "login.html", res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());
@@ -65,4 +69,14 @@ public class Login implements Handler<RoutingContext> {
         });
     }
 
+    private void configureThymeleafEngine(ThymeleafTemplateEngine engine) {
+        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+        templateResolver.setPrefix(Constants.TEMPLATE_PREFIX);
+        templateResolver.setSuffix(Constants.TEMPLATE_SUFFIX);
+        engine.getThymeleafTemplateEngine().setTemplateResolver(templateResolver);
+
+//        CustomMessageResolver customMessageResolver = new CustomMessageResolver();
+//        engine.getThymeleafTemplateEngine().setMessageResolver(customMessageResolver);
+    }    
+    
 }

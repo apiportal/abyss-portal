@@ -31,7 +31,7 @@ public class Index implements Handler<RoutingContext> {
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/full-width-light/", "index.html", res -> {
+        engine.render(routingContext, "webroot/", "index.html", res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());
