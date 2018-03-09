@@ -150,7 +150,7 @@ public class MainVerticle extends AbstractVerticle {
 	            //router.post("/login-auth2").handler(FormLoginHandler.create(auth));
 
 
-	            router.get("/img/*").handler(StaticHandler.create("./img").setWebRoot("webroot/img"));
+	            router.get("/img/*").handler(StaticHandler.create("webroot/img"));
 	            router.get("/vendors/*").handler(StaticHandler.create("/vendors").setWebRoot("webroot/vendors"));
 	            router.get("/full-width-light/dist/*").handler(StaticHandler.create("/full-width-light/dist").setWebRoot("webroot/full-width-light/dist"));
 
