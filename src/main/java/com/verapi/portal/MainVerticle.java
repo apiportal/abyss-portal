@@ -275,7 +275,7 @@ public class MainVerticle extends AbstractVerticle {
         }
 
         // and now delegate to the engine to render it.
-        engine.render(context, "src/main/resources/webroot/full-width-light/", templateFileName, res -> {
+        engine.render(context, "webroot/full-width-light/", templateFileName, res -> {
             if (res.succeeded()) {
                 context.response().putHeader("Content-Type", "text/html");
                 context.response().setStatusCode(statusCode);
