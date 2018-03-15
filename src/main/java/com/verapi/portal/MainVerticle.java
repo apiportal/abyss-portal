@@ -101,35 +101,37 @@ public class MainVerticle extends AbstractVerticle {
 	        	
 	            // To simplify the development of the web components we use a Router to route all HTTP requests
 	            // to organize our code in a reusable way.
+	            Router abyssRouter = Router.router(vertx);
+	            
 	            Router router = Router.router(vertx);
 
 	            //log HTTP requests
-	            router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+	            abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
 	            //firstly install cookie handler
 	            //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
-	            router.route().handler(CookieHandler.create());
+	            abyssRouter.route().handler(CookieHandler.create());
 
 	            //secondly install body handler
 	            //A handler which gathers the entire request body and sets it on the RoutingContext
 	            //It also handles HTTP file uploads and can be used to limit body sizes
-	            router.route().handler(BodyHandler.create());
+	            abyssRouter.route().handler(BodyHandler.create());
 
 	            //thirdly install session handler
 	            //A handler that maintains a Session for each browser session
 	            //The session is available on the routing context with RoutingContext.session()
 	            //The session handler requires a CookieHandler to be on the routing chain before it
-	            router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session"));
+	            abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session"));
 
 	            //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
 	            //It requires that the session handler is already present on previous matching routes
 	            //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
-	            router.route().handler(UserSessionHandler.create(auth));
+	            abyssRouter.route().handler(UserSessionHandler.create(auth));
 
 	            //An auth handler that's used to handle auth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
-	            AuthHandler authHandler = RedirectAuthHandler.create(auth, "/login");
+	            AuthHandler authHandler = RedirectAuthHandler.create(auth, "/abyss/login");
 
-	            router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
+	            //router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
 	            
 	            Signup signup = new Signup(auth, jdbcClient);
 	            router.get("/signup").handler(signup::pageRender).failureHandler(this::failureHandler);
@@ -151,11 +153,11 @@ public class MainVerticle extends AbstractVerticle {
 	            
 	            router.route("/logout").handler(context-> {
 	            	context.clearUser();
-	            	context.response().putHeader("location", "/index").setStatusCode(302).end();
+	            	context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
 	            });
 	            
 	            router.route("/").handler(context-> {
-	            	context.response().putHeader("location", "/index").setStatusCode(302).end();
+	            	context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
 	            });	            
 	            
 	            //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
@@ -165,27 +167,30 @@ public class MainVerticle extends AbstractVerticle {
 
 	            //router.get("/img/*").handler(StaticHandler.create("webroot/img"));
 	            //router.get("/vendors/*").handler(StaticHandler.create("webroot/vendors"));
-	            router.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
+	            abyssRouter.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
 
-	            router.routeWithRegex("^/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+	            abyssRouter.mountSubRouter("/abyss", router);
+	            
+	            abyssRouter.routeWithRegex("^/abyss/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
-	            router.get("/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+	            abyssRouter.get("/abyss/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
 	            //only rendering page routings' failures shall be handled by using regex
 	            //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
-	            router.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
+	            abyssRouter.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
 
-	            router.route().handler(ctx -> {
+	            abyssRouter.route().handler(ctx -> {
 	                logger.info("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
 	                ctx.fail(404);
 	            });
-
+	            
+	            
 	            logger.info("starting http server");
 	            HttpServerOptions httpServerOptions = new HttpServerOptions();
 
 	            logger.warn("http server is running in plaintext mode. Enable SSL in config for production deployments.");
 	            vertx.createHttpServer(httpServerOptions.setCompressionSupported(true))
-	                    .requestHandler(router::accept)
+	                    .requestHandler(abyssRouter::accept)
 	                    .listen(Config.getInstance().getConfigJsonObject().getInteger("port")
 	                            , Config.getInstance().getConfigJsonObject().getString("host")
 	                            , result -> {
@@ -324,7 +329,7 @@ public class MainVerticle extends AbstractVerticle {
 //        if (strStatusCode.matches("400|401|403|404|500")) {
 //            context.response().putHeader("location", "/" + strStatusCode).setStatusCode(302).end();
 //        } else {
-            context.response().putHeader("location", "/httperror").setStatusCode(302).end();
+            context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
 //        }
     }
 

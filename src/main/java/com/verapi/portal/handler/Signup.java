@@ -125,7 +125,7 @@ public class Signup implements Handler<RoutingContext> {
 											//TODO: Send email to user
 											
 											routingContext.session().put("isUserActivated", true);
-											routingContext.response().putHeader("location", "/login").setStatusCode(302).end();
+											routingContext.response().putHeader("location", "/abyss/login").setStatusCode(302).end();
 											
 										} else {
 											logger.error("user_activation create error: " + resUpdateActivation.cause().getLocalizedMessage());

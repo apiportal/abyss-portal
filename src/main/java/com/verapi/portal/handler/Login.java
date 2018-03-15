@@ -41,7 +41,7 @@ public class Login implements Handler<RoutingContext> {
                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context? 
                 logger.info("Logged in user: " + user.principal().encodePrettily());
                 routingContext.put("username", user.principal().getString("username"));
-                routingContext.response().putHeader("location", "/index").setStatusCode(302).end();
+                routingContext.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
                 logger.info("redirected../index");
             } else {
                 routingContext.fail(401);
@@ -56,6 +56,7 @@ public class Login implements Handler<RoutingContext> {
         if (isUserActivated == null) {
         	isUserActivated = new Boolean(false);
         }
+        routingContext.session().put("isUserActivated", false);
         
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
