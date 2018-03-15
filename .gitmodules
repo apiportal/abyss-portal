@@ -1,3 +1,4 @@
 [submodule "src/main/resources/webroot"]
 	path = src/main/resources/webroot
-	url = https://bitbucket.verapi.com:17991/scm/abyss/abyss-view.git
+	url = ssh://git@bitbucket.verapi.com:7999/abyss/abyss-view.git
+	#url = https://bitbucket.verapi.com:17991/scm/abyss/abyss-view.git
