@@ -1,7 +1,7 @@
 package com.verapi.portal.common;
 
-import io.vertx.core.Vertx;
-import io.vertx.servicediscovery.ServiceDiscovery;
+import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
 
 public class AbyssServiceDiscovery {

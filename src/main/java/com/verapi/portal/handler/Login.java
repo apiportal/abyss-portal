@@ -2,10 +2,10 @@ package com.verapi.portal.handler;
 
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.auth.AuthProvider;
+import io.vertx.reactivex.ext.auth.User;
+import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
@@ -74,7 +74,7 @@ public class Login implements Handler<RoutingContext> {
             }
         });
     }
-
+/*
     private void configureThymeleafEngine(ThymeleafTemplateEngine engine) {
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
         templateResolver.setPrefix(Constants.TEMPLATE_PREFIX);
@@ -84,5 +84,5 @@ public class Login implements Handler<RoutingContext> {
 //        CustomMessageResolver customMessageResolver = new CustomMessageResolver();
 //        engine.getThymeleafTemplateEngine().setMessageResolver(customMessageResolver);
     }    
-    
+*/
 }

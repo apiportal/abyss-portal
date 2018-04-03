@@ -1,7 +1,7 @@
 package com.verapi.starter;
 
 import com.verapi.portal.MainVerticle;
-import io.vertx.core.Vertx;
+import io.vertx.reactivex.core.Vertx;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;

@@ -1,9 +1,9 @@
 package com.verapi.portal.handler;
 
 import io.vertx.core.Handler;
-import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.web.RoutingContext;
-import io.vertx.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.auth.AuthProvider;
+import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
