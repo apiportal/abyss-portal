@@ -1,24 +1,18 @@
 package com.verapi.portal.handler;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.VertxContextPRNG;
+
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
-import org.postgresql.core.ResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,160 +69,66 @@ public class Signup implements Handler<RoutingContext> {
 
         jdbcClient.rxGetConnection().flatMap(resConn ->
                 resConn
-
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(email))
-                                .map(resultSet -> {
-                                    if (resultSet.getNumRows() > 0) {
-                                        logger.info("user found: " + resultSet.toJson().encodePrettily());
-                                    } else {
-                                        logger.info("user NOT found, creating user and activation records...");
-                                        String salt = authProvider.generateSalt();
-                                        String hash = authProvider.computeHash(password, salt);
-                                        // save user to the database
-                                        resConn.rxUpdateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(email).add(hash).add(salt))
-                                                .map(updateResult -> {
-                                                            logger.info("user created successfully: " + updateResult.getKeys().encodePrettily());
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(email)))
+                        .flatMap(resultSet -> {
+                            if (resultSet.getNumRows() > 0) {
+                                logger.info("user found: " + resultSet.toJson().encodePrettily());
+                                return Single.error(new Exception("User already exists"));
+                            } else {
+                                logger.info("user NOT found, creating user and activation records...");
+                                String salt = authProvider.generateSalt();
+                                String hash = authProvider.computeHash(password, salt);
 
-                                                            //Generate and Persist Activation Token
-                                                            Token tokenGenerator = new Token();
-                                                            AuthenticationInfo authInfo = null;
-                                                            try {
-                                                                authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx().getDelegate());
-                                                                logger.info("activation token is created successfully: " + authInfo.getToken());
-                                                            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                                                                logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
-                                                            }
-                                                            resConn.rxUpdateWithParams("INSERT INTO portalschema.user_activation (username, expire_date, token) VALUES (?, ?, ?)", new JsonArray().add(email).add(authInfo.getExpireDate()).add(authInfo.getToken()))
-                                                                    .map(updateResult1 -> {
-                                                                        resConn.rxCommit().toSingleDefault(true).map(commit -> updateResult);
-                                                                        return resultSet;
-                                                                    });
-                                                            return resultSet;
-                                                        }
-                                                );
-                                    }
-                                    return resultSet;
-                                })
-                                .onErrorResumeNext(ex -> resConn.rxRollback()
-                                        .toSingleDefault(true)
-                                        .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-                                        .flatMap(ignore -> Single.error(ex))
-                                )
+                                // save user to the database
+                                return resConn.rxUpdateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(email).add(hash).add(salt));
+                            }
+                        })
+                        .flatMap(updateResult -> {
+                            logger.info("user created successfully: " + updateResult.getKeys().encodePrettily());
+
+                            //Generate and Persist Activation Token
+                            Token tokenGenerator = new Token();
+                            AuthenticationInfo authInfo;
+                            try {
+                                authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx().getDelegate());
+                                logger.info("activation token is created successfully: " + authInfo.getToken());
+                            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                                logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
+                                return Single.error(new Exception("activation token could not be generated"));
+                            }
+                            return resConn.rxUpdateWithParams("INSERT INTO portalschema.user_activation (username, expire_date, token) VALUES (?, ?, ?)", new JsonArray().add(email).add(authInfo.getExpireDate()).add(authInfo.getToken()));
+                        })
+                        // commit if all succeeded
+                        .flatMap(updateResult -> resConn.rxCommit().toSingleDefault(true))
+
+                        // Rollback if any failed with exception propagation
+                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
+                                            .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
+                                            .flatMap(ignore -> Single.error(ex))
                         )
-                        //.flatMap(logit -> logger.info("signup - connection autocommit is set to false").map(dolog -> resQuery))
-                        //.flatMap().map(checkNumOfRows -> updateResult)
+
                         .doAfterSuccess(succ -> {
                             logger.info("activation token is created and persisted successfully");
-                            //generateResponse(routingContext, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
-                            //TODO: Send email to user
                         })
+
+                        // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
-        ).subscribe();
 
-/*
-		jdbcClient.getConnection(resConn -> {
-			if (resConn.succeeded()) {
+                        ).subscribe(result -> {
+                                logger.info("Subscription to Signup successfull:" + result);
+                                generateResponse(routingContext, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
+                                //TODO: Send email to user
+                            }, t -> {
+                                logger.error("Signup Error", t);
+                                generateResponse(routingContext, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "" );
 
-				SQLConnection connection = resConn.result();
-				connection.setAutoCommit(false, resultHandler -> {
-					if (resultHandler.succeeded()) {
-						logger.info("signup - connection autocommit is set to false");
-					} else {
-						
-					}
-						
-				});
-				
-				
-				connection.queryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(email), resQuery -> {
-					if (resQuery.succeeded()) {
-						ResultSet rs = resQuery.result();
-						// Do something with results
-						if (rs.getNumRows() > 0) {
-							connection.close();
-							logger.info("user found: " + rs.toJson().encodePrettily());
-							//TODO: Send response: this user exists 
-							//TODO: Design a generic business error page with user error message
-						} else {
-							logger.info("user NOT found, creating user and activation records...");
-							String salt = authProvider.generateSalt();
-							String hash = authProvider.computeHash(password, salt);
-							// save user to the database
-							connection.updateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(email).add(hash).add(salt), resUpdate -> {
-								if (resUpdate.succeeded()) {
-									logger.info("user created successfully: " + resUpdate.result().getKeys().encodePrettily());
-									
-									//Generate and Persist Activation Token
-									Token tokenGenerator = new Token();
-									AuthenticationInfo authInfo = null;
-									try {
-										authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx());
-										logger.info("activation token is created successfully: " + authInfo.getToken());
-									} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-										logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
-									}
-									connection.updateWithParams("INSERT INTO portalschema.user_activation (username, expire_date, token) VALUES (?, ?, ?)", new JsonArray().add(email).add(authInfo.getExpireDate()).add(authInfo.getToken()), resUpdateActivation -> {
-										if (resUpdate.succeeded()) {
-											connection.commit(handler -> {
-												if (handler.failed()) {
-													connection.close();
-													throw new RuntimeException(handler.cause());
-												}
-											});
-											logger.info("activation token is created and persisted successfully");
-											//generateResponse(routingContext, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
-											//TODO: Send email to user
-											
-											routingContext.session().put("isUserActivated", true);
-											routingContext.response().putHeader("location", "/abyss/login").setStatusCode(302).end();
-											
-										} else {
-											logger.error("user_activation create error: " + resUpdateActivation.cause().getLocalizedMessage());
-											connection.rollback(handler -> {
-												if (handler.failed()) {
-													connection.close();
-													throw new RuntimeException(handler.cause());
-												}
-											});
-											connection.close();
-											resUpdateActivation.failed();
-										}
-									});
-									
-								} else {
-									logger.error("user create error: " + resUpdate.cause().getLocalizedMessage());
-									connection.rollback(handler -> {
-										if (handler.failed()) {
-											connection.close();
-											throw new RuntimeException(handler.cause());
-										}
-									});
-									connection.close();
-									resUpdate.failed();
-								}
-							});
-						}
-					} else {
-						logger.error("SELECT user failed: " + resQuery.cause().getLocalizedMessage());
-						connection.close();
-						//jdbcClient.close();
-					}
-				});
-			} else {
-				// Failed to get connection - deal with it
-				logger.error("JDBC getConnection failed: " + resConn.cause().getLocalizedMessage());
-				resConn.failed();
-				//jdbcClient.close();
-			}
-		});
-*/
-
-
+                            }
+                        );
     }
 
     public void pageRender(RoutingContext routingContext) {
@@ -260,7 +160,7 @@ public class Signup implements Handler<RoutingContext> {
         context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
 
-        context.response().putHeader("location", "/httperror").setStatusCode(302).end();
+        context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
     }
 
 }
