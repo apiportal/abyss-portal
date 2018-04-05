@@ -44,7 +44,6 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 .register(PortalVersionCommand.class)
                 .dispatch(args);
     }
-
     private Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void executeCommand(String cmd, String... args) {
@@ -91,12 +90,9 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         });
         try {
             future.get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error(e.getLocalizedMessage());
-        } catch (ExecutionException e) {
-            logger.error(e.getLocalizedMessage());
-        } catch (TimeoutException e) {
-            logger.error(e.getLocalizedMessage());
+            vertx.close();
         }
         retriever.listen(configChange -> {
             Config config = Config.getInstance().setConfig(configChange.getNewConfiguration());
@@ -120,12 +116,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void beforeStoppingVertx(Vertx vertx) {
-
+        logger.info("shutdown in progres...");
     }
 
     @Override
     public void afterStoppingVertx() {
-
+        logger.info("shutdown in progres...");
     }
 
     @Override

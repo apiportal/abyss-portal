@@ -69,6 +69,7 @@ public class Signup implements Handler<RoutingContext> {
 
         jdbcClient.rxGetConnection().flatMap(resConn ->
                 resConn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
