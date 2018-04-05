@@ -1,6 +1,5 @@
 package com.verapi.portal.common;
 
-import io.vertx.reactivex.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public class Config {

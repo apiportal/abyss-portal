@@ -24,7 +24,6 @@ public class Constants {
     public static final String HTTP_URL = "http.url";
     public static final String HTTP_STATUSCODE = "http.statusCode";
     public static final String HTTPERROR_HTML = "httperror.html";
-    public static final String HTTP_SERVER_TIMEOUT_= "http.server.timeout";
 
     public static final String PORTAL_JDBC_URL = "portal.jdbc.url";
     public static final String PORTAL_JDBC_DRIVER_CLASS = "portal.jdbc.driver.class";
@@ -36,4 +35,7 @@ public class Constants {
 
     public static final String TEMPLATE_PREFIX = "webroot/";
 	public static final String TEMPLATE_SUFFIX = ".html";
+
+    public static final String LOG_LEVEL = "log.level";
+
 }

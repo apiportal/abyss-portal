@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration scan="true">
+<configuration scan="true" debug="false">
 
   <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
   <property name="log-file" value="${abyss-jar.name}" />
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <withJansi>true</withJansi>
+    <withJansi>false</withJansi>
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
       <Pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %highlight(%logger{36}) - %highlight(%msg%n)</Pattern>
     </encoder>
@@ -26,17 +26,19 @@
     <appender-ref ref="FILE" />
   </appender>
 
-  <logger name="com.verapi" level="TRACE">
+  <logger name="com.verapi" level="WARN">
     <appender-ref ref="ASYNC_STDOUT" />
     <!--<appender-ref ref="ASYNC_FILE" />-->
   </logger>
 
-  <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="INFO">
+  <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="WARN">
     <appender-ref ref="ASYNC_FILE" />
   </logger>
 
-  <root level="TRACE">
+  <root level="WARN">
     <appender-ref ref="ASYNC_FILE" />
   </root>
+
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 
 </configuration>
