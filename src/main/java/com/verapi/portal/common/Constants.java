@@ -15,6 +15,8 @@ package com.verapi.portal.common;
  */
 public class Constants {
 
+    public static final String ABBYS_PORTAL = "abbys-portal";
+
     public static final String HTTP_SERVER_HOST= "http.server.host";
     public static final String HTTP_SERVER_PORT= "http.server.port";
     public static final String HTTP_SERVER_TIMEOUT= "http.server.timeout";
@@ -37,5 +39,8 @@ public class Constants {
 	public static final String TEMPLATE_SUFFIX = ".html";
 
     public static final String LOG_LEVEL = "log.level";
+
+    public static final String METRICS_ENABLED = "metrics.enabled";
+    public static final String METRICS_JMX_ENABLED = "metrics.jmx.enabled";
 
 }

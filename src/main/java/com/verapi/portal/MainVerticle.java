@@ -219,9 +219,6 @@ public class MainVerticle extends AbstractVerticle {
                                     startFuture.fail(result.cause());
                                 }
                             });
-
-            logger.debug("loaded config : " + Config.getInstance().getConfigJsonObject().encodePrettily());
-
         }), t -> {
             logger.error("serviceDiscovery.getJDBCClient failed..." + t);
             startFuture.fail(t);

@@ -22,6 +22,7 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.impl.launcher.VertxCommandLauncher;
 import io.vertx.core.impl.launcher.VertxLifecycleHooks;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,8 @@ import java.util.concurrent.TimeoutException;
 
 public class PortalLauncher extends VertxCommandLauncher implements VertxLifecycleHooks {
 
+    private static Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
+
     public static void main(String[] args) {
 
         //enforce SLF4J logging set
@@ -49,7 +52,6 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 .dispatch(args);
     }
 
-    private Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void executeCommand(String cmd, String... args) {
         new PortalLauncher().execute(cmd, args);
@@ -63,6 +65,13 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     @Override
     public void beforeStartingVertx(VertxOptions vertxOptions) {
         vertxOptions.setHAEnabled(true);
+        vertxOptions.setMetricsOptions(new DropwizardMetricsOptions()
+                .setEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_ENABLED, true))
+                .setJmxEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_JMX_ENABLED, true))
+                .setRegistryName(Constants.ABBYS_PORTAL)
+                .setJmxDomain(Constants.ABBYS_PORTAL)
+                .setBaseName(Constants.ABBYS_PORTAL)
+        );
         logger.trace(vertxOptions.toString());
     }
 
@@ -70,7 +79,10 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     public void afterStartingVertx(Vertx vertx) {
         logger.trace(String.format("%s vertx started", vertx.toString()));
         logger.trace(String.format("vertx is clustered : %s", vertx.isClustered()));
+
+        //MetricsService service = MetricsService.create(vertx);
         logger.trace(String.format("vertx is metric enabled : %s", vertx.isMetricsEnabled()));
+
         ConfigStoreOptions file = new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("properties")

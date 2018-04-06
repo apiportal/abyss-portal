@@ -2,7 +2,7 @@
 <configuration scan="true" debug="false">
 
   <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
-  <property name="log-file" value="${abyss-jar.name}" />
+  <property name="log-file" value="logs/${abyss-jar.name}" />
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <withJansi>false</withJansi>
@@ -26,7 +26,7 @@
     <appender-ref ref="FILE" />
   </appender>
 
-  <logger name="com.verapi" level="WARN">
+  <logger name="com.verapi" level="TRACE">
     <appender-ref ref="ASYNC_STDOUT" />
     <!--<appender-ref ref="ASYNC_FILE" />-->
   </logger>
@@ -35,7 +35,7 @@
     <appender-ref ref="ASYNC_FILE" />
   </logger>
 
-  <root level="WARN">
+  <root level="TRACE">
     <appender-ref ref="ASYNC_FILE" />
   </root>
 

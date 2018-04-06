@@ -17,6 +17,8 @@ public class Config {
     }
 
     public JsonObject getConfigJsonObject() {
+        if (config == null)
+            setConfig(new JsonObject());
         return config;
     }
 
