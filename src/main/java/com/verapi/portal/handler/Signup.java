@@ -85,11 +85,37 @@ public class Signup implements Handler<RoutingContext> {
                                 String hash = authProvider.computeHash(password, salt);
 
                                 // save user to the database
-                                return resConn.rxUpdateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(email).add(hash).add(salt));
+                                return resConn.rxUpdateWithParams("INSERT INTO portalschema.user(" +
+                                        "organization_id," +
+                                        //"now()," +          //created
+                                        //"now()," +          //updated
+                                        "crud_user_id," +
+                                        "is_activated," +
+                                        "username," +
+                                        "first_name," +
+                                        "last_name," +
+                                        "display_name," +
+                                        "email," +
+                                        "effective_start_date," +
+                                        //"effective_end_date," +
+                                        "password," +
+                                        "password_salt) " +
+                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?) RETURNING id",
+                                        new JsonArray()
+                                                .add(0)
+                                                .add(1)
+                                                .add(0)
+                                                .add(username)
+                                                .add(firstname)
+                                                .add(lastname)
+                                                .add(firstname + " " + lastname)
+                                                .add(email)
+                                                .add(hash)
+                                                .add(salt));
                             }
                         })
                         .flatMap(updateResult -> {
-                            logger.info("user created successfully: " + updateResult.getKeys().encodePrettily());
+                            logger.info("[" + updateResult.getUpdated() + "] user created successfully: " + updateResult.getKeys().encodePrettily() + " | Integer Key @pos=0:" + updateResult.getKeys().getInteger(0));
 
                             //Generate and Persist Activation Token
                             Token tokenGenerator = new Token();
@@ -101,7 +127,19 @@ public class Signup implements Handler<RoutingContext> {
                                 logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
-                            return resConn.rxUpdateWithParams("INSERT INTO portalschema.user_activation (username, expire_date, token) VALUES (?, ?, ?)", new JsonArray().add(email).add(authInfo.getExpireDate()).add(authInfo.getToken()));
+                            return resConn.rxUpdateWithParams("INSERT INTO portalschema.user_activation (" +
+                                    "organization_id," +
+                                    "crud_user_id," +
+                                    "user_id," +
+                                    "expire_date," +
+                                    "token) " +
+                                    "VALUES (?, ?, ?, ?, ?)",
+                                    new JsonArray()
+                                            .add(0)
+                                            .add(1)
+                                            .add(updateResult.getKeys().getInteger(0))
+                                            .add(authInfo.getExpireDate())
+                                            .add(authInfo.getToken()));
                         })
                         // commit if all succeeded
                         .flatMap(updateResult -> resConn.rxCommit().toSingleDefault(true))
@@ -113,7 +151,7 @@ public class Signup implements Handler<RoutingContext> {
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.info("activation token is created and persisted successfully");
+                            logger.info("User record and activation token is created and persisted successfully");
                         })
 
                         // close the connection regardless succeeded or failed

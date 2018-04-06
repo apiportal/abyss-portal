@@ -103,11 +103,14 @@ public class MainVerticle extends AbstractVerticle {
 
             auth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
 
-
             auth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.USER WHERE USERNAME = ?");
-            auth.setPermissionsQuery("SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE");
-            auth.setRolesQuery("SELECT ROLE FROM portalschema.USER_ROLES WHERE USERNAME = ?");
-            //auth.setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx));
+
+            //"SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE"
+            //auth.setPermissionsQuery("SELECT PERM FROM portalschema.GROUP_PERMISSION GP, portalschema.USER_MEMBERSHIP UM, portalschema.USER U WHERE UM.USERNAME = ? AND UM.ROLE = UP.ROLE");
+            auth.setPermissionsQuery("SELECT PERMISSION FROM portalschema.USER_PERMISSION UP, portalschema.USER U WHERE UM.USERNAME = ? AND UP.USER_ID = U.ID");
+
+            //"SELECT ROLE FROM portalschema.USER_ROLES WHERE USERNAME = ?"
+            auth.setRolesQuery("SELECT GROUP_NAME FROM portalschema.USER_GROUP UG, portalschema.USER_MEMBERSHIP UM, portalschema.USER U WHERE U.USERNAME = ? AND UM.USER_ID = U.ID AND UM.GROUP_ID = UG.ID");
 
             //TODO: authProvider.setNonces();
             logger.info("JDBCAuthProvider configuration done... ");
