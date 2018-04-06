@@ -11,8 +11,12 @@
 
 package com.verapi.portal;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.shell.PortalMetricsListCommand;
+import com.verapi.shell.PortalVersionCommand;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -23,11 +27,9 @@ import io.vertx.core.impl.launcher.VertxCommandLauncher;
 import io.vertx.core.impl.launcher.VertxLifecycleHooks;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
-
+import io.vertx.ext.shell.command.CommandRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +39,7 @@ import java.util.concurrent.TimeoutException;
 
 public class PortalLauncher extends VertxCommandLauncher implements VertxLifecycleHooks {
 
-    private static Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
+    private Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void main(String[] args) {
 
@@ -125,10 +127,14 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             }
         });
 
-        //set all loggers level
+        //set all loggers' level
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
         loggerList.stream().forEach(tmpLogger -> tmpLogger.setLevel(Level.toLevel(Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL))));
+
+        //register CLI commands
+        CommandRegistry commandRegistry = CommandRegistry.getShared(vertx);
+        commandRegistry.registerCommand(PortalMetricsListCommand.class);
 
     }
 
