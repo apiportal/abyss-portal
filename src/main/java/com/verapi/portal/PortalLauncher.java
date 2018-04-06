@@ -12,25 +12,32 @@
 package com.verapi.portal;
 
 import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.impl.launcher.VertxCommandLauncher;
 import io.vertx.core.impl.launcher.VertxLifecycleHooks;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class PortalLauncher extends VertxCommandLauncher implements VertxLifecycleHooks {
+
+    private static Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void main(String[] args) {
 
@@ -45,7 +52,6 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 .dispatch(args);
     }
 
-    private Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void executeCommand(String cmd, String... args) {
         new PortalLauncher().execute(cmd, args);
@@ -59,14 +65,24 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     @Override
     public void beforeStartingVertx(VertxOptions vertxOptions) {
         vertxOptions.setHAEnabled(true);
-        logger.info(vertxOptions.toString());
+        vertxOptions.setMetricsOptions(new DropwizardMetricsOptions()
+                .setEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_ENABLED, true))
+                .setJmxEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_JMX_ENABLED, true))
+                .setRegistryName(Constants.ABBYS_PORTAL)
+                .setJmxDomain(Constants.ABBYS_PORTAL)
+                .setBaseName(Constants.ABBYS_PORTAL)
+        );
+        logger.trace(vertxOptions.toString());
     }
 
     @Override
     public void afterStartingVertx(Vertx vertx) {
-        logger.info(String.format("%s vertx started", vertx.toString()));
-        logger.info(String.format("vertx is clustered : %s", vertx.isClustered()));
-        logger.info(String.format("vertx is metric enabled : %s", vertx.isMetricsEnabled()));
+        logger.trace(String.format("%s vertx started", vertx.toString()));
+        logger.trace(String.format("vertx is clustered : %s", vertx.isClustered()));
+
+        //MetricsService service = MetricsService.create(vertx);
+        logger.trace(String.format("vertx is metric enabled : %s", vertx.isMetricsEnabled()));
+
         ConfigStoreOptions file = new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("properties")
@@ -74,9 +90,9 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         ConfigRetrieverOptions options = new ConfigRetrieverOptions()
                 .addStore(file)
                 .setScanPeriod(10000);
-        logger.debug("ConfigRetrieverOptions set OK..");
+        logger.info("ConfigRetrieverOptions set OK..");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
-        logger.debug("ConfigRetriever OK..");
+        logger.info("ConfigRetriever OK..");
         CompletableFuture future = new CompletableFuture();
         retriever.getConfig(ar -> {
             if (ar.failed()) {
@@ -85,18 +101,15 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             } else {
                 Config config = Config.getInstance().setConfig(ar.result());
                 future.complete(ar.result());
-                logger.debug("afterStartingVertx ConfigRetriever getConfig OK..");
+                logger.info("afterStartingVertx ConfigRetriever getConfig OK..");
                 logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
         try {
             future.get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error(e.getLocalizedMessage());
-        } catch (ExecutionException e) {
-            logger.error(e.getLocalizedMessage());
-        } catch (TimeoutException e) {
-            logger.error(e.getLocalizedMessage());
+            vertx.close();
         }
         retriever.listen(configChange -> {
             Config config = Config.getInstance().setConfig(configChange.getNewConfiguration());
@@ -111,6 +124,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + throwable.getStackTrace());
             }
         });
+
+        //set all loggers level
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
+        loggerList.stream().forEach(tmpLogger -> tmpLogger.setLevel(Level.toLevel(Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL))));
+
     }
 
     @Override
@@ -120,12 +139,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void beforeStoppingVertx(Vertx vertx) {
-
+        logger.info("shutdown in progres...");
     }
 
     @Override
     public void afterStoppingVertx() {
-
+        logger.info("shutdown in progres...");
     }
 
     @Override

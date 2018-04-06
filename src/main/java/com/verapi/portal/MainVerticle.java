@@ -31,6 +31,7 @@ import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.LoggerFormat;
+import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import io.vertx.reactivex.ext.web.handler.BodyHandler;
@@ -158,6 +159,9 @@ public class MainVerticle extends AbstractVerticle {
             //router.route("/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
             router.route("/index").handler(authHandler).failureHandler(this::failureHandler);
 
+            //If a request times out before the response is written a 503 response will be returned to the client, timeout 5 secs
+            router.route().handler(TimeoutHandler.create(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_TIMEOUT)));
+
             // Entry point to the application, this will render a custom Thymeleaf template
             //router.get("/login").handler(this::loginHandler);
             Login login = new Login(auth);
@@ -207,8 +211,8 @@ public class MainVerticle extends AbstractVerticle {
             logger.warn("http server is running in plaintext mode. Enable SSL in config for production deployments.");
             vertx.createHttpServer(httpServerOptions.setCompressionSupported(true))
                     .requestHandler(abyssRouter::accept)
-                    .listen(Config.getInstance().getConfigJsonObject().getInteger("port")
-                            , Config.getInstance().getConfigJsonObject().getString("host")
+                    .listen(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_PORT)
+                            , Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_SERVER_HOST)
                             , result -> {
                                 if (result.succeeded()) {
                                     logger.info("http server started..." + result.succeeded());
@@ -218,9 +222,6 @@ public class MainVerticle extends AbstractVerticle {
                                     startFuture.fail(result.cause());
                                 }
                             });
-
-            logger.debug("loaded config : " + Config.getInstance().getConfigJsonObject().encodePrettily());
-
         }), t -> {
             logger.error("serviceDiscovery.getJDBCClient failed..." + t);
             startFuture.fail(t);
