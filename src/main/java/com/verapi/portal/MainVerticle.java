@@ -104,14 +104,14 @@ public class MainVerticle extends AbstractVerticle {
 
             auth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
 
-            auth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.USER WHERE USERNAME = ?");
+            auth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?");
 
             //"SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE"
             //auth.setPermissionsQuery("SELECT PERM FROM portalschema.GROUP_PERMISSION GP, portalschema.USER_MEMBERSHIP UM, portalschema.USER U WHERE UM.USERNAME = ? AND UM.ROLE = UP.ROLE");
-            auth.setPermissionsQuery("SELECT PERMISSION FROM portalschema.USER_PERMISSION UP, portalschema.USER U WHERE UM.USERNAME = ? AND UP.USER_ID = U.ID");
+            auth.setPermissionsQuery("SELECT PERMISSION FROM portalschema.SUBJECT_PERMISSION UP, portalschema.SUBJECT U WHERE UM.SUBJECT_NAME = ? AND UP.SUBJECT_ID = U.ID");
 
             //"SELECT ROLE FROM portalschema.USER_ROLES WHERE USERNAME = ?"
-            auth.setRolesQuery("SELECT GROUP_NAME FROM portalschema.USER_GROUP UG, portalschema.USER_MEMBERSHIP UM, portalschema.USER U WHERE U.USERNAME = ? AND UM.USER_ID = U.ID AND UM.GROUP_ID = UG.ID");
+            auth.setRolesQuery("SELECT GROUP_NAME FROM portalschema.SUBJECT_GROUP UG, portalschema.SUBJECT_MEMBERSHIP UM, portalschema.SUBJECT U WHERE U.SUBJECT_NAME = ? AND UM.SUBJECT_ID = U.ID AND UM.GROUP_ID = UG.ID");
 
             //TODO: authProvider.setNonces();
             logger.info("JDBCAuthProvider configuration done... ");
@@ -226,135 +226,6 @@ public class MainVerticle extends AbstractVerticle {
             logger.error("serviceDiscovery.getJDBCClient failed..." + t);
             startFuture.fail(t);
         });
-/*
-        JDBCDataSource.getJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE), resultHandler -> {
-        	
-        	if (resultHandler.succeeded()) {
-	        	JDBCClient jdbcClient = resultHandler.result();
-	        	logger.info("JDBCClient created... " + jdbcClient.toString());
-	        	
-	        	auth = JDBCAuth.create(vertx, jdbcClient);
-	        	logger.info("JDBCAuthProvider created... " + auth.toString());
-	        	
-	            auth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.USER WHERE USERNAME = ?");
-	            auth.setPermissionsQuery("SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE");
-	            auth.setRolesQuery("SELECT ROLE FROM portalschema.USER_ROLES WHERE USERNAME = ?");
-	            auth.setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx));
-	            //TODO: authProvider.setNonces();
-	            logger.info("JDBCAuthProvider configuration done... ");
-	        	
-	            // To simplify the development of the web components we use a Router to route all HTTP requests
-	            // to organize our code in a reusable way.
-	            Router abyssRouter = Router.router(vertx);
-	            
-	            Router router = Router.router(vertx);
-
-	            //log HTTP requests
-	            abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
-
-	            //firstly install cookie handler
-	            //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
-	            abyssRouter.route().handler(CookieHandler.create());
-
-	            //secondly install body handler
-	            //A handler which gathers the entire request body and sets it on the RoutingContext
-	            //It also handles HTTP file uploads and can be used to limit body sizes
-	            abyssRouter.route().handler(BodyHandler.create());
-
-	            //thirdly install session handler
-	            //A handler that maintains a Session for each browser session
-	            //The session is available on the routing context with RoutingContext.session()
-	            //The session handler requires a CookieHandler to be on the routing chain before it
-	            abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session"));
-
-	            //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
-	            //It requires that the session handler is already present on previous matching routes
-	            //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
-	            abyssRouter.route().handler(UserSessionHandler.create(auth));
-
-	            //An auth handler that's used to handle auth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
-	            AuthHandler authHandler = RedirectAuthHandler.create(auth, "/abyss/login");
-
-	            //router.get("/create_user").handler(this::createUser).failureHandler(this::failureHandler);
-	            
-	            Signup signup = new Signup(auth, jdbcClient);
-	            router.get("/signup").handler(signup::pageRender).failureHandler(this::failureHandler);
-	            router.post("/sign-up").handler(signup).failureHandler(this::failureHandler);
-	            
-	            //install authHandler for all routes where authentication is required
-	            //router.route("/").handler(authHandler);
-	            //router.route("/index").handler(authHandler.addAuthority("okumaz")).failureHandler(this::failureHandler);
-	            router.route("/index").handler(authHandler).failureHandler(this::failureHandler);
-
-	            // Entry point to the application, this will render a custom Thymeleaf template
-	            //router.get("/login").handler(this::loginHandler);
-	            Login login = new Login(auth);
-	            router.get("/login").handler(login::pageRender).failureHandler(this::failureHandler);
-	            router.post("/login-auth").handler(login).failureHandler(this::failureHandler);
-
-	            Index index = new Index(auth);
-	            router.get("/index").handler(index::pageRender).failureHandler(this::failureHandler);
-	            
-	            router.route("/logout").handler(context-> {
-	            	context.clearUser();
-	            	context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
-	            });
-	            
-	            router.route("/").handler(context-> {
-	            	context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
-	            });	            
-	            
-	            //router.post("/login-auth").handler(new SpecialLoginHandler(auth));
-
-	            //router.post("/login-auth2").handler(FormLoginHandler.create(auth));
-
-
-	            //router.get("/img/*").handler(StaticHandler.create("webroot/img"));
-	            //router.get("/vendors/*").handler(StaticHandler.create("webroot/vendors"));
-	            abyssRouter.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
-
-	            abyssRouter.mountSubRouter("/abyss", router);
-	            
-	            abyssRouter.routeWithRegex("^/abyss/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
-
-	            abyssRouter.get("/abyss/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
-
-	            //only rendering page routings' failures shall be handled by using regex
-	            //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
-	            abyssRouter.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
-
-	            abyssRouter.route().handler(ctx -> {
-	                logger.info("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
-	                ctx.fail(404);
-	            });
-	            
-	            
-	            logger.info("starting http server");
-	            HttpServerOptions httpServerOptions = new HttpServerOptions();
-
-	            logger.warn("http server is running in plaintext mode. Enable SSL in config for production deployments.");
-	            vertx.createHttpServer(httpServerOptions.setCompressionSupported(true))
-	                    .requestHandler(abyssRouter::accept)
-	                    .listen(Config.getInstance().getConfigJsonObject().getInteger("port")
-	                            , Config.getInstance().getConfigJsonObject().getString("host")
-	                            , result -> {
-	                                if (result.succeeded()) {
-	                                    logger.info("http server started..." + result.succeeded());
-	                                    start.complete();
-	                                } else {
-	                                    logger.error("http server starting failed..." + result.cause());
-	                                    start.fail(result.cause());
-	                                }
-	                            });
-
-	            logger.debug("loaded config : " + Config.getInstance().getConfigJsonObject().encodePrettily());
-	            
-        	} else {
-                logger.error("serviceDiscovery.getJDBCClient failed..." + resultHandler.cause());
-                start.fail(resultHandler.cause());
-        	}
-        });
-*/
 
 
     }

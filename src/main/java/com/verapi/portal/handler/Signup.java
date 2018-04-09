@@ -5,6 +5,8 @@ import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -29,6 +31,8 @@ public class Signup implements Handler<RoutingContext> {
 
     private final JDBCAuth authProvider;
 
+    private Integer subjectId;
+
     public Signup(JDBCAuth authProvider, JDBCClient jdbcClient) {
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
@@ -37,6 +41,7 @@ public class Signup implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext routingContext) {
         logger.info("Signup.handle invoked..");
+
 
         /*
         firstname:Ökkeş
@@ -75,24 +80,32 @@ public class Signup implements Handler<RoutingContext> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(email)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?", new JsonArray().add(username)))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
+                                subjectId = resultSet.getRows(true).get(0).getInteger("id");
                                 logger.info("user found: " + resultSet.toJson().encodePrettily());
-                                return Single.error(new Exception("User already exists"));
+                                if (resultSet.getRows(true).get(0).getInteger("is_activated")>0) {
+                                    return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
+                                } else {
+                                    //TODO: Cancel previous activation - Is it really required.
+                                    logger.info("Username already exists but NOT activated, create and send new activation record..."); //Skip user creation
+                                    return Single.just(resultSet);
+                                }
                             } else {
                                 logger.info("user NOT found, creating user and activation records...");
                                 String salt = authProvider.generateSalt();
                                 String hash = authProvider.computeHash(password, salt);
 
                                 // save user to the database
-                                return resConn.rxUpdateWithParams("INSERT INTO portalschema.user(" +
+                                return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject(" +
                                         "organization_id," +
                                         //"now()," +          //created
                                         //"now()," +          //updated
-                                        "crud_user_id," +
+                                        "crud_subject_id," +
                                         "is_activated," +
-                                        "username," +
+                                        "subject_type_id," +
+                                        "subject_name," +
                                         "first_name," +
                                         "last_name," +
                                         "display_name," +
@@ -101,11 +114,12 @@ public class Signup implements Handler<RoutingContext> {
                                         //"effective_end_date," +
                                         "password," +
                                         "password_salt) " +
-                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?) RETURNING id",
+                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?) RETURNING id",
                                         new JsonArray()
                                                 .add(0)
                                                 .add(1)
                                                 .add(0)
+                                                .add(1)
                                                 .add(username)
                                                 .add(firstname)
                                                 .add(lastname)
@@ -116,7 +130,13 @@ public class Signup implements Handler<RoutingContext> {
                             }
                         })
                         .flatMap(updateResult -> {
-                            logger.info("[" + updateResult.getUpdated() + "] user created successfully: " + updateResult.getKeys().encodePrettily() + " | Integer Key @pos=0:" + updateResult.getKeys().getInteger(0));
+                            if(updateResult instanceof UpdateResult) {
+                                subjectId = ((UpdateResult) updateResult).getKeys().getInteger(0);
+                                logger.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0:" + subjectId);
+                            } else if(updateResult instanceof ResultSet) {
+                                logger.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | Integer Key @pos=0:" + ((ResultSet) updateResult).getRows(true).get(0).getInteger("id") + " subjectID:" + subjectId);
+                            }
+
 
                             //Generate and Persist Activation Token
                             Token tokenGenerator = new Token();
@@ -128,17 +148,17 @@ public class Signup implements Handler<RoutingContext> {
                                 logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
-                            return resConn.rxUpdateWithParams("INSERT INTO portalschema.user_activation (" +
+                            return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
                                     "organization_id," +
-                                    "crud_user_id," +
-                                    "user_id," +
+                                    "crud_subject_id," +
+                                    "subject_id," +
                                     "expire_date," +
                                     "token) " +
                                     "VALUES (?, ?, ?, ?, ?)",
                                     new JsonArray()
                                             .add(0)
                                             .add(1)
-                                            .add(updateResult.getKeys().getInteger(0))
+                                            .add(subjectId)
                                             .add(authInfo.getExpireDate())
                                             .add(authInfo.getToken()));
                         })
