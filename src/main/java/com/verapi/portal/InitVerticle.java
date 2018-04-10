@@ -17,28 +17,13 @@ public class InitVerticle extends AbstractVerticle {
     public void start(Future<Void> startFuture) {
 
         vertx.rxDeployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setHa(true))
+                .flatMap(id -> vertx.rxDeployVerticle(MailVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .subscribe(id -> {
-                    logger.info(System.getProperty("abyss-jar.name") + " MainVerticle deployVerticle completed...");
+                    logger.info(System.getProperty("abyss-jar.name") + " MainVerticle and MailVerticle deployVerticle completed...");
                     startFuture.complete();
                 }, t -> {
-                    logger.error("MainVerticle deployVerticle failed..." + t);
+                    logger.error("MainVerticle or MailVerticle deployVerticle failed..." + t);
                     startFuture.fail(t);
                 });
-
-
-/*
-        vertx.deployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setHa(true), res -> {
-
-            if (res.succeeded()) {
-                logger.info(System.getProperty("abyss-jar.name")+" MainVerticle deployVerticle completed..." + res.succeeded());
-                startFuture.complete();
-            } else {
-                logger.error("MainVerticle deployVerticle failed..." + res.cause());
-                startFuture.fail(res.cause());
-            }
-        });
-*/
     }
-
-
 }

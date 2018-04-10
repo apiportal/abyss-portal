@@ -65,6 +65,7 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) {
+        logger.info("MainVerticle is starting");
 
         Record record = JDBCDataSource.createRecord(
                 Constants.PORTAL_DATA_SOURCE_SERVICE,

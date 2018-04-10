@@ -2,12 +2,14 @@ package com.verapi.portal.handler;
 
 import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
+import com.verapi.portal.MailVerticle;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -32,6 +34,8 @@ public class ForgotPassword implements Handler<RoutingContext> {
     private final JDBCAuth authProvider;
 
     private Integer subjectId;
+
+    private String authToken;
 
     public ForgotPassword(JDBCAuth authProvider, JDBCClient jdbcClient) {
         this.authProvider = authProvider;
@@ -80,6 +84,7 @@ public class ForgotPassword implements Handler<RoutingContext> {
                                     try {
                                         authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("quarter.hour.in.seconds"), email, routingContext.vertx().getDelegate());
                                         logger.info("Reset Password: token is created successfully: " + authInfo.getToken());
+                                        authToken = authInfo.getToken();
                                     } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
                                         logger.error("Reset Password: tokenGenerator.encodeToken :" + e.getLocalizedMessage());
                                         return Single.error(new Exception("Reset Password: token could not be generated"));
@@ -114,6 +119,15 @@ public class ForgotPassword implements Handler<RoutingContext> {
 
                         .doAfterSuccess(succ -> {
                             logger.info("Reset password token is created and persisted successfully");
+
+                            JsonObject json = new JsonObject();
+                            json.put(MailVerticle.TOKEN, authToken);
+                            json.put(MailVerticle.TO, email);
+
+                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(MailVerticle.ABYSS_MAIL_CLIENT, json, result -> {
+                                logger.info(result.toString());
+                            });
+
                         })
 
                         // close the connection regardless succeeded or failed

@@ -1,10 +1,12 @@
 package com.verapi.portal.handler;
 
+import com.verapi.portal.MailVerticle;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -32,6 +34,8 @@ public class Signup implements Handler<RoutingContext> {
     private final JDBCAuth authProvider;
 
     private Integer subjectId;
+
+    private String authToken;
 
     public Signup(JDBCAuth authProvider, JDBCClient jdbcClient) {
         this.authProvider = authProvider;
@@ -144,6 +148,7 @@ public class Signup implements Handler<RoutingContext> {
                             try {
                                 authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx().getDelegate());
                                 logger.info("activation token is created successfully: " + authInfo.getToken());
+                                authToken = authInfo.getToken();
                             } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
                                 logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
@@ -173,6 +178,15 @@ public class Signup implements Handler<RoutingContext> {
 
                         .doAfterSuccess(succ -> {
                             logger.info("User record and activation token is created and persisted successfully");
+
+                            JsonObject json = new JsonObject();
+                            json.put(MailVerticle.TOKEN, authToken);
+                            json.put(MailVerticle.TO, email);
+
+                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(MailVerticle.ABYSS_MAIL_CLIENT, json, result -> {
+                                logger.info(result.toString());
+                            });
+
                         })
 
                         // close the connection regardless succeeded or failed
