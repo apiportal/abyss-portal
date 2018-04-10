@@ -14,6 +14,8 @@ package com.verapi.portal;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.handler.ForgotPassword;
+import com.verapi.portal.handler.ResetPassword;
 import com.verapi.portal.handler.Index;
 import com.verapi.portal.handler.Login;
 import com.verapi.portal.handler.Signup;
@@ -153,6 +155,15 @@ public class MainVerticle extends AbstractVerticle {
             Signup signup = new Signup(auth, jdbcClient);
             router.get("/signup").handler(signup::pageRender).failureHandler(this::failureHandler);
             router.post("/sign-up").handler(signup).failureHandler(this::failureHandler);
+
+            ForgotPassword forgotPassword = new ForgotPassword(auth, jdbcClient);
+            router.get("/forgot-password").handler(forgotPassword::pageRender).failureHandler(this::failureHandler);
+            router.post("/forgot-password").handler(forgotPassword).failureHandler(this::failureHandler);
+
+            ResetPassword resetPassword = new ResetPassword(auth, jdbcClient);
+            router.get("/reset-password").handler(resetPassword::pageRender).failureHandler(this::failureHandler);
+            router.post("/reset-password").handler(resetPassword).failureHandler(this::failureHandler);
+
 
             //install authHandler for all routes where authentication is required
             //router.route("/").handler(authHandler);
