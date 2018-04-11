@@ -119,12 +119,16 @@
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
+<<<<<<< HEAD
             <artifactId>vertx-service-proxy</artifactId>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-codegen</artifactId>
             <classifier>processor</classifier>
+=======
+            <artifactId>vertx-mail-client</artifactId>
+>>>>>>> ef5407f3294d9064f9b40d380d2a872fdd056a64
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
