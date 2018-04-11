@@ -22,15 +22,12 @@ import io.vertx.reactivex.servicediscovery.types.JDBCDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractService<T> implements IService<T> {
+public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
     protected Vertx vertx;
     protected JDBCClient jdbcClient;
-
-    public AbstractService() {
-    }
 
     public AbstractService(Vertx vertx) {
         this.vertx = vertx;
@@ -53,15 +50,19 @@ public abstract class AbstractService<T> implements IService<T> {
         this.jdbcClient = jdbcClient;
     }
 
-    public void getJDBCServiceObject() {
+    private void getJDBCServiceObject() {
         JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE)).subscribe(jdbcClient -> {
             this.jdbcClient = jdbcClient;
         });
     }
 
-    public Single releaseJDBCServiceObject() {
+    private Single releaseJDBCServiceObject() {
         ServiceDiscovery.releaseServiceObject(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), jdbcClient);
         return Single.just(AbstractService.class);
     }
 
+    @Override
+    public void close() throws Exception {
+        releaseJDBCServiceObject();
+    }
 }

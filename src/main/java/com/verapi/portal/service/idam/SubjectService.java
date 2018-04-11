@@ -18,6 +18,7 @@ import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,10 @@ import java.util.stream.Collectors;
 public class SubjectService extends AbstractService<Subject> {
 
     private static Logger logger = LoggerFactory.getLogger(SubjectService.class);
+
+    public SubjectService(Vertx vertx) {
+        super(vertx);
+    }
 
     @Override
     public Completable init() {
@@ -56,14 +61,12 @@ public class SubjectService extends AbstractService<Subject> {
                 .add(subject.getPassword())
                 .add(subject.getPasswordSalt());
         return jdbcClient.rxUpdateWithParams(SQL_INSERT, insertParams)
-                .doFinally(this::releaseJDBCServiceObject)
                 .map(e -> subject);
     }
 
     @Override
     public Maybe<Subject> findById(long id) {
         return jdbcClient.rxQueryWithParams(SQL_FINB_BY_ID, new JsonArray().add(id))
-                .doFinally(this::releaseJDBCServiceObject)
                 .map(ResultSet::getRows)
                 .toObservable()
                 .flatMapIterable(e -> e)
@@ -74,7 +77,6 @@ public class SubjectService extends AbstractService<Subject> {
     @Override
     public Maybe<Subject> findById(UUID uuid) {
         return jdbcClient.rxQueryWithParams(SQL_FINB_BY_UUID, new JsonArray().add(uuid))
-                .doFinally(this::releaseJDBCServiceObject)
                 .map(ResultSet::getRows)
                 .toObservable()
                 .flatMapIterable(e -> e)
@@ -85,7 +87,6 @@ public class SubjectService extends AbstractService<Subject> {
     @Override
     public Single<List<Subject>> findAll() {
         return jdbcClient.rxQuery(SQL_FIND_ALL)
-                .doFinally(this::releaseJDBCServiceObject)
                 .map(ar -> ar.getRows().stream()
                         .map(Subject::new)
                         .collect(Collectors.toList())
@@ -118,7 +119,6 @@ public class SubjectService extends AbstractService<Subject> {
                             .add(subject.getPasswordSalt())
                             .add(subject.getId());
                     return jdbcClient.rxUpdateWithParams(SQL_UPDATE, updateParams)
-                            .doFinally(this::releaseJDBCServiceObject)
                             .flatMapMaybe(v -> Maybe.just(subject));
                 });
     }
@@ -126,14 +126,12 @@ public class SubjectService extends AbstractService<Subject> {
     @Override
     public Completable delete(long id) {
         return jdbcClient.rxUpdateWithParams(SQL_DELETE, new JsonArray().add(id))
-                .doFinally(this::releaseJDBCServiceObject)
                 .toCompletable();
     }
 
     @Override
     public Completable deleteAll() {
         return jdbcClient.rxUpdate(SQL_DELETE_ALL)
-                .doFinally(this::releaseJDBCServiceObject)
                 .toCompletable();
     }
 
@@ -149,7 +147,6 @@ public class SubjectService extends AbstractService<Subject> {
                             .add(subject.getIsDeleted())
                             .add(subject.getId());
                     return jdbcClient.rxUpdateWithParams(SQL_UPDATE_IS_DELETED, updateParams)
-                            .doFinally(this::releaseJDBCServiceObject)
                             .flatMapMaybe(v -> Maybe.just(subject));
                 });
     }
@@ -163,7 +160,6 @@ public class SubjectService extends AbstractService<Subject> {
                             .add(subject.getEffectiveEndDate())
                             .add(subject.getId());
                     return jdbcClient.rxUpdateWithParams(SQL_UPDATE_EFFECTIVE_END_DATE, updateParams)
-                            .doFinally(this::releaseJDBCServiceObject)
                             .flatMapMaybe(v -> Maybe.just(subject));
                 });
     }
