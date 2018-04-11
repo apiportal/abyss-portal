@@ -1,0 +1,26 @@
+= Cheatsheets
+
+[[Subject]]
+== Subject
+
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+|[[crudSubjectId]]`crudSubjectId`|`Number (long)`|-
+|[[displayName]]`displayName`|`String`|-
+|[[email]]`email`|`String`|-
+|[[firstName]]`firstName`|`String`|-
+|[[id]]`id`|`String`|-
+|[[isActivated]]`isActivated`|`Number (long)`|-
+|[[isDeleted]]`isDeleted`|`Number (long)`|-
+|[[lastName]]`lastName`|`String`|-
+|[[organizationId]]`organizationId`|`Number (long)`|-
+|[[password]]`password`|`String`|-
+|[[passwordSalt]]`passwordSalt`|`String`|-
+|[[secondaryEmail]]`secondaryEmail`|`String`|-
+|[[subjectName]]`subjectName`|`String`|-
+|[[subjectTypeId]]`subjectTypeId`|`Number (long)`|-
+|===
+
