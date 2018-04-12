@@ -14,6 +14,7 @@ package com.verapi.portal;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.handler.ActivateAccount;
 import com.verapi.portal.handler.ForgotPassword;
 import com.verapi.portal.handler.ResetPassword;
 import com.verapi.portal.handler.Index;
@@ -107,7 +108,7 @@ public class MainVerticle extends AbstractVerticle {
 
             auth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
 
-            auth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?");
+            auth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.SUBJECT WHERE IS_DELETED = 0 AND is_activated = 1 AND SUBJECT_NAME = ?");
 
             //"SELECT PERM FROM portalschema.ROLES_PERMS RP, portalschema.USER_ROLES UR WHERE UR.USERNAME = ? AND UR.ROLE = RP.ROLE"
             //auth.setPermissionsQuery("SELECT PERM FROM portalschema.GROUP_PERMISSION GP, portalschema.USER_MEMBERSHIP UM, portalschema.USER U WHERE UM.USERNAME = ? AND UM.ROLE = UP.ROLE");
@@ -165,6 +166,9 @@ public class MainVerticle extends AbstractVerticle {
             router.get("/reset-password").handler(resetPassword::pageRender).failureHandler(this::failureHandler);
             router.post("/reset-password").handler(resetPassword).failureHandler(this::failureHandler);
 
+            ActivateAccount activateAccount = new ActivateAccount(jdbcClient);
+            router.get(Constants.ACTIVATION_PATH).handler(activateAccount).failureHandler(this::failureHandler);
+            router.get(Constants.RESET_PASSWORD_PATH).handler(activateAccount).failureHandler(this::failureHandler);//TODO: Is same handler ok?
 
             //install authHandler for all routes where authentication is required
             //router.route("/").handler(authHandler);

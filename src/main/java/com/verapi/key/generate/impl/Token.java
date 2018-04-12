@@ -35,6 +35,7 @@ import com.verapi.key.generate.intf.TokenRemoteIntf;
  */
 public class Token implements TokenRemoteIntf{
 
+	public static final String PRECHECKS_OK = "prechecks.ok";
 	private static Logger logger = LoggerFactory.getLogger(Token.class);
 	
 	//http://www.oracle.com/technetwork/articles/java/jf14-date-time-2125367.html
@@ -115,23 +116,38 @@ public class Token implements TokenRemoteIntf{
 		
 		return receivedDate.isBefore(currentDate); //(zonedDateTimeDifference(currentDate, receivedDate, ChronoUnit.SECONDS) < 0);
 	}
-	
+
+	/**
+	 * Is Token Expired
+	 * @author faik.saglar
+	 * @param expireDate
+	 * @return boolean
+	 */
+	private boolean isExpired(Instant expireDate) {
+
+		Instant currentDate = Instant.now();
+
+		printDateTime(expireDate, "expireDate");
+		printDateTime(currentDate,  "currentDate ");
+
+		return expireDate.isBefore(currentDate);
+	}
 	
 	/**
-	 * Encode Token without Encryption Using Vertx PRNG and Hashing
+	 * Generate Token without Encryption Using Vertx PRNG and Hashing
 	 * @author faik.saglar
 	 * @return {@link AuthenticationInfo}
 	 * @throws UnsupportedEncodingException
-	 * @throws NoSuchAlgorithmException
 	 */
-	public AuthenticationInfo encodeToken(long secondsToExpire, String userData, Vertx vertx) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-		
-		//userData = username
+	public AuthenticationInfo generateToken(long secondsToExpire, String userData, Vertx vertx) throws UnsupportedEncodingException {
 		
 		ApiKey apiKey = new ApiKey();
 		
 		Hash hash = new Hash();
-		
+
+		String userDataBase64 = apiKey.encodeBase64(userData.getBytes(ApiKey.UTF8_ENCODING));
+		String userDataBase64Hash = hash.generateHash(userDataBase64);
+
 		String nonceBase64 = VertxContextPRNG.current(vertx).nextString(32);
 		
 		//Calculate Expire Date
@@ -153,7 +169,7 @@ public class Token implements TokenRemoteIntf{
 		///////////////////////////////////////////////////////////////////
 		// Concat Data 
 
-		String input = HEADER_WITH_SPLITTER + nonceBase64 + SPLITTER + expireDateStrHash; //TODO  + Hash/Crc + HMAC / Signature ;
+		String input = HEADER_WITH_SPLITTER + nonceBase64 + SPLITTER + userDataBase64Hash + SPLITTER + expireDateStrHash; //TODO  + Hash/Crc + HMAC / Signature ;
 		
 		///////////////////////////////////////////////////////////////////
 		// Prepare Token for Export
@@ -165,7 +181,118 @@ public class Token implements TokenRemoteIntf{
 		return authenticationInfo;
 	}
 
-	
+	private AuthenticationInfo doPreChecksBeforeValidateToken(String token, AuthenticationInfo authInfo) {
+
+		///////////////////////////////////////////////////////////////////
+		//Check authInfo
+		if (authInfo == null) {
+			return new AuthenticationInfo("Null AuthenticationInfo");
+		}
+
+		// Preset Result to FALSE
+		authInfo.setValid(false);
+
+		//Check token
+		if (token == null) {
+			return new AuthenticationInfo("Received Token is null");
+		}
+
+		if (token.isEmpty()) {
+			return new AuthenticationInfo("Received Token is empty");
+		}
+
+		authInfo.setResultText(PRECHECKS_OK);
+
+		return authInfo;
+
+	}
+
+	/**
+	 * Validate Token
+	 * @author faik.saglar
+	 * @param receivedToken
+	 * @param storedAuthInfo
+	 * @return {@link AuthenticationInfo}
+	 * @throws UnsupportedEncodingException
+	 */
+	public AuthenticationInfo validateToken(String receivedToken, AuthenticationInfo storedAuthInfo) throws UnsupportedEncodingException  {
+
+		storedAuthInfo = doPreChecksBeforeValidateToken(receivedToken,storedAuthInfo);
+		if (!(storedAuthInfo.getResultText().equals(PRECHECKS_OK))) {
+			return storedAuthInfo;
+		}
+
+		///////////////////////////////////////////////////////////////////
+		// Decode Token for Dec
+		ApiKey apiKey = new ApiKey();
+
+		byte[] plainBytes = apiKey.decodeBase64(receivedToken);
+		//ByteUtils.printByteArray(plainBytes, "plainBytes"); //TODO: Kaldır. For Debug
+
+		String plainStr = new String(plainBytes, ApiKey.UTF8_ENCODING);
+
+
+		///////////////////////////////////////////////////////////////////
+		// Validate Token String
+		///////////////////////////////////////////////////////////////////
+
+		//Check Header
+		if (!(HEADER_WITH_SPLITTER.equals(plainStr.substring(0, LEN_HEADER_WITH_SPLITTER)))) {
+			storedAuthInfo.setResultText("HEADER of Received Token is incorrect");
+			return storedAuthInfo;
+		}
+
+		//TODO Authenticated
+
+		//TODO Check Integrity
+
+		//Split & Check
+		String[] strArray = plainStr.split(SPLITTER);
+		if (strArray.length != LEN_SPLITTED_ARRAY) {
+			storedAuthInfo.setResultText("Received Token is broken");
+			return storedAuthInfo;
+		}
+
+		// For Debug
+		//for (int i = 0; i < strArray.length; i++) {
+		//	System.out.println(strArray[i]);
+		//}
+
+
+		//Check nonce
+		if (!(storedAuthInfo.getNonce().equals(strArray[INDEX_NONCE]))) {
+			storedAuthInfo.setResultText("NONCE in Received Token does not match");
+			return storedAuthInfo;
+		}
+
+		Hash hash = new Hash();
+
+		//Check UserData Match
+		String userDataBase64 = apiKey.encodeBase64(storedAuthInfo.getUserData().getBytes(ApiKey.UTF8_ENCODING));
+		String userDataBase64Hash = hash.generateHash(userDataBase64);
+		if (!(userDataBase64Hash.equals(strArray[INDEX_USER_DATA]))) {
+			storedAuthInfo.setResultText("USER DATA in Received Token does not match");
+			return storedAuthInfo;
+		}
+
+		//Check Expire Date Match
+		String expireDateStrHash = hash.generateHash(storedAuthInfo.getExpireDate().toString());
+		if (!(expireDateStrHash.equals(strArray[INDEX_EXPIRE_DATE]))) {
+			storedAuthInfo.setResultText("EXPIRE DATE in Received Token does not match");
+			return storedAuthInfo;
+		}
+
+		//Check Expiry
+		if (isExpired(storedAuthInfo.getExpireDate())) {
+			storedAuthInfo.setResultText("Token has expired");
+			return storedAuthInfo;
+		}
+
+		storedAuthInfo.setResultText("Received Token is VALID");
+		storedAuthInfo.setValid(true);
+
+		return storedAuthInfo;
+	}
 	
 	/**
 	 * Encode Token
@@ -244,18 +371,8 @@ public class Token implements TokenRemoteIntf{
 	 */
 	public AuthenticationInfo decodeAndValidateToken(String token, AuthenticationInfo authInfo) throws UnsupportedEncodingException  {
 
-		///////////////////////////////////////////////////////////////////
-		//Check authInfo
-		if (authInfo == null) {
-			return new AuthenticationInfo("Null AuthenticationInfo");
-		}
-		
-		// Preset Result to FALSE
-		authInfo.setValid(false);
-		
-		//Check token
-		if (token == null || token.isEmpty()) {
-			authInfo.setResultText("Received Token is null or empty");
+		authInfo = doPreChecksBeforeValidateToken(token,authInfo);
+		if (!(authInfo.getResultText().equals(PRECHECKS_OK))) {
 			return authInfo;
 		}
 
@@ -369,8 +486,23 @@ public class Token implements TokenRemoteIntf{
 		authResult = token.decodeAndValidateToken(wrongToken, authInfo);
 		System.out.println("DECODED OUTPUT:"+authResult.getResultText());
 		System.out.println("----------------------------------");
-		
-		
+
+
+		//----------------------- USAGE EXAMPLE
+		AuthenticationInfo authInfo2 = token.generateToken(60*10, "userData123@xyz", Vertx.vertx());
+
+		System.out.println(authInfo2.getToken());
+		System.out.println("----------------------------------");
+
+		AuthenticationInfo authResult2 = token.validateToken(authInfo2.getToken(), authInfo2);
+		System.out.println("DECODED OUTPUT2:"+authResult2.getResultText());
+		System.out.println("----------------------------------");
+
+		String wrongToken2 = authInfo2.getToken().replaceAll("a", "x").replaceAll("e", "z");
+		authResult2 = token.validateToken(wrongToken2, authInfo2);
+		System.out.println("DECODED OUTPUT2:"+authResult2.getResultText());
+		System.out.println("----------------------------------");
+
 	}
 
 }

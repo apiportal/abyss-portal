@@ -14,7 +14,7 @@ import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResetPassword implements Handler<RoutingContext> {
+public class ResetPassword extends PortalHandler implements Handler<RoutingContext> {
 
     private static Logger logger = LoggerFactory.getLogger(ResetPassword.class);
 
@@ -49,19 +49,19 @@ public class ResetPassword implements Handler<RoutingContext> {
 
         if (oldPassword == null || oldPassword.isEmpty()) {
             logger.info("oldPassword is null or empty");
-            generateResponse(routingContext, 401, "Reset Password Error Occured", "Please enter Old Password field", "", "" );
+            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "Please enter Old Password field", "", "" );
         }
         if (newPassword == null || newPassword.isEmpty()) {
             logger.info("newPassword is null or empty");
-            generateResponse(routingContext, 401, "Reset Password Error Occured", "Please enter New Password field", "", "" );
+            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "Please enter New Password field", "", "" );
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             logger.info("newPassword is null or empty");
-            generateResponse(routingContext, 401, "Reset Password Error Occured", "Please enter Confirm Password field", "", "" );
+            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "Please enter Confirm Password field", "", "" );
         }
         if (!(newPassword.equals(confirmPassword))) {
             logger.info("newPassword and confirmPassword does not match");
-            generateResponse(routingContext, 401, "Reset Password Error Occured", "New Password and Confirm Password does not match", "Please check and enter again", "" );
+            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "New Password and Confirm Password does not match", "Please check and enter again", "" );
         }
 
         JsonObject creds = new JsonObject()
@@ -115,11 +115,11 @@ public class ResetPassword implements Handler<RoutingContext> {
 
         ).subscribe(result -> {
                     logger.info("Subscription to ResetPassword successfull:" + result);
-                    generateResponse(routingContext, 200, "Password is reset.", "Please use your new password.", "", "" );
+                    generateResponse(routingContext, logger, 200, "Password is reset.", "Please use your new password.", "", "" );
                     //TODO: Send email to user
                 }, t -> {
                     logger.error("ResetPassword Error", t);
-                    generateResponse(routingContext, 401, "Reset Password Error Occured", t.getLocalizedMessage(), "", "" );
+                    generateResponse(routingContext, logger, 401, "Reset Password Error Occured", t.getLocalizedMessage(), "", "" );
 
                 }
         );
@@ -143,16 +143,4 @@ public class ResetPassword implements Handler<RoutingContext> {
         });
     }
 
-    private void generateResponse(RoutingContext context, int statusCode, String message1, String message2, String message3, String message4) {
-
-        logger.info("generateResponse invoked...");
-
-        //Use user's session for storage
-        context.session().put(Constants.HTTP_STATUSCODE, statusCode);
-        context.session().put(Constants.HTTP_URL, message2);
-        context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
-        context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
-
-        context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
-    }
 }

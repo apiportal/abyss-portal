@@ -43,4 +43,36 @@ public class Constants {
     public static final String METRICS_ENABLED = "metrics.enabled";
     public static final String METRICS_JMX_ENABLED = "metrics.jmx.enabled";
 
+    public static final String EB_MSG_TOKEN = "token";
+    public static final String EB_MSG_TOKEN_TYPE = "token.type";
+    public static final String EB_MSG_TO_EMAIL = "to.email";
+    public static final String ABYSS_MAIL_CLIENT = "ABYSS_MAIL_CLIENT";
+
+    public static final String MAIL_SMTP_HOST = "mail.smtp.host";
+    public static final String MAIL_SMTP_PORT = "mail.smtp.port";
+    public static final String MAIL_SMTP_LOGIN_OPTION = "mail.smtp.login.option";
+    public static final String MAIL_SMTP_START_TLS_OPTION = "mail.smtp.start.tls.option";
+    public static final String MAIL_SMTP_AUTH_METHOD = "mail.smtp.auth.method";
+    public static final String MAIL_SMTP_AUTH_USERNAME = "mail.smtp.auth.username";
+    public static final String MAIL_SMTP_AUTH_PASSWORD = "mail.smtp.auth.password";
+
+    public static final String MAIL_HREF_HOST = "mail.href.host";
+    public static final String MAIL_HREF_PORT = "mail.href.port";
+
+    public static final String ACTIVATION_SUBJECT = "Activate Your API Portal Account";
+    public static final String COGITO_ACTIVATION_SUBJECT = "Activate Your Cogito Account";
+    public static final String RESET_PASSWORD_SUBJECT = "Reset Your API Portal Password";
+
+    public static final String ACTIVATION_TEXT = "Activate My API Portal Account";
+    public static final String COGITO_ACTIVATION_TEXT = "Activate My Cogito Account";
+    public static final String RESET_PASSWORD_TEXT = "Reset My API Portal Password";
+
+    public static final String ACTIVATION_PATH = "/activate-account";
+    public static final String COGITO_ACTIVATION_PATH = "/activate-cogito";
+    public static final String RESET_PASSWORD_PATH = "/reset-password";
+
+    public static final String ACTIVATION_TOKEN = "token.type.activation";
+    public static final String RESET_PASSWORD_TOKEN = "token.type.reset.password";
+
+
 }

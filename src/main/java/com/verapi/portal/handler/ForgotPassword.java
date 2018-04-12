@@ -2,7 +2,6 @@ package com.verapi.portal.handler;
 
 import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
-import com.verapi.portal.MailVerticle;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import io.reactivex.Single;
@@ -25,7 +24,7 @@ import java.security.NoSuchAlgorithmException;
  * Reset password using activation mail sent to selected email
  * TODO: same email may be connected to multiple usernames/accounts???
  */
-public class ForgotPassword implements Handler<RoutingContext> {
+public class ForgotPassword extends PortalHandler implements Handler<RoutingContext> {
 
     private static Logger logger = LoggerFactory.getLogger(ForgotPassword.class);
 
@@ -34,6 +33,7 @@ public class ForgotPassword implements Handler<RoutingContext> {
     private final JDBCAuth authProvider;
 
     private Integer subjectId;
+    private String email;
 
     private String authToken;
 
@@ -47,8 +47,8 @@ public class ForgotPassword implements Handler<RoutingContext> {
     public void handle(RoutingContext routingContext) {
         logger.info("ForgotPassword.handle invoked..");
 
-        String email = routingContext.request().getFormAttribute("email");
-        logger.info("Received email:" + email);
+        String username = routingContext.request().getFormAttribute("username");
+        logger.info("Received username:" + username);
 
 
         //TODO: OWASP Email Validate
@@ -62,46 +62,55 @@ public class ForgotPassword implements Handler<RoutingContext> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT WHERE EMAIL = ?", new JsonArray().add(email)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?", new JsonArray().add(username)))
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
-                                logger.info("email NOT found...");
-                                return Single.error(new Exception("Email not found in our records"));
+                                logger.info("username NOT found...");
+                                return Single.error(new Exception("Username not found in our records"));
                             } else if (numOfRows == 1) {
                                 if (resultSet.getRows(true).get(0).getInteger("is_activated") == 0) {
-                                    logger.info("account connected to email is NOT activated");
+                                    logger.info("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
                                     subjectId = resultSet.getRows(true).get(0).getInteger("id");
-
-                                    logger.info("Activated account found:[" + subjectId + "]. Reset password token is going to be created...");
+                                    email = resultSet.getRows(true).get(0).getString("email");
+                                    logger.info("Activated account found:[" + subjectId + "]. Email:[" + email + "]Reset password token is going to be created...");
 
 
                                     //Generate and Persist Reset Password Token
                                     Token tokenGenerator = new Token();
                                     AuthenticationInfo authInfo;
                                     try {
-                                        authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("quarter.hour.in.seconds"), email, routingContext.vertx().getDelegate());
+                                        authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("quarter.hour.in.seconds"), username, routingContext.vertx().getDelegate());
                                         logger.info("Reset Password: token is created successfully: " + authInfo.getToken());
                                         authToken = authInfo.getToken();
-                                    } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                                        logger.error("Reset Password: tokenGenerator.encodeToken :" + e.getLocalizedMessage());
+                                    } catch (UnsupportedEncodingException e) {
+                                        logger.error("Reset Password: tokenGenerator.generateToken :" + e.getLocalizedMessage());
                                         return Single.error(new Exception("Reset Password: token could not be generated"));
                                     }
                                     return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
-                                                    "organization_id," +
-                                                    "crud_subject_id," +
-                                                    "subject_id," +
-                                                    "expire_date," +
-                                                    "token) " +
-                                                    "VALUES (?, ?, ?, ?, ?)",
+                                            "organization_id," +
+                                            "crud_subject_id," +
+                                            "subject_id," +
+                                            "expire_date," +
+                                            "token," +
+                                            "token_type, " +
+                                            "email," +
+                                            "nonce," +
+                                            "user_data) " +
+                                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                             new JsonArray()
                                                     .add(0)
                                                     .add(1)
                                                     .add(subjectId)
                                                     .add(authInfo.getExpireDate())
-                                                    .add(authInfo.getToken()));
+                                                    .add(authInfo.getToken())
+                                                    .add(Constants.ACTIVATION_TOKEN)
+                                                    .add(email)
+                                                    .add(authInfo.getNonce())
+                                                    .add(authInfo.getUserData())
+                                    );
                                 }
                             } else {
                                 logger.info("email is connected to multiple accounts [" + numOfRows + "]");
@@ -121,10 +130,11 @@ public class ForgotPassword implements Handler<RoutingContext> {
                             logger.info("Reset password token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
-                            json.put(MailVerticle.TOKEN, authToken);
-                            json.put(MailVerticle.TO, email);
+                            json.put(Constants.EB_MSG_TOKEN, authToken);
+                            json.put(Constants.EB_MSG_TO_EMAIL, email);
+                            json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.RESET_PASSWORD_TOKEN);
 
-                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(MailVerticle.ABYSS_MAIL_CLIENT, json, result -> {
+                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
                                 logger.info(result.toString());
                             });
 
@@ -135,11 +145,11 @@ public class ForgotPassword implements Handler<RoutingContext> {
 
         ).subscribe(result -> {
                     logger.info("Subscription to Forgot Password successfull:" + result);
-                    generateResponse(routingContext, 200, "Reset Password Code is sent to your email address.", "Please check spam folder also...", "Please click the link inside the mail.", "");
+                    generateResponse(routingContext, logger, 200, "Reset Password Code is sent to your email address.", "Please check spam folder also...", "Please click the link inside the mail.", "");
                     //TODO: Send email to user
                 }, t -> {
                     logger.error("Forgot Password Error", t);
-                    generateResponse(routingContext, 401, "Error in Forgot Password Occured", t.getLocalizedMessage(), "", "");
+                    generateResponse(routingContext, logger, 401, "Error in Forgot Password Occured", t.getLocalizedMessage(), "", "");
                 }
         );
 
@@ -165,16 +175,4 @@ public class ForgotPassword implements Handler<RoutingContext> {
         });
     }
 
-    private void generateResponse(RoutingContext context, int statusCode, String message1, String message2, String message3, String message4) {
-
-        logger.info("generateResponse invoked...");
-
-        //Use user's session for storage
-        context.session().put(Constants.HTTP_STATUSCODE, statusCode);
-        context.session().put(Constants.HTTP_URL, message2);
-        context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
-        context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
-
-        context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
-    }
 }

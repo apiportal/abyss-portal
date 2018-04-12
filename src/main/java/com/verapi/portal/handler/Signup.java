@@ -1,6 +1,5 @@
 package com.verapi.portal.handler;
 
-import com.verapi.portal.MailVerticle;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
@@ -25,7 +24,7 @@ import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 
-public class Signup implements Handler<RoutingContext> {
+public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
     private static Logger logger = LoggerFactory.getLogger(Signup.class);
 
@@ -66,7 +65,7 @@ public class Signup implements Handler<RoutingContext> {
         String password2 = routingContext.request().getFormAttribute("password2");
         String isAgreedToTerms = routingContext.request().getFormAttribute("isAgreedToTerms");
 
-        //TODO: OWASP Validate
+        //TODO: OWASP Validate & Truncate the Fields that are going to be stored
 
         logger.info("Received firstname:" + firstname);
         logger.info("Received lastname:" + lastname);
@@ -146,11 +145,11 @@ public class Signup implements Handler<RoutingContext> {
                             Token tokenGenerator = new Token();
                             AuthenticationInfo authInfo;
                             try {
-                                authInfo = tokenGenerator.encodeToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx().getDelegate());
+                                authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx().getDelegate());
                                 logger.info("activation token is created successfully: " + authInfo.getToken());
                                 authToken = authInfo.getToken();
-                            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
-                                logger.error("tokenGenerator.encodeToken :" + e.getLocalizedMessage());
+                            } catch (UnsupportedEncodingException e) {
+                                logger.error("tokenGenerator.generateToken :" + e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
                             return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
@@ -158,14 +157,23 @@ public class Signup implements Handler<RoutingContext> {
                                     "crud_subject_id," +
                                     "subject_id," +
                                     "expire_date," +
-                                    "token) " +
-                                    "VALUES (?, ?, ?, ?, ?)",
+                                    "token," +
+                                    "token_type, " +
+                                    "email," +
+                                    "nonce," +
+                                    "user_data) " +
+                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                     new JsonArray()
                                             .add(0)
                                             .add(1)
                                             .add(subjectId)
                                             .add(authInfo.getExpireDate())
-                                            .add(authInfo.getToken()));
+                                            .add(authInfo.getToken())
+                                            .add(Constants.ACTIVATION_TOKEN)
+                                            .add(email)
+                                            .add(authInfo.getNonce())
+                                            .add(authInfo.getUserData())
+                            );
                         })
                         // commit if all succeeded
                         .flatMap(updateResult -> resConn.rxCommit().toSingleDefault(true))
@@ -180,10 +188,11 @@ public class Signup implements Handler<RoutingContext> {
                             logger.info("User record and activation token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
-                            json.put(MailVerticle.TOKEN, authToken);
-                            json.put(MailVerticle.TO, email);
+                            json.put(Constants.EB_MSG_TOKEN, authToken);
+                            json.put(Constants.EB_MSG_TO_EMAIL, email);
+                            json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
 
-                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(MailVerticle.ABYSS_MAIL_CLIENT, json, result -> {
+                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
                                 logger.info(result.toString());
                             });
 
@@ -194,11 +203,11 @@ public class Signup implements Handler<RoutingContext> {
 
                         ).subscribe(result -> {
                                 logger.info("Subscription to Signup successfull:" + result);
-                                generateResponse(routingContext, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
+                                generateResponse(routingContext, logger,200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
                                 //TODO: Send email to user
                             }, t -> {
                                 logger.error("Signup Error", t);
-                                generateResponse(routingContext, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "" );
+                                generateResponse(routingContext, logger,401, "Signup Error Occured", t.getLocalizedMessage(), "", "" );
 
                             }
                         );
@@ -221,19 +230,6 @@ public class Signup implements Handler<RoutingContext> {
                 routingContext.fail(res.cause());
             }
         });
-    }
-
-    private void generateResponse(RoutingContext context, int statusCode, String message1, String message2, String message3, String message4) {
-
-        logger.info("generateResponse invoked...");
-
-        //Use user's session for storage 
-        context.session().put(Constants.HTTP_STATUSCODE, statusCode);
-        context.session().put(Constants.HTTP_URL, message2);
-        context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
-        context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
-
-        context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
     }
 
 }
