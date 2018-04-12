@@ -28,6 +28,8 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
     public void handle(RoutingContext routingContext) {
         logger.info("Users.handle invoked..");
 
+        //TODO: pagination eklenmeli
+
         jdbcClient.rxGetConnection().flatMap(resConn ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -36,7 +38,25 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT", new JsonArray()))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT " +
+                                "uuid," +
+                                //"organization_id," +
+                                "created," +
+                                "updated," +
+                                "deleted," +
+                                "is_deleted," +
+                                //"crud_subject_id," +
+                                "is_activated," +
+                                //"subject_type_id," +
+                                "subject_name," +
+                                "first_name," +
+                                "last_name," +
+                                "display_name," +
+                                "email," +
+                                //"secondary_email," +
+                                "effective_start_date," +
+                                "effective_end_date " +
+                                "FROM portalschema.SUBJECT", new JsonArray()))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 logger.info("Number of users found:[" + resultSet.getNumRows() + "]");
@@ -51,7 +71,8 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
                         .doAfterTerminate(resConn::close)
         ).subscribe(result -> {
                     logger.info("Subscription to Users successfull:" + result);
-                    routingContext.response().end(result.toJson().encode());
+                    routingContext.response().end(result.getRows().toString(), "UTF-8" );//.concat("\"totalItems\""+result.getNumRows())); //TODO: Türkçe karakter problemine bakılacak. users.js UTF-8 ...
+                    //TODO: json envelope ve footer data eklenmesi
                 }, t -> {
                     logger.error("Users Error", t);
                     generateResponse(routingContext, logger, 401, "Users Handling Error Occured", t.getLocalizedMessage(), "", "");

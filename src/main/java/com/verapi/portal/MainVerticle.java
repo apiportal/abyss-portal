@@ -173,8 +173,8 @@ public class MainVerticle extends AbstractVerticle {
 
             Users users = new Users(jdbcClient);
             router.route("/users").handler(authHandler).failureHandler(this::failureHandler);
+            router.get("/users/management").handler(users).failureHandler(this::failureHandler);
             router.get("/users").handler(users::pageRender).failureHandler(this::failureHandler);
-            router.post("/users").handler(users).failureHandler(this::failureHandler);
 
 
             //install authHandler for all routes where authentication is required
