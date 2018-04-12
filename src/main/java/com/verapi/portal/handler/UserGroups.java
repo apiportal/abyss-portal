@@ -5,6 +5,7 @@ import com.verapi.portal.common.Constants;
 import io.reactivex.Single;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
@@ -50,7 +51,7 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
                                 "description," +
                                 "effective_start_date," +
                                 "effective_end_date " +
-                                "FROM portalschema.SUBJECT_GROUP", new JsonArray()))
+                                "FROM portalschema.SUBJECT_GROUP ORDER BY group_name", new JsonArray()))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 logger.info("Number of groups found:[" + resultSet.getNumRows() + "]");
@@ -65,8 +66,10 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
                         .doAfterTerminate(resConn::close)
         ).subscribe(result -> {
                     logger.info("Subscription to UserGroups successfull:" + result);
-                    routingContext.response().end(result.getRows().toString(), "UTF-8" );//.concat("\"totalItems\""+result.getNumRows())); //TODO: Türkçe karakter problemine bakılacak. users.js UTF-8 ...
-                    //TODO: json envelope ve footer data eklenmesi
+                    JsonObject groupsResult = new JsonObject();
+                    groupsResult.put("groupList",result.toJson().getValue("rows"));
+                    groupsResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",10).put("currentPage",1).put("last",false).put("first",true).put("sort","ASC GROUP NAME");
+                    routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(groupsResult.toString(), "UTF-8");
                 }, t -> {
                     logger.error("UserGroups Error", t);
                     generateResponse(routingContext, logger, 401, "UserGroups Handling Error Occured", t.getLocalizedMessage(), "", "");

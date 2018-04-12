@@ -5,6 +5,7 @@ import com.verapi.portal.common.Constants;
 import io.reactivex.Single;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -56,7 +57,7 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
                                 //"secondary_email," +
                                 "effective_start_date," +
                                 "effective_end_date " +
-                                "FROM portalschema.SUBJECT", new JsonArray()))
+                                "FROM portalschema.SUBJECT ORDER BY SUBJECT_NAME", new JsonArray()))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 logger.info("Number of users found:[" + resultSet.getNumRows() + "]");
@@ -71,8 +72,10 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
                         .doAfterTerminate(resConn::close)
         ).subscribe(result -> {
                     logger.info("Subscription to Users successfull:" + result);
-                    routingContext.response().end(result.getRows().toString(), "UTF-8" );//.concat("\"totalItems\""+result.getNumRows())); //TODO: Türkçe karakter problemine bakılacak. users.js UTF-8 ...
-                    //TODO: json envelope ve footer data eklenmesi
+                    JsonObject usersResult = new JsonObject();
+                    usersResult.put("userList",result.toJson().getValue("rows"));
+                    usersResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",10).put("currentPage",1).put("last",false).put("first",true).put("sort","ASC SUBJECT NAME");
+                    routingContext.response().putHeader("content-type","application/json; charset=utf-8").end(usersResult.toString(), "UTF-8");
                 }, t -> {
                     logger.error("Users Error", t);
                     generateResponse(routingContext, logger, 401, "Users Handling Error Occured", t.getLocalizedMessage(), "", "");
