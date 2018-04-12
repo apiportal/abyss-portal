@@ -105,10 +105,6 @@
 		</dependency>
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-codegen</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
             <artifactId>vertx-unit</artifactId>
             <scope>test</scope>
         </dependency>
@@ -120,6 +116,15 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-templ-thymeleaf</artifactId>
             <classifier>shaded</classifier>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-service-proxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-codegen</artifactId>
+            <classifier>processor</classifier>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -229,7 +234,7 @@
                             ${project.basedir}/src/main/generated
                         </generatedSourcesDirectory>
                         <compilerArgs>
-                            <arg>-AoutputDirectory=${project.basedir}/src/main</arg>
+                            <arg>-Acodegen.output=${project.basedir}/src/main</arg>
                         </compilerArgs>
                     </configuration>
                 </plugin>
