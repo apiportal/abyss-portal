@@ -20,6 +20,7 @@ import com.verapi.portal.handler.ForgotPassword;
 import com.verapi.portal.handler.Index;
 import com.verapi.portal.handler.Login;
 import com.verapi.portal.handler.Signup;
+import com.verapi.portal.handler.Users;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -169,6 +170,12 @@ public class MainVerticle extends AbstractVerticle {
             ActivateAccount activateAccount = new ActivateAccount(jdbcClient);
             router.get(Constants.ACTIVATION_PATH).handler(activateAccount).failureHandler(this::failureHandler);
             router.get(Constants.RESET_PASSWORD_PATH).handler(activateAccount).failureHandler(this::failureHandler);//TODO: Is same handler ok?
+
+            Users users = new Users(jdbcClient);
+            router.route("/users").handler(authHandler).failureHandler(this::failureHandler);
+            router.get("/users").handler(users::pageRender).failureHandler(this::failureHandler);
+            router.post("/users").handler(users).failureHandler(this::failureHandler);
+
 
             //install authHandler for all routes where authentication is required
             //router.route("/").handler(authHandler);

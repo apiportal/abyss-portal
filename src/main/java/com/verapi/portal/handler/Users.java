@@ -1,0 +1,83 @@
+package com.verapi.portal.handler;
+
+import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
+import io.reactivex.Single;
+import io.vertx.core.Handler;
+import io.vertx.core.json.JsonArray;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class Users extends PortalHandler implements Handler<RoutingContext> {
+
+    private static Logger logger = LoggerFactory.getLogger(Users.class);
+
+    private final JDBCClient jdbcClient;
+
+    //private String result;
+
+    public Users(JDBCClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
+
+    @Override
+    public void handle(RoutingContext routingContext) {
+        logger.info("Users.handle invoked..");
+
+        jdbcClient.rxGetConnection().flatMap(resConn ->
+                resConn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
+                        // Disable auto commit to handle transaction manually
+                        .rxSetAutoCommit(false)
+                        // Switch from Completable to default Single value
+                        .toSingleDefault(false)
+                        //Check if user already exists
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT", new JsonArray()))
+                        .flatMap(resultSet -> {
+                            if (resultSet.getNumRows() > 0) {
+                                logger.info("Number of users found:[" + resultSet.getNumRows() + "]");
+                                //result = resultSet.toJson().encode();
+                                return Single.just(resultSet);
+                            } else {
+                                logger.info("No users found...");
+                                return Single.error(new Exception("No users found"));
+                            }
+                        })
+                        // close the connection regardless succeeded or failed
+                        .doAfterTerminate(resConn::close)
+        ).subscribe(result -> {
+                    logger.info("Subscription to Users successfull:" + result);
+                    routingContext.response().end(result.toJson().encode());
+                }, t -> {
+                    logger.error("Users Error", t);
+                    generateResponse(routingContext, logger, 401, "Users Handling Error Occured", t.getLocalizedMessage(), "", "");
+
+                }
+        );
+    }
+
+
+
+    public void pageRender(RoutingContext routingContext) {
+        logger.info("Users.pageRender invoked...");
+
+        // In order to use a Thymeleaf template we first need to create an engine
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+
+        // we define a hardcoded title for our application
+        //routingContext.put("signin", "Sign in Abyss");
+        // and now delegate to the engine to render it.
+        engine.render(routingContext, "webroot/", "users.html", res -> {
+            if (res.succeeded()) {
+                routingContext.response().putHeader("Content-Type", "text/html");
+                routingContext.response().end(res.result());
+            } else {
+                routingContext.fail(res.cause());
+            }
+        });
+    }
+}
