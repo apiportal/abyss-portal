@@ -20,6 +20,7 @@ import com.verapi.portal.handler.ForgotPassword;
 import com.verapi.portal.handler.Index;
 import com.verapi.portal.handler.Login;
 import com.verapi.portal.handler.Signup;
+import com.verapi.portal.handler.UserGroups;
 import com.verapi.portal.handler.Users;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -175,6 +176,11 @@ public class MainVerticle extends AbstractVerticle {
             router.route("/users").handler(authHandler).failureHandler(this::failureHandler);
             router.get("/users/management").handler(users).failureHandler(this::failureHandler);
             router.get("/users").handler(users::pageRender).failureHandler(this::failureHandler);
+
+            UserGroups userGroups = new UserGroups(jdbcClient);
+            router.route("/user-groups").handler(authHandler).failureHandler(this::failureHandler);
+            router.get("/user-groups/management").handler(userGroups).failureHandler(this::failureHandler);
+            router.get("/user-groups").handler(userGroups::pageRender).failureHandler(this::failureHandler);
 
 
             //install authHandler for all routes where authentication is required
