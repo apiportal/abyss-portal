@@ -15,8 +15,8 @@ import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.handler.ActivateAccount;
+import com.verapi.portal.handler.ChangePassword;
 import com.verapi.portal.handler.ForgotPassword;
-import com.verapi.portal.handler.ResetPassword;
 import com.verapi.portal.handler.Index;
 import com.verapi.portal.handler.Login;
 import com.verapi.portal.handler.Signup;
@@ -50,7 +50,6 @@ import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
 import io.vertx.reactivex.servicediscovery.types.JDBCDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 
 /**
@@ -162,9 +161,10 @@ public class MainVerticle extends AbstractVerticle {
             router.get("/forgot-password").handler(forgotPassword::pageRender).failureHandler(this::failureHandler);
             router.post("/forgot-password").handler(forgotPassword).failureHandler(this::failureHandler);
 
-            ResetPassword resetPassword = new ResetPassword(auth, jdbcClient);
-            router.get("/reset-password").handler(resetPassword::pageRender).failureHandler(this::failureHandler);
-            router.post("/reset-password").handler(resetPassword).failureHandler(this::failureHandler);
+            ChangePassword changePassword = new ChangePassword(auth, jdbcClient);
+            router.route("/change-password").handler(authHandler).failureHandler(this::failureHandler);
+            router.get("/change-password").handler(changePassword::pageRender).failureHandler(this::failureHandler);
+            router.post("/change-password").handler(changePassword).failureHandler(this::failureHandler);
 
             ActivateAccount activateAccount = new ActivateAccount(jdbcClient);
             router.get(Constants.ACTIVATION_PATH).handler(activateAccount).failureHandler(this::failureHandler);
