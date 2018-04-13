@@ -74,7 +74,7 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
                     logger.info("Subscription to Users successfull:" + result);
                     JsonObject usersResult = new JsonObject();
                     usersResult.put("userList",result.toJson().getValue("rows"));
-                    usersResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",10).put("currentPage",1).put("last",false).put("first",true).put("sort","ASC SUBJECT NAME");
+                    usersResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",30).put("currentPage",1).put("last",false).put("first",false).put("sort","ASC SUBJECT NAME");
                     routingContext.response().putHeader("content-type","application/json; charset=utf-8").end(usersResult.toString(), "UTF-8");
                 }, t -> {
                     logger.error("Users Error", t);

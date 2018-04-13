@@ -68,7 +68,7 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
                     logger.info("Subscription to UserGroups successfull:" + result);
                     JsonObject groupsResult = new JsonObject();
                     groupsResult.put("groupList",result.toJson().getValue("rows"));
-                    groupsResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",10).put("currentPage",1).put("last",false).put("first",true).put("sort","ASC GROUP NAME");
+                    groupsResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",30).put("currentPage",1).put("last",false).put("first",false).put("sort","ASC GROUP NAME");
                     routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(groupsResult.toString(), "UTF-8");
                 }, t -> {
                     logger.error("UserGroups Error", t);
