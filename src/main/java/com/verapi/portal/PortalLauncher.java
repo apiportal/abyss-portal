@@ -70,9 +70,9 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         vertxOptions.setMetricsOptions(new DropwizardMetricsOptions()
                 .setEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_ENABLED, true))
                 .setJmxEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_JMX_ENABLED, true))
-                .setRegistryName(Constants.ABBYS_PORTAL)
-                .setJmxDomain(Constants.ABBYS_PORTAL)
-                .setBaseName(Constants.ABBYS_PORTAL)
+                .setRegistryName(Constants.ABYSS_PORTAL)
+                .setJmxDomain(Constants.ABYSS_PORTAL)
+                .setBaseName(Constants.ABYSS_PORTAL)
         );
         logger.trace(vertxOptions.toString());
     }
