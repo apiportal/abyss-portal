@@ -58,7 +58,7 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
 
                                 if (row.getInteger("is_deleted") == 1) {
                                     logger.error("Received Token is deleted");
-                                    return Single.error(new Exception("Token does not exist in our records. Please request a new token."));
+                                    return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
                                 }
 
                                 if (!(row.getString("token_type","").equals(Constants.ACTIVATION_TOKEN))) {

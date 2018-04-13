@@ -46,7 +46,9 @@ public class Constants {
     public static final String EB_MSG_TOKEN = "token";
     public static final String EB_MSG_TOKEN_TYPE = "token.type";
     public static final String EB_MSG_TO_EMAIL = "to.email";
+    public static final String EB_MSG_HTML_STRING = "html.string";
     public static final String ABYSS_MAIL_CLIENT = "ABYSS_MAIL_CLIENT";
+    public static final String DEFAULT_HTML_STRING = "<a href=\"http://apiportal.com/abyss/activation/?v=asSFbhIKae34654yhe3XEEUmjt56n5yrn45yh\">Activate My API Portal Account</a>";
 
     public static final String MAIL_SMTP_HOST = "mail.smtp.host";
     public static final String MAIL_SMTP_PORT = "mail.smtp.port";
@@ -58,6 +60,8 @@ public class Constants {
 
     public static final String MAIL_HREF_HOST = "mail.href.host";
     public static final String MAIL_HREF_PORT = "mail.href.port";
+    public static final String MAIL_BASE_URL = "mail.base.url";
+    public static final String MAIL_IMAGE_URL = "mail.image.url";
 
     public static final String ACTIVATION_SUBJECT = "Activate Your API Portal Account";
     public static final String COGITO_ACTIVATION_SUBJECT = "Activate Your Cogito Account";
@@ -73,6 +77,5 @@ public class Constants {
 
     public static final String ACTIVATION_TOKEN = "token.type.activation";
     public static final String RESET_PASSWORD_TOKEN = "token.type.reset.password";
-
 
 }

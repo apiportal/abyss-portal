@@ -11,9 +11,12 @@ import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
 import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.mail.StartTLSOptions;
+import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public class MailVerticle extends AbstractVerticle {
@@ -34,6 +37,7 @@ public class MailVerticle extends AbstractVerticle {
                 .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.MAIL_SMTP_PORT, 25))
                 .setStarttls(StartTLSOptions.valueOf(Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SMTP_START_TLS_OPTION, "OPTIONAL").toUpperCase(Locale.ENGLISH)))
                 .setLogin(LoginOption.valueOf(Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SMTP_LOGIN_OPTION, "DISABLED").toUpperCase(Locale.ENGLISH)))
+                //.setAllowRcptErrors(true) //TODO: Oku
         ;
         if (mailConfig.getLogin() == LoginOption.REQUIRED) {
             mailConfig
@@ -59,6 +63,7 @@ public class MailVerticle extends AbstractVerticle {
             String token = msg.body().getString(Constants.EB_MSG_TOKEN, "");
             String toEmail = msg.body().getString(Constants.EB_MSG_TO_EMAIL, "");
             String tokenType = msg.body().getString(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
+            String htmlString = msg.body().getString(Constants.EB_MSG_HTML_STRING, Constants.DEFAULT_HTML_STRING);
 
             String subject;
             String text;
@@ -90,15 +95,18 @@ public class MailVerticle extends AbstractVerticle {
             }
 
 
+
             MailMessage email = new MailMessage()
-                .setFrom("info@apiportal.com")
+                .setFrom("activation@apiportal.com (ABYSS API PORTAL)") //TODO:
                 .setTo(toEmail)
-                .setCc("faik.saglar@verapi.com")
-                .setBcc("halil.ozkan@verapi.com")
+                //.setCc("faik.saglar@verapi.com")
+                .setBcc(Arrays.asList("halil.ozkan@verapi.com","faik.saglar@verapi.com"))
                 .setBounceAddress("info@verapi.com")
                 .setSubject(subject)
                 .setText("Please click -> Activate My API Portal Account")
-                .setHtml("<a href=\"http://"+hrefHost+":"+hrefPort+"/abyss"+path+"/?v=" + token + "\">"+text+"</a>");
+                    //.setHeaders() //TODO: Oku
+                .setHtml(htmlString);
+                //.setHtml("<a href=\"http://"+hrefHost+":"+hrefPort+"/abyss"+path+"/?v=" + token + "\">"+text+"</a>");
 
             mailClient.sendMail(email, result -> {
                 if (result.succeeded()) {
@@ -112,4 +120,6 @@ public class MailVerticle extends AbstractVerticle {
 
         };
     }
+
+
 }
