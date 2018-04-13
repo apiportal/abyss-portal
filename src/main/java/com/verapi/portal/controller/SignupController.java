@@ -22,9 +22,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
-import io.vertx.reactivex.ext.auth.AuthProvider;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,15 @@ import java.io.UnsupportedEncodingException;
 public class SignupController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(SignupController.class);
 
-    public SignupController(AuthProvider authProvider) {
+    private Integer subjectId;
+    private String authToken;
+
+    public SignupController(JDBCAuth authProvider) {
         super(authProvider);
     }
 
-    public SignupController(AuthProvider authProvider, JDBCClient jdbcClient) {
-        super(authProvider);
+    public SignupController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        super(authProvider, jdbcClient);
     }
 
     @Override
@@ -49,7 +53,8 @@ public class SignupController extends PortalAbstractController {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        super.handle(routingContext);
+        logger.info("SignupController.handle invoked...");
+
         String firstname = routingContext.request().getFormAttribute("firstname");
         String lastname = routingContext.request().getFormAttribute("lastname");
         String username = routingContext.request().getFormAttribute("username");
@@ -82,7 +87,7 @@ public class SignupController extends PortalAbstractController {
                             if (resultSet.getNumRows() > 0) {
                                 subjectId = resultSet.getRows(true).get(0).getInteger("id");
                                 logger.info("user found: " + resultSet.toJson().encodePrettily());
-                                if (resultSet.getRows(true).get(0).getInteger("is_activated")>0) {
+                                if (resultSet.getRows(true).get(0).getInteger("is_activated") > 0) {
                                     return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
                                 } else {
                                     //TODO: Cancel previous activation - Is it really required.
@@ -127,10 +132,10 @@ public class SignupController extends PortalAbstractController {
                             }
                         })
                         .flatMap(updateResult -> {
-                            if(updateResult instanceof UpdateResult) {
+                            if (updateResult instanceof UpdateResult) {
                                 subjectId = ((UpdateResult) updateResult).getKeys().getInteger(0);
                                 logger.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0:" + subjectId);
-                            } else if(updateResult instanceof ResultSet) {
+                            } else if (updateResult instanceof ResultSet) {
                                 logger.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | Integer Key @pos=0:" + ((ResultSet) updateResult).getRows(true).get(0).getInteger("id") + " subjectID:" + subjectId);
                             }
 
@@ -185,6 +190,9 @@ public class SignupController extends PortalAbstractController {
                             json.put(Constants.EB_MSG_TOKEN, authToken);
                             json.put(Constants.EB_MSG_TO_EMAIL, email);
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
+                            json.put(Constants.EB_MSG_HTML_STRING, renderMailPage(routingContext,
+                                    Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + authToken,
+                                    Constants.ACTIVATION_TEXT));
 
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
                                 logger.info(result.toString());
@@ -197,14 +205,39 @@ public class SignupController extends PortalAbstractController {
 
         ).subscribe(result -> {
                     logger.info("Subscription to Signup successfull:" + result);
-                    generateResponse(routingContext, logger,200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
+                    generateResponse(routingContext, logger, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "");
                     //TODO: Send email to user
                 }, t -> {
                     logger.error("Signup Error", t);
-                    generateResponse(routingContext, logger,401, "Signup Error Occured", t.getLocalizedMessage(), "", "" );
-
+                    generateResponse(routingContext, logger, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "");
                 }
         );
+        super.handle(routingContext);
+    }
+
+    public String renderMailPage(RoutingContext routingContext, String activationUrl, String activationText) {
+        logger.info("renderMailPage invoked...");
+
+
+        // In order to use a Thymeleaf template we first need to create an engine
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+
+        routingContext.put("url.activation", activationUrl);
+        routingContext.put("text.activation", activationText);
+        routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+        // and now delegate to the engine to render it.
+        engine.render(routingContext, "webroot/email/", "activate.html", res -> {
+            if (res.succeeded()) {
+                //routingContext.response().putHeader("Content-Type", "text/html");
+                //routingContext.response().end(res.result());
+
+                this.htmlString = res.result().toString("UTF-8");
+            } else {
+                routingContext.fail(res.cause());
+            }
+        });
+        return htmlString;
 
     }
+
 }

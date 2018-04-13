@@ -14,6 +14,7 @@ import io.vertx.ext.mail.StartTLSOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 public class MailVerticle extends AbstractVerticle {
@@ -34,6 +35,7 @@ public class MailVerticle extends AbstractVerticle {
                 .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.MAIL_SMTP_PORT, 25))
                 .setStarttls(StartTLSOptions.valueOf(Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SMTP_START_TLS_OPTION, "OPTIONAL").toUpperCase(Locale.ENGLISH)))
                 .setLogin(LoginOption.valueOf(Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SMTP_LOGIN_OPTION, "DISABLED").toUpperCase(Locale.ENGLISH)))
+                //.setAllowRcptErrors(true) //TODO: Oku
         ;
         if (mailConfig.getLogin() == LoginOption.REQUIRED) {
             mailConfig
@@ -59,19 +61,29 @@ public class MailVerticle extends AbstractVerticle {
             String token = msg.body().getString(Constants.EB_MSG_TOKEN, "");
             String toEmail = msg.body().getString(Constants.EB_MSG_TO_EMAIL, "");
             String tokenType = msg.body().getString(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
+            String htmlString = msg.body().getString(Constants.EB_MSG_HTML_STRING, Constants.DEFAULT_HTML_STRING);
 
+            String from;
             String subject;
             String text;
             String path;
             if (tokenType.equals(Constants.ACTIVATION_TOKEN)) {
+                from = Constants.MAIL_FROM_EMAIL_ACTIVATION;
                 subject = Constants.ACTIVATION_SUBJECT;
                 text = Constants.ACTIVATION_TEXT;
                 path = Constants.ACTIVATION_PATH;
             } else if (tokenType.equals(Constants.RESET_PASSWORD_TOKEN)) {
+                from = Constants.MAIL_FROM_EMAIL_RESET_PASSWORD;
                 subject = Constants.RESET_PASSWORD_SUBJECT;
                 text = Constants.RESET_PASSWORD_TEXT;
                 path = Constants.RESET_PASSWORD_PATH;
+            } else if (tokenType.equals(Constants.WELCOME_TOKEN)) {
+                from = Constants.MAIL_FROM_EMAIL_WELCOME;
+                subject = Constants.WELCOME_SUBJECT;
+                text = Constants.WELCOME_TEXT;
+                path = Constants.RESET_PASSWORD_PATH;
             } else {//TODO:handle token type is empty
+                from = Constants.MAIL_FROM_EMAIL_ACTIVATION;
                 subject = Constants.ACTIVATION_SUBJECT;
                 text = Constants.ACTIVATION_TEXT;
                 path = Constants.ACTIVATION_PATH;
@@ -90,15 +102,18 @@ public class MailVerticle extends AbstractVerticle {
             }
 
 
+
             MailMessage email = new MailMessage()
-                .setFrom("info@apiportal.com")
+                .setFrom(from)
                 .setTo(toEmail)
-                .setCc("faik.saglar@verapi.com")
-                .setBcc("halil.ozkan@verapi.com")
+                //.setCc("faik.saglar@verapi.com")
+                .setBcc(Arrays.asList("halil.ozkan@verapi.com","faik.saglar@verapi.com"))
                 .setBounceAddress("info@verapi.com")
                 .setSubject(subject)
-                .setText("Please click -> Activate My API Portal Account")
-                .setHtml("<a href=\"http://"+hrefHost+":"+hrefPort+"/abyss"+path+"/?v=" + token + "\">"+text+"</a>");
+                .setText(text)
+                    //.setHeaders() //TODO: Oku
+                .setHtml(htmlString);
+                //.setHtml("<a href=\"http://"+hrefHost+":"+hrefPort+"/abyss"+path+"/?v=" + token + "\">"+text+"</a>");
 
             mailClient.sendMail(email, result -> {
                 if (result.succeeded()) {
@@ -112,4 +127,6 @@ public class MailVerticle extends AbstractVerticle {
 
         };
     }
+
+
 }

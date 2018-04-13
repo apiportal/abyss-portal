@@ -12,7 +12,7 @@
 package com.verapi.portal.controller;
 
 import com.verapi.portal.common.Controllers;
-import io.vertx.reactivex.ext.auth.AuthProvider;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class IndexController extends PortalAbstractController {
 
     private static Logger logger = LoggerFactory.getLogger(IndexController.class);
 
-    public IndexController(AuthProvider authProvider) {
+    public IndexController(JDBCAuth authProvider) {
         super(authProvider);
     }
 

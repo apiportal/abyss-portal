@@ -13,11 +13,10 @@ package com.verapi.portal.controller;
 
 import com.verapi.portal.common.Constants;
 import io.vertx.core.Handler;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
 import io.vertx.reactivex.core.buffer.Buffer;
-import io.vertx.reactivex.ext.auth.AuthProvider;
-import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
@@ -27,10 +26,16 @@ public abstract class PortalAbstractController implements Handler<RoutingContext
 
     private static Logger logger = LoggerFactory.getLogger(PortalAbstractController.class);
 
-    protected final AuthProvider authProvider;
+    protected final JDBCAuth authProvider;
+    protected JDBCClient jdbcClient;
 
-    public PortalAbstractController(AuthProvider authProvider) {
+    public PortalAbstractController(JDBCAuth authProvider) {
         this.authProvider = authProvider;
+    }
+
+    public PortalAbstractController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        this.authProvider = authProvider;
+        this.jdbcClient = jdbcClient;
     }
 
     public abstract void defaultPostHandler(RoutingContext routingContext);

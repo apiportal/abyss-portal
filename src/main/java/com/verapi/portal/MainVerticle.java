@@ -15,11 +15,13 @@ import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.handler.ActivateAccount;
+import com.verapi.portal.handler.ChangePassword;
 import com.verapi.portal.handler.ForgotPassword;
-import com.verapi.portal.handler.ResetPassword;
 import com.verapi.portal.handler.Index;
 import com.verapi.portal.handler.Login;
 import com.verapi.portal.handler.Signup;
+import com.verapi.portal.handler.UserGroups;
+import com.verapi.portal.handler.Users;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -50,7 +52,6 @@ import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
 import io.vertx.reactivex.servicediscovery.types.JDBCDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 
 /**
@@ -162,13 +163,29 @@ public class MainVerticle extends AbstractVerticle {
             router.get("/forgot-password").handler(forgotPassword::pageRender).failureHandler(this::failureHandler);
             router.post("/forgot-password").handler(forgotPassword).failureHandler(this::failureHandler);
 
-            ResetPassword resetPassword = new ResetPassword(auth, jdbcClient);
-            router.get("/reset-password").handler(resetPassword::pageRender).failureHandler(this::failureHandler);
-            router.post("/reset-password").handler(resetPassword).failureHandler(this::failureHandler);
+            ChangePassword changePassword = new ChangePassword(auth, jdbcClient);
+            router.route("/change-password").handler(authHandler).failureHandler(this::failureHandler);
+            router.get("/change-password").handler(changePassword::pageRender).failureHandler(this::failureHandler);
+            router.post("/change-password").handler(changePassword).failureHandler(this::failureHandler);
 
             ActivateAccount activateAccount = new ActivateAccount(jdbcClient);
             router.get(Constants.ACTIVATION_PATH).handler(activateAccount).failureHandler(this::failureHandler);
             router.get(Constants.RESET_PASSWORD_PATH).handler(activateAccount).failureHandler(this::failureHandler);//TODO: Is same handler ok?
+
+            Users users = new Users(jdbcClient);
+            router.route("/users").handler(authHandler).failureHandler(this::failureHandler);
+            router.get("/users/management").handler(users).failureHandler(this::failureHandler);
+            router.get("/users").handler(users::pageRender).failureHandler(this::failureHandler);
+
+            UserGroups userGroups = new UserGroups(jdbcClient);
+            router.route("/user-groups").handler(authHandler).failureHandler(this::failureHandler);
+            router.get("/user-groups/management").handler(userGroups).failureHandler(this::failureHandler);
+            router.get("/user-groups").handler(userGroups::pageRender).failureHandler(this::failureHandler);
+            router.get("/user-directories").handler(userGroups::dirPageRender).failureHandler(this::failureHandler);
+
+            //TEST - router.get("/my-apis").handler(userGroups::apiPageRender).failureHandler(this::failureHandler);
+
+
 
             //install authHandler for all routes where authentication is required
             //router.route("/").handler(authHandler);
@@ -210,6 +227,8 @@ public class MainVerticle extends AbstractVerticle {
             abyssRouter.routeWithRegex("^/abyss/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
             abyssRouter.get("/abyss/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+
+            abyssRouter.get("/abyss/success").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
             //only rendering page routings' failures shall be handled by using regex
             //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
@@ -316,8 +335,12 @@ public class MainVerticle extends AbstractVerticle {
         context.put(Constants.HTTP_ERRORMESSAGE, context.session().get(Constants.HTTP_ERRORMESSAGE));
         context.put(Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
-
-        String templateFileName = Constants.HTTPERROR_HTML;
+        String templateFileName;
+        if (statusCode==200) {
+            templateFileName = Constants.SUCCESS_HTML;
+        } else {
+            templateFileName = Constants.HTTPERROR_HTML;
+        }
 
 //        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {
 //            templateFileName = statusCode + ".html";

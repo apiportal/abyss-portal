@@ -14,9 +14,9 @@ import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResetPassword extends PortalHandler implements Handler<RoutingContext> {
+public class ChangePassword extends PortalHandler implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(ResetPassword.class);
+    private static Logger logger = LoggerFactory.getLogger(ChangePassword.class);
 
     private final JDBCClient jdbcClient;
 
@@ -24,7 +24,7 @@ public class ResetPassword extends PortalHandler implements Handler<RoutingConte
 
     //private Integer subjectId;
 
-    public ResetPassword(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public ChangePassword(JDBCAuth authProvider, JDBCClient jdbcClient) {
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
     }
@@ -32,7 +32,7 @@ public class ResetPassword extends PortalHandler implements Handler<RoutingConte
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("ResetPassword.handle invoked..");
+        logger.info("ChangePassword.handle invoked..");
 
         String username = routingContext.user().principal().getString("username");
         String oldPassword = routingContext.request().getFormAttribute("oldPassword");
@@ -49,19 +49,19 @@ public class ResetPassword extends PortalHandler implements Handler<RoutingConte
 
         if (oldPassword == null || oldPassword.isEmpty()) {
             logger.info("oldPassword is null or empty");
-            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "Please enter Old Password field", "", "" );
+            generateResponse(routingContext, logger,401, "Change Password Error Occured", "Please enter Old Password field", "", "" );
         }
         if (newPassword == null || newPassword.isEmpty()) {
             logger.info("newPassword is null or empty");
-            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "Please enter New Password field", "", "" );
+            generateResponse(routingContext, logger,401, "Change Password Error Occured", "Please enter New Password field", "", "" );
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             logger.info("newPassword is null or empty");
-            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "Please enter Confirm Password field", "", "" );
+            generateResponse(routingContext, logger,401, "Change Password Error Occured", "Please enter Confirm Password field", "", "" );
         }
         if (!(newPassword.equals(confirmPassword))) {
             logger.info("newPassword and confirmPassword does not match");
-            generateResponse(routingContext, logger,401, "Reset Password Error Occured", "New Password and Confirm Password does not match", "Please check and enter again", "" );
+            generateResponse(routingContext, logger,401, "Change Password Error Occured", "New Password and Confirm Password does not match", "Please check and enter again", "" );
         }
 
         JsonObject creds = new JsonObject()
@@ -107,19 +107,19 @@ public class ResetPassword extends PortalHandler implements Handler<RoutingConte
                 )
 
                 .doAfterSuccess(succ -> {
-                    logger.info("Reset Password: User record is updated and persisted successfully");
+                    logger.info("Change Password: User record is updated and persisted successfully");
                 })
 
                 // close the connection regardless succeeded or failed
                 .doAfterTerminate(resConn::close)
 
         ).subscribe(result -> {
-                    logger.info("Subscription to ResetPassword successfull:" + result);
-                    generateResponse(routingContext, logger, 200, "Password is reset.", "Please use your new password.", "", "" );
+                    logger.info("Subscription to ChangePassword successfull:" + result);
+                    generateResponse(routingContext, logger, 200, "Password is changed.", "Please use your new password.", "", "" );
                     //TODO: Send email to user
                 }, t -> {
-                    logger.error("ResetPassword Error", t);
-                    generateResponse(routingContext, logger, 401, "Reset Password Error Occured", t.getLocalizedMessage(), "", "" );
+                    logger.error("ChangePassword Error", t);
+                    generateResponse(routingContext, logger, 401, "Change Password Error Occured", t.getLocalizedMessage(), "", "" );
 
                 }
         );
@@ -127,13 +127,13 @@ public class ResetPassword extends PortalHandler implements Handler<RoutingConte
     }
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("ResetPassword.pageRender invoked...");
+        logger.info("ChangePassword.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
 
         // delegate to the engine to render it.
-        engine.render(routingContext, "webroot/", "reset-password.html", res -> {
+        engine.render(routingContext, "webroot/", "change-password.html", res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());

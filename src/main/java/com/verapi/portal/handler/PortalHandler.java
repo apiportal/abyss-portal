@@ -15,7 +15,11 @@ public abstract class PortalHandler {
         context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
 
-        context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
+        if (statusCode==200) {
+            context.response().putHeader("location", "/abyss/success").setStatusCode(302).end();
+        } else {
+            context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
+        }
     }
 
 }
