@@ -26,6 +26,7 @@ public class Constants {
     public static final String HTTP_URL = "http.url";
     public static final String HTTP_STATUSCODE = "http.statusCode";
     public static final String HTTPERROR_HTML = "httperror.html";
+    public static final String SUCCESS_HTML = "success.html";
 
     public static final String PORTAL_JDBC_URL = "portal.jdbc.url";
     public static final String PORTAL_JDBC_DRIVER_CLASS = "portal.jdbc.driver.class";

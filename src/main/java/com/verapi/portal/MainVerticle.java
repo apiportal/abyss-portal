@@ -181,6 +181,10 @@ public class MainVerticle extends AbstractVerticle {
             router.route("/user-groups").handler(authHandler).failureHandler(this::failureHandler);
             router.get("/user-groups/management").handler(userGroups).failureHandler(this::failureHandler);
             router.get("/user-groups").handler(userGroups::pageRender).failureHandler(this::failureHandler);
+            router.get("/user-directories").handler(userGroups::dirPageRender).failureHandler(this::failureHandler);
+
+            //TEST - router.get("/my-apis").handler(userGroups::apiPageRender).failureHandler(this::failureHandler);
+
 
 
             //install authHandler for all routes where authentication is required
@@ -223,6 +227,8 @@ public class MainVerticle extends AbstractVerticle {
             abyssRouter.routeWithRegex("^/abyss/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
             abyssRouter.get("/abyss/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+
+            abyssRouter.get("/abyss/success").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
 
             //only rendering page routings' failures shall be handled by using regex
             //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
@@ -329,8 +335,12 @@ public class MainVerticle extends AbstractVerticle {
         context.put(Constants.HTTP_ERRORMESSAGE, context.session().get(Constants.HTTP_ERRORMESSAGE));
         context.put(Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
-
-        String templateFileName = Constants.HTTPERROR_HTML;
+        String templateFileName;
+        if (statusCode==200) {
+            templateFileName = Constants.SUCCESS_HTML;
+        } else {
+            templateFileName = Constants.HTTPERROR_HTML;
+        }
 
 //        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {
 //            templateFileName = statusCode + ".html";
