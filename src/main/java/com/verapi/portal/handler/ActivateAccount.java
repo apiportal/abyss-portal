@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,12 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
     private final JDBCClient jdbcClient;
 
     private Integer tokenId;
+
+    private String email;
+
+    private String displayName;
+
+    private String htmlString;
 
     public ActivateAccount(JDBCClient jdbcClient) {
         this.jdbcClient = jdbcClient;
@@ -46,7 +53,7 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT_ACTIVATION WHERE TOKEN = ?", new JsonArray().add(token)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.display_name FROM portalschema.SUBJECT_ACTIVATION A, portalschema.SUBJECT S WHERE TOKEN = ? and A.subject_id = S.id", new JsonArray().add(token)))
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
@@ -80,6 +87,10 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
 
                                 if (authResult.isValid()) {
                                     logger.info("Received Token is valid.");
+
+                                    email = row.getString("email");
+                                    displayName = row.getString("display_name");
+
                                     return Single.just(row);
                                 } else {
                                     logger.error("Received Token is NOT valid: " + authResult.getResultText());
@@ -141,6 +152,16 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
 
                         .doAfterSuccess(succ -> {
                             logger.info("Activate Account: User record is activated and Token is deleted. Both persisted successfully");
+
+                            JsonObject json = new JsonObject();
+                            json.put(Constants.EB_MSG_TOKEN, "");
+                            json.put(Constants.EB_MSG_TO_EMAIL, email);
+                            json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.WELCOME_TOKEN);
+                            json.put(Constants.EB_MSG_HTML_STRING, renderMailPage(routingContext, displayName));
+
+                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
+                                logger.info(result.toString());
+                            });
                         })
 
                         // close the connection regardless succeeded or failed
@@ -156,6 +177,7 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
 
                 }
         );
+
 
 
         //TODO: Different action for different tokens and paths
@@ -178,4 +200,31 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
         //TODO: mark token as deleted
 
     }
+
+    public String renderMailPage(RoutingContext routingContext, String fullName) {
+        logger.info("renderWelcomeMailPage invoked...");
+
+
+        // In order to use a Thymeleaf template we first need to create an engine
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+
+        routingContext.put("full.name", fullName);
+        routingContext.put("url.login", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL));
+        routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+        // and now delegate to the engine to render it.
+        engine.render(routingContext, "webroot/email/", "welcome.html", res -> {
+            if (res.succeeded()) {
+                //routingContext.response().putHeader("Content-Type", "text/html");
+                //routingContext.response().end(res.result());
+
+                this.htmlString = res.result().toString("UTF-8");
+            } else {
+                routingContext.fail(res.cause());
+            }
+        });
+
+        return htmlString;
+
+    }
+
 }

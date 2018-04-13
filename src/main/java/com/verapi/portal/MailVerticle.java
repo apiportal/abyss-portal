@@ -11,8 +11,6 @@ import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
 import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.mail.StartTLSOptions;
-import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,18 +63,27 @@ public class MailVerticle extends AbstractVerticle {
             String tokenType = msg.body().getString(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
             String htmlString = msg.body().getString(Constants.EB_MSG_HTML_STRING, Constants.DEFAULT_HTML_STRING);
 
+            String from;
             String subject;
             String text;
             String path;
             if (tokenType.equals(Constants.ACTIVATION_TOKEN)) {
+                from = Constants.MAIL_FROM_EMAIL_ACTIVATION;
                 subject = Constants.ACTIVATION_SUBJECT;
                 text = Constants.ACTIVATION_TEXT;
                 path = Constants.ACTIVATION_PATH;
             } else if (tokenType.equals(Constants.RESET_PASSWORD_TOKEN)) {
+                from = Constants.MAIL_FROM_EMAIL_RESET_PASSWORD;
                 subject = Constants.RESET_PASSWORD_SUBJECT;
                 text = Constants.RESET_PASSWORD_TEXT;
                 path = Constants.RESET_PASSWORD_PATH;
+            } else if (tokenType.equals(Constants.WELCOME_TOKEN)) {
+                from = Constants.MAIL_FROM_EMAIL_WELCOME;
+                subject = Constants.WELCOME_SUBJECT;
+                text = Constants.WELCOME_TEXT;
+                path = Constants.RESET_PASSWORD_PATH;
             } else {//TODO:handle token type is empty
+                from = Constants.MAIL_FROM_EMAIL_ACTIVATION;
                 subject = Constants.ACTIVATION_SUBJECT;
                 text = Constants.ACTIVATION_TEXT;
                 path = Constants.ACTIVATION_PATH;
@@ -97,13 +104,13 @@ public class MailVerticle extends AbstractVerticle {
 
 
             MailMessage email = new MailMessage()
-                .setFrom("activation@apiportal.com (ABYSS API PORTAL)") //TODO:
+                .setFrom(from)
                 .setTo(toEmail)
                 //.setCc("faik.saglar@verapi.com")
                 .setBcc(Arrays.asList("halil.ozkan@verapi.com","faik.saglar@verapi.com"))
                 .setBounceAddress("info@verapi.com")
                 .setSubject(subject)
-                .setText("Please click -> Activate My API Portal Account")
+                .setText(text)
                     //.setHeaders() //TODO: Oku
                 .setHtml(htmlString);
                 //.setHtml("<a href=\"http://"+hrefHost+":"+hrefPort+"/abyss"+path+"/?v=" + token + "\">"+text+"</a>");
