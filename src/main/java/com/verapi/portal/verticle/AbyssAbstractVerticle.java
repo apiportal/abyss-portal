@@ -148,6 +148,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //It requires that the session handler is already present on previous matching routes
         //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
 
+        logger.info("createRouter() - "+jdbcClient.toString());
         jdbcAuth = JDBCAuth.create(vertx, jdbcClient);
 
         jdbcAuth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
@@ -253,6 +254,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                 .andThen(jdbcService.getJDBCServiceObject())
                 .subscribe(jdbcClient -> {
                     this.jdbcClient = jdbcClient;
+                    logger.info("initializeJdbcClient() - "+jdbcClient.toString());
                 });
 
         return Completable.complete();
