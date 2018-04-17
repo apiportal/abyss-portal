@@ -225,12 +225,21 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         return Completable.complete();
     }
 
-    protected Completable initializeJdbcClient() {
+    private Completable initializeJdbcClient() {
+/*
         jdbcService.publishDataSource().subscribe(() -> {
             jdbcService.getJDBCServiceObject().subscribe(jdbcClient -> {
                 this.jdbcClient = jdbcClient;
             });
         });
+*/
+
+        jdbcService.publishDataSource()
+                .andThen(jdbcService.getJDBCServiceObject())
+                .subscribe(jdbcClient -> {
+                    this.jdbcClient = jdbcClient;
+                });
+
         return Completable.complete();
     }
 
