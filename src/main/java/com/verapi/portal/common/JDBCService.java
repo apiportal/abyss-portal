@@ -14,7 +14,6 @@ package com.verapi.portal.common;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
@@ -35,6 +34,7 @@ public class JDBCService {
     }
 
     public Completable publishDataSource() {
+        logger.info("publishDataSource() running");
         record = JDBCDataSource.createRecord(
                 Constants.PORTAL_DATA_SOURCE_SERVICE,
                 new JsonObject().put("url", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_URL)),
@@ -51,10 +51,12 @@ public class JDBCService {
     }
 
     public Single<JDBCClient> getJDBCServiceObject() {
+        logger.info("getJDBCServiceObject() running");
         return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE));
     }
 
     public void releaseJDBCServiceObject(JDBCClient jdbcClient) {
+        logger.info("releaseJDBCServiceObject() running");
         ServiceDiscovery.releaseServiceObject(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), jdbcClient);
     }
 

@@ -122,6 +122,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     protected Completable createRouter() {
+
+        logger.info("createRouter() running");
         abyssRouter = Router.router(vertx);
         //publicRouter = Router.router(vertx);
 
@@ -205,6 +207,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     protected Completable createHttpServer() {
+        logger.info("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setCompressionSupported(true)
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
@@ -216,6 +219,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     protected Completable enableCorsSupport(Router router) {
+
+        logger.info("enableCorsSupport() running");
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");
         allowHeaders.add("Access-Control-Allow-Origin");
@@ -242,6 +247,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
             });
         });
 */
+        logger.info("initializeJdbcClient() running");
 
         jdbcService.publishDataSource()
                 .andThen(jdbcService.getJDBCServiceObject())
