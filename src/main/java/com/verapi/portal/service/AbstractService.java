@@ -13,7 +13,6 @@ package com.verapi.portal.service;
 
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Constants;
-import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
@@ -56,9 +55,8 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
         });
     }
 
-    private Single releaseJDBCServiceObject() {
+    private void releaseJDBCServiceObject() {
         ServiceDiscovery.releaseServiceObject(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), jdbcClient);
-        return Single.just(AbstractService.class);
     }
 
     @Override

@@ -339,9 +339,9 @@ public class MainVerticle extends AbstractVerticle {
 
         String templateFileName;
         if (statusCode==200) {
-            templateFileName = Constants.SUCCESS_HTML;
+            templateFileName = Constants.HTML_SUCCESS;
         } else {
-            templateFileName = Constants.HTTPERROR_HTML;
+            templateFileName = Constants.HTML_FAILURE;
         }
 
 //        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {

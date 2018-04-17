@@ -3,6 +3,7 @@ package com.verapi.portal;
 //import io.reactivex.Single;
 //import io.reactivex.disposables.Disposable;
 
+import com.verapi.portal.verticle.PortalVerticle;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -16,7 +17,7 @@ public class InitVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) {
 
-        vertx.rxDeployVerticle(MainVerticle.class.getName(), new DeploymentOptions().setHa(true))
+        vertx.rxDeployVerticle(PortalVerticle.class.getName(), new DeploymentOptions().setHa(true))
                 .flatMap(id -> vertx.rxDeployVerticle(MailVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .subscribe(id -> {
                     logger.info(System.getProperty("abyss-jar.name") + " MainVerticle and MailVerticle deployVerticle completed...");
