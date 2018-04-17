@@ -181,6 +181,8 @@ public class MainVerticle extends AbstractVerticle {
             router.route("/user-groups").handler(authHandler).failureHandler(this::failureHandler);
             router.get("/user-groups/management").handler(userGroups).failureHandler(this::failureHandler);
             router.get("/user-groups").handler(userGroups::pageRender).failureHandler(this::failureHandler);
+
+            router.route("/user-directories").handler(authHandler).failureHandler(this::failureHandler);
             router.get("/user-directories").handler(userGroups::dirPageRender).failureHandler(this::failureHandler);
 
             //TEST - router.get("/my-apis").handler(userGroups::apiPageRender).failureHandler(this::failureHandler);
