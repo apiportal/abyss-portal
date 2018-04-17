@@ -45,7 +45,7 @@ import java.util.Set;
 public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     private static Logger logger = LoggerFactory.getLogger(AbyssAbstractVerticle.class);
-    protected JDBCAuth jdbcAuth;
+    JDBCAuth jdbcAuth;
     private String host;
     private int port;
     private Router abyssRouter;
@@ -53,7 +53,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     //private Router publicRouter;
     private JDBCService jdbcService;
     protected JDBCClient jdbcClient;
-    AuthHandler authHandler;
+    private AuthHandler authHandler;
 
     /*    public AbyssAbstractVerticle(String host, int port, Router router) {
             this.host = host;
@@ -64,6 +64,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         this.jdbcService = new JDBCService(vertx);
+/*
         initializeJdbcClient().subscribe(() -> {
             createRouter().subscribe(() -> {
                 enableCorsSupport(router).subscribe(() -> {
@@ -71,6 +72,14 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                 }, startFuture::fail);
             }, startFuture::fail);
         }, startFuture::fail);
+*/
+
+        initializeJdbcClient()
+                .andThen(createRouter())
+                .andThen(enableCorsSupport(router))
+                .andThen(createHttpServer())
+                .subscribe(startFuture::complete, startFuture::fail);
+
     }
 
     protected void mountControllerRouter(HttpMethod method, String path, Handler<RoutingContext> requestHandler) {
