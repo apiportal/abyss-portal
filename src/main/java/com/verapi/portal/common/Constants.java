@@ -15,6 +15,8 @@ package com.verapi.portal.common;
 public class Constants {
 
     public static final String ABYSS = "abyss";
+    public static final String ABYSS_ROOT = "/"+ABYSS;
+
     public static final String ABYSS_PORTAL = "abyss-portal";
 
     public static final String HTTP_SERVER_HOST = "http.server.host";
@@ -25,8 +27,8 @@ public class Constants {
     public static final String HTTP_ERRORMESSAGE = "http.errorMessage";
     public static final String HTTP_URL = "http.url";
     public static final String HTTP_STATUSCODE = "http.statusCode";
-    public static final String HTTPERROR_HTML = "httperror.html";
-    public static final String SUCCESS_HTML = "success.html";
+    public static final String HTML_FAILURE = "failure.html";
+    public static final String HTML_SUCCESS = "success.html";
 
     public static final String PORTAL_JDBC_URL = "portal.jdbc.url";
     public static final String PORTAL_JDBC_DRIVER_CLASS = "portal.jdbc.driver.class";
@@ -36,8 +38,10 @@ public class Constants {
     public static final String PORTAL_DATA_SOURCE_SERVICE = "portal-data-source-service";
     public static final String PORTAL_DBQUERY_TIMEOUT = "portal.dbconn.query.timeout";
 
-    public static final String TEMPLATE_PREFIX = "webroot/";
+    public static final String TEMPLATE_DIR_ROOT = "webroot/";
+    public static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT +"email/";
     public static final String TEMPLATE_SUFFIX = ".html";
+
 
     public static final String LOG_LEVEL = "log.level";
     public static final String LOG_HTTPSERVER_ACTIVITY = "log.httpserver.activity";

@@ -17,6 +17,8 @@ import com.verapi.portal.common.Controllers;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.AuthProvider;
 import io.vertx.reactivex.ext.auth.User;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +27,15 @@ public class LoginController extends PortalAbstractController {
 
     private static Logger logger = LoggerFactory.getLogger(LoginController.class);
 
-    public LoginController(AuthProvider authProvider) {
-        super(authProvider);
+    public LoginController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        super(authProvider, jdbcClient);
     }
 
     @Override
-    public void defaultPostHandler(RoutingContext routingContext) {
-        logger.info("LoginController.defaultPostHandler invoked...");
+    public void defaultGetHandler(RoutingContext routingContext) {
+        logger.info("LoginController.defaultGetHandler invoked...");
 
+/*
         Boolean isUserActivated = routingContext.session().get("isUserActivated");
         if (isUserActivated == null) {
             isUserActivated = Boolean.FALSE;
@@ -40,6 +43,7 @@ public class LoginController extends PortalAbstractController {
         routingContext.session().put("isUserActivated", false);
 
         routingContext.put("isUserActivated", isUserActivated);
+*/
         // and now delegate to the engine to render it.
         renderTemplate(routingContext, Controllers.LOGIN.templateFileName);
     }
@@ -64,9 +68,7 @@ public class LoginController extends PortalAbstractController {
                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                 logger.info("Logged in user: " + user.principal().encodePrettily());
                 routingContext.put("username", user.principal().getString("username"));
-                final String abyssRootPath = "/" + Config.getInstance().getConfigJsonObject().getString(Constants.ABYSS);
-                routingContext.response().putHeader("location", abyssRootPath + "/index").setStatusCode(302).end();
-                logger.info("redirected../index");
+                redirect(routingContext, Constants.ABYSS_ROOT+"/index");
             } else {
                 routingContext.fail(401);
             }

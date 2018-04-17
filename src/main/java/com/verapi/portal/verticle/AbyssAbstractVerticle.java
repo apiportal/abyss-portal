@@ -14,7 +14,11 @@ package com.verapi.portal.verticle;
 
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.common.Controllers;
 import com.verapi.portal.common.JDBCService;
+import com.verapi.portal.controller.FailureController;
+import com.verapi.portal.controller.IController;
+import com.verapi.portal.controller.PortalAbstractController;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
 import io.vertx.core.Future;
@@ -34,19 +38,22 @@ import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     private static Logger logger = LoggerFactory.getLogger(AbyssAbstractVerticle.class);
-    private static final String abyssRootPath = "/" + Config.getInstance().getConfigJsonObject().getString(Constants.ABYSS);
     protected JDBCAuth jdbcAuth;
     private String host;
     private int port;
+    private Router abyssRouter;
     private Router router;
+    //private Router publicRouter;
     private JDBCService jdbcService;
     protected JDBCClient jdbcClient;
+    AuthHandler authHandler;
 
     /*    public AbyssAbstractVerticle(String host, int port, Router router) {
             this.host = host;
@@ -56,6 +63,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     */
     @Override
     public void start(Future<Void> startFuture) throws Exception {
+        this.jdbcService = new JDBCService(vertx);
         initializeJdbcClient().subscribe(() -> {
             createRouter().subscribe(() -> {
                 enableCorsSupport(router).subscribe(() -> {
@@ -66,7 +74,26 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     protected void mountControllerRouter(HttpMethod method, String path, Handler<RoutingContext> requestHandler) {
+        router.route("/" + path).handler(authHandler).failureHandler(this::failureHandler);
         router.route(method, "/" + path).handler(requestHandler).failureHandler(this::failureHandler);
+    }
+
+    protected void mountControllerRouter(HttpMethod method, String path, Handler<RoutingContext> requestHandler, Boolean isPublic) {
+        if (!isPublic)
+            router.route("/" + path).handler(authHandler).failureHandler(this::failureHandler);
+        router.route(method, "/" + path).handler(requestHandler).failureHandler(this::failureHandler);
+    }
+
+    //protected <T extends PortalAbstractController> void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef, IController<T> requestHandler) throws IllegalAccessException, InstantiationException {
+    void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        // T requestHandlerInstance = (T) requestHandler.getClass().newInstance();
+        //T t = (T) requestHandler;
+        //IController<PortalAbstractController> requestHandlerInstance = ((IController<PortalAbstractController>) (controllerDef.className.getClass())).newInstance();
+        IController<PortalAbstractController> requestHandlerInstance = (IController<PortalAbstractController>) controllerDef.className.getConstructor(JDBCAuth.class, JDBCClient.class).newInstance(jdbcAuth, jdbcClient);
+        if (!controllerDef.isPublic)
+            router.route("/" + controllerDef.routePathGET).handler(authHandler).failureHandler(this::failureHandler);
+        router.route(HttpMethod.GET, "/" + controllerDef.routePathGET).handler(requestHandlerInstance::defaultGetHandler).failureHandler(this::failureHandler);
+        router.route(HttpMethod.POST, "/" + controllerDef.routePathPOST).handler(requestHandlerInstance).failureHandler(this::failureHandler);
     }
 
     protected abstract void mountControllerRouters();
@@ -86,7 +113,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     protected Completable createRouter() {
-        Router abyssRouter = Router.router(vertx);
+        abyssRouter = Router.router(vertx);
+        //publicRouter = Router.router(vertx);
 
         //log HTTP requests
         abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
@@ -122,30 +150,38 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         abyssRouter.route().handler(UserSessionHandler.create(jdbcAuth));
 
         //An jdbcAuth handler that's used to handle jdbcAuth (provided by Shiro Auth prodiver) by redirecting user to a custom login page
-        AuthHandler authHandler = RedirectAuthHandler.create(jdbcAuth, abyssRootPath + "/login");
+        authHandler = RedirectAuthHandler.create(jdbcAuth, Constants.ABYSS_ROOT + "/login");
 
         //If a request times out before the response is written a 503 response will be returned to the client, timeout 5 secs
-        router.route().handler(TimeoutHandler.create(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_TIMEOUT)));
+        abyssRouter.route().handler(TimeoutHandler.create(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_TIMEOUT)));
+
+        //Handler which adds a header `x-response-time` in the response of matching requests containing the time taken in ms to process the request.
+        abyssRouter.route().handler(ResponseTimeHandler.create());
+        router.route().handler(ResponseTimeHandler.create());
 
         router.route("/logout").handler(context -> {
             context.clearUser();
-            context.response().putHeader("location", abyssRootPath+"/index").setStatusCode(302).end();
+            context.response().putHeader("location", Constants.ABYSS_ROOT + "/index").setStatusCode(302).end();
+            //todo: use redirect method
         });
 
         router.route("/").handler(context -> {
-            context.response().putHeader("location", abyssRootPath+"/index").setStatusCode(302).end();
+            context.response().putHeader("location", Constants.ABYSS_ROOT + "/index").setStatusCode(302).end();
+            //todo: use redirect method
         });
 
         abyssRouter.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
 
-        abyssRouter.mountSubRouter(abyssRootPath, router);
-
         //lastly mount all controllers
         mountControllerRouters();
 
-        abyssRouter.routeWithRegex("^"+abyssRootPath+"/[4|5][0|1]\\d$").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+        abyssRouter.mountSubRouter(Constants.ABYSS_ROOT, router);
 
-        abyssRouter.get(abyssRootPath+"/httperror").handler(this::pGenericHttpStatusCodeHandler).failureHandler(this::failureHandler);
+        FailureController failureController = new FailureController(jdbcAuth, jdbcClient);
+
+        abyssRouter.routeWithRegex("^" + Constants.ABYSS_ROOT + "/[4|5][0|1]\\d$").handler(failureController).failureHandler(this::failureHandler);
+
+        abyssRouter.get(Constants.ABYSS_ROOT + "/failure").handler(failureController).failureHandler(this::failureHandler);
 
         //only rendering page routings' failures shall be handled by using regex
         //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
@@ -165,7 +201,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage()))
-                .requestHandler(router::accept)
+                .requestHandler(abyssRouter::accept)
                 .rxListen(port, host)
                 .toCompletable();
     }
@@ -208,21 +244,13 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         context.session().put(Constants.HTTP_URL, context.request().path());
         logger.info(Constants.HTTP_URL + " is put in context session:" + context.session().get(Constants.HTTP_URL));
 
-        context.session().put(Constants.HTTP_ERRORMESSAGE, HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase());
+        context.session().put(Constants.HTTP_ERRORMESSAGE, context.statusCode() > 0 ? HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase() : "0");
         logger.info(Constants.HTTP_ERRORMESSAGE + " is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
 
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
         logger.info(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
-
-        String strStatusCode = String.valueOf(context.statusCode());
-
-        //if (strStatusCode.matches("[4|5][0|1]\")) //TODO: In the future...
-//        if (strStatusCode.matches("400|401|403|404|500")) {
-//            context.response().putHeader("location", "/" + strStatusCode).setStatusCode(302).end();
-//        } else {
-        context.response().putHeader("location", abyssRootPath+"/httperror").setStatusCode(302).end();
-//        }
+        context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
     }
 
     private void pGenericHttpStatusCodeHandler(RoutingContext context) {
@@ -241,7 +269,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         context.put(Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
 
-        String templateFileName = Constants.HTTPERROR_HTML;
+        String templateFileName = Constants.HTML_FAILURE;
 
 //        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {
 //            templateFileName = statusCode + ".html";

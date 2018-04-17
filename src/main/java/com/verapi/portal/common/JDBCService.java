@@ -15,6 +15,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
 import io.vertx.reactivex.servicediscovery.types.JDBCDataSource;
@@ -22,13 +23,15 @@ import io.vertx.servicediscovery.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JDBCService extends AbstractVerticle {
+public class JDBCService {
 
     private static Logger logger = LoggerFactory.getLogger(JDBCService.class);
+    protected Vertx vertx;
 
     private Record record;
 
-    public JDBCService() {
+    public JDBCService(Vertx vertx) {
+        this.vertx = vertx;
     }
 
     public Completable publishDataSource() {

@@ -16,6 +16,7 @@ import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.Controllers;
+import com.verapi.portal.common.MailUtil;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
@@ -37,17 +38,13 @@ public class SignupController extends PortalAbstractController {
     private Integer subjectId;
     private String authToken;
 
-    public SignupController(JDBCAuth authProvider) {
-        super(authProvider);
-    }
-
     public SignupController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
-    public void defaultPostHandler(RoutingContext routingContext) {
-        logger.info("SignupController.defaultPostHandler invoked...");
+    public void defaultGetHandler(RoutingContext routingContext) {
+        logger.info("SignupController.defaultGetHandler invoked...");
         renderTemplate(routingContext, Controllers.SIGNUP.templateFileName);
     }
 
@@ -190,7 +187,7 @@ public class SignupController extends PortalAbstractController {
                             json.put(Constants.EB_MSG_TOKEN, authToken);
                             json.put(Constants.EB_MSG_TO_EMAIL, email);
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
-                            json.put(Constants.EB_MSG_HTML_STRING, renderMailPage(routingContext,
+                            json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderActivationMailBody(routingContext,
                                     Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + authToken,
                                     Constants.ACTIVATION_TEXT));
 
@@ -205,39 +202,14 @@ public class SignupController extends PortalAbstractController {
 
         ).subscribe(result -> {
                     logger.info("Subscription to Signup successfull:" + result);
-                    generateResponse(routingContext, logger, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "");
+                    showTrxResult(routingContext, logger, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "");
                     //TODO: Send email to user
                 }, t -> {
                     logger.error("Signup Error", t);
-                    generateResponse(routingContext, logger, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "");
+                    showTrxResult(routingContext, logger, 403, "Signup Error Occured", t.getLocalizedMessage(), "");
                 }
         );
         super.handle(routingContext);
-    }
-
-    public String renderMailPage(RoutingContext routingContext, String activationUrl, String activationText) {
-        logger.info("renderMailPage invoked...");
-
-
-        // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
-
-        routingContext.put("url.activation", activationUrl);
-        routingContext.put("text.activation", activationText);
-        routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
-        // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/email/", "activate.html", res -> {
-            if (res.succeeded()) {
-                //routingContext.response().putHeader("Content-Type", "text/html");
-                //routingContext.response().end(res.result());
-
-                this.htmlString = res.result().toString("UTF-8");
-            } else {
-                routingContext.fail(res.cause());
-            }
-        });
-        return htmlString;
-
     }
 
 }
