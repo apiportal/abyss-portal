@@ -66,27 +66,32 @@ public class MailVerticle extends AbstractVerticle {
             String from;
             String subject;
             String text;
-            String path;
+            //String path;
             if (tokenType.equals(Constants.ACTIVATION_TOKEN)) {
                 from = Constants.MAIL_FROM_EMAIL_ACTIVATION;
                 subject = Constants.ACTIVATION_SUBJECT;
                 text = Constants.ACTIVATION_TEXT;
-                path = Constants.ACTIVATION_PATH;
+                //path = Constants.ACTIVATION_PATH;
             } else if (tokenType.equals(Constants.RESET_PASSWORD_TOKEN)) {
                 from = Constants.MAIL_FROM_EMAIL_RESET_PASSWORD;
                 subject = Constants.RESET_PASSWORD_SUBJECT;
                 text = Constants.RESET_PASSWORD_TEXT;
-                path = Constants.RESET_PASSWORD_PATH;
+                //path = Constants.RESET_PASSWORD_PATH;
             } else if (tokenType.equals(Constants.WELCOME_TOKEN)) {
                 from = Constants.MAIL_FROM_EMAIL_WELCOME;
                 subject = Constants.WELCOME_SUBJECT;
                 text = Constants.WELCOME_TEXT;
-                path = Constants.RESET_PASSWORD_PATH;
+                //path = Constants.RESET_PASSWORD_PATH;
+            } else if (tokenType.equals((Constants.PASSWORD_RESET_TOKEN))) {
+                from = Constants.MAIL_FROM_EMAIL_NOTIFICATION;
+                subject = Constants.PASSWORD_RESET_SUBJECT;
+                text = Constants.PASSWORD_RESET_TEXT;
+                //path = Constants.RESET_PASSWORD_PATH;
             } else {//TODO:handle token type is empty
                 from = Constants.MAIL_FROM_EMAIL_ACTIVATION;
                 subject = Constants.ACTIVATION_SUBJECT;
                 text = Constants.ACTIVATION_TEXT;
-                path = Constants.ACTIVATION_PATH;
+                //path = Constants.ACTIVATION_PATH;
             }
 
             if (token.isEmpty()) {
@@ -113,7 +118,6 @@ public class MailVerticle extends AbstractVerticle {
                 .setText(text)
                     //.setHeaders() //TODO: Oku
                 .setHtml(htmlString);
-                //.setHtml("<a href=\"http://"+hrefHost+":"+hrefPort+"/abyss"+path+"/?v=" + token + "\">"+text+"</a>");
 
             mailClient.sendMail(email, result -> {
                 if (result.succeeded()) {

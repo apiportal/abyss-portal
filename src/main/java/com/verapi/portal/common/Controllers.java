@@ -11,9 +11,12 @@
 
 package com.verapi.portal.common;
 
+import com.verapi.portal.controller.ActivateAccountController;
 import com.verapi.portal.controller.FailureController;
+import com.verapi.portal.controller.ForgotPasswordController;
 import com.verapi.portal.controller.IndexController;
 import com.verapi.portal.controller.LoginController;
+import com.verapi.portal.controller.ResetPasswordController;
 import com.verapi.portal.controller.SignupController;
 import com.verapi.portal.controller.SuccessController;
 
@@ -24,6 +27,9 @@ public class Controllers {
     public static final ControllerDef SIGNUP = new ControllerDef(SignupController.class, "signup", "sign-up", "signup.html", Boolean.TRUE);
     public static final ControllerDef TRX_OK = new ControllerDef(SuccessController.class, "success", "success", "success.html", Boolean.TRUE);
     public static final ControllerDef TRX_NOK = new ControllerDef(FailureController.class, "failure", "failure", "failure.html", Boolean.TRUE);
+    public static final ControllerDef ACTIVATE_ACCOUNT = new ControllerDef(ActivateAccountController.class, "activate-account", null, null, Boolean.TRUE);
+    public static final ControllerDef FORGOT_PASSWORD = new ControllerDef(ForgotPasswordController.class, "forgot-password", "forgot-password", "forgot-password.html", Boolean.TRUE);
+    public static final ControllerDef RESET_PASSWORD = new ControllerDef(ResetPasswordController.class, "reset-password", "reset-password", "reset-password.html", Boolean.TRUE);
 
     public Controllers() {
     }

@@ -74,11 +74,13 @@ public class Constants {
     public static final String COGITO_ACTIVATION_SUBJECT = "Activate Your Cogito Account";
     public static final String RESET_PASSWORD_SUBJECT = "Reset Your API Portal Password";
     public static final String WELCOME_SUBJECT = "Welcome to Abyss API Portal";
+    public static final String PASSWORD_RESET_SUBJECT = "Your Abyss API Portal Password Has Been Reset";
 
     public static final String ACTIVATION_TEXT = "Activate My API Portal Account";
     public static final String COGITO_ACTIVATION_TEXT = "Activate My Cogito Account";
     public static final String RESET_PASSWORD_TEXT = "Reset My API Portal Password";
     public static final String WELCOME_TEXT = "Login to Abyss API Portal";
+    public static final String PASSWORD_RESET_TEXT = "Your Abyss API Portal Password Has Been Reset. You Can Now Login to Abyss API Portal";
 
     public static final String ACTIVATION_PATH = "/activate-account";
     public static final String COGITO_ACTIVATION_PATH = "/activate-cogito";
@@ -87,8 +89,10 @@ public class Constants {
     public static final String ACTIVATION_TOKEN = "token.type.activation";
     public static final String RESET_PASSWORD_TOKEN = "token.type.reset.password";
     public static final String WELCOME_TOKEN = "token.type.welcome"; //No token
+    public static final String PASSWORD_RESET_TOKEN = "token.type.password.reset"; //No token
 
     public static final String MAIL_FROM_EMAIL_RESET_PASSWORD = "reset-password@apiportal.com (ABYSS API PORTAL)";
     public static final String MAIL_FROM_EMAIL_ACTIVATION = "activation@apiportal.com (ABYSS API PORTAL)";
     public static final String MAIL_FROM_EMAIL_WELCOME = "welcome@apiportal.com (ABYSS API PORTAL)";
+    public static final String MAIL_FROM_EMAIL_NOTIFICATION = "notification@apiportal.com (ABYSS API PORTAL)";
 }

@@ -63,6 +63,9 @@ public class PortalVerticle extends AbyssAbstractVerticle {
             mountControllerRouter(jdbcAuth, Controllers.INDEX);
             mountControllerRouter(jdbcAuth, Controllers.SIGNUP);
             mountControllerRouter(jdbcAuth, Controllers.TRX_OK);
+            mountControllerRouter(jdbcAuth, Controllers.ACTIVATE_ACCOUNT);
+            mountControllerRouter(jdbcAuth, Controllers.FORGOT_PASSWORD);
+            mountControllerRouter(jdbcAuth, Controllers.RESET_PASSWORD);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
