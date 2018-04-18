@@ -20,7 +20,7 @@ import com.verapi.portal.controller.FailureController;
 import com.verapi.portal.controller.IController;
 import com.verapi.portal.controller.PortalAbstractController;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.reactivex.Completable;
+import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -28,6 +28,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Router;
@@ -64,22 +65,12 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         this.jdbcService = new JDBCService(vertx);
-/*
-        initializeJdbcClient().subscribe(() -> {
-            createRouter().subscribe(() -> {
-                enableCorsSupport(router).subscribe(() -> {
-                    createHttpServer().subscribe(startFuture::complete, startFuture::fail);
-                }, startFuture::fail);
-            }, startFuture::fail);
-        }, startFuture::fail);
-*/
 
         initializeJdbcClient()
-                .andThen(createRouter())
-                .andThen(enableCorsSupport(router))
-                .andThen(createHttpServer())
-                .subscribe(startFuture::complete, startFuture::fail);
-
+                .flatMap(jdbcClient1 -> createRouter())
+                .flatMap(router1 ->  enableCorsSupport(router1))
+                .flatMap(router1 ->  createHttpServer())
+                .subscribe(httpServer -> {startFuture.complete();}, t -> {startFuture.fail(t);});
     }
 
     protected void mountControllerRouter(HttpMethod method, String path, Handler<RoutingContext> requestHandler) {
@@ -121,7 +112,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         this.router = router;
     }
 
-    protected Completable createRouter() {
+    protected Single<Router> createRouter() {
 
         logger.info("createRouter() running");
         abyssRouter = Router.router(vertx);
@@ -204,10 +195,10 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
             ctx.fail(404);
         });
 
-        return Completable.complete();
+        return Single.just(router);
     }
 
-    protected Completable createHttpServer() {
+    protected Single<HttpServer> createHttpServer() {
         logger.info("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setCompressionSupported(true)
@@ -215,11 +206,10 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage()))
                 .requestHandler(abyssRouter::accept)
-                .rxListen(port, host)
-                .toCompletable();
+                .rxListen(port, host);
     }
 
-    protected Completable enableCorsSupport(Router router) {
+    protected Single<Router> enableCorsSupport(Router router) {
 
         logger.info("enableCorsSupport() running");
         Set<String> allowHeaders = new HashSet<>();
@@ -237,27 +227,23 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                 .allowedMethod(HttpMethod.PATCH)
                 .allowedMethod(HttpMethod.PUT)
         );
-        return Completable.complete();
+        return Single.just(router);
     }
 
-    private Completable initializeJdbcClient() {
-/*
-        jdbcService.publishDataSource().subscribe(() -> {
-            jdbcService.getJDBCServiceObject().subscribe(jdbcClient -> {
-                this.jdbcClient = jdbcClient;
-            });
-        });
-*/
+    private Single<JDBCClient> initializeJdbcClient() {
+
         logger.info("initializeJdbcClient() running");
 
-        jdbcService.publishDataSource()
-                .andThen(jdbcService.getJDBCServiceObject())
-                .subscribe(jdbcClient -> {
-                    this.jdbcClient = jdbcClient;
-                    logger.info("initializeJdbcClient() - "+jdbcClient.toString());
+        return jdbcService.publishDataSource()
+                .flatMap(rec -> {
+                    logger.info("getting Jdbc Data Service ...");
+                    return jdbcService.getJDBCServiceObject();
+                })
+                .flatMap(jdbcClient1 -> {
+                    this.jdbcClient = jdbcClient1;
+                    logger.info("Got jdbcClient successfully - " + jdbcClient1.toString());
+                    return Single.just(jdbcClient1);
                 });
-
-        return Completable.complete();
     }
 
     private void failureHandler(RoutingContext context) {

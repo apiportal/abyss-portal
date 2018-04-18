@@ -33,7 +33,7 @@ public class JDBCService {
         this.vertx = vertx;
     }
 
-    public Completable publishDataSource() {
+    public Single<Record> publishDataSource() {
         logger.info("publishDataSource() running");
         record = JDBCDataSource.createRecord(
                 Constants.PORTAL_DATA_SOURCE_SERVICE,
@@ -43,7 +43,13 @@ public class JDBCService {
                         .put("password", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_PASSWORD))
                         .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE))
         );
-        return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).toCompletable();
+
+        return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).flatMap(record1 -> {
+
+            logger.info("publishDataSource() successful");
+            record = record1;
+            return Single.just(record1);
+        });
     }
 
     public Completable unpublishDataSource() {

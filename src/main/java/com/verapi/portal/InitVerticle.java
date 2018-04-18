@@ -20,10 +20,10 @@ public class InitVerticle extends AbstractVerticle {
         vertx.rxDeployVerticle(PortalVerticle.class.getName(), new DeploymentOptions().setHa(true))
                 .flatMap(id -> vertx.rxDeployVerticle(MailVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .subscribe(id -> {
-                    logger.info(System.getProperty("abyss-jar.name") + " MainVerticle and MailVerticle deployVerticle completed...");
+                    logger.info(System.getProperty("abyss-jar.name") + " PortalVerticle and MailVerticle deployVerticle completed...");
                     startFuture.complete();
                 }, t -> {
-                    logger.error("MainVerticle or MailVerticle deployVerticle failed..." + t);
+                    logger.error("PortalVerticle or MailVerticle deployVerticle failed..." + t);
                     startFuture.fail(t);
                 });
     }
