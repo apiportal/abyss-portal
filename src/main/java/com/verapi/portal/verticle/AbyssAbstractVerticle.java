@@ -14,7 +14,7 @@ package com.verapi.portal.verticle;
 
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.Controllers;
+import com.verapi.portal.controller.Controllers;
 import com.verapi.portal.common.JDBCService;
 import com.verapi.portal.controller.FailureController;
 import com.verapi.portal.controller.IController;

@@ -12,11 +12,9 @@
 package com.verapi.portal.controller;
 
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.Controllers;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

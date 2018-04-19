@@ -15,7 +15,6 @@ import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.Controllers;
 import com.verapi.portal.common.MailUtil;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
@@ -26,7 +25,6 @@ import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

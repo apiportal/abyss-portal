@@ -9,9 +9,10 @@
  *
  */
 
-package com.verapi.portal.common;
+package com.verapi.portal.controller;
 
 import com.verapi.portal.controller.ActivateAccountController;
+import com.verapi.portal.controller.ChangePasswordController;
 import com.verapi.portal.controller.FailureController;
 import com.verapi.portal.controller.ForgotPasswordController;
 import com.verapi.portal.controller.IndexController;
@@ -30,6 +31,8 @@ public class Controllers {
     public static final ControllerDef ACTIVATE_ACCOUNT = new ControllerDef(ActivateAccountController.class, "activate-account", null, null, Boolean.TRUE);
     public static final ControllerDef FORGOT_PASSWORD = new ControllerDef(ForgotPasswordController.class, "forgot-password", "forgot-password", "forgot-password.html", Boolean.TRUE);
     public static final ControllerDef RESET_PASSWORD = new ControllerDef(ResetPasswordController.class, "reset-password", "reset-password", "reset-password.html", Boolean.TRUE);
+    public static final ControllerDef CHANGE_PASSWORD = new ControllerDef(ChangePasswordController.class, "change-password", "change-password", "change-password.html");
+    public static final ControllerDef USERS = new ControllerDef(UsersController.class, "users", "users", "users.html");
 
     public Controllers() {
     }

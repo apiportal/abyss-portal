@@ -13,13 +13,8 @@ package com.verapi.portal.verticle;
 
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.Controllers;
-import com.verapi.portal.controller.FailureController;
-import com.verapi.portal.controller.IndexController;
-import com.verapi.portal.controller.LoginController;
-import com.verapi.portal.controller.SignupController;
+import com.verapi.portal.controller.Controllers;
 import io.vertx.core.Future;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.reactivex.ext.web.Router;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +61,8 @@ public class PortalVerticle extends AbyssAbstractVerticle {
             mountControllerRouter(jdbcAuth, Controllers.ACTIVATE_ACCOUNT);
             mountControllerRouter(jdbcAuth, Controllers.FORGOT_PASSWORD);
             mountControllerRouter(jdbcAuth, Controllers.RESET_PASSWORD);
+            mountControllerRouter(jdbcAuth, Controllers.CHANGE_PASSWORD);
+            mountControllerRouter(jdbcAuth, Controllers.USERS);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }

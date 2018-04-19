@@ -17,23 +17,22 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class IndexController extends PortalAbstractController {
+public class UsersController extends PortalAbstractController {
+    private static Logger logger = LoggerFactory.getLogger(UsersController.class);
 
-    private static Logger logger = LoggerFactory.getLogger(IndexController.class);
-
-    public IndexController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public UsersController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("IndexController.defaultGetHandler invoked...");
-        routingContext.put("user.name", routingContext.user().principal().getValue("username"));
-        renderTemplate(routingContext, Controllers.INDEX.templateFileName);
+        logger.info("UsersController.defaultGetHandler invoked...");
+        renderTemplate(routingContext, Controllers.USERS.templateFileName);
     }
 
     @Override
-    public void handle(RoutingContext event) {
-        super.handle(event);
+    public void handle(RoutingContext routingContext) {
+        logger.info("UsersController.handle invoked...");
     }
+
 }
