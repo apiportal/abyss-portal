@@ -14,13 +14,15 @@ package com.verapi.portal.service;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface IService<T> {
 
-    Completable init();
+    Single<JDBCClient> initJDBCClient();
 
     Single<T> insert(T t);
 
@@ -28,7 +30,8 @@ public interface IService<T> {
 
     Maybe<T> findById(final UUID uuid);
 
-    Single<List<T>> findAll();
+    //Single<List<T>> findAll();
+    Single<ResultSet> findAll();
 
     Maybe<T> update(final long id, T newT);
 

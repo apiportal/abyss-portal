@@ -11,8 +11,10 @@
 
 package com.verapi.portal.service;
 
+import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Constants;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
@@ -27,10 +29,34 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
 
     protected Vertx vertx;
     protected JDBCClient jdbcClient;
+    private AbyssJDBCService abyssJDBCService;
 
-    public AbstractService(Vertx vertx) {
+    public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) throws Exception {
+        logger.info("AbstractService() invoked " + vertx + abyssJDBCService);
         this.vertx = vertx;
-        getJDBCServiceObject();
+        this.abyssJDBCService = abyssJDBCService;
+    }
+
+    public AbstractService(Vertx vertx) throws Exception {
+        logger.info("AbstractService() invoked " + vertx);
+        this.vertx = vertx;
+    }
+
+    public Single<JDBCClient> initJDBCClient() {
+        logger.info("AbstractService() initJDBCClient ok");
+/*
+        return abyssJDBCService.getJDBCServiceObject(Constants.API_DATA_SOURCE_SERVICE)
+                .flatMap(jdbcClient1 -> {
+                    this.jdbcClient = jdbcClient1;
+                    return Single.just(jdbcClient1);
+                });
+*/
+
+        return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.API_DATA_SOURCE_SERVICE))
+                .flatMap(jdbcClient1 -> {
+                    this.jdbcClient = jdbcClient1;
+                    return Single.just(jdbcClient1);
+                });
     }
 
     public Vertx getVertx() {
@@ -49,18 +75,8 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
         this.jdbcClient = jdbcClient;
     }
 
-    private void getJDBCServiceObject() {
-        JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE)).subscribe(jdbcClient -> {
-            this.jdbcClient = jdbcClient;
-        });
-    }
-
-    private void releaseJDBCServiceObject() {
-        ServiceDiscovery.releaseServiceObject(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), jdbcClient);
-    }
-
     @Override
     public void close() throws Exception {
-        releaseJDBCServiceObject();
+        abyssJDBCService.releaseJDBCServiceObject(jdbcClient);
     }
 }

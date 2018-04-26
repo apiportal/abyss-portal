@@ -11,20 +11,14 @@
 
 package com.verapi.portal.verticle;
 
-
+import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.controller.Controllers;
-import com.verapi.portal.common.JDBCService;
 import com.verapi.portal.controller.FailureController;
-import com.verapi.portal.controller.IController;
-import com.verapi.portal.controller.PortalAbstractController;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -35,91 +29,103 @@ import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.handler.*;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     private static Logger logger = LoggerFactory.getLogger(AbyssAbstractVerticle.class);
-    JDBCAuth jdbcAuth;
-    private String host;
-    private int port;
-    private Router abyssRouter;
-    private Router router;
-    //private Router publicRouter;
-    private JDBCService jdbcService;
-    protected JDBCClient jdbcClient;
-    private AuthHandler authHandler;
+    //####### static #######
+    Router abyssRouter;
+    //##### static - end #####
 
-    /*    public AbyssAbstractVerticle(String host, int port, Router router) {
-            this.host = host;
-            this.port = port;
-            this.router = router;
-        }
-    */
+    private AbyssJDBCService abyssJDBCService;
+    JDBCClient jdbcClient;
+    AuthHandler authHandler;
+    JDBCAuth jdbcAuth;
+    String verticleHost;
+    int serverPort;
+    Router verticleRouter;
+
+
+    //#########################################################
+    public Router getVerticleRouter() {
+        return verticleRouter;
+    }
+
+    public void setVerticleRouter(Router verticleRouter) {
+        this.verticleRouter = verticleRouter;
+    }
+
+    void setVerticleHost(String verticleHost) {
+        this.verticleHost = verticleHost;
+    }
+
+    void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
+    }
+
+    public AbyssJDBCService getAbyssJDBCService() {
+        return abyssJDBCService;
+    }
+
+    void setAbyssJDBCService(AbyssJDBCService abyssJDBCService) {
+        this.abyssJDBCService = abyssJDBCService;
+    }
+
+    //#########################################################
+
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        this.jdbcService = new JDBCService(vertx);
-
-        initializeJdbcClient()
-                .flatMap(jdbcClient1 -> createRouter())
-                .flatMap(router1 ->  enableCorsSupport(router1))
-                .flatMap(router1 ->  createHttpServer())
-                .subscribe(httpServer -> {startFuture.complete();}, t -> {startFuture.fail(t);});
+        logger.info("AbyssAbstractVerticle.start invoked");
+        super.start(startFuture);
     }
-
-    protected void mountControllerRouter(HttpMethod method, String path, Handler<RoutingContext> requestHandler) {
-        router.route("/" + path).handler(authHandler).failureHandler(this::failureHandler);
-        router.route(method, "/" + path).handler(requestHandler).failureHandler(this::failureHandler);
-    }
-
-    protected void mountControllerRouter(HttpMethod method, String path, Handler<RoutingContext> requestHandler, Boolean isPublic) {
-        if (!isPublic)
-            router.route("/" + path).handler(authHandler).failureHandler(this::failureHandler);
-        router.route(method, "/" + path).handler(requestHandler).failureHandler(this::failureHandler);
-    }
-
-    //protected <T extends PortalAbstractController> void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef, IController<T> requestHandler) throws IllegalAccessException, InstantiationException {
-    void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        // T requestHandlerInstance = (T) requestHandler.getClass().newInstance();
-        //T t = (T) requestHandler;
-        //IController<PortalAbstractController> requestHandlerInstance = ((IController<PortalAbstractController>) (controllerDef.className.getClass())).newInstance();
-        IController<PortalAbstractController> requestHandlerInstance = (IController<PortalAbstractController>) controllerDef.className.getConstructor(JDBCAuth.class, JDBCClient.class).newInstance(jdbcAuth, jdbcClient);
-        if (!controllerDef.isPublic)
-            router.route("/" + controllerDef.routePathGET).handler(authHandler).failureHandler(this::failureHandler);
-        router.route(HttpMethod.GET, "/" + controllerDef.routePathGET).handler(requestHandlerInstance::defaultGetHandler).failureHandler(this::failureHandler);
-        router.route(HttpMethod.POST, "/" + controllerDef.routePathPOST).handler(requestHandlerInstance).failureHandler(this::failureHandler);
-    }
-
-    protected abstract void mountControllerRouters();
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
+        logger.info("AbyssAbstractVerticle.stop invoked");
         jdbcClient.close();
-        jdbcService.releaseJDBCServiceObject(jdbcClient);
-        jdbcService.unpublishDataSource();
+        abyssJDBCService.releaseJDBCServiceObject(jdbcClient);
+        abyssJDBCService.unpublishDataSource();
         super.stop(stopFuture);
     }
 
-    public void setHostParams(String host, int port, Router router) {
-        this.host = host;
-        this.port = port;
-        this.router = router;
+
+    //#########################################################
+    Single<Router> createRouters() {
+        abyssRouter = Router.router(vertx);
+        verticleRouter = Router.router(vertx);
+        return configureAbyssRouter();
     }
 
-    protected Single<Router> createRouter() {
+    Single<JDBCClient> initializeJdbcClient(String dataSourceName) {
+
+        logger.info("AbyssAbstractVerticle.initializeJdbcClient() running");
+
+        return abyssJDBCService.publishDataSource(dataSourceName)
+                .flatMap(rec -> {
+                    logger.info("AbyssAbstractVerticle - getting Jdbc Data Service ...");
+                    return abyssJDBCService.getJDBCServiceObject(dataSourceName);
+                })
+                .flatMap(jdbcClient1 -> {
+                    this.jdbcClient = jdbcClient1;
+                    logger.info("AbyssAbstractVerticle - Got jdbcClient successfully - " + jdbcClient1.toString());
+                    return Single.just(jdbcClient1);
+                });
+    }
+
+    protected abstract Single<HttpServer> createHttpServer();
+
+    private Single<Router> configureAbyssRouter() {
 
         logger.info("createRouter() running");
-        abyssRouter = Router.router(vertx);
-        //publicRouter = Router.router(vertx);
 
         //log HTTP requests
         abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+
         //firstly install cookie handler
         //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
         abyssRouter.route().handler(CookieHandler.create());
@@ -139,7 +145,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //It requires that the session handler is already present on previous matching routes
         //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
 
-        logger.info("createRouter() - "+jdbcClient.toString());
+        logger.info("createRouter() - " + jdbcClient.toString());
         jdbcAuth = JDBCAuth.create(vertx, jdbcClient);
 
         jdbcAuth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
@@ -160,25 +166,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         //Handler which adds a header `x-response-time` in the response of matching requests containing the time taken in ms to process the request.
         abyssRouter.route().handler(ResponseTimeHandler.create());
-        router.route().handler(ResponseTimeHandler.create());
-
-        router.route("/logout").handler(context -> {
-            context.clearUser();
-            context.response().putHeader("location", Constants.ABYSS_ROOT + "/index").setStatusCode(302).end();
-            //todo: use redirect method
-        });
-
-        router.route("/").handler(context -> {
-            context.response().putHeader("location", Constants.ABYSS_ROOT + "/index").setStatusCode(302).end();
-            //todo: use redirect method
-        });
 
         abyssRouter.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
-
-        //lastly mount all controllers
-        mountControllerRouters();
-
-        abyssRouter.mountSubRouter(Constants.ABYSS_ROOT, router);
 
         FailureController failureController = new FailureController(jdbcAuth, jdbcClient);
 
@@ -190,27 +179,10 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
         abyssRouter.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
 
-        abyssRouter.route().handler(ctx -> {
-            logger.info("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
-            ctx.fail(404);
-        });
-
-        return Single.just(router);
+        return Single.just(abyssRouter);
     }
 
-    protected Single<HttpServer> createHttpServer() {
-        logger.info("createHttpServer() running");
-        HttpServerOptions httpServerOptions = new HttpServerOptions()
-                .setCompressionSupported(true)
-                .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
-        return vertx.createHttpServer(httpServerOptions)
-                .exceptionHandler(event -> logger.error(event.getLocalizedMessage()))
-                .requestHandler(abyssRouter::accept)
-                .rxListen(port, host);
-    }
-
-    protected Single<Router> enableCorsSupport(Router router) {
-
+    Single<Router> enableCorsSupport(Router router) {
         logger.info("enableCorsSupport() running");
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");
@@ -230,27 +202,11 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         return Single.just(router);
     }
 
-    private Single<JDBCClient> initializeJdbcClient() {
-
-        logger.info("initializeJdbcClient() running");
-
-        return jdbcService.publishDataSource()
-                .flatMap(rec -> {
-                    logger.info("getting Jdbc Data Service ...");
-                    return jdbcService.getJDBCServiceObject();
-                })
-                .flatMap(jdbcClient1 -> {
-                    this.jdbcClient = jdbcClient1;
-                    logger.info("Got jdbcClient successfully - " + jdbcClient1.toString());
-                    return Single.just(jdbcClient1);
-                });
-    }
-
-    private void failureHandler(RoutingContext context) {
+    void failureHandler(RoutingContext context) {
         logger.info("failureHandler invoked.. statusCode: " + context.statusCode());
 
         //Use user's session for storage
-        context.session().put(Constants.HTTP_STATUSCODE, new Integer(context.statusCode()));
+        context.session().put(Constants.HTTP_STATUSCODE, context.statusCode());
         logger.info(Constants.HTTP_STATUSCODE + " is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
 
         context.session().put(Constants.HTTP_URL, context.request().path());
@@ -265,39 +221,5 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
     }
 
-    private void pGenericHttpStatusCodeHandler(RoutingContext context) {
-
-        logger.info("pGenericHttpStatusCodeHandler invoked...");
-        Integer statusCode = context.session().get(Constants.HTTP_STATUSCODE);
-        logger.info("pGenericHttpStatusCodeHandler - status code: " + statusCode);
-
-        // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
-        //configureThymeleafEngine(engine);
-
-        context.put(Constants.HTTP_STATUSCODE, statusCode);
-        context.put(Constants.HTTP_URL, context.session().get(Constants.HTTP_URL));
-        context.put(Constants.HTTP_ERRORMESSAGE, context.session().get(Constants.HTTP_ERRORMESSAGE));
-        context.put(Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
-
-
-        String templateFileName = Constants.HTML_FAILURE;
-
-//        if (String.valueOf(statusCode).matches("400|401|403|404|500")) {
-//            templateFileName = statusCode + ".html";
-//        }
-
-        // and now delegate to the engine to render it.
-        engine.render(context, "webroot/", templateFileName, res -> {
-            if (res.succeeded()) {
-                context.response().putHeader("Content-Type", "text/html");
-                context.response().setStatusCode(statusCode);
-                context.response().end(res.result());
-            } else {
-                logger.error("pGenericHttpStatusCodeHandler - engine render failed with cause:" + res.cause().getLocalizedMessage());
-                context.fail(res.cause());
-            }
-        });
-    }
 
 }
