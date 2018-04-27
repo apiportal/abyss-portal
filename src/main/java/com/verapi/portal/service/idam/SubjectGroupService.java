@@ -68,7 +68,7 @@ public class SubjectGroupService extends AbstractService<SubjectGroup> {
                                 return Single.just(resultSet);
                             } else {
                                 logger.info("SubjectGroupService findAll() # of records : 0");
-                                return Single.error(new Exception("SubjectGroupService findAll() # of records : 0"));
+                                return Single.just(resultSet);
                             }
                         })
                         // close the connection regardless succeeded or failed
