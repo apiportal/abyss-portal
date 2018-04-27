@@ -11,6 +11,9 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import com.verapi.portal.entity.idam.Subject;
 import com.verapi.portal.service.AbstractService;
 import io.reactivex.Completable;
@@ -31,13 +34,14 @@ public class SubjectService extends AbstractService<Subject> {
 
     private static Logger logger = LoggerFactory.getLogger(SubjectService.class);
 
-    public SubjectService(Vertx vertx) {
-        super(vertx);
+    public SubjectService(Vertx vertx, AbyssJDBCService abyssJDBCService) throws Exception {
+        super(vertx, abyssJDBCService);
+        logger.info("SubjectService() invoked " + vertx + abyssJDBCService);
     }
 
-    @Override
-    public Completable init() {
-        return null;
+    public SubjectService(Vertx vertx) throws Exception {
+        super(vertx);
+        logger.info("SubjectService() invoked " + vertx);
     }
 
     @Override
@@ -84,12 +88,39 @@ public class SubjectService extends AbstractService<Subject> {
                 .map(Subject::new);
     }
 
-    @Override
-    public Single<List<Subject>> findAll() {
+
+    public Single<List<Subject>> findAllEntity() {
+        logger.info("SubjectService findAll() invoked" + jdbcClient);
         return jdbcClient.rxQuery(SQL_FIND_ALL)
                 .map(ar -> ar.getRows().stream()
                         .map(Subject::new)
                         .collect(Collectors.toList())
+                );
+    }
+
+    @Override
+    public Single<ResultSet> findAll() {
+        logger.info("SubjectService findAll() invoked" + jdbcClient);
+        return jdbcClient
+                .rxGetConnection().flatMap(conn -> conn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
+                        // Disable auto commit to handle transaction manually
+                        .rxSetAutoCommit(false)
+                        // Switch from Completable to default Single value
+                        .toSingleDefault(false)
+                        //Check if user already exists
+                        .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_COMPACT))
+                        .flatMap(resultSet -> {
+                            if (resultSet.getNumRows() > 0) {
+                                logger.info("SubjectService findAll() # of records :[" + resultSet.getNumRows() + "]");
+                                return Single.just(resultSet);
+                            } else {
+                                logger.info("SubjectService findAll() # of records : 0");
+                                return Single.error(new Exception("SubjectService findAll() # of records : 0"));
+                            }
+                        })
+                        // close the connection regardless succeeded or failed
+                        .doAfterTerminate(conn::close)
                 );
     }
 
@@ -179,5 +210,23 @@ public class SubjectService extends AbstractService<Subject> {
             "WHERE id = ?";
     private static final String SQL_UPDATE_IS_DELETED = "UPDATE Subject SET is_deleted = ? WHERE id = ?";
     private static final String SQL_UPDATE_EFFECTIVE_END_DATE = "UPDATE Subject SET effective_end_date = ? WHERE id = ?";
-
+    private static final String SQL_FIND_ALL_COMPACT = "SELECT " +
+            "uuid," +
+            //"organization_id," +
+            "created," +
+            "updated," +
+            "deleted," +
+            "is_deleted," +
+            //"crud_subject_id," +
+            "is_activated," +
+            //"subject_type_id," +
+            "subject_name," +
+            "first_name," +
+            "last_name," +
+            "display_name," +
+            "email," +
+            //"secondary_email," +
+            "effective_start_date," +
+            "effective_end_date " +
+            "FROM portalschema.SUBJECT ORDER BY SUBJECT_NAME";
 }

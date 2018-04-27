@@ -22,21 +22,21 @@ import io.vertx.servicediscovery.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JDBCService {
+public class AbyssJDBCService {
 
-    private static Logger logger = LoggerFactory.getLogger(JDBCService.class);
+    private static Logger logger = LoggerFactory.getLogger(AbyssJDBCService.class);
     protected Vertx vertx;
 
     private Record record;
 
-    public JDBCService(Vertx vertx) {
+    public AbyssJDBCService(Vertx vertx) {
         this.vertx = vertx;
     }
 
-    public Single<Record> publishDataSource() {
-        logger.info("publishDataSource() running");
+    public Single<Record> publishDataSource(String dataSourceName) {
+        logger.info("AbyssJDBCService.publishDataSource() running");
         record = JDBCDataSource.createRecord(
-                Constants.PORTAL_DATA_SOURCE_SERVICE,
+                dataSourceName,
                 new JsonObject().put("url", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_URL)),
                 new JsonObject().put("driver_class", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_DRIVER_CLASS))
                         .put("user", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_NAME))
@@ -46,23 +46,24 @@ public class JDBCService {
 
         return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).flatMap(record1 -> {
 
-            logger.info("publishDataSource() successful");
+            logger.info("AbyssJDBCService.publishDataSource() successful");
             record = record1;
             return Single.just(record1);
         });
     }
 
     public Completable unpublishDataSource() {
-        return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).toCompletable();
+        logger.info("AbyssJDBCService.unpublishDataSource() running");
+        return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxUnpublish(record.getRegistration());
     }
 
-    public Single<JDBCClient> getJDBCServiceObject() {
-        logger.info("getJDBCServiceObject() running");
-        return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE));
+    public Single<JDBCClient> getJDBCServiceObject(String dataSourceName) {
+        logger.info("AbyssJDBCService.getJDBCServiceObject() running");
+        return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", dataSourceName));
     }
 
     public void releaseJDBCServiceObject(JDBCClient jdbcClient) {
-        logger.info("releaseJDBCServiceObject() running");
+        logger.info("AbyssJDBCService.releaseJDBCServiceObject() running");
         ServiceDiscovery.releaseServiceObject(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), jdbcClient);
     }
 

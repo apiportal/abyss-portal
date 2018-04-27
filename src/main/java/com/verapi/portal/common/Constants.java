@@ -23,6 +23,11 @@ public class Constants {
     public static final String HTTP_SERVER_PORT = "http.server.port";
     public static final String HTTP_SERVER_TIMEOUT = "http.server.timeout";
 
+    public static final String HTTP_API_SERVER_HOST = "http.api.server.host";
+    public static final String HTTP_API_SERVER_PORT = "http.api.server.port";
+    public static final String HTTP_API_SERVER_TIMEOUT = "http.api.server.timeout";
+    public static final String EB_API_SERVER_ADDRESS = "eb.api.server.address";
+
     public static final String CONTEXT_FAILURE_MESSAGE = "context.failureMessage";
     public static final String HTTP_ERRORMESSAGE = "http.errorMessage";
     public static final String HTTP_URL = "http.url";
@@ -37,6 +42,8 @@ public class Constants {
     public static final String PORTAL_DBCONN_MAX_POOL_SIZE = "portal.dbconn.max.pool.size";
     public static final String PORTAL_DATA_SOURCE_SERVICE = "portal-data-source-service";
     public static final String PORTAL_DBQUERY_TIMEOUT = "portal.dbconn.query.timeout";
+
+    public static final String API_DATA_SOURCE_SERVICE = "api-data-source-service";
 
     public static final String TEMPLATE_DIR_ROOT = "webroot/";
     public static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT +"email/";

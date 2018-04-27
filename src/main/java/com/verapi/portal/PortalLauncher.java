@@ -49,9 +49,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
         System.setProperty("abyss-jar.name", new java.io.File(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
 
+        attachShutDownHook();
+
         new PortalLauncher()
                 .register(PortalVersionCommand.class)
                 .dispatch(args);
+
     }
 
 
@@ -157,4 +160,15 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     public void handleDeployFailed(Vertx vertx, String s, DeploymentOptions deploymentOptions, Throwable throwable) {
 
     }
+
+    private static void attachShutDownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                System.out.println("Inside Add Shutdown Hook");
+            }
+        });
+        System.out.println("Shut Down Hook Attached");
+    }
+
 }

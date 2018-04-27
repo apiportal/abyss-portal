@@ -399,7 +399,7 @@ public class MainVerticle extends AbstractVerticle {
     }
 */
     /* (non-Javadoc)
-     * @see io.vertx.reactivex.core.AbstractVerticle#stop()
+     * @see io.vertx.reactivex.core.AbyssAbstractVerticle#stop()
      */
     @Override
     public void stop() throws Exception {

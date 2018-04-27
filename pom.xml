@@ -14,7 +14,7 @@
 
     <groupId>com.verapi.abyss.portal</groupId>
     <artifactId>abyss-portal</artifactId>
-<!--     <version>1.0.0-SNAPSHOT</version> -->
+    <!--     <version>1.0.0-SNAPSHOT</version> -->
     <packaging>jar</packaging>
 
     <name>Verapi Web Abyss API Portal Project</name>
@@ -65,7 +65,7 @@
     </issueManagement>
 
     <properties>
-        <main.verticle>com.verapi.portal.InitVerticle</main.verticle>
+        <main.verticle>com.verapi.portal.verticle.InitVerticle</main.verticle>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <reporting>
@@ -99,10 +99,10 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
         </dependency>
-		<dependency>
-			<groupId>io.vertx</groupId>
-			<artifactId>vertx-rx-java2</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-rx-java2</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-unit</artifactId>
@@ -198,29 +198,37 @@
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
-            <version>2.1.9</version>
         </dependency>
         <dependency>
             <groupId>org.reactivestreams</groupId>
             <artifactId>reactive-streams</artifactId>
-            <version>1.0.2</version>
         </dependency>
-
-<!--         <dependency> -->
-<!--         	<groupId>joda-time</groupId> -->
-<!--         	<artifactId>joda-time</artifactId> -->
-<!--         	<version>2.9.9</version> -->
-<!--         </dependency> -->
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-vertx</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-wadl</artifactId>
-            <version>3.5.1.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxrs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.lukehutch</groupId>
+            <artifactId>fast-classpath-scanner</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jaxrs</artifactId>
             <version>1.5.13</version>
         </dependency>
+        <!--         <dependency> -->
+        <!--         	<groupId>joda-time</groupId> -->
+        <!--         	<artifactId>joda-time</artifactId> -->
+        <!--         	<version>2.9.9</version> -->
+        <!--         </dependency> -->
     </dependencies>
 
     <build>
