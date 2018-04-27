@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
+@AbyssController(routePathGET = "forgot-password", routePathPOST = "forgot-password", htmlTemplateFile = "forgot-password.html", isPublic = true)
 public class ForgotPasswordController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(ForgotPasswordController.class);
 

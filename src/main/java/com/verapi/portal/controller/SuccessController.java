@@ -18,6 +18,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@AbyssController(routePathGET = "success", routePathPOST = "success", htmlTemplateFile = "success.html", isPublic = true)
 public class SuccessController extends PortalAbstractController {
 
     private static Logger logger = LoggerFactory.getLogger(SuccessController.class);

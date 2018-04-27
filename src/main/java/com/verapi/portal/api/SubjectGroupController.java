@@ -65,7 +65,7 @@ public class SubjectGroupController extends ApiAbstractController {
                                 .put("last", true)
                                 .put("first", true)
                                 .put("sort", "ASC GROUP NAME");
-                        logger.info(jsonObject.encodePrettily());
+                        logger.trace(jsonObject.encodePrettily());
                         return Single.just(jsonObject);
                     });
 
@@ -76,7 +76,7 @@ public class SubjectGroupController extends ApiAbstractController {
                                 .entity(resp.encode())
                                 .build());
 
-                        logger.info("SubjectGroupController.getAll() replied successfully " + resp.encodePrettily());
+                        logger.trace("SubjectGroupController.getAll() replied successfully " + resp.encodePrettily());
                     },
                     throwable -> {
                         asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(throwable).build());

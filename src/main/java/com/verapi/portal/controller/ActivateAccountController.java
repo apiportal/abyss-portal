@@ -26,6 +26,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@AbyssController(routePathGET = "activate-account", routePathPOST = "", htmlTemplateFile = "", isPublic = true)
 public class ActivateAccountController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(ActivateAccountController.class);
 

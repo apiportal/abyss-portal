@@ -26,6 +26,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@AbyssController(routePathGET = "reset-password", routePathPOST = "reset-password", htmlTemplateFile = "reset-password.html", isPublic = true)
 public class ResetPasswordController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(ResetPasswordController.class);
 

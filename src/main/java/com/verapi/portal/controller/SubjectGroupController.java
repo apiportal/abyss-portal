@@ -17,6 +17,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@AbyssController(routePathGET = "user-groups", routePathPOST = "user-groups", htmlTemplateFile = "user-groups.html")
 public class SubjectGroupController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(SubjectGroupController.class);
 

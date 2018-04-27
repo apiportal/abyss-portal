@@ -23,6 +23,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@AbyssController(routePathGET = "change-password", routePathPOST = "change-password", htmlTemplateFile = "change-password.html")
 public class ChangePasswordController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(ChangePasswordController.class);
 

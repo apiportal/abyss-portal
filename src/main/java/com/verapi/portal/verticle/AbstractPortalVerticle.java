@@ -84,8 +84,8 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
             ctx.fail(404);
         });
 
-        logger.info("verticle routers : " + verticleRouter.getRoutes().toString());
-        logger.info("abyss routers : " + abyssRouter.getRoutes().toString());
+        logger.trace("verticle routers : " + verticleRouter.getRoutes().toString());
+        logger.trace("abyss routers : " + abyssRouter.getRoutes().toString());
 
         return Single.just(verticleRouter);
     }

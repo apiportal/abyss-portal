@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
+@AbyssController(routePathGET = "signup", routePathPOST = "sign-up", htmlTemplateFile = "sign-up.html", isPublic = true)
 public class SignupController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(SignupController.class);
 

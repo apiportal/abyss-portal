@@ -179,7 +179,7 @@ public class SubjectController extends ApiAbstractController {
                                 .put("last", true)
                                 .put("first", true)
                                 .put("sort", "ASC SUBJECT NAME");
-                        logger.info(jsonObject.encodePrettily());
+                        logger.trace(jsonObject.encodePrettily());
                         return Single.just(jsonObject);
                     });
 
@@ -190,7 +190,7 @@ public class SubjectController extends ApiAbstractController {
                                 .entity(resp.encode())
                                 .build());
 
-                        logger.info("SubjectController.getAll() replied successfully " + resp.encodePrettily());
+                        logger.trace("SubjectController.getAll() replied successfully " + resp.encodePrettily());
                     },
                     throwable -> {
                         asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(throwable).build());
