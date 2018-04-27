@@ -11,16 +11,6 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.portal.controller.ActivateAccountController;
-import com.verapi.portal.controller.ChangePasswordController;
-import com.verapi.portal.controller.FailureController;
-import com.verapi.portal.controller.ForgotPasswordController;
-import com.verapi.portal.controller.IndexController;
-import com.verapi.portal.controller.LoginController;
-import com.verapi.portal.controller.ResetPasswordController;
-import com.verapi.portal.controller.SignupController;
-import com.verapi.portal.controller.SuccessController;
-
 public class Controllers {
 
     public static final ControllerDef LOGIN = new ControllerDef(LoginController.class, "login", "login-auth", "login.html", Boolean.TRUE);
@@ -33,6 +23,7 @@ public class Controllers {
     public static final ControllerDef RESET_PASSWORD = new ControllerDef(ResetPasswordController.class, "reset-password", "reset-password", "reset-password.html", Boolean.TRUE);
     public static final ControllerDef CHANGE_PASSWORD = new ControllerDef(ChangePasswordController.class, "change-password", "change-password", "change-password.html");
     public static final ControllerDef USERS = new ControllerDef(UsersController.class, "users", "users", "users.html");
+    public static final ControllerDef SUBJECTGROUP = new ControllerDef(SubjectGroupController.class, "user-groups", "user-groups", "user-groups.html");
 
     public Controllers() {
     }

@@ -15,16 +15,11 @@ import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.service.idam.SubjectService;
-import com.verapi.portal.verticle.AbyssAbstractVerticle;
-import com.verapi.portal.verticle.ApiHttpServerVerticle;
 import io.reactivex.Single;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.reactivex.core.http.HttpServer;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +27,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
@@ -157,7 +153,10 @@ public class SubjectController extends ApiAbstractController {
             @Suspended final AsyncResponse asyncResponse,
 
             // Inject the Vertx instance
-            @Context io.vertx.core.Vertx vertx
+            @Context io.vertx.core.Vertx vertx,
+
+            @QueryParam("q") String subjectName
+
     ) {
         logger.info("SubjectController.getAll() invoked");
 
@@ -168,7 +167,7 @@ public class SubjectController extends ApiAbstractController {
             SubjectService subjectService = new SubjectService(reactiveVertx);
 
             Single<JsonObject> apiResponse = subjectService.initJDBCClient()
-                    .flatMap(jdbcClient -> subjectService.findAll())
+                    .flatMap(jdbcClient -> (subjectName == null) ? subjectService.findAll() : subjectService.filterBySubjectName(subjectName))
                     .flatMap(result -> {
                         JsonObject jsonObject = new JsonObject()
                                 .put("statusCode", "200")

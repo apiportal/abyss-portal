@@ -13,6 +13,7 @@ package com.verapi.portal.service;
 
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
+import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
@@ -44,20 +45,30 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
 
     public Single<JDBCClient> initJDBCClient() {
         logger.info("AbstractService() initJDBCClient ok");
+
 /*
-        return abyssJDBCService.getJDBCServiceObject(Constants.API_DATA_SOURCE_SERVICE)
+        return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.API_DATA_SOURCE_SERVICE))
                 .flatMap(jdbcClient1 -> {
                     this.jdbcClient = jdbcClient1;
                     return Single.just(jdbcClient1);
                 });
 */
 
-        return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.API_DATA_SOURCE_SERVICE))
-                .flatMap(jdbcClient1 -> {
-                    this.jdbcClient = jdbcClient1;
-                    return Single.just(jdbcClient1);
-                });
+///***************** TODO: service discovery den alınan jdbc client shared çalışmıyor, bu nedenle aşağıdaki kod eklendi
+        JsonObject jdbcConfig = new JsonObject().put("url", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_URL))
+                .put("driver_class", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_DRIVER_CLASS))
+                .put("user", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_NAME))
+                .put("password", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_PASSWORD))
+                .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE));
+
+        this.jdbcClient = JDBCClient.createShared(vertx, jdbcConfig, Constants.API_DATA_SOURCE_SERVICE);
+
+        return Single.just(jdbcClient);
+
+///***************
+
     }
+
 
     public Vertx getVertx() {
         return vertx;
@@ -78,5 +89,6 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
     @Override
     public void close() throws Exception {
         abyssJDBCService.releaseJDBCServiceObject(jdbcClient);
+        logger.info("AbstractService.close() invoked " + vertx);
     }
 }

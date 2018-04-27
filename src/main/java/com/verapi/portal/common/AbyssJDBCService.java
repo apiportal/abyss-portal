@@ -59,7 +59,20 @@ public class AbyssJDBCService {
 
     public Single<JDBCClient> getJDBCServiceObject(String dataSourceName) {
         logger.info("AbyssJDBCService.getJDBCServiceObject() running");
-        return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", dataSourceName));
+///***************** TODO: service discovery den alınan jdbc client shared çalışmıyor, bu nedenle aşağıdaki kod eklendi
+        JsonObject jdbcConfig = new JsonObject().put("url", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_URL))
+                .put("driver_class", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_JDBC_DRIVER_CLASS))
+                .put("user", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_NAME))
+                .put("password", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_PASSWORD))
+                .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE));
+
+        JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcConfig, dataSourceName);
+
+        return Single.just(jdbcClient);
+
+///***************
+
+//        return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", dataSourceName));
     }
 
     public void releaseJDBCServiceObject(JDBCClient jdbcClient) {

@@ -124,6 +124,31 @@ public class SubjectService extends AbstractService<Subject> {
                 );
     }
 
+    public Single<ResultSet> filterBySubjectName(String subjectName) {
+        logger.info("SubjectService filterBySubjectName() invoked" + jdbcClient);
+        return jdbcClient
+                .rxGetConnection().flatMap(conn -> conn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
+                        // Disable auto commit to handle transaction manually
+                        .rxSetAutoCommit(false)
+                        // Switch from Completable to default Single value
+                        .toSingleDefault(false)
+                        //Check if user already exists
+                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName+"%")))
+                        .flatMap(resultSet -> {
+                            if (resultSet.getNumRows() > 0) {
+                                logger.info("SubjectService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
+                                return Single.just(resultSet);
+                            } else {
+                                logger.info("SubjectService filterBySubjectName() # of records : 0");
+                                return Single.just(resultSet);
+                            }
+                        })
+                        // close the connection regardless succeeded or failed
+                        .doAfterTerminate(conn::close)
+                );
+    }
+
     @Override
     public Maybe<Subject> update(long id, Subject newT) {
         return findById(id)
@@ -229,4 +254,27 @@ public class SubjectService extends AbstractService<Subject> {
             "effective_start_date," +
             "effective_end_date " +
             "FROM portalschema.SUBJECT ORDER BY SUBJECT_NAME";
+
+    private static final String SQL_FILTER_BY_SUBJECTNAME = "SELECT " +
+            "uuid," +
+            //"organization_id," +
+            "created," +
+            "updated," +
+            "deleted," +
+            "is_deleted," +
+            //"crud_subject_id," +
+            "is_activated," +
+            //"subject_type_id," +
+            "subject_name," +
+            "first_name," +
+            "last_name," +
+            "display_name," +
+            "email," +
+            //"secondary_email," +
+            "effective_start_date," +
+            "effective_end_date " +
+            "FROM portalschema.SUBJECT " +
+            "WHERE lower(subject_name) like lower(?) " +
+            "ORDER BY SUBJECT_NAME";
+
 }
