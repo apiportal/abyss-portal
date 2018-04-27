@@ -169,6 +169,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         abyssRouter.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
 
+        abyssRouter.get(Constants.ABYSS_ROOT + "/data/*").handler(StaticHandler.create("webroot/data"));
+
         abyssRouter.get("/global.js").handler(this::globalJavascript);
 
         FailureController failureController = new FailureController(jdbcAuth, jdbcClient);
