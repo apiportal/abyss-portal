@@ -24,6 +24,7 @@ public class Controllers {
     public static final ControllerDef CHANGE_PASSWORD = new ControllerDef(ChangePasswordController.class, "change-password", "change-password", "change-password.html");
     public static final ControllerDef USERS = new ControllerDef(UsersController.class, "users", "users", "users.html");
     public static final ControllerDef SUBJECTGROUP = new ControllerDef(SubjectGroupController.class, "user-groups", "user-groups", "user-groups.html");
+    public static final ControllerDef MYAPIS = new ControllerDef(MyApisController.class, "my-apis", "my-apis", "my-apis.html");
 
     public Controllers() {
     }

@@ -52,6 +52,7 @@ public class PortalVerticle extends AbstractPortalVerticle {
             mountControllerRouter(jdbcAuth, Controllers.CHANGE_PASSWORD);
             mountControllerRouter(jdbcAuth, Controllers.USERS);
             mountControllerRouter(jdbcAuth, Controllers.SUBJECTGROUP);
+            mountControllerRouter(jdbcAuth, Controllers.MYAPIS);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
         }
