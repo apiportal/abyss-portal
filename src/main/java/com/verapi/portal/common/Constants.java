@@ -14,10 +14,13 @@ package com.verapi.portal.common;
  */
 public class Constants {
 
-    public static final String ABYSS = "abyss";
+    private static final String ABYSS = "abyss";
     public static final String ABYSS_ROOT = "/"+ABYSS;
 
     public static final String ABYSS_PORTAL = "abyss-portal";
+
+    public static final String HOST = "host";
+    public static final String ISSANDBOX = "issandbox";
 
     public static final String HTTP_SERVER_HOST = "http.server.host";
     public static final String HTTP_SERVER_PORT = "http.server.port";
@@ -46,7 +49,7 @@ public class Constants {
     public static final String API_DATA_SOURCE_SERVICE = "api-data-source-service";
 
     public static final String TEMPLATE_DIR_ROOT = "webroot/";
-    public static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT +"email/";
+    static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT +"email/";
     public static final String TEMPLATE_SUFFIX = ".html";
 
 
