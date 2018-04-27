@@ -169,6 +169,10 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         abyssRouter.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
 
+        abyssRouter.get(Constants.ABYSS_ROOT + "/data/*").handler(StaticHandler.create("webroot/data"));
+
+        abyssRouter.get("/global.js").handler(this::globalJavascript);
+
         FailureController failureController = new FailureController(jdbcAuth, jdbcClient);
 
         abyssRouter.routeWithRegex("^" + Constants.ABYSS_ROOT + "/[4|5][0|1]\\d$").handler(failureController).failureHandler(this::failureHandler);
@@ -226,5 +230,12 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
     }
 
+    void globalJavascript(RoutingContext context) {
+        String filecontent = "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';" +
+                "var abyssSandbox='" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + "';";
+        context.response().putHeader("Content-Type", "application/javascript");
+        context.response().setStatusCode(200);
+        context.response().end(filecontent);
+    }
 
 }
