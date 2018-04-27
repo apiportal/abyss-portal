@@ -39,7 +39,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     private static Logger logger = LoggerFactory.getLogger(AbyssAbstractVerticle.class);
     //####### static #######
-    Router abyssRouter;
+    static Router abyssRouter;
     //##### static - end #####
 
     private AbyssJDBCService abyssJDBCService;
@@ -187,17 +187,22 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");
         allowHeaders.add("Access-Control-Allow-Origin");
+        allowHeaders.add("Access-Control-Allow-Credentials");
         allowHeaders.add("origin");
+        allowHeaders.add("Vary : Origin");
         allowHeaders.add("Content-Type");
         allowHeaders.add("accept");
+        allowHeaders.add("Cookie");
         // CORS support
-        router.route().handler(CorsHandler.create("*")
+        router.route().handler(CorsHandler.create("http(s)?:\\/\\/(.+\\.)?(192\\.168\\..*|apiportal\\.com)(:\\d{1,5})?$")
+                .allowCredentials(true)
                 .allowedHeaders(allowHeaders)
                 .allowedMethod(HttpMethod.GET)
                 .allowedMethod(HttpMethod.POST)
                 .allowedMethod(HttpMethod.DELETE)
                 .allowedMethod(HttpMethod.PATCH)
                 .allowedMethod(HttpMethod.PUT)
+                .allowedMethod(HttpMethod.OPTIONS)
         );
         return Single.just(router);
     }

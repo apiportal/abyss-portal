@@ -188,9 +188,6 @@ public class SubjectController extends ApiAbstractController {
                         asyncResponse.resume(Response.status(Response.Status.OK)
                                 .encoding("UTF-8")
                                 .type(MediaType.APPLICATION_JSON)
-                                .header("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT")
-                                .header("Access-Control-Allow-Origin", "http://localhost:38081")
-                                .header("origin", "http://localhost:38081")
                                 .entity(resp.encode())
                                 .build());
 
