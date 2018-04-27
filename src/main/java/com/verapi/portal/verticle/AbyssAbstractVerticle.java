@@ -232,7 +232,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     void globalJavascript(RoutingContext context) {
         String filecontent = "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';" +
-                "var abyssSandbox='" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + "';";
+                "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";";
         context.response().putHeader("Content-Type", "application/javascript");
         context.response().setStatusCode(200);
         context.response().end(filecontent);
