@@ -40,7 +40,8 @@ public class ActivateAccountController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-
+        logger.info("ActivateAccountController.defaultGetHandler invoked..");
+        handle(routingContext);
     }
 
     @Override
