@@ -28,7 +28,7 @@ public class UsersController extends PortalAbstractController {
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
         logger.info("UsersController.defaultGetHandler invoked...");
-        renderTemplate(routingContext, Controllers.USERS.templateFileName);
+        renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override

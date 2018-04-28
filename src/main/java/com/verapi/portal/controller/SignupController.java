@@ -44,7 +44,7 @@ public class SignupController extends PortalAbstractController {
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
         logger.info("SignupController.defaultGetHandler invoked...");
-        renderTemplate(routingContext, Controllers.SIGNUP.templateFileName);
+        renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override

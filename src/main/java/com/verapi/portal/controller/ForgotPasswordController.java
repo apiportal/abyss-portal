@@ -44,7 +44,7 @@ public class ForgotPasswordController extends PortalAbstractController {
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
         logger.info("ForgotPasswordController.defaultGetHandler invoked...");
-        renderTemplate(routingContext, Controllers.FORGOT_PASSWORD.templateFileName);
+        renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override

@@ -32,7 +32,7 @@ public class LoginController extends PortalAbstractController {
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
         logger.info("LoginController.defaultGetHandler invoked...");
-        renderTemplate(routingContext, Controllers.LOGIN.templateFileName);
+        renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override

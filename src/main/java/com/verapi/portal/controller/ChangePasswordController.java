@@ -34,7 +34,7 @@ public class ChangePasswordController extends PortalAbstractController {
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
         logger.info("ChangePasswordController.defaultGetHandler invoked...");
-        renderTemplate(routingContext, Controllers.CHANGE_PASSWORD.templateFileName);
+        renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
