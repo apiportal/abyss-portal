@@ -116,7 +116,7 @@ public class SubjectService extends AbstractService<Subject> {
                                 return Single.just(resultSet);
                             } else {
                                 logger.info("SubjectService findAll() # of records : 0");
-                                return Single.error(new Exception("SubjectService findAll() # of records : 0"));
+                                return Single.just(resultSet);//return Single.error(new Exception("SubjectService findAll() # of records : 0"));
                             }
                         })
                         // close the connection regardless succeeded or failed
