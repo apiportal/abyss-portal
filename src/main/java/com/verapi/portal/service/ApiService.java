@@ -130,7 +130,7 @@ public class ApiService extends AbstractService<JsonObject> {
             "data_format," +
             //"raw_text," +
             "json_text," +
-            "to_json(json_text) as jayson," +
+            //"to_json(json_text) as jayson," +
             //"jsonb_pretty(json_text)," +
             "business_api_id," +
             "image," +
@@ -159,7 +159,7 @@ public class ApiService extends AbstractService<JsonObject> {
             "data_format," +
             //"raw_text," +
             "json_text," +
-            "to_json(json_text) as jayson," +
+            //"to_json(json_text) as jayson," +
             "business_api_id," +
             "image," +
             "color," +

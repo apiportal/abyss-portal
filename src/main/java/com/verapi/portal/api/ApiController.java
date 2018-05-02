@@ -66,17 +66,18 @@ public class ApiController {
                     .flatMap(jdbcClient -> (apiOwnerSubjectName == null) ? apiService.findAll() : apiService.filterBySubjectName(apiOwnerSubjectName))
                     .flatMap(result -> {
                         JsonArray apiList = new JsonArray();
-                        //for (Iterator<JsonObject> i =  result.getRows(true).iterator();  i.hasNext();) {
-                        //apiList.add(new JsonObject(i.next().getString("json_text")));
                         for (JsonObject row : result.getRows(true)) {
-                            apiList.add(new JsonObject(row.getString("json_text")));
+                            JsonObject jO = new JsonObject(row.getString("json_text"));
+                            row.remove("json_text");
+                            jO.put("x-abyss-platform", row);
+                            apiList.add(jO);
                         }
 
                         JsonObject jsonObject = new JsonObject()
                                 .put("statusCode", "200")
                                 //new JsonObject(result.getRows(true).get(0).getString("json_text"))
                                 .put("openApiList", apiList)
-                                .put("apiList", result.toJson().getValue("rows"))
+                                //.put("apiList", result.toJson().getValue("rows"))
                                 //.mergeIn(result.toJson().getJsonObject("json_text"))
                                 .put("totalPages", 1) //TODO:pagination
                                 .put("totalItems", result.getNumRows())
