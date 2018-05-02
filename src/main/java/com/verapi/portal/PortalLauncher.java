@@ -31,7 +31,13 @@ import io.vertx.ext.shell.command.CommandRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +54,8 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             System.setProperty("vertx.logger-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
 
         System.setProperty("abyss-jar.name", new java.io.File(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+
+        System.setProperty("es.server.api.bulk.url", getProperty("es.server.api.bulk.url"));
 
         attachShutDownHook();
 
@@ -171,4 +179,32 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         System.out.println("Shut Down Hook Attached");
     }
 
+    private static String getProperty(String propertyName) {
+        Properties prop = new Properties();
+        InputStream input = null;
+        String result = null;
+        try {
+            input = new FileInputStream("abyss-portal-config.properties");
+
+            // load a properties file
+            prop.load(input);
+
+            // get the property value and print it out
+            result = prop.getProperty(propertyName);
+
+        } catch (IOException e) {
+            System.out.println("PortalLauncher.getProperty error " + e.getLocalizedMessage());
+            System.out.println("PortalLauncher.getProperty error " + Arrays.toString(e.getStackTrace()));
+        } finally {
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+                    System.out.println("PortalLauncher.getProperty error during closing config file " + propertyName + e.getLocalizedMessage());
+                    System.out.println("PortalLauncher.getProperty error during closing config file " + propertyName + Arrays.toString(e.getStackTrace()));
+                }
+            }
+        }
+        return result;
+    }
 }

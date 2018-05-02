@@ -219,10 +219,38 @@
             <groupId>io.github.lukehutch</groupId>
             <artifactId>fast-classpath-scanner</artifactId>
         </dependency>
+
+<!--
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-jaxrs2</artifactId>
+            <scope>compile</scope>
+        </dependency>
+-->
+<!--
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
+        </dependency>
+-->
+
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jaxrs</artifactId>
-            <version>1.5.13</version>
+        </dependency>
+        <dependency>
+            <groupId>com.internetitem</groupId>
+            <artifactId>logback-elasticsearch-appender</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback.contrib</groupId>
+            <artifactId>logback-json-classic</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback.contrib</groupId>
+            <artifactId>logback-jackson</artifactId>
+            <scope>runtime</scope>
         </dependency>
         <!--         <dependency> -->
         <!--         	<groupId>joda-time</groupId> -->

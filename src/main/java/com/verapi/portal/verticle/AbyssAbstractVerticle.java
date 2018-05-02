@@ -103,7 +103,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     Single<JDBCClient> initializeJdbcClient(String dataSourceName) {
 
-        logger.info("AbyssAbstractVerticle.initializeJdbcClient() running");
+        logger.info("AbyssAbstractVerticle.initializeJdbcClient() running for " + dataSourceName);
 
         return abyssJDBCService.publishDataSource(dataSourceName)
                 .flatMap(rec -> {
@@ -170,6 +170,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         abyssRouter.get("/dist/*").handler(StaticHandler.create("webroot/dist"));
 
         abyssRouter.get("/data/*").handler(StaticHandler.create("webroot/data"));
+
+        abyssRouter.get("/swagger-ui/*").handler(StaticHandler.create("webroot/swagger-ui"));
 
         abyssRouter.get("/global.js").handler(this::globalJavascript);
 

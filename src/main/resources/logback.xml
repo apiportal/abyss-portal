@@ -1,43 +1,118 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" debug="false">
 
-  <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
-  <property name="log-file" value="logs/${abyss-jar.name}" />
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+    <property name="log-file" value="logs/${abyss-jar.name}"/>
+    <property name="es.server.api.bulk.url" value="${es.server.api.bulk.url}"/>
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <withJansi>false</withJansi>
-    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <Pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %highlight(%logger{36}) - %highlight(%msg%n)</Pattern>
-    </encoder>
-  </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>false</withJansi>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %highlight(%logger{36}) - %highlight(%msg%n)
+            </Pattern>
+        </encoder>
+    </appender>
 
-  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>${log-file}-${bySecond}.log</file>
-    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
-    </encoder>
-  </appender>
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${log-file}-${bySecond}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</Pattern>
+        </encoder>
+    </appender>
 
-  <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
-    <appender-ref ref="STDOUT" />
-  </appender>
+    <appender name="ELASTIC" class="com.internetitem.logback.elasticsearch.ElasticsearchAppender">
+        <!--<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+                <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
+                    <!-- prettyPrint is probably ok in dev, but usually not ideal in production: -->
+                    <!--<prettyPrint>true</prettyPrint>-->
+                </jsonFormatter>
+                <!-- <context>api</context> -->
+                <timestampFormat>yyyy-MM-dd'T'HH:mm:ss.SSS'Z'</timestampFormat>
+                <timestampFormatTimezoneId>UTC</timestampFormatTimezoneId>
+                <appendLineSeparator>true</appendLineSeparator>
+            </layout>
+        </encoder>
 
-  <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
-    <appender-ref ref="FILE" />
-  </appender>
+        <url>${es.server.api.bulk.url}</url>
+        <index>logs-%date{yyyy-MM-dd}</index>
+        <type>logback</type>
+        <!--<loggerName>es-logger</loggerName>--> <!-- optional -->
+        <!--<errorLoggerName>es-error-logger</errorLoggerName>--> <!-- optional -->
+        <connectTimeout>30000</connectTimeout> <!-- optional (in ms, default 30000) -->
+        <errorsToStderr>true</errorsToStderr> <!-- optional (default false) -->
+        <includeCallerData>false</includeCallerData> <!-- optional (default false) -->
+        <logsToStderr>false</logsToStderr> <!-- optional (default false) -->
+        <maxQueueSize>104857600</maxQueueSize> <!-- optional (default 104857600) -->
+        <maxRetries>3</maxRetries> <!-- optional (default 3) -->
+        <readTimeout>30000</readTimeout> <!-- optional (in ms, default 30000) -->
+        <sleepTime>250</sleepTime> <!-- optional (in ms, default 250) -->
+        <rawJsonMessage>false</rawJsonMessage> <!-- optional (default false) -->
+        <includeMdc>false</includeMdc> <!-- optional (default false) -->
+        <maxMessageSize>100</maxMessageSize> <!-- optional (default -1 -->
+        <authentication class="com.internetitem.logback.elasticsearch.config.BasicAuthentication"/> <!-- optional -->
+        <properties>
+            <property>
+                <name>host</name>
+                <value>${HOSTNAME}</value>
+                <allowEmpty>false</allowEmpty>
+            </property>
+            <property>
+                <name>severity</name>
+                <value>%level</value>
+            </property>
+            <property>
+                <name>thread</name>
+                <value>%thread</value>
+            </property>
+            <property>
+                <name>stacktrace</name>
+                <value>%ex</value>
+            </property>
+            <property>
+                <name>logger</name>
+                <value>%logger</value>
+            </property>
+<!--
+            <property>
+                <name>message</name>
+                <value>%msg</value>
+            </property>
+-->
+        </properties>
+        <headers>
+            <header>
+                <name>Content-Type</name>
+                <value>application/json</value>
+            </header>
+        </headers>
+    </appender>
 
-  <logger name="com.verapi" level="TRACE">
-    <appender-ref ref="ASYNC_STDOUT" />
-    <!--<appender-ref ref="ASYNC_FILE" />-->
-  </logger>
+    <appender name="ASYNC_ELASTIC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="ELASTIC"/>
+    </appender>
 
-  <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="WARN">
-    <appender-ref ref="ASYNC_FILE" />
-  </logger>
+    <appender name="ASYNC_STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT"/>
+    </appender>
 
-  <root level="TRACE">
-    <appender-ref ref="ASYNC_FILE" />
-  </root>
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <logger name="com.verapi" level="TRACE">
+        <appender-ref ref="ASYNC_STDOUT"/>
+        <appender-ref ref="ASYNC_ELASTIC"/>
+    </logger>
+
+    <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="WARN">
+        <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
+    <root level="TRACE">
+        <appender-ref ref="ASYNC_FILE"/>
+    </root>
 
     <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 

@@ -105,4 +105,7 @@ public class Constants {
     public static final String MAIL_FROM_EMAIL_ACTIVATION = "activation@apiportal.com (ABYSS API PORTAL)";
     public static final String MAIL_FROM_EMAIL_WELCOME = "welcome@apiportal.com (ABYSS API PORTAL)";
     public static final String MAIL_FROM_EMAIL_NOTIFICATION = "notification@apiportal.com (ABYSS API PORTAL)";
+
+    public static final String  ES_SERVER_URL = "es.server.url";
+    public static final String  ES_SERVER_API_BULK_URL = "es.server.api.bulk.url";
 }

@@ -39,7 +39,7 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
     }
 
     public AbstractService(Vertx vertx) throws Exception {
-        logger.info("AbstractService() invoked " + vertx);
+        logger.info("AbstractService() invoked");
         this.vertx = vertx;
     }
 
@@ -66,6 +66,22 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
         return Single.just(jdbcClient);
 
 ///***************
+
+/*
+        return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", Constants.API_DATA_SOURCE_SERVICE))
+                .flatMap(record1 -> Single.just(JDBCClient.createShared(vertx, record1.getMetadata(), Constants.API_DATA_SOURCE_SERVICE)));
+*/
+
+/* TODO: aşağıdaki kodda vertx sapıtıyor ve hata üretiyor, JDBCClient.createShared hata fırlatıyor
+        return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", Constants.API_DATA_SOURCE_SERVICE))
+                .flatMap(record1 -> {
+                    logger.trace("AbstractService() initJDBCClient() getServiceDiscovery().rxGetRecord for " + Constants.API_DATA_SOURCE_SERVICE + ", record = " + record1.toJson().encodePrettily());
+                    JDBCClient jdbcClient = JDBCClient.createShared(vertx, record1.getMetadata(), Constants.API_DATA_SOURCE_SERVICE);
+                    logger.trace("AbstractService() initJDBCClient() JDBCClient.createShared for " + Constants.API_DATA_SOURCE_SERVICE + " jdbcClient = " + jdbcClient);
+                    return Single.just(jdbcClient);
+                    //return Single.just(JDBCClient.createShared(vertx, record1.getMetadata(), dataSourceName));
+                });
+*/
 
     }
 

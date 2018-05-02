@@ -11,6 +11,7 @@
 
 package com.verapi.portal.verticle;
 
+import com.google.common.collect.Lists;
 import com.verapi.portal.api.RestRouterHttpServerRequest;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
@@ -19,6 +20,8 @@ import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.ClassAnnotationMatchProcessor;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
+import io.swagger.jaxrs.listing.ApiListingResource;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.http.HttpServer;
@@ -62,6 +65,19 @@ public class ApiHttpServerVerticle extends AbyssAbstractVerticle {
         deployment.start();
         //deployment.getRegistry().addPerInstanceResource(ApiController.class);
         //deployment.getRegistry().addPerInstanceResource(SubjectController.class);
+        //deployment.getRegistry().addPerRequestResource(io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class);
+//        deployment.getRegistry().addPerRequestResource(io.swagger.jaxrs.listing.ApiListingResource.class);
+//        deployment.getRegistry().addPerRequestResource(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+/*
+        deployment.setProviderClasses(Lists.newArrayList("io.swagger.v3.jaxrs2.integration.resources.BaseOpenApiResource.class",
+                "io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class"));
+        deployment.setResourceClasses(Lists.newArrayList("io.swagger.v3.jaxrs2.integration.resources.OpenApiResource.class"));
+*/
+//        deployment.setProviderClasses(Lists.newArrayList(
+//                "com.wordnik.swagger.jaxrs.listing.ResourceListingProvider",
+//                "com.wordnik.swagger.jaxrs.listing.ApiDeclarationProvider"));
+
+
         new FastClasspathScanner("com.verapi")
                 //.verbose()
                 .matchClassesWithAnnotation(Path.class, new ClassAnnotationMatchProcessor() {

@@ -161,8 +161,9 @@ public class SubjectController extends ApiAbstractController {
         logger.info("SubjectController.getAll() invoked");
 
         try {
+            //logger.info("SubjectController.getAll() injected vertx : " + vertx.toString());
             Vertx reactiveVertx = Vertx.newInstance(vertx);
-            logger.info("io.vertx.reactivex.core.Vertx : " + reactiveVertx.toString());
+            //logger.info("SubjectController.getAll() io.vertx.reactivex.core.Vertx : " + reactiveVertx.toString());
 
             SubjectService subjectService = new SubjectService(reactiveVertx);
 
@@ -194,7 +195,8 @@ public class SubjectController extends ApiAbstractController {
                     },
                     throwable -> {
                         asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(throwable).build());
-                        logger.error("SubjectController.getAll() replied error : ", throwable.getLocalizedMessage() + Arrays.toString(throwable.getStackTrace()));
+                        //logger.error("SubjectController.getAll() replied error : ", throwable.getLocalizedMessage() + Arrays.toString(throwable.getStackTrace()));
+                        logger.error("SubjectController.getAll() replied error : ", Arrays.toString(throwable.getStackTrace()));
                     });
 
         } catch (Exception e) {
