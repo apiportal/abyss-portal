@@ -134,7 +134,7 @@ public class SubjectService extends AbstractService<Subject> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName+"%")))
+                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName + "%")))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 logger.info("SubjectService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
@@ -235,7 +235,7 @@ public class SubjectService extends AbstractService<Subject> {
             "WHERE id = ?";
     private static final String SQL_UPDATE_IS_DELETED = "UPDATE Subject SET is_deleted = ? WHERE id = ?";
     private static final String SQL_UPDATE_EFFECTIVE_END_DATE = "UPDATE Subject SET effective_end_date = ? WHERE id = ?";
-    private static final String SQL_FIND_ALL_COMPACT = "SELECT " +
+    private static final String SQL_FIND_ALL_COMPACT_OLD = "SELECT " +
             "uuid," +
             //"organization_id," +
             "created," +
@@ -255,7 +255,7 @@ public class SubjectService extends AbstractService<Subject> {
             "effective_end_date " +
             "FROM portalschema.SUBJECT ORDER BY SUBJECT_NAME";
 
-    private static final String SQL_FILTER_BY_SUBJECTNAME = "SELECT " +
+    private static final String SQL_FILTER_BY_SUBJECTNAME_OLD = "SELECT " +
             "uuid," +
             //"organization_id," +
             "created," +
@@ -277,4 +277,69 @@ public class SubjectService extends AbstractService<Subject> {
             "WHERE lower(subject_name) like lower(?) " +
             "ORDER BY SUBJECT_NAME";
 
+    private static final String SQL_FIND_ALL_COMPACT = "select\n" +
+//            "  id,\n" +
+            "  uuid,\n" +
+            "  organization_id,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  is_deleted,\n" +
+//            "  crud_subject_id,\n" +
+            "  is_activated,\n" +
+//            "  subject_type_id,\n" +
+            "  subject_name,\n" +
+            "  first_name,\n" +
+            "  last_name,\n" +
+            "  display_name,\n" +
+            "  email,\n" +
+//            "  secondary_email,\n" +
+            "  effective_start_date,\n" +
+            "  effective_end_date,\n" +
+//            "  password,\n" +
+//            "  password_salt,\n" +
+            "  picture,\n" +
+            "  total_login_count,\n" +
+            "  failed_login_count,\n" +
+            "  invalid_password_attempt_count,\n" +
+            "  is_password_change_required,\n" +
+            "  password_expires_at,\n" +
+            "  last_login_at,\n" +
+            "  last_password_change_at,\n" +
+            "  last_authenticated_at\n" +
+            "from subject order by subject_name";
+
+    private static final String SQL_FILTER_BY_SUBJECTNAME = "select\n" +
+//            "  id,\n" +
+            "  uuid,\n" +
+            "  organization_id,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  is_deleted,\n" +
+//            "  crud_subject_id,\n" +
+            "  is_activated,\n" +
+//            "  subject_type_id,\n" +
+            "  subject_name,\n" +
+            "  first_name,\n" +
+            "  last_name,\n" +
+            "  display_name,\n" +
+            "  email,\n" +
+//            "  secondary_email,\n" +
+            "  effective_start_date,\n" +
+            "  effective_end_date,\n" +
+//            "  password,\n" +
+//            "  password_salt,\n" +
+            "  picture,\n" +
+            "  total_login_count,\n" +
+            "  failed_login_count,\n" +
+            "  invalid_password_attempt_count,\n" +
+            "  is_password_change_required,\n" +
+            "  password_expires_at,\n" +
+            "  last_login_at,\n" +
+            "  last_password_change_at,\n" +
+            "  last_authenticated_at\n" +
+            "from subject\n" +
+            "where lower(subject_name) like lower(?)\n" +
+            "order by subject_name";
 }
