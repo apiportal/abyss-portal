@@ -88,20 +88,17 @@ public class ApiController extends ApiAbstractController{
 
                         JsonArray apiList = new JsonArray();
                         for (JsonObject row : result.getRows(true)) {
-                            JsonObject jsonObj = new JsonObject(row.getString("json_text"));
-                            row.remove("json_text");
-                            row.put("proxies_summary", apiProxyList);
-                            jsonObj.put("x-abyss-platform", row);
-                            //jsonObj.put("x-abyss-proxies-summary", apiProxyList);
+                            JsonObject jsonObj = new JsonObject(row.getString("openapi"));
+                            JsonObject jsonObjPlatform = new JsonObject(row.getString("rowjson"));
+                            jsonObjPlatform.remove("json_text");
+                            jsonObjPlatform.put("proxies_summary", apiProxyList);
+                            jsonObj.put("x-abyss-platform", jsonObjPlatform);
                             apiList.add(jsonObj);
                         }
 
                         JsonObject jsonObject = new JsonObject()
                                 .put("statusCode", "200")
-                                //new JsonObject(result.getRows(true).get(0).getString("json_text"))
                                 .put("openApiList", apiList)
-                                //.put("apiList", result.toJson().getValue("rows"))
-                                //.mergeIn(result.toJson().getJsonObject("json_text"))
                                 .put("totalPages", 1) //TODO:pagination
                                 .put("totalItems", result.getNumRows())
                                 .put("pageSize", 30)
