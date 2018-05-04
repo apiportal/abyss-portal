@@ -19,12 +19,13 @@
            xmlns="http://www.hazelcast.com/schema/config"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <properties>
-    <property name="hazelcast.shutdownhook.enabled">false</property>
+    <property name="hazelcast.shutdownhook.enabled">true</property>
     <property name="hazelcast.mancenter.enabled">false</property>
     <property name="hazelcast.memcache.enabled">false</property>
     <property name="hazelcast.rest.enabled">false</property>
     <property name="hazelcast.wait.seconds.before.join">0</property>
     <property name="hazelcast.initial.min.cluster.size">1</property>
+	<property name="hazelcast.logging.type">slf4j</property>
   </properties>
 
   <group>

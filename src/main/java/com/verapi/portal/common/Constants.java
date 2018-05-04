@@ -47,6 +47,7 @@ public class Constants {
     public static final String PORTAL_DBQUERY_TIMEOUT = "portal.dbconn.query.timeout";
 
     public static final String API_DATA_SOURCE_SERVICE = "api-data-source-service";
+    public static final String API_DBQUERY_TIMEOUT = "api.dbconn.query.timeout";
 
     public static final String TEMPLATE_DIR_ROOT = "webroot/";
     static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT +"email/";
