@@ -90,8 +90,9 @@ public class ApiController extends ApiAbstractController{
                         for (JsonObject row : result.getRows(true)) {
                             JsonObject jsonObj = new JsonObject(row.getString("json_text"));
                             row.remove("json_text");
+                            row.put("proxies_summary", apiProxyList);
                             jsonObj.put("x-abyss-platform", row);
-                            jsonObj.put("x-abyss-proxies-summary", apiProxyList);
+                            //jsonObj.put("x-abyss-proxies-summary", apiProxyList);
                             apiList.add(jsonObj);
                         }
 

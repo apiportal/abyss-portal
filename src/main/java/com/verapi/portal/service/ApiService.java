@@ -113,7 +113,9 @@ public class ApiService extends AbstractService<JsonObject> {
     }
 
 
-    private static final String SQL_FIND_ALL_COMPACT = "SELECT " +
+    private static final String SQL_FIND_ALL_COMPACT =
+    //"SELECT row_to_json(jayson) from (" +
+            "SELECT " +
             "uuid," +
             //"organization_id," +
             "created," +
@@ -136,11 +138,20 @@ public class ApiService extends AbstractService<JsonObject> {
             "image," +
             "color," +
             "deployed," +
-            "change_log " +
-            "FROM portalschema.api " +
+            "change_log, " +
+            "(SELECT json_agg(json_build_object('uuid', t.uuid,'name', t.\"name\"))" +
+            " FROM api_tag t join api__api_tag axt on t.id = axt.api_tag_id" +
+            " WHERE axt.api_id = a.id) as tags," +
+            "(SELECT json_agg(json_build_object('uuid', g.uuid,'name', g.\"name\"))" +
+            " FROM api_group g join api__api_group axg on g.id = axg.api_group_id" +
+            " WHERE axg.api_id = a.id) as groups," +
+            "(SELECT json_agg(json_build_object('uuid', c.uuid,'name', c.\"name\"))" +
+            " FROM api_category c join api__api_category axc on c.id = axc.api_category_id" +
+            " WHERE axc.api_id = a.id) as categories " +
+            "FROM portalschema.api a " +
             "WHERE json_text ?? 'servers' " +
             "ORDER BY json_text -> 'info' -> 'title'" +
-            ";";
+            ";";//") as jayson;";
 
     private static final String SQL_FILTER_BY_SUBJECTNAME = "SELECT " +
             "uuid," +
@@ -164,8 +175,17 @@ public class ApiService extends AbstractService<JsonObject> {
             "image," +
             "color," +
             "deployed," +
-            "change_log " +
-            "FROM portalschema.api" +
+            "change_log, " +
+            "(SELECT json_agg(json_build_object('uuid', t.uuid,'name', t.\"name\"))" +
+            " FROM api_tag t join api__api_tag axt on t.id = axt.api_tag_id" +
+            " WHERE axt.api_id = a.id) as tags," +
+            "(SELECT json_agg(json_build_object('uuid', g.uuid,'name', g.\"name\"))" +
+            " FROM api_group g join api__api_group axg on g.id = axg.api_group_id" +
+            " WHERE axg.api_id = a.id) as groups," +
+            "(SELECT json_agg(json_build_object('uuid', c.uuid,'name', c.\"name\"))" +
+            " FROM api_category c join api__api_category axc on c.id = axc.api_category_id" +
+            " WHERE axc.api_id = a.id) as categories " +
+            "FROM portalschema.api a " +
             "WHERE json_text ?? 'servers' " +
             "AND subject_id = (SELECT id FROM subject WHERE lower(subject_name) like lower(?)) " +
             "ORDER BY json_text -> 'info' -> 'title'" +
