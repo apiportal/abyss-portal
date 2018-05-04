@@ -65,12 +65,32 @@ public class ApiController {
             Single<JsonObject> apiResponse = apiService.initJDBCClient()
                     .flatMap(jdbcClient -> (apiOwnerSubjectName == null) ? apiService.findAll() : apiService.filterBySubjectName(apiOwnerSubjectName))
                     .flatMap(result -> {
+
+                        JsonArray apiProxyList = new JsonArray("[" +
+                                "{\n" +
+                                "\"uuid\": \"65bd3e20-ff9c-4570-87c2-61e5447f3d5d\",\n" +
+                                "\"name\": \"My Proxy 1\",\n" +
+                                "\"context\": \"my_proxy_1\"\n" +
+                                "},\n" +
+                                "{\n" +
+                                "\"uuid\": \"9b2858f0-6963-4d7c-91d7-e1e64ac24a22\",\n" +
+                                "\"name\": \"My Proxy 2\",\n" +
+                                "\"context\": \"my_proxy_2\"\n" +
+                                "},\n" +
+                                "{\n" +
+                                "\"uuid\": \"9b4bde91-53e4-411a-9449-5b33afc41c19\",\n" +
+                                "\"name\": \"My Proxy 3\",\n" +
+                                "\"context\": \"my_proxy_3\"\n" +
+                                "}\n" +
+                                "]\n");
+
                         JsonArray apiList = new JsonArray();
                         for (JsonObject row : result.getRows(true)) {
-                            JsonObject jO = new JsonObject(row.getString("json_text"));
+                            JsonObject jsonObj = new JsonObject(row.getString("json_text"));
                             row.remove("json_text");
-                            jO.put("x-abyss-platform", row);
-                            apiList.add(jO);
+                            jsonObj.put("x-abyss-platform", row);
+                            jsonObj.put("x-abyss-proxies-summary", apiProxyList);
+                            apiList.add(jsonObj);
                         }
 
                         JsonObject jsonObject = new JsonObject()
