@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
@@ -42,7 +43,9 @@ public class SubjectGroupController extends ApiAbstractController {
             @Suspended final AsyncResponse asyncResponse,
 
             // Inject the Vertx instance
-            @Context io.vertx.core.Vertx vertx
+            @Context io.vertx.core.Vertx vertx,
+
+            @QueryParam("q") String groupName
     ) {
         logger.info("SubjectGroupController.getAll() invoked");
 
@@ -53,7 +56,7 @@ public class SubjectGroupController extends ApiAbstractController {
             SubjectGroupService subjectGroupService = new SubjectGroupService(reactiveVertx);
 
             Single<JsonObject> apiResponse = subjectGroupService.initJDBCClient()
-                    .flatMap(jdbcClient -> subjectGroupService.findAll())
+                    .flatMap(jdbcClient -> (groupName == null) ? subjectGroupService.findAll() : subjectGroupService.filterByGroupName(groupName))
                     .flatMap(result -> {
                         JsonObject jsonObject = new JsonObject()
                                 .put("statusCode", "200")

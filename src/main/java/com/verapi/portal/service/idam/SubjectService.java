@@ -103,7 +103,7 @@ public class SubjectService extends AbstractService<Subject> {
         logger.info("SubjectService findAll() invoked" + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
@@ -111,13 +111,8 @@ public class SubjectService extends AbstractService<Subject> {
                         //Check if user already exists
                         .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_COMPACT))
                         .flatMap(resultSet -> {
-                            if (resultSet.getNumRows() > 0) {
-                                logger.info("SubjectService findAll() # of records :[" + resultSet.getNumRows() + "]");
-                                return Single.just(resultSet);
-                            } else {
-                                logger.info("SubjectService findAll() # of records : 0");
-                                return Single.just(resultSet);//return Single.error(new Exception("SubjectService findAll() # of records : 0"));
-                            }
+                            logger.trace("SubjectService findAll() # of records :[" + resultSet.getNumRows() + "]");
+                            return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(conn::close)
@@ -128,21 +123,16 @@ public class SubjectService extends AbstractService<Subject> {
         logger.info("SubjectService filterBySubjectName() invoked" + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName+"%")))
+                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName + "%")))
                         .flatMap(resultSet -> {
-                            if (resultSet.getNumRows() > 0) {
-                                logger.info("SubjectService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
-                                return Single.just(resultSet);
-                            } else {
-                                logger.info("SubjectService filterBySubjectName() # of records : 0");
-                                return Single.just(resultSet);
-                            }
+                            logger.trace("SubjectService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
+                            return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(conn::close)
@@ -235,46 +225,70 @@ public class SubjectService extends AbstractService<Subject> {
             "WHERE id = ?";
     private static final String SQL_UPDATE_IS_DELETED = "UPDATE Subject SET is_deleted = ? WHERE id = ?";
     private static final String SQL_UPDATE_EFFECTIVE_END_DATE = "UPDATE Subject SET effective_end_date = ? WHERE id = ?";
-    private static final String SQL_FIND_ALL_COMPACT = "SELECT " +
-            "uuid," +
-            //"organization_id," +
-            "created," +
-            "updated," +
-            "deleted," +
-            "is_deleted," +
-            //"crud_subject_id," +
-            "is_activated," +
-            //"subject_type_id," +
-            "subject_name," +
-            "first_name," +
-            "last_name," +
-            "display_name," +
-            "email," +
-            //"secondary_email," +
-            "effective_start_date," +
-            "effective_end_date " +
-            "FROM portalschema.SUBJECT ORDER BY SUBJECT_NAME";
 
-    private static final String SQL_FILTER_BY_SUBJECTNAME = "SELECT " +
-            "uuid," +
-            //"organization_id," +
-            "created," +
-            "updated," +
-            "deleted," +
-            "is_deleted," +
-            //"crud_subject_id," +
-            "is_activated," +
-            //"subject_type_id," +
-            "subject_name," +
-            "first_name," +
-            "last_name," +
-            "display_name," +
-            "email," +
-            //"secondary_email," +
-            "effective_start_date," +
-            "effective_end_date " +
-            "FROM portalschema.SUBJECT " +
-            "WHERE lower(subject_name) like lower(?) " +
-            "ORDER BY SUBJECT_NAME";
+    private static final String SQL_FIND_ALL_COMPACT = "select\n" +
+//            "  id,\n" +
+            "  uuid,\n" +
+            "  organization_id,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  is_deleted,\n" +
+//            "  crud_subject_id,\n" +
+            "  is_activated,\n" +
+//            "  subject_type_id,\n" +
+            "  subject_name,\n" +
+            "  first_name,\n" +
+            "  last_name,\n" +
+            "  display_name,\n" +
+            "  email,\n" +
+//            "  secondary_email,\n" +
+            "  effective_start_date,\n" +
+            "  effective_end_date,\n" +
+//            "  password,\n" +
+//            "  password_salt,\n" +
+            "  picture,\n" +
+            "  total_login_count,\n" +
+            "  failed_login_count,\n" +
+            "  invalid_password_attempt_count,\n" +
+            "  is_password_change_required,\n" +
+            "  password_expires_at,\n" +
+            "  last_login_at,\n" +
+            "  last_password_change_at,\n" +
+            "  last_authenticated_at\n" +
+            "from subject order by subject_name";
 
+    private static final String SQL_FILTER_BY_SUBJECTNAME = "select\n" +
+//            "  id,\n" +
+            "  uuid,\n" +
+            "  organization_id,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  is_deleted,\n" +
+//            "  crud_subject_id,\n" +
+            "  is_activated,\n" +
+//            "  subject_type_id,\n" +
+            "  subject_name,\n" +
+            "  first_name,\n" +
+            "  last_name,\n" +
+            "  display_name,\n" +
+            "  email,\n" +
+//            "  secondary_email,\n" +
+            "  effective_start_date,\n" +
+            "  effective_end_date,\n" +
+//            "  password,\n" +
+//            "  password_salt,\n" +
+            "  picture,\n" +
+            "  total_login_count,\n" +
+            "  failed_login_count,\n" +
+            "  invalid_password_attempt_count,\n" +
+            "  is_password_change_required,\n" +
+            "  password_expires_at,\n" +
+            "  last_login_at,\n" +
+            "  last_password_change_at,\n" +
+            "  last_authenticated_at\n" +
+            "from subject\n" +
+            "where lower(subject_name) like lower(?)\n" +
+            "order by subject_name";
 }

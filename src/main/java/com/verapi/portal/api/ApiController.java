@@ -11,6 +11,7 @@
 
 package com.verapi.portal.api;
 
+import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.service.ApiService;
@@ -18,6 +19,7 @@ import com.verapi.portal.verticle.ApiHttpServerVerticle;
 import io.reactivex.Single;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
@@ -37,10 +39,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 @Path("/abyss/api/my-apis")
-public class ApiController {
+public class ApiController extends ApiAbstractController{
     private static Logger logger = LoggerFactory.getLogger(ApiHttpServerVerticle.class);
 
-    @GET
+        @GET
     @Path("/getAll")
     @Produces({MediaType.APPLICATION_JSON})
     public void getAll(
@@ -133,5 +135,8 @@ public class ApiController {
     }
 
 
-
+    @Override
+    public Single<JsonObject> handle(io.vertx.reactivex.core.Vertx vertx, Message message, AbyssJDBCService abyssJDBCService) throws Exception {
+        return null;
+    }
 }

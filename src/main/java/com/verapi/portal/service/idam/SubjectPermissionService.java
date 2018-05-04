@@ -65,13 +65,8 @@ public class SubjectPermissionService extends AbstractService<SubjectPermission>
                         //Check if user already exists
                         .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_COMPACT))
                         .flatMap(resultSet -> {
-                            if (resultSet.getNumRows() > 0) {
-                                logger.info("SubjectPermissionService findAll() # of records :[" + resultSet.getNumRows() + "]");
-                                return Single.just(resultSet);
-                            } else {
-                                logger.info("SubjectPermissionService findAll() # of records : 0");
-                                return Single.just(resultSet);
-                            }
+                            logger.trace("SubjectPermissionService findAll() # of records :[" + resultSet.getNumRows() + "]");
+                            return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(conn::close)
@@ -79,7 +74,7 @@ public class SubjectPermissionService extends AbstractService<SubjectPermission>
     }
 
     public Single<ResultSet> filterByPermissionName(String permissionName) {
-        logger.info("SubjectPermissionService filterBySubjectName() invoked" + jdbcClient);
+        logger.info("SubjectPermissionService filterByPermissionName() invoked" + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -90,13 +85,8 @@ public class SubjectPermissionService extends AbstractService<SubjectPermission>
                         //Check if user already exists
                         .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_PERMISSIONNAME, new JsonArray().add(permissionName + "%")))
                         .flatMap(resultSet -> {
-                            if (resultSet.getNumRows() > 0) {
-                                logger.info("SubjectPermissionService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
-                                return Single.just(resultSet);
-                            } else {
-                                logger.info("SubjectPermissionService filterBySubjectName() # of records : 0");
-                                return Single.just(resultSet);
-                            }
+                            logger.trace("SubjectPermissionService filterByPermissionName() # of records :[" + resultSet.getNumRows() + "]");
+                            return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(conn::close)
@@ -119,41 +109,39 @@ public class SubjectPermissionService extends AbstractService<SubjectPermission>
         return null;
     }
 
-    private static final String SQL_FIND_ALL_COMPACT = "SELECT " +
-            "uuid," +
-            //"organization_id," +
-            "created," +
-            "updated," +
-            "deleted," +
-            "is_deleted," +
-            //"crud_subject_id," +
-            "is_deleted," +
-            "crud_subject_id," +
-            "permission," +
-            "description," +
-            "effective_start_date," +
-            "effective_end_date " +
-            "subject_id " +
-            "FROM portalschema.SUBJECT_PERMISSION ORDER BY permission";
+    private static final String SQL_FIND_ALL_COMPACT = "select\n" +
+//            "  id,\n" +
+            "  uuid,\n" +
+            "  organization_id,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  is_deleted,\n" +
+//            "  crud_subject_id,\n" +
+            "  permission,\n" +
+            "  description,\n" +
+            "  effective_start_date,\n" +
+            "  effective_end_date,\n" +
+            "  subject_id\n" +
+            "from subject_permission\n" +
+            "order by permission";
 
-    private static final String SQL_FILTER_BY_PERMISSIONNAME = "SELECT " +
-            "uuid," +
-            //"organization_id," +
-            "created," +
-            "updated," +
-            "deleted," +
-            "is_deleted," +
-            //"crud_subject_id," +
-            "is_deleted," +
-            "crud_subject_id," +
-            "permission," +
-            "description," +
-            "effective_start_date," +
-            "effective_end_date " +
-            "subject_id " +
-            "FROM portalschema.SUBJECT_PERMISSION " +
-            "WHERE lower(permission) like lower(?) " +
-            "ORDER BY permission";
-
+    private static final String SQL_FILTER_BY_PERMISSIONNAME = "select\n" +
+//            "  id,\n" +
+            "  uuid,\n" +
+            "  organization_id,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  is_deleted,\n" +
+//            "  crud_subject_id,\n" +
+            "  permission,\n" +
+            "  description,\n" +
+            "  effective_start_date,\n" +
+            "  effective_end_date,\n" +
+            "  subject_id\n" +
+            "from subject_permission\n" +
+            "where lower(permission) like lower(?)\n" +
+            "order by permission";
 
 }
