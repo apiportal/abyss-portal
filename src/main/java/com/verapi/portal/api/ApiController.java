@@ -67,20 +67,38 @@ public class ApiController extends ApiAbstractController{
             Single<JsonObject> apiResponse = apiService.initJDBCClient()
                     .flatMap(jdbcClient -> (apiOwnerSubjectName == null) ? apiService.findAll() : apiService.filterBySubjectName(apiOwnerSubjectName))
                     .flatMap(result -> {
+
+                        JsonArray apiProxyList = new JsonArray("[" +
+                                "{\n" +
+                                "\"uuid\": \"65bd3e20-ff9c-4570-87c2-61e5447f3d5d\",\n" +
+                                "\"name\": \"My Proxy 1\",\n" +
+                                "\"context\": \"my_proxy_1\"\n" +
+                                "},\n" +
+                                "{\n" +
+                                "\"uuid\": \"9b2858f0-6963-4d7c-91d7-e1e64ac24a22\",\n" +
+                                "\"name\": \"My Proxy 2\",\n" +
+                                "\"context\": \"my_proxy_2\"\n" +
+                                "},\n" +
+                                "{\n" +
+                                "\"uuid\": \"9b4bde91-53e4-411a-9449-5b33afc41c19\",\n" +
+                                "\"name\": \"My Proxy 3\",\n" +
+                                "\"context\": \"my_proxy_3\"\n" +
+                                "}\n" +
+                                "]\n");
+
                         JsonArray apiList = new JsonArray();
                         for (JsonObject row : result.getRows(true)) {
-                            JsonObject jO = new JsonObject(row.getString("json_text"));
-                            row.remove("json_text");
-                            jO.put("x-abyss-platform", row);
-                            apiList.add(jO);
+                            JsonObject jsonObj = new JsonObject(row.getString("openapi"));
+                            JsonObject jsonObjPlatform = new JsonObject(row.getString("rowjson"));
+                            jsonObjPlatform.remove("json_text");
+                            jsonObjPlatform.put("proxies_summary", apiProxyList);
+                            jsonObj.put("x-abyss-platform", jsonObjPlatform);
+                            apiList.add(jsonObj);
                         }
 
                         JsonObject jsonObject = new JsonObject()
                                 .put("statusCode", "200")
-                                //new JsonObject(result.getRows(true).get(0).getString("json_text"))
                                 .put("openApiList", apiList)
-                                //.put("apiList", result.toJson().getValue("rows"))
-                                //.mergeIn(result.toJson().getJsonObject("json_text"))
                                 .put("totalPages", 1) //TODO:pagination
                                 .put("totalItems", result.getNumRows())
                                 .put("pageSize", 30)

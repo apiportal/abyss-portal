@@ -15,6 +15,7 @@ import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.entity.idam.Subject;
+import com.verapi.portal.service.idam.SubjectIndexService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.reactivex.Single;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -222,6 +223,68 @@ public class SubjectController extends ApiAbstractController {
 
     }
 
+    @GET
+    @Path("/getIndex")
+    @Produces({MediaType.APPLICATION_JSON})
+    public void getIndex(
+            // Suspend the request
+            @Suspended final AsyncResponse asyncResponse,
+
+            // Inject the Vertx instance
+            @Context io.vertx.core.Vertx vertx,
+
+            //@Context io.vertx.ext.web.RoutingContext routingContext,
+
+            //@QueryParam("q") String subjectName
+            @QueryParam("q") String subjectUUID
+
+    ) {
+        logger.info("SubjectController.getIndex() invoked");
+
+        try {
+            //logger.info("SubjectController.getAll() injected vertx : " + vertx.toString());
+            Vertx reactiveVertx = Vertx.newInstance(vertx);
+            //logger.info("SubjectController.getAll() io.vertx.reactivex.core.Vertx : " + reactiveVertx.toString());
+
+            SubjectIndexService subjectIndexService = new SubjectIndexService(reactiveVertx);
+
+            Single<JsonObject> apiResponse = subjectIndexService.initJDBCClient()
+                    .flatMap(jdbcClient -> (subjectUUID == null) ? subjectIndexService.findAll() : subjectIndexService.findBySubjectUuid(subjectUUID))
+                    .flatMap(result -> {
+
+                        //TODO: Check # 0f row == 1
+                        JsonObject jsonObject = new JsonObject(result.getRows(true).get(0).getString("result"));
+
+                        jsonObject.getJsonObject("user").remove("id");
+
+                        jsonObject.put("statusCode", "200");
+                        //.mergeIn(result.getRows(true).get(0));
+                        logger.trace(jsonObject.encodePrettily());
+                        return Single.just(jsonObject);
+                    });
+
+            apiResponse.subscribe(resp -> {
+                        asyncResponse.resume(Response.status(Response.Status.OK)
+                                .encoding("UTF-8")
+                                .type(MediaType.APPLICATION_JSON)
+                                .entity(resp.encode())
+                                .build());
+
+                        logger.trace("SubjectController.getIndex() replied successfully " + resp.encodePrettily());
+                    },
+                    throwable -> {
+                        asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(throwable).build());
+                        //logger.error("SubjectController.getAll() replied error : ", throwable.getLocalizedMessage() + Arrays.toString(throwable.getStackTrace()));
+                        logger.error("SubjectController.getIndex() replied error : ", Arrays.toString(throwable.getStackTrace()));
+                    });
+
+        } catch (Exception e) {
+            logger.error("SubjectController.getIndex() new SubjectService exception occured " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+            asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
+        }
+
+    }
+
     @POST
     @Path("/addSubject")
     @Produces({MediaType.APPLICATION_JSON})
@@ -243,3 +306,4 @@ public class SubjectController extends ApiAbstractController {
 
     }
 }
+
