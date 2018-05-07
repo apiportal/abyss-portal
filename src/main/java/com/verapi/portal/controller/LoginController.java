@@ -16,6 +16,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,9 @@ public class LoginController extends PortalAbstractController {
                 User user = authResult.result();
                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                 logger.info("Logged in user: " + user.principal().encodePrettily());
+
+                routingContext.addCookie(Cookie.cookie("abyss_principal", "32c9c734-11cb-44c9-b06f-0b52e076672d"));
+
                 routingContext.put("username", user.principal().getString("username"));
                 redirect(routingContext, Constants.ABYSS_ROOT+"/index");
             } else {
