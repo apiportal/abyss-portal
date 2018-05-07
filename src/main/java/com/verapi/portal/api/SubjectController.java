@@ -14,16 +14,23 @@ package com.verapi.portal.api;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.entity.idam.Subject;
 import com.verapi.portal.service.idam.SubjectService;
 import io.reactivex.Single;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -170,9 +177,18 @@ public class SubjectController extends ApiAbstractController {
             Single<JsonObject> apiResponse = subjectService.initJDBCClient()
                     .flatMap(jdbcClient -> (subjectName == null) ? subjectService.findAll() : subjectService.filterBySubjectName(subjectName))
                     .flatMap(result -> {
+                        JsonArray jsonArray = new JsonArray();
+                        if (subjectName == null) {
+                            for (JsonObject row : result.getRows(true)) {
+                                jsonArray.add(new JsonObject(row.getString("rowjson")));
+                            }
+                        }
                         JsonObject jsonObject = new JsonObject()
                                 .put("statusCode", "200")
-                                .put("userList", result.toJson().getValue("rows"))
+                                //.put("userList", result.toJson().getValue("rows"))
+                                //.put("userList", result.getRows())
+                                //.put("userList", new JsonObject(result.getResults().get(0).getString(0)))
+                                .put("respDataList", (subjectName == null) ? jsonArray : result.toJson().getValue("rows"))
                                 .put("totalPages", 1) //TODO:pagination
                                 .put("totalItems", result.getNumRows())
                                 .put("pageSize", 30)
@@ -206,4 +222,24 @@ public class SubjectController extends ApiAbstractController {
 
     }
 
+    @POST
+    @Path("/addSubject")
+    @Produces({MediaType.APPLICATION_JSON})
+    @Consumes({MediaType.APPLICATION_JSON})
+    public void addSubject(
+            // Suspend the request
+            @Suspended final AsyncResponse asyncResponse,
+
+            // Inject the Vertx instance
+            @Context io.vertx.core.Vertx vertx,
+
+            @RequestBody(description = "New subject to add", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Subject.class))) String subject) {
+        logger.info("SubjectController.addSubject() invoked");
+        asyncResponse.resume(Response.status(Response.Status.OK)
+                .encoding("UTF-8")
+                .type(MediaType.APPLICATION_JSON)
+                .entity(new JsonObject(subject).encode())
+                .build());
+
+    }
 }

@@ -20,6 +20,7 @@ import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
@@ -109,7 +110,8 @@ public class SubjectService extends AbstractService<Subject> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_COMPACT))
+                        //.flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_COMPACT))
+                        .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_WITH_GROUPS_PERMISSIONS))
                         .flatMap(resultSet -> {
                             logger.trace("SubjectService findAll() # of records :[" + resultSet.getNumRows() + "]");
                             return Single.just(resultSet);
@@ -138,6 +140,52 @@ public class SubjectService extends AbstractService<Subject> {
                         .doAfterTerminate(conn::close)
                 );
     }
+
+    public Single<ResultSet> findBySubjectName(String subjectName) {
+        logger.info("SubjectService findBySubjectName() invoked" + jdbcClient);
+        return jdbcClient
+                .rxGetConnection().flatMap(conn -> conn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
+                        // Disable auto commit to handle transaction manually
+                        .rxSetAutoCommit(false)
+                        // Switch from Completable to default Single value
+                        .toSingleDefault(false)
+                        //Check if user already exists
+                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FIND_BY_SUBJECTNAME, new JsonArray().add(subjectName)))
+                        .flatMap(resultSet -> {
+                            logger.trace("SubjectService findBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
+                            return Single.just(resultSet);
+                        })
+                        // close the connection regardless succeeded or failed
+                        .doAfterTerminate(conn::close)
+                );
+    }
+
+/*
+    public Single<List<JsonObject>> findAllJ() {
+        logger.info("SubjectService findAllJ() invoked" + jdbcClient);
+        return jdbcClient
+                .rxGetConnection().flatMap(conn -> conn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
+                        // Disable auto commit to handle transaction manually
+                        .rxSetAutoCommit(false)
+                        // Switch from Completable to default Single value
+                        .toSingleDefault(false)
+                        //Check if user already exists
+                        //.flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_COMPACT))
+                        .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_WITH_GROUPS_PERMISSIONS))
+                        .map(ar -> ar.getRows().stream()
+                                .map(JsonObject::stream)
+                                .collect(Collectors.toList()))
+                        .flatMap(resultSet -> {
+                            logger.trace("SubjectService findAll() # of records :[" + resultSet.getNumRows() + "]");
+                            return Single.just(resultSet);
+                        })
+                        // close the connection regardless succeeded or failed
+                        .doAfterTerminate(conn::close)
+                );
+    }
+*/
 
     @Override
     public Maybe<Subject> update(long id, Subject newT) {
@@ -210,7 +258,7 @@ public class SubjectService extends AbstractService<Subject> {
                 });
     }
 
-    private static final String SQL_INSERT = "INSERT INTO Subject " +
+    private static final String SQL_INSERT_OLD = "INSERT INTO Subject " +
             "(organization_id, created, updated, deleted, is_deleted, crud_subject_id, is_activated, subject_type_id, subject_name, first_name, last_name, display_name, email, secondary_email, effective_start_date, effective_end_date, password, password_salt) " +
             "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     private static final String SQL_FIND_ALL = "SELECT * FROM Subject";
@@ -261,13 +309,13 @@ public class SubjectService extends AbstractService<Subject> {
     private static final String SQL_FILTER_BY_SUBJECTNAME = "select\n" +
 //            "  id,\n" +
             "  uuid,\n" +
-            "  organization_id,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  is_deleted,\n" +
+//            "  organization_id,\n" +
+//            "  created,\n" +
+//            "  updated,\n" +
+//            "  deleted,\n" +
+//            "  is_deleted,\n" +
 //            "  crud_subject_id,\n" +
-            "  is_activated,\n" +
+//            "  is_activated,\n" +
 //            "  subject_type_id,\n" +
             "  subject_name,\n" +
             "  first_name,\n" +
@@ -275,20 +323,113 @@ public class SubjectService extends AbstractService<Subject> {
             "  display_name,\n" +
             "  email,\n" +
 //            "  secondary_email,\n" +
-            "  effective_start_date,\n" +
-            "  effective_end_date,\n" +
+//            "  effective_start_date,\n" +
+//            "  effective_end_date,\n" +
 //            "  password,\n" +
 //            "  password_salt,\n" +
-            "  picture,\n" +
-            "  total_login_count,\n" +
-            "  failed_login_count,\n" +
-            "  invalid_password_attempt_count,\n" +
-            "  is_password_change_required,\n" +
-            "  password_expires_at,\n" +
-            "  last_login_at,\n" +
-            "  last_password_change_at,\n" +
-            "  last_authenticated_at\n" +
+            "  picture\n" +
+//            "  total_login_count,\n" +
+//            "  failed_login_count,\n" +
+//            "  invalid_password_attempt_count,\n" +
+//            "  is_password_change_required,\n" +
+//            "  password_expires_at,\n" +
+//            "  last_login_at,\n" +
+//            "  last_password_change_at,\n" +
+//            "  last_authenticated_at\n" +
             "from subject\n" +
             "where lower(subject_name) like lower(?)\n" +
             "order by subject_name";
+
+    private static final String SQL_FIND_BY_SUBJECTNAME = "select\n" +
+//            "  id,\n" +
+            "  uuid,\n" +
+//            "  organization_id,\n" +
+//            "  created,\n" +
+//            "  updated,\n" +
+//            "  deleted,\n" +
+//            "  is_deleted,\n" +
+//            "  crud_subject_id,\n" +
+//            "  is_activated,\n" +
+//            "  subject_type_id,\n" +
+            "  subject_name,\n" +
+            "  first_name,\n" +
+            "  last_name,\n" +
+            "  display_name,\n" +
+            "  email,\n" +
+//            "  secondary_email,\n" +
+//            "  effective_start_date,\n" +
+//            "  effective_end_date,\n" +
+//            "  password,\n" +
+//            "  password_salt,\n" +
+            "  picture\n" +
+//            "  total_login_count,\n" +
+//            "  failed_login_count,\n" +
+//            "  invalid_password_attempt_count,\n" +
+//            "  is_password_change_required,\n" +
+//            "  password_expires_at,\n" +
+//            "  last_login_at,\n" +
+//            "  last_password_change_at,\n" +
+//            "  last_authenticated_at\n" +
+            "from subject\n" +
+            "where lower(subject_name) = lower(?)";
+
+    private static final String SQL_INSERT = "insert into subject (id, uuid, organization_id, created, updated, deleted, is_deleted, crud_subject_id, is_activated, subject_type_id, subject_name, first_name, last_name, display_name, email, secondary_email, effective_start_date, effective_end_date, password, password_salt, picture, total_login_count, failed_login_count, invalid_password_attempt_count, is_password_change_required, password_expires_at, last_login_at, last_password_change_at, last_authenticated_at)\n" +
+            "values ();";
+
+    private static final String SQL_FIND_ALL_WITH_GROUPS_PERMISSIONS = "select row_to_json(t)  rowjson\n" +
+            "from (\n" +
+            "       select\n" +
+//            "         id,\n" +
+            "         uuid,\n" +
+            "         organization_id,\n" +
+            "         created,\n" +
+            "         updated,\n" +
+            "         deleted,\n" +
+            "         is_deleted,\n" +
+//            "         crud_subject_id,\n" +
+            "         is_activated,\n" +
+            "         subject_type_id,\n" +
+            "         subject_name,\n" +
+            "         first_name,\n" +
+            "         last_name,\n" +
+            "         display_name,\n" +
+            "         email,\n" +
+            "         secondary_email,\n" +
+            "         effective_start_date,\n" +
+            "         effective_end_date,\n" +
+//            "         password,\n" +
+//            "         password_salt,\n" +
+            "         picture,\n" +
+            "         total_login_count,\n" +
+            "         failed_login_count,\n" +
+            "         invalid_password_attempt_count,\n" +
+            "         is_password_change_required,\n" +
+            "         password_expires_at,\n" +
+            "         last_login_at,\n" +
+            "         last_password_change_at,\n" +
+            "         last_authenticated_at,\n" +
+            "         last_failed_login_at,\n" +
+            "         (\n" +
+            "           select json_agg(row_to_json(sp))\n" +
+            "           from (\n" +
+            "                  select\n" +
+            "                    sg.uuid,\n" +
+            "                    sg.group_name\n" +
+            "                  from subject_group sg, subject_membership sm\n" +
+            "                  where sm.subject_id = subject.id and sg.id = sm.subject_group_id\n" +
+            "                ) sp\n" +
+            "         ) as groups,\n" +
+            "         (\n" +
+            "           select json_agg(row_to_json(rsp))\n" +
+            "           from (\n" +
+            "                  select\n" +
+            "                    sp.uuid,\n" +
+            "                    sp.permission\n" +
+            "                  from subject_permission sp\n" +
+            "                  where sp.subject_id = subject.id) rsp\n" +
+            "         ) as permissions\n" +
+            "       from subject\n" +
+            "       order by subject_name\n" +
+            "     ) as t";
+
 }

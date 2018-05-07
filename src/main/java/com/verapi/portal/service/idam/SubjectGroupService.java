@@ -126,17 +126,17 @@ public class SubjectGroupService extends AbstractService<SubjectGroup> {
     private static final String SQL_FILTER_BY_GROUPNAME = "select\n" +
 //            "  id,\n" +
             "  uuid,\n" +
-            "  organization_id,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  is_deleted,\n" +
+//            "  organization_id,\n" +
+//            "  created,\n" +
+//            "  updated,\n" +
+//            "  deleted,\n" +
+//            "  is_deleted,\n" +
 //            "  crud_subject_id,\n" +
-            "  is_enabled,\n" +
-            "  group_name,\n" +
-            "  description,\n" +
-            "  effective_start_date,\n" +
-            "  effective_end_date\n" +
+//            "  is_enabled,\n" +
+            "  group_name\n" +
+//            "  description,\n" +
+//            "  effective_start_date,\n" +
+//            "  effective_end_date\n" +
             "from subject_group\n" +
             "where lower(group_name) like lower(?)\n" +
             "order by group_name";

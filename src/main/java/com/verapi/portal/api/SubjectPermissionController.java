@@ -66,7 +66,7 @@ public class SubjectPermissionController extends ApiAbstractController {
                     .flatMap(result -> {
                         JsonObject jsonObject = new JsonObject()
                                 .put("statusCode", "200")
-                                .put("groupList", result.toJson().getValue("rows"))
+                                .put("respDataList", result.toJson().getValue("rows"))
                                 .put("totalPages", 1) //TODO:pagination
                                 .put("totalItems", result.getNumRows())
                                 .put("pageSize", 30)

@@ -139,7 +139,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //A handler that maintains a Session for each browser session
         //The session is available on the routing context with RoutingContext.session()
         //The session handler requires a CookieHandler to be on the routing chain before it
-        abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session"));
+        abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session").setSessionTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60 * 1000));
 
         //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
         //It requires that the session handler is already present on previous matching routes
@@ -172,6 +172,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         abyssRouter.get("/data/*").handler(StaticHandler.create("webroot/data"));
 
         abyssRouter.get("/swagger-ui/*").handler(StaticHandler.create("webroot/swagger-ui"));
+
+        abyssRouter.get("/swagger-editor/*").handler(StaticHandler.create("webroot/swagger-editor"));
 
         abyssRouter.get("/global.js").handler(this::globalJavascript);
 

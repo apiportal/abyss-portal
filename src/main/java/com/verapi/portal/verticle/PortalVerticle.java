@@ -51,20 +51,6 @@ public class PortalVerticle extends AbstractPortalVerticle {
     @Override
     protected void mountControllerRouters() {
         logger.info("PortalVerticle.mountControllerRouters() invoked");
-/*
-            mountControllerRouter(jdbcAuth, Controllers.LOGIN);
-            mountControllerRouter(jdbcAuth, Controllers.INDEX);
-            mountControllerRouter(jdbcAuth, Controllers.SIGNUP);
-            mountControllerRouter(jdbcAuth, Controllers.TRX_OK);
-            mountControllerRouter(jdbcAuth, Controllers.ACTIVATE_ACCOUNT);
-            mountControllerRouter(jdbcAuth, Controllers.FORGOT_PASSWORD);
-            mountControllerRouter(jdbcAuth, Controllers.RESET_PASSWORD);
-            mountControllerRouter(jdbcAuth, Controllers.CHANGE_PASSWORD);
-            mountControllerRouter(jdbcAuth, Controllers.USERS);
-            mountControllerRouter(jdbcAuth, Controllers.SUBJECTGROUP);
-            mountControllerRouter(jdbcAuth, Controllers.MYAPIS);
-*/
-
         new FastClasspathScanner("com.verapi")
                 //.verbose()
                 .matchClassesWithAnnotation(AbyssController.class, new ClassAnnotationMatchProcessor() {

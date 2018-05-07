@@ -129,17 +129,17 @@ public class SubjectPermissionService extends AbstractService<SubjectPermission>
     private static final String SQL_FILTER_BY_PERMISSIONNAME = "select\n" +
 //            "  id,\n" +
             "  uuid,\n" +
-            "  organization_id,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  is_deleted,\n" +
+//            "  organization_id,\n" +
+//            "  created,\n" +
+//            "  updated,\n" +
+//            "  deleted,\n" +
+//            "  is_deleted,\n" +
 //            "  crud_subject_id,\n" +
-            "  permission,\n" +
-            "  description,\n" +
-            "  effective_start_date,\n" +
-            "  effective_end_date,\n" +
-            "  subject_id\n" +
+            "  permission\n" +
+//            "  description,\n" +
+//            "  effective_start_date,\n" +
+//            "  effective_end_date,\n" +
+//            "  subject_id\n" +
             "from subject_permission\n" +
             "where lower(permission) like lower(?)\n" +
             "order by permission";
