@@ -67,7 +67,7 @@ public class Cryptor {
 			//TODO: generate KCV
 			//TODO: use keyblock mechanism
 			//TODO: store key / load key
-			//ByteUtils.printByteArray(aesEncKey.getEncoded(), "AES ENC KEY"); //TODO: Kald�r
+			//ByteUtils.printByteArray(aesEncKey.getEncoded(), "AES ENC KEY"); //TODO: Kaldır
 			
 		} catch (NoSuchAlgorithmException e1) {
 			// TODO: handle exception

@@ -73,7 +73,7 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
     }
 
     public Single<ResultSet> findBySubjectUuid(String subjectUuid) {
-        logger.info("SubjectIndexService filterBySubjectName() invoked" + jdbcClient);
+        logger.info("SubjectIndexService findBySubjectUuid() invoked " + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -221,7 +221,7 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
             "  --json_array_elements('[]') as notifications \n" +
             "from subject\n" +
             //"where lower(subject_name) = lower(?)\n" +
-            "where uuid = ?\n" +
+            "where uuid = CAST(? as uuid)\n" +
             //"order by subject_name\n" +
             ") as subj;";
 
