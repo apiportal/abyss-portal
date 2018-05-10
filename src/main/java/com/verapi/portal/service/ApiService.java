@@ -130,7 +130,7 @@ public class ApiService extends AbstractService<JsonObject> {
             "language_name," +
             "language_version," +
             "data_format," +
-            "json_text," +
+            "openapi_document," +
             "business_api_id," +
             "image," +
             "color," +
@@ -146,8 +146,8 @@ public class ApiService extends AbstractService<JsonObject> {
             " FROM api_category c join api__api_category axc on c.id = axc.api_category_id" +
             " WHERE axc.api_id = a.id) as categories " +
             "FROM portalschema.api a " +
-            "WHERE json_text ?? 'servers' " +
-            "ORDER BY json_text -> 'info' -> 'title'" +
+            "WHERE openapi_document ?? 'servers' " +
+            "ORDER BY openapi_document -> 'info' -> 'title'" +
             ") as jayson;";
 
     private static final String SQL_FILTER_BY_SUBJECTNAME = "SELECT " +
@@ -165,7 +165,7 @@ public class ApiService extends AbstractService<JsonObject> {
             "language_name," +
             "language_version," +
             "data_format," +
-            "json_text," +
+            "openapi_document," +
             "business_api_id," +
             "image," +
             "color," +
@@ -181,13 +181,13 @@ public class ApiService extends AbstractService<JsonObject> {
             " FROM api_category c join api__api_category axc on c.id = axc.api_category_id" +
             " WHERE axc.api_id = a.id) as categories " +
             "FROM portalschema.api a " +
-            "WHERE json_text ?? 'servers' " +
+            "WHERE openapi_document ?? 'servers' " +
             "AND subject_id = (SELECT id FROM subject WHERE lower(subject_name) like lower(?)) " +
-            "ORDER BY json_text -> 'info' -> 'title'" +
+            "ORDER BY openapi_document -> 'info' -> 'title'" +
             ";";
 
 
-    private static final String SQL_FIND_ALL_COMPACT_JSON = "select row_to_json(jayson) rowjson, to_json(json_text) openapi\n" +
+    private static final String SQL_FIND_ALL_COMPACT_JSON = "select row_to_json(jayson) rowjson, to_json(openapi_document) openapi\n" +
             "from (\n" +
             "       select\n" +
             "         uuid,\n" +
@@ -204,10 +204,8 @@ public class ApiService extends AbstractService<JsonObject> {
             "         language_name,\n" +
             "         language_version,\n" +
             "         data_format,\n" +
-            "         raw_text,\n" +
-            "         json_text,\n" +
-            "         --          to_json(json_text) as jayson,\n" +
-            "         --          jsonb_pretty(json_text),\n" +
+            "         original_document,\n" +
+            "         openapi_document,\n" +
             "         business_api_id,\n" +
             "         image,\n" +
             "         color,\n" +
@@ -246,8 +244,8 @@ public class ApiService extends AbstractService<JsonObject> {
             "             axc.api_id = a.id\n" +
             "         ) as categories\n" +
             "       from api a\n" +
-            "       where json_text ?? 'servers'\n" +
-            "       order by json_text -> 'info' -> 'title'\n" +
+            "       where openapi_document ?? 'servers'\n" +
+            "       order by openapi_document -> 'info' -> 'title'\n" +
             "     ) as jayson;\n";
 
 

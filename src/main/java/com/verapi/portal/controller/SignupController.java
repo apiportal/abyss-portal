@@ -83,7 +83,7 @@ public class SignupController extends PortalAbstractController {
                             if (resultSet.getNumRows() > 0) {
                                 subjectId = resultSet.getRows(true).get(0).getInteger("id");
                                 logger.info("user found: " + resultSet.toJson().encodePrettily());
-                                if (resultSet.getRows(true).get(0).getInteger("is_activated") > 0) {
+                                if (resultSet.getRows(true).get(0).getBoolean("is_activated")) {
                                     return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
                                 } else {
                                     //TODO: Cancel previous activation - Is it really required.

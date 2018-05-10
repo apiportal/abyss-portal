@@ -68,7 +68,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                         JsonObject row = resultSet.getRows(true).get(0);
                                         logger.info("Token found:" + row.encodePrettily());
 
-                                        if (row.getInteger("is_deleted") == 1) {
+                                        if (row.getBoolean("is_deleted")) {
                                             logger.error("Received Token is deleted");
                                             return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
                                         }
@@ -112,7 +112,7 @@ public class ResetPasswordController extends PortalAbstractController {
 //                                    return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET " +
 //                                                    "updated = now()," +
 //                                                    "crud_subject_id = ?," +
-//                                                    "is_activated = 1" +
+//                                                    "is_activated = true" +
 //                                                    " WHERE " +
 //                                                    "id = ?;",
 //                                            new JsonArray()
@@ -128,7 +128,7 @@ public class ResetPasswordController extends PortalAbstractController {
 //                                return resConn.rxUpdateWithParams("UPDATE portalschema.subject_activation SET " +
 //                                                "deleted = now()," +
 //                                                "crud_subject_id = ?," +
-//                                                "is_deleted = 1" +
+//                                                "is_deleted = true" +
 //                                                " WHERE " +
 //                                                "id = ?;",
 //                                        new JsonArray()
@@ -214,7 +214,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                 JsonObject row = resultSet.getRows(true).get(0);
                                 logger.info("Token found:" + row.encodePrettily());
 
-                                if (row.getInteger("is_deleted") == 1) {
+                                if (row.getBoolean("is_deleted")) {
                                     logger.error("Received Token is deleted");
                                         return Single.error(new Exception("Token does not exist in our records. Please request a new token."));
                                 }
@@ -263,7 +263,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                     return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET " +
                                                     "updated = now()," +
                                                     "crud_subject_id = ?," +
-                                                    "is_activated = 1," +
+                                                    "is_activated = true," +
                                                     "password = ?," +
                                                     "password_salt = ? " +
                                                     " WHERE " +
@@ -283,7 +283,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                 return resConn.rxUpdateWithParams("UPDATE portalschema.subject_activation SET " +
                                                 "deleted = now()," +
                                                 "crud_subject_id = ?," +
-                                                "is_deleted = 1" +
+                                                "is_deleted = true" +
                                                 " WHERE " +
                                                 "id = ?;",
                                         new JsonArray()

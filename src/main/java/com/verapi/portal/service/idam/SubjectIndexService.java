@@ -127,7 +127,7 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
             "\t,\n" +
             "\t'myApiVisibilityList', (select json_agg(row_to_json(myApiVisibilityList)) from \n" +
             "\t(select vt.id, vt.uuid, vt.\"name\", count(a.subject_id) as \"count\" \n" +
-            "\t  from visibility_type vt left outer join api a on (vt.id = a.api_visibility_id)\n" +
+            "\t  from api_visibility_type vt left outer join api a on (vt.id = a.api_visibility_id)\n" +
             "\t  where a.subject_id = subj.id or a.subject_id is null\n" +
             "\t  group by vt.id, vt.uuid, vt.\"name\") as myApiVisibilityList)\n" +
             "\t,\n" +
@@ -181,7 +181,7 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
             "\t,\n" +
             "\t'myApiVisibilityList', (select json_agg(row_to_json(myApiVisibilityList)) from \n" +
             "\t(select vt.id, vt.uuid, vt.\"name\", count(a.subject_id) as \"count\" \n" +
-            "\t  from visibility_type vt left outer join api a on (vt.id = a.api_visibility_id)\n" +
+            "\t  from api_visibility_type vt left outer join api a on (vt.id = a.api_visibility_id)\n" +
             "\t  where a.subject_id = subj.id or a.subject_id is null\n" +
             "\t  group by vt.id, vt.uuid, vt.\"name\") as myApiVisibilityList)\n" +
             "\t,\n" +

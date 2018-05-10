@@ -69,7 +69,7 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                                 logger.info("username NOT found...");
                                 return Single.error(new Exception("Username not found in our records"));
                             } else if (numOfRows == 1) {
-                                if (resultSet.getRows(true).get(0).getInteger("is_activated") == 0) {
+                                if (resultSet.getRows(true).get(0).getBoolean("is_activated") == false) {
                                     logger.info("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
