@@ -27,6 +27,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.handler.ResponseTimeHandler;
@@ -66,6 +67,21 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
         verticleRouter.route("/logout").handler(context -> {
             context.clearUser();
+
+            logger.trace("Cookie list before logout:");
+            for (Cookie c : context.cookies()) {
+                logger.info(c.getName() + ":" + c.getValue());
+            }
+
+            context.removeCookie("abyss.principal.uuid");
+            context.removeCookie("abyss.session");
+            context.removeCookie("abyss_principal"); //TODO: Bunu kim koyuyor?
+
+            logger.trace("Cookie list after logout:");
+            for (Cookie c : context.cookies()) {
+                logger.info(c.getName() + ":" + c.getValue());
+            }
+
             context.response().putHeader("location", Constants.ABYSS_ROOT + "/index").setStatusCode(302).end();
             //todo: use redirect method
         });
