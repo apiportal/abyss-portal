@@ -1,0 +1,414 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38081/abyss'
+  - url: 'http://192.168.10.46:38081/abyss' 
+  - url: 'https://apiportal.com/abyss'
+info:
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: info@apiportal.com
+    name: Abyss
+    url: 'https://apiportal.com'
+  license:
+    name: Abyss 1.0
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: TODO
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: Abyss ... [TODO]  
+paths:
+  /resource-actions:
+    get:
+      tags:
+        - TODO
+      summary: Get list of resourceActions
+      description: 'Returns list of resourceActions'
+      operationId: getResourceActions
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfResourceAction'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    post:
+      tags:
+        - TODO
+      summary: Add a new ResourceAction
+      description: 'Provide a new ResourceAction to be inserted'
+      operationId: addResourceActions
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ResourceAction'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of ResourceAction
+      description: 'Provide an altered ResourceAction array to be updated'
+      operationId: updateResourceActions
+      parameters:
+        - name: uuid
+          in: path
+          description: bulk of uuids of resourceActions that need to be updated
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfResourceAction'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfResourceAction'          
+    delete:
+      tags:
+        - TODO
+      summary: Delete all resourceActions
+      description: 'Deletes all resourceActions'
+      operationId: deleteResourceActions
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+  /resource-actions/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing ResourceAction by uuid
+      description: 'Provide an uuid of ResourceAction to be get'
+      operationId: getResourceAction
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of ResourceAction that need to be get
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    put:
+      tags:
+        - TODO
+      summary: Update an existing ResourceAction
+      description: 'Provide an altered ResourceAction to be updated'
+      operationId: updateResourceAction
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of ResourceAction that need to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ResourceAction'
+    delete:
+      tags:
+        - TODO
+      summary: Delete ResourceAction
+      description: 'Provide an uuid parameter of ResourceAction to be updated'
+      operationId: deleteResourceAction
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of ResourceAction that needs to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+externalDocs:
+  description: See Abyss example
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    ResourceAction:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationId:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          description: Timestamp of creation
+        updated:
+          type: string
+          description: Timestamp of update
+        deleted:
+          type: string
+          description: Timestamp of deletion
+        isDeleted:
+          type: boolean
+          description: Is record logically deleted
+        crudSubjectId:
+          type: integer
+          format: int32
+          description: ID of Subject that reads, creates, updates or deletes
+        actionName:
+          type: string
+          description: Action Name
+        description:
+          type: string
+          description: Description of Action
+        subjectPermissionId:
+          type: integer
+          format: int32
+          description: FK ID of Subject Permission
+  requestBodies:
+    ResourceAction:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAction'          
+      description: ResourceAction object that needs to be added
+      required: true
+    ListOfResourceAction:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ResourceAction'          
+      description: ResourceAction array that needs to be added
+      required: true
+  responses:
+    '200':
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAction'
+    '200-ListOfResourceAction':
+      description: A ResourceAction array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ResourceAction'          
+            
+    '201':
+      description: New ResourceAction resource has been created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAction'
+    '204':
+      description: The ResourceAction resource was successfully deleted
+    '304':
+      description: Not Modified – The client can use cached data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAction'
+    '400':
+      description: Invalid UUID supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: Authorization information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Not found – There is no resource behind the URI
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Unprocessable Entity – server cannot process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too many request(rate limiting)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      name: abyss.session
+      in: cookie
+  links: {}
+  callbacks: {}
+security:
+  - cookieAuth: []

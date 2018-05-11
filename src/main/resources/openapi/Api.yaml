@@ -1,0 +1,455 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38081/abyss'
+  - url: 'http://192.168.10.46:38081/abyss' 
+  - url: 'https://apiportal.com/abyss'
+info:
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: info@apiportal.com
+    name: Abyss
+    url: 'https://apiportal.com'
+  license:
+    name: Abyss 1.0
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: TODO
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: Abyss ... [TODO]  
+paths:
+  /apis:
+    get:
+      tags:
+        - TODO
+      summary: Get list of apis
+      description: 'Returns list of apis'
+      operationId: getApis
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    post:
+      tags:
+        - TODO
+      summary: Add a new Api
+      description: 'Provide a new Api to be inserted'
+      operationId: addApis
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/Api'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of Api
+      description: 'Provide an altered Api array to be updated'
+      operationId: updateApis
+      parameters:
+        - name: uuid
+          in: path
+          description: bulk of uuids of apis that need to be updated
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApi'          
+    delete:
+      tags:
+        - TODO
+      summary: Delete all apis
+      description: 'Deletes all apis'
+      operationId: deleteApis
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+  /apis/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing Api by uuid
+      description: 'Provide an uuid of Api to be get'
+      operationId: getApi
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Api that need to be get
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    put:
+      tags:
+        - TODO
+      summary: Update an existing Api
+      description: 'Provide an altered Api to be updated'
+      operationId: updateApi
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Api that need to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/Api'
+    delete:
+      tags:
+        - TODO
+      summary: Delete Api
+      description: 'Provide an uuid parameter of Api to be updated'
+      operationId: deleteApi
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of Api that needs to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+externalDocs:
+  description: See Abyss example
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    Api:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationId:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isDeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudSubjectId:
+          type: integer
+          format: int32
+          description: ID of Subject that reads, creates, updates or deletes
+        subjectId:
+          type: integer
+          format: int32
+          description: FK ID of owner Subject
+        isProxyApi:
+          type: boolean
+          description: Type of API. False - Business API, True - API Proxy
+        apiStateId:
+          type: integer
+          format: int32
+          description: FK ID of State of Business API
+        apiVisibilityId:
+          type: integer
+          format: int32
+          description: ID of Business API Visibility - Private, Closed Group, Public, ...
+        languageName:
+          type: string
+          description: Formal API Description Language - Swagger, OpenAPI, RAML, WADL, WSDL, ...
+        languageVersion:
+          type: string
+          description: Version of Description Language
+        dataFormat:
+          type: integer
+          format: int32
+          description: Data format type. 0 - JSON, 1 - YAML, 2 - XML
+        originalDocument:
+          type: string
+          description: Original API DSL Document
+        openapiDocument:
+          type: string
+          description: Transformed API DSL document in Open API json format
+        businessApiId:
+          type: integer
+          format: int32
+          description: FK ID of Business API for API Proxies
+        image:
+          type: string
+          description: Image data of Business API
+        color:
+          type: string
+          description: Color of Business API
+        deployed:
+          type: string
+          description: Deployed Date Time of API
+        changeLog:
+          type: string
+          description: Release notes and change log of API
+  requestBodies:
+    Api:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Api'          
+      description: Api object that needs to be added
+      required: true
+    ListOfApi:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Api'          
+      description: Api array that needs to be added
+      required: true
+  responses:
+    '200':
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Api'
+    '200-ListOfApi':
+      description: A Api array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Api'          
+            
+    '201':
+      description: New Api resource has been created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Api'
+    '204':
+      description: The Api resource was successfully deleted
+    '304':
+      description: Not Modified – The client can use cached data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Api'
+    '400':
+      description: Invalid UUID supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: Authorization information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Not found – There is no resource behind the URI
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Unprocessable Entity – server cannot process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too many request(rate limiting)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      name: abyss.session
+      in: cookie
+  links: {}
+  callbacks: {}
+security:
+  - cookieAuth: []

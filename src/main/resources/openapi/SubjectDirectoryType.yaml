@@ -1,0 +1,414 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38081/abyss'
+  - url: 'http://192.168.10.46:38081/abyss' 
+  - url: 'https://apiportal.com/abyss'
+info:
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: info@apiportal.com
+    name: Abyss
+    url: 'https://apiportal.com'
+  license:
+    name: Abyss 1.0
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: TODO
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: Abyss ... [TODO]  
+paths:
+  /subject-directory-types:
+    get:
+      tags:
+        - TODO
+      summary: Get list of subjectDirectoryTypes
+      description: 'Returns list of subjectDirectoryTypes'
+      operationId: getSubjectDirectoryTypes
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectDirectoryType'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    post:
+      tags:
+        - TODO
+      summary: Add a new SubjectDirectoryType
+      description: 'Provide a new SubjectDirectoryType to be inserted'
+      operationId: addSubjectDirectoryTypes
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/SubjectDirectoryType'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of SubjectDirectoryType
+      description: 'Provide an altered SubjectDirectoryType array to be updated'
+      operationId: updateSubjectDirectoryTypes
+      parameters:
+        - name: uuid
+          in: path
+          description: bulk of uuids of subjectDirectoryTypes that need to be updated
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectDirectoryType'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectDirectoryType'          
+    delete:
+      tags:
+        - TODO
+      summary: Delete all subjectDirectoryTypes
+      description: 'Deletes all subjectDirectoryTypes'
+      operationId: deleteSubjectDirectoryTypes
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+  /subject-directory-types/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing SubjectDirectoryType by uuid
+      description: 'Provide an uuid of SubjectDirectoryType to be get'
+      operationId: getSubjectDirectoryType
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of SubjectDirectoryType that need to be get
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    put:
+      tags:
+        - TODO
+      summary: Update an existing SubjectDirectoryType
+      description: 'Provide an altered SubjectDirectoryType to be updated'
+      operationId: updateSubjectDirectoryType
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of SubjectDirectoryType that need to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/SubjectDirectoryType'
+    delete:
+      tags:
+        - TODO
+      summary: Delete SubjectDirectoryType
+      description: 'Provide an uuid parameter of SubjectDirectoryType to be updated'
+      operationId: deleteSubjectDirectoryType
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of SubjectDirectoryType that needs to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+externalDocs:
+  description: See Abyss example
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    SubjectDirectoryType:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationId:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isDeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudSubjectId:
+          type: integer
+          format: int32
+          description: ID of Subject that reads, creates, updates or deletes
+        typeName:
+          type: string
+          description: Subject Directory Type Name
+        decription:
+          type: string
+          description: Description of Directory Type
+  requestBodies:
+    SubjectDirectoryType:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectDirectoryType'          
+      description: SubjectDirectoryType object that needs to be added
+      required: true
+    ListOfSubjectDirectoryType:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SubjectDirectoryType'          
+      description: SubjectDirectoryType array that needs to be added
+      required: true
+  responses:
+    '200':
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectDirectoryType'
+    '200-ListOfSubjectDirectoryType':
+      description: A SubjectDirectoryType array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SubjectDirectoryType'          
+            
+    '201':
+      description: New SubjectDirectoryType resource has been created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectDirectoryType'
+    '204':
+      description: The SubjectDirectoryType resource was successfully deleted
+    '304':
+      description: Not Modified – The client can use cached data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectDirectoryType'
+    '400':
+      description: Invalid UUID supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: Authorization information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Not found – There is no resource behind the URI
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Unprocessable Entity – server cannot process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too many request(rate limiting)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      name: abyss.session
+      in: cookie
+  links: {}
+  callbacks: {}
+security:
+  - cookieAuth: []

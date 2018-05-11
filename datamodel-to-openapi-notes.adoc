@@ -1,0 +1,118 @@
+= Data model to OpenAPI yaml Development Notes
+Abyss Doc Writer <doc.writer@verapi.com>
+v1.0, 2018-05-10
+:doctype: guide
+:encoding: utf-8
+:lang: en
+:toc: left
+:numbered:
+
+Verapi (R)(TM)
+
+:uri-project: https://apiportal.com
+:uri-twitter: https://twitter.com/Verapiyazilim
+:uri-twitter-hash: https://twitter.com/hashtag/verapi?src=hash
+:icons: font
+
+== Naming Conventions
+path name:::
+- lower case
+- spinal-case notation
+- using noun but no verb
+- plural
+
+schema component name:::
+- camel case notation
+- singular
+
+response body component name:::
+- camel case notation
+- singular
+
+== Excludes
+The following rules are applied to *exclude* table columns to be generated inside yaml file
+
+=== Serial datatype (primary key fields)
+[source,groovy,indent=0]
+----
+if (column.dataType == "serial") --then exclude the field
+----
+=== Privacy Level 0
+[source,groovy,indent=0]
+----
+if (column.description.contains("#Level:0#")) --then exclude the field
+----
+== Includes
+:sectnums:
+=== Type Mapping
+During YAML generation the following mapping table is used to map database and openAPI datatypes
+
+.Database datatype TO OpenAPI datatype
+|===
+|Database datatype |OpenAPI datatype
+
+|uuid|string
+|int|integer
+|serial|integer
+|float|number
+|double|number
+|double precision|number
+|decimal|number
+|real|number
+|numeric|number
+|datetime|string
+|timestamp|string
+|date|string
+|time|string
+|text|string
+|bool|boolean
+|_default_|string
+|===
+=== Format Mapping
+During YAML generation the following mapping table is used to map database data type and openAPI format types
+
+.Database datatype TO OpenAPI format type
+|===
+|Database datatype |OpenAPI format type
+
+|uuid|uuid
+|int|int32
+|serial|serial
+|float|float
+|real|float
+|double|double
+|double precision|double
+|decimal|-
+|numeric|-
+|datetime|date-time
+|timestamp|date-time
+|date|date
+|time|date-time
+|text|-
+|bool|-
+|_default_|string
+|===
+
+=== YAML schema component generation
+==== Schema name
+Schema name is the _capatilized_ table name
+
+==== Schema property name
+Schema property name is the table's column name
+
+==== Schema property type attribute
+Schema property type is the column's datatype mapped OpenAPI datatype
+
+==== Schema property format attribute
+* Schema property format is the column's datatype mapped OpenAPI format type
+Exceptions:::
+- Schema property format attribute is set *password* if the corresponding column's description includes *\#Level:1#* tag
+- Schema property format attribute is set *email* if the corresponding column's description includes *\#email#* tag
+- Schema property format attribute is set *byte* if the corresponding column's description includes *\#base64#* tag
+
+==== Schema property readOnly attribute
+* Schema property readOnly attribute is set *true* if the corresponding column's description includes *\#readOnly#* tag
+* Schema property readOnly attribute is set *true* if the property format type is *uuid*
+
+==== Schema property description attribute
+Schema property description attribute is set using with the corresponding column's description

@@ -1,0 +1,388 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38081/abyss'
+  - url: 'http://192.168.10.46:38081/abyss' 
+  - url: 'https://apiportal.com/abyss'
+info:
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: info@apiportal.com
+    name: Abyss
+    url: 'https://apiportal.com'
+  license:
+    name: Abyss 1.0
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: TODO
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: Abyss ... [TODO]  
+paths:
+  /api-api-groups:
+    get:
+      tags:
+        - TODO
+      summary: Get list of apiApiGroups
+      description: 'Returns list of apiApiGroups'
+      operationId: getApiApiGroups
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiApiGroup'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    post:
+      tags:
+        - TODO
+      summary: Add a new ApiApiGroup
+      description: 'Provide a new ApiApiGroup to be inserted'
+      operationId: addApiApiGroups
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ApiApiGroup'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of ApiApiGroup
+      description: 'Provide an altered ApiApiGroup array to be updated'
+      operationId: updateApiApiGroups
+      parameters:
+        - name: uuid
+          in: path
+          description: bulk of uuids of apiApiGroups that need to be updated
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiApiGroup'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApiApiGroup'          
+    delete:
+      tags:
+        - TODO
+      summary: Delete all apiApiGroups
+      description: 'Deletes all apiApiGroups'
+      operationId: deleteApiApiGroups
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+  /api-api-groups/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing ApiApiGroup by uuid
+      description: 'Provide an uuid of ApiApiGroup to be get'
+      operationId: getApiApiGroup
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of ApiApiGroup that need to be get
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    put:
+      tags:
+        - TODO
+      summary: Update an existing ApiApiGroup
+      description: 'Provide an altered ApiApiGroup to be updated'
+      operationId: updateApiApiGroup
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of ApiApiGroup that need to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ApiApiGroup'
+    delete:
+      tags:
+        - TODO
+      summary: Delete ApiApiGroup
+      description: 'Provide an uuid parameter of ApiApiGroup to be updated'
+      operationId: deleteApiApiGroup
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of ApiApiGroup that needs to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+externalDocs:
+  description: See Abyss example
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    ApiApiGroup:
+      type: object
+      properties:
+        apiId:
+          type: integer
+          format: int32
+          description: FK ID of API for many to many relationship of API groups
+        apiGroupId:
+          type: integer
+          format: int32
+          description: FK ID of API Group for many to many relationship of API groups
+  requestBodies:
+    ApiApiGroup:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiApiGroup'          
+      description: ApiApiGroup object that needs to be added
+      required: true
+    ListOfApiApiGroup:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiApiGroup'          
+      description: ApiApiGroup array that needs to be added
+      required: true
+  responses:
+    '200':
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiApiGroup'
+    '200-ListOfApiApiGroup':
+      description: A ApiApiGroup array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiApiGroup'          
+            
+    '201':
+      description: New ApiApiGroup resource has been created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiApiGroup'
+    '204':
+      description: The ApiApiGroup resource was successfully deleted
+    '304':
+      description: Not Modified – The client can use cached data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiApiGroup'
+    '400':
+      description: Invalid UUID supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: Authorization information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Not found – There is no resource behind the URI
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Unprocessable Entity – server cannot process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too many request(rate limiting)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      name: abyss.session
+      in: cookie
+  links: {}
+  callbacks: {}
+security:
+  - cookieAuth: []

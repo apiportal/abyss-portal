@@ -1,0 +1,493 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38081/abyss'
+  - url: 'http://192.168.10.46:38081/abyss' 
+  - url: 'https://apiportal.com/abyss'
+info:
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: info@apiportal.com
+    name: Abyss
+    url: 'https://apiportal.com'
+  license:
+    name: Abyss 1.0
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: TODO
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: Abyss ... [TODO]  
+paths:
+  /subjects:
+    get:
+      tags:
+        - TODO
+      summary: Get list of subjects
+      description: 'Returns list of subjects'
+      operationId: getSubjects
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubject'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    post:
+      tags:
+        - TODO
+      summary: Add a new Subject
+      description: 'Provide a new Subject to be inserted'
+      operationId: addSubjects
+      responses:
+        '201':
+          $ref: '#/components/responses/201'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/Subject'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of Subject
+      description: 'Provide an altered Subject array to be updated'
+      operationId: updateSubjects
+      parameters:
+        - name: uuid
+          in: path
+          description: bulk of uuids of subjects that need to be updated
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubject'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubject'          
+    delete:
+      tags:
+        - TODO
+      summary: Delete all subjects
+      description: 'Deletes all subjects'
+      operationId: deleteSubjects
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+  /subjects/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing Subject by uuid
+      description: 'Provide an uuid of Subject to be get'
+      operationId: getSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Subject that need to be get
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+    put:
+      tags:
+        - TODO
+      summary: Update an existing Subject
+      description: 'Provide an altered Subject to be updated'
+      operationId: updateSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Subject that need to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid          
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+      requestBody:
+        $ref: '#/components/requestBodies/Subject'
+    delete:
+      tags:
+        - TODO
+      summary: Delete Subject
+      description: 'Provide an uuid parameter of Subject to be updated'
+      operationId: deleteSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of Subject that needs to be deleted
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      security: []
+externalDocs:
+  description: See Abyss example
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    Subject:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationId:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isDeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudSubjectId:
+          type: integer
+          format: int32
+          description: ID of Subject that creates, updates or deletes
+        isActivated:
+          type: boolean
+          readOnly: true
+          description: Is user activated after signup by validating secondary verification mechanism #readOnly#
+        subjectTypeId:
+          type: integer
+          format: int32
+          description: Id of Subject Type
+        subjectName:
+          type: string
+          description: Username of user that is going to be used as credential
+        firstName:
+          type: string
+          description: First name of user
+        lastName:
+          type: string
+          description: Surname of user
+        displayName:
+          type: string
+          description: Display name or alias of user
+        email:
+          type: string
+          format: email
+          description: Main contact email of user #email#
+        secondaryEmail:
+          type: string
+          format: email
+          description: Secondary email of user for recovering account etc. #email#
+        effectiveStartDate:
+          type: string
+          description: Effective start date time of user that he or she can start using the platform
+        effectiveEndDate:
+          type: string
+          description: Effective end date time of user that he or she can use the platform until
+        password:
+          type: string
+          format: password
+          description: Password of user that is going to be used as credential #Level:1#
+        picture:
+          type: string
+          format: byte
+          description: Picture of subject #base64#
+        totalLoginCount:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Total Login Count of Subject #readOnly#
+        failedLoginCount:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Failed Login Count of Subject #readOnly#
+        invalidPasswordAttemptCount:
+          type: integer
+          format: int32
+          readOnly: true
+          description: Invalid Password Attempt Count of Subject #readOnly#
+        isPasswordChangeRequired:
+          type: boolean
+          readOnly: true
+          description: Does subject have to change password #readOnly#
+        passwordExpiresAt:
+          type: string
+          readOnly: true
+          description: Password expire date time. After this time subject must change password is still logon else should reset password to get a new one. #readOnly#
+        lastLoginAt:
+          type: string
+          readOnly: true
+          description: Last login date time of subject #readOnly#
+        lastPasswordChangeAt:
+          type: string
+          readOnly: true
+          description: Last password change date time #readOnly#
+        lastAuthenticatedAt:
+          type: string
+          readOnly: true
+          description: Last successful authentication date time #readOnly#
+        lastFailedLoginAt:
+          type: string
+          readOnly: true
+          description: Last failed login attempt date time #readOnly#
+        subjectDirectoryId:
+          type: integer
+          format: int32
+          description: FK ID of Subject Directory
+  requestBodies:
+    Subject:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Subject'          
+      description: Subject object that needs to be added
+      required: true
+    ListOfSubject:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Subject'          
+      description: Subject array that needs to be added
+      required: true
+  responses:
+    '200':
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Subject'
+    '200-ListOfSubject':
+      description: A Subject array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Subject'          
+            
+    '201':
+      description: New Subject resource has been created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Subject'
+    '204':
+      description: The Subject resource was successfully deleted
+    '304':
+      description: Not Modified – The client can use cached data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Subject'
+    '400':
+      description: Invalid UUID supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: Authorization information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Not found – There is no resource behind the URI
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Unprocessable Entity – server cannot process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too many request(rate limiting)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      name: abyss.session
+      in: cookie
+  links: {}
+  callbacks: {}
+security:
+  - cookieAuth: []
