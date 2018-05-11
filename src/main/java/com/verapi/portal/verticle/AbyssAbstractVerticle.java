@@ -238,6 +238,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         String filecontent =
                 "var hostProtocol='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_PROTOCOL) + "';" +
                 "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';" +
+                "var hostPort='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_PORT) + "';" +
+                "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_JSON_PORT) + "';" +
                 "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";";
         context.response().putHeader("Content-Type", "application/javascript");
         context.response().setStatusCode(200);

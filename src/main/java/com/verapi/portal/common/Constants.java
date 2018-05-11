@@ -19,6 +19,8 @@ public class Constants {
     public static final String ABYSS_PORTAL = "abyss-portal";
     public static final String HOST_PROTOCOL = "hostProtocol";
     public static final String HOST = "host";
+    public static final String HOST_PORT = "hostPort";
+    public static final String HOST_JSON_PORT = "hostJsonPort";
     public static final String ISSANDBOX = "issandbox";
 
     public static final String BROWSER_SESSION_TIMEOUT = "browser.session.timeout";
