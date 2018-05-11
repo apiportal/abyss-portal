@@ -150,7 +150,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         jdbcAuth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
 
-        jdbcAuth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.SUBJECT WHERE IS_DELETED = 0 AND is_activated = 1 AND SUBJECT_NAME = ?");
+        jdbcAuth.setAuthenticationQuery("SELECT PASSWORD, PASSWORD_SALT FROM portalschema.SUBJECT WHERE IS_DELETED = false AND is_activated = true AND SUBJECT_NAME = ?");
 
         jdbcAuth.setPermissionsQuery("SELECT PERMISSION FROM portalschema.SUBJECT_PERMISSION UP, portalschema.SUBJECT U WHERE UM.SUBJECT_NAME = ? AND UP.SUBJECT_ID = U.ID");
 

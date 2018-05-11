@@ -337,6 +337,25 @@
             </plugin>
 
             <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>deploy-file</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>target/*fat.jar</file>
+                            <!--<repositoryId></repositoryId>-->
+                            <!--<url>&lt;!&ndash; url-of-the-repository-to-deploy &ndash;&gt;</url>-->
+                            <packaging>jar</packaging>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>

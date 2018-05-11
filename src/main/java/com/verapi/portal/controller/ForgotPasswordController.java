@@ -74,7 +74,7 @@ public class ForgotPasswordController extends PortalAbstractController {
                                 return Single.error(new Exception("Username not found in our records"));
                             } else if (numOfRows == 1) {
                                 JsonObject row = resultSet.getRows(true).get(0);
-                                if (row.getInteger("is_activated") == 0) {
+                                if (row.getBoolean("is_activated") == false) {
                                     logger.info("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
@@ -129,7 +129,7 @@ public class ForgotPasswordController extends PortalAbstractController {
                                 return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET " +
                                                 "updated = now()," +
                                                 "crud_subject_id = ?," +
-                                                "is_activated = 0" +
+                                                "is_activated = false" +
                                                 " WHERE " +
                                                 "id = ?;",
                                         new JsonArray()

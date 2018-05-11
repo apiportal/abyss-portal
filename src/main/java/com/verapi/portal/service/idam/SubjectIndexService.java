@@ -73,7 +73,7 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
     }
 
     public Single<ResultSet> findBySubjectUuid(String subjectUuid) {
-        logger.info("SubjectIndexService filterBySubjectName() invoked" + jdbcClient);
+        logger.info("SubjectIndexService findBySubjectUuid() invoked " + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -120,13 +120,15 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
             "\t'user', row_to_json(subj) \n" +
             "\t,\n" +
             "\t'myApiStateList', (select json_agg(row_to_json(myApiStateList)) from \n" +
-            "\t(select st.id, st.uuid, st.\"name\", st.description,count(*) as \"count\" from api_state st, api a \n" +
-            "\t  where st.id = a.api_state_id and a.subject_id = subj.id--:subjectid \n" +
+            "\t(select st.id, st.uuid, st.\"name\", st.description, count(a.subject_id) as \"count\" \n" +
+            "\t  from api_state st left outer join api a on (st.id = a.api_state_id)  \n" +
+            "\t  where a.subject_id = subj.id or a.subject_id is null\n" +
             "\t  group by st.id, st.uuid, st.\"name\", st.description) as myApiStateList)\n" +
             "\t,\n" +
             "\t'myApiVisibilityList', (select json_agg(row_to_json(myApiVisibilityList)) from \n" +
-            "\t(select vt.id, vt.uuid, vt.\"name\", count(*) as \"count\" from visibility_type vt, api a \n" +
-            "\t  where vt.id = a.api_visibility_id and a.subject_id = subj.id \n" +
+            "\t(select vt.id, vt.uuid, vt.\"name\", count(a.subject_id) as \"count\" \n" +
+            "\t  from api_visibility_type vt left outer join api a on (vt.id = a.api_visibility_id)\n" +
+            "\t  where a.subject_id = subj.id or a.subject_id is null\n" +
             "\t  group by vt.id, vt.uuid, vt.\"name\") as myApiVisibilityList)\n" +
             "\t,\n" +
             "\t'myApiTagList', (select json_agg(row_to_json(myApiTagList)) from \n" +
@@ -172,14 +174,16 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
             "\t'user', row_to_json(subj) \n" +
             "\t,\n" +
             "\t'myApiStateList', (select json_agg(row_to_json(myApiStateList)) from \n" +
-            "\t(select st.uuid, st.\"name\", st.description,count(*) as \"count\" from api_state st, api a \n" +
-            "\t  where st.id = a.api_state_id and a.subject_id = subj.id--:subjectid \n" +
-            "\t  group by st.uuid, st.\"name\", st.description) as myApiStateList)\n" +
+            "\t(select st.id, st.uuid, st.\"name\", st.description, count(a.subject_id) as \"count\" \n" +
+            "\t  from api_state st left outer join api a on (st.id = a.api_state_id)  \n" +
+            "\t  where a.subject_id = subj.id or a.subject_id is null\n" +
+            "\t  group by st.id, st.uuid, st.\"name\", st.description) as myApiStateList)\n" +
             "\t,\n" +
             "\t'myApiVisibilityList', (select json_agg(row_to_json(myApiVisibilityList)) from \n" +
-            "\t(select vt.uuid, vt.\"name\", count(*) as \"count\" from visibility_type vt, api a \n" +
-            "\t  where vt.id = a.api_visibility_id and a.subject_id = subj.id \n" +
-            "\t  group by vt.uuid, vt.\"name\") as myApiVisibilityList)\n" +
+            "\t(select vt.id, vt.uuid, vt.\"name\", count(a.subject_id) as \"count\" \n" +
+            "\t  from api_visibility_type vt left outer join api a on (vt.id = a.api_visibility_id)\n" +
+            "\t  where a.subject_id = subj.id or a.subject_id is null\n" +
+            "\t  group by vt.id, vt.uuid, vt.\"name\") as myApiVisibilityList)\n" +
             "\t,\n" +
             "\t'myApiTagList', (select json_agg(row_to_json(myApiTagList)) from \n" +
             "\t(select t.uuid, t.\"name\", count(*) as \"count\" from api_tag t, api a, api__api_tag axt \n" +
@@ -217,7 +221,7 @@ public class SubjectIndexService extends AbstractService<JsonObject> {
             "  --json_array_elements('[]') as notifications \n" +
             "from subject\n" +
             //"where lower(subject_name) = lower(?)\n" +
-            "where uuid = ?\n" +
+            "where uuid = CAST(? as uuid)\n" +
             //"order by subject_name\n" +
             ") as subj;";
 
