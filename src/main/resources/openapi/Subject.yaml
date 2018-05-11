@@ -20,7 +20,7 @@ tags:
     externalDocs:
       url: 'https://apiportal.com'
       description: Find out more
-    description: Abyss Identity and Access Management APIs
+    description: Abyss Identity and Access Management Subject APIs
 paths:
   /subjects:
     get:
