@@ -171,9 +171,9 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         abyssRouter.get("/data/*").handler(StaticHandler.create("webroot/data"));
 
-        abyssRouter.get("/swagger-ui/*").handler(StaticHandler.create("webroot/swagger-ui"));
+        abyssRouter.get(Constants.ABYSS_ROOT + "/swagger-ui/*").handler(StaticHandler.create("webroot/swagger-ui"));
 
-        abyssRouter.get("/swagger-editor/*").handler(StaticHandler.create("webroot/swagger-editor"));
+        abyssRouter.get(Constants.ABYSS_ROOT + "/swagger-editor/*").handler(StaticHandler.create("webroot/swagger-editor"));
 
         abyssRouter.get("/global.js").handler(this::globalJavascript);
 
