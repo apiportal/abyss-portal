@@ -16,16 +16,16 @@ info:
     name: Abyss 1.0
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: TODO
+  - name: idam
     externalDocs:
       url: 'https://apiportal.com'
       description: Find out more
-    description: Abyss ... [TODO]  
+    description: Abyss Identity and Access Management APIs
 paths:
   /subjects:
     get:
       tags:
-        - TODO
+        - idam
       summary: Get list of subjects
       description: 'Returns list of subjects'
       operationId: getSubjects
@@ -51,7 +51,7 @@ paths:
       security: []
     post:
       tags:
-        - TODO
+        - idam
       summary: Add a new Subject
       description: 'Provide a new Subject to be inserted'
       operationId: addSubjects
@@ -79,7 +79,7 @@ paths:
         $ref: '#/components/requestBodies/Subject'
     put:
       tags:
-        - TODO
+        - idam
       summary: Update a bulk of Subject
       description: 'Provide an altered Subject array to be updated'
       operationId: updateSubjects
@@ -117,7 +117,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubject'          
     delete:
       tags:
-        - TODO
+        - idam
       summary: Delete all subjects
       description: 'Deletes all subjects'
       operationId: deleteSubjects
@@ -140,7 +140,7 @@ paths:
   /subjects/{uuid}:
     get:
       tags:
-        - TODO
+        - idam
       summary: Get an existing Subject by uuid
       description: 'Provide an uuid of Subject to be get'
       operationId: getSubject
@@ -174,7 +174,7 @@ paths:
       security: []
     put:
       tags:
-        - TODO
+        - idam
       summary: Update an existing Subject
       description: 'Provide an altered Subject to be updated'
       operationId: updateSubject
@@ -210,7 +210,7 @@ paths:
         $ref: '#/components/requestBodies/Subject'
     delete:
       tags:
-        - TODO
+        - idam
       summary: Delete Subject
       description: 'Provide an uuid parameter of Subject to be updated'
       operationId: deleteSubject
