@@ -19,18 +19,18 @@ public class Constants {
     public static final String ABYSS_PORTAL = "abyss-portal";
     public static final String HOST_PROTOCOL = "hostProtocol";
     public static final String HOST = "host";
-    public static final String HOST_PORT = "hostPort";
-    public static final String HOST_JSON_PORT = "hostJsonPort";
     public static final String ISSANDBOX = "issandbox";
 
     public static final String BROWSER_SESSION_TIMEOUT = "browser.session.timeout";
 
     public static final String HTTP_SERVER_HOST = "http.server.host";
     public static final String HTTP_SERVER_PORT = "http.server.port";
+    public static final String HTTP_PROXY_SERVER_PORT = "http.proxy.server.port";
     public static final String HTTP_SERVER_TIMEOUT = "http.server.timeout";
 
     public static final String HTTP_API_SERVER_HOST = "http.api.server.host";
     public static final String HTTP_API_SERVER_PORT = "http.api.server.port";
+    public static final String HTTP_PROXY_API_SERVER_PORT = "http.proxy.api.server.port";
     public static final String HTTP_API_SERVER_TIMEOUT = "http.api.server.timeout";
     public static final String EB_API_SERVER_ADDRESS = "eb.api.server.address";
 
