@@ -1,6 +1,7 @@
 openapi: 3.0.0
 servers:
   - url: 'http://192.168.21.99:38081/abyss'
+  - url: 'http://192.168.21.139:38081/abyss'  
   - url: 'http://192.168.10.46:38081/abyss' 
   - url: 'https://apiportal.com/abyss'
 info:
@@ -48,7 +49,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
     post:
       tags:
         - TODO
@@ -74,7 +74,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
       requestBody:
         $ref: '#/components/requestBodies/ResourceAction'
     put:
@@ -112,7 +111,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
       requestBody:
         $ref: '#/components/requestBodies/ListOfResourceAction'          
     delete:
@@ -136,7 +134,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
   /resource-actions/{uuid}:
     get:
       tags:
@@ -171,7 +168,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
     put:
       tags:
         - TODO
@@ -205,7 +201,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
       requestBody:
         $ref: '#/components/requestBodies/ResourceAction'
     delete:
@@ -239,7 +234,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
 externalDocs:
   description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'
