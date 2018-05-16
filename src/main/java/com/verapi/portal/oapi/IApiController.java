@@ -9,8 +9,12 @@
  *
  */
 
-package com.verapi.portal.api;
+package com.verapi.portal.oapi;
 
-public class SubjectApiController {
+import com.verapi.portal.common.Constants;
 
+public interface IApiController {
+    String mountPoint = Constants.ABYSS_ROOT + "/oapi";
+
+    void init();
 }

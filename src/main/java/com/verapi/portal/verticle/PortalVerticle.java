@@ -14,7 +14,6 @@ package com.verapi.portal.verticle;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.controller.AbyssController;
-import com.verapi.portal.controller.Controllers;
 import com.verapi.portal.controller.IController;
 import com.verapi.portal.controller.PortalAbstractController;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
@@ -26,7 +25,6 @@ import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.Path;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
@@ -39,6 +37,7 @@ public class PortalVerticle extends AbstractPortalVerticle {
         logger.info("PortalVerticle.start invoked");
         super.setVerticleHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_SERVER_HOST));
         super.setServerPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_PORT));
+        super.setVerticleType(Constants.VERTICLE_TYPE_PORTAL);
         super.start(startFuture);
     }
 

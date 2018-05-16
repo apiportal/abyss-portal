@@ -66,7 +66,11 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
         verticleRouter.route().handler(ResponseTimeHandler.create());
 
         verticleRouter.route("/logout").handler(context -> {
+            context.session().remove("user.uuid");
+            context.remove("username");
+            context.user().clearCache();
             context.clearUser();
+
 
             logger.trace("Cookie list before logout:");
             for (Cookie c : context.cookies()) {

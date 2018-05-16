@@ -34,6 +34,11 @@ public class Constants {
     public static final String HTTP_API_SERVER_TIMEOUT = "http.api.server.timeout";
     public static final String EB_API_SERVER_ADDRESS = "eb.api.server.address";
 
+    public static final String HTTP_OPENAPI_SERVER_HOST = "http.openapi.server.host";
+    public static final String HTTP_OPENAPI_SERVER_PORT = "http.openapi.server.port";
+    public static final String HTTP_PROXY_OPENAPI_SERVER_PORT = "http.proxy.openapi.server.port";
+    public static final String HTTP_OPENAPI_SERVER_TIMEOUT = "http.openapi.server.timeout";
+
     public static final String CONTEXT_FAILURE_MESSAGE = "context.failureMessage";
     public static final String HTTP_ERRORMESSAGE = "http.errorMessage";
     public static final String HTTP_URL = "http.url";
@@ -112,4 +117,8 @@ public class Constants {
 
     public static final String  ES_SERVER_URL = "es.server.url";
     public static final String  ES_SERVER_API_BULK_URL = "es.server.api.bulk.url";
+
+    public static final String VERTICLE_TYPE_PORTAL = "verticle.type.portal";
+    public static final String VERTICLE_TYPE_API = "verticle.type.api";
+
 }

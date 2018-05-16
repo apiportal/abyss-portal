@@ -30,7 +30,8 @@ public class InitVerticle extends AbstractVerticle {
         vertx.rxDeployVerticle(PortalVerticle.class.getName(), new DeploymentOptions().setHa(true))
                 .flatMap(id -> vertx.rxDeployVerticle(MailVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(ApiHttpServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
-                .flatMap(id -> vertx.rxDeployVerticle(ApiBusServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
+                //.flatMap(id -> vertx.rxDeployVerticle(ApiBusServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
+                .flatMap(id -> vertx.rxDeployVerticle(OpenApiServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .subscribe(id -> {
                     logger.info(System.getProperty("abyss-jar.name") + " InitVerticle : All verticles successfully deployed");
                     super.start(startFuture);

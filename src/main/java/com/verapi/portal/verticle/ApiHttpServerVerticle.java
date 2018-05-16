@@ -58,6 +58,7 @@ public class ApiHttpServerVerticle extends AbyssAbstractVerticle {
         logger.info("ApiHttpServerVerticle.start invoked");
         super.setVerticleHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_API_SERVER_HOST));
         super.setServerPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_API_SERVER_PORT));
+        super.setVerticleType(Constants.VERTICLE_TYPE_API);
 
         // Build the Jax-RS controller deployment
         //ResteasyProviderFactory.pushContext(Vertx.class, io.vertx.reactivex.core.Vertx.newInstance(vertx));

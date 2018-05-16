@@ -48,7 +48,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
     post:
       tags:
         - TODO
@@ -74,7 +73,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
       requestBody:
         $ref: '#/components/requestBodies/SubjectDirectoryType'
     put:
@@ -92,7 +90,6 @@ paths:
             type: array
             items:
               type: string
-              format: uuid          
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectDirectoryType'
@@ -112,7 +109,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectDirectoryType'          
     delete:
@@ -136,7 +132,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
   /subject-directory-types/{uuid}:
     get:
       tags:
@@ -151,7 +146,6 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid          
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -171,7 +165,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
     put:
       tags:
         - TODO
@@ -185,7 +178,6 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid          
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -205,7 +197,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
       requestBody:
         $ref: '#/components/requestBodies/SubjectDirectoryType'
     delete:
@@ -221,7 +212,6 @@ paths:
           required: true
           schema:
             type: string
-            format: uuid
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -239,7 +229,6 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      security: []
 externalDocs:
   description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'

@@ -130,18 +130,18 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
         });
         vertx.exceptionHandler((Throwable event) -> {
-            logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + event.getStackTrace());
+            logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + Arrays.toString(event.getStackTrace()));
             try {
                 throw event;
             } catch (Throwable throwable) {
-                logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + throwable.getStackTrace());
+                logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + Arrays.toString(throwable.getStackTrace()));
             }
         });
 
         //set all loggers' level
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
-        loggerList.stream().forEach(tmpLogger -> tmpLogger.setLevel(Level.toLevel(Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL))));
+        loggerList.forEach(tmpLogger -> tmpLogger.setLevel(Level.toLevel(Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL))));
 
         //register CLI commands
         CommandRegistry commandRegistry = CommandRegistry.getShared(vertx);

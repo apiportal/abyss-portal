@@ -110,6 +110,10 @@
         <appender-ref ref="ASYNC_FILE"/>
     </logger>
 
+    <logger name="com.hazelcast" level="WARN">
+        <appender-ref ref="ASYNC_FILE"/>
+    </logger>
+
     <root level="TRACE">
         <appender-ref ref="ASYNC_FILE"/>
     </root>

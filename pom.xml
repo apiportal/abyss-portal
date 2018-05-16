@@ -264,6 +264,11 @@
             <artifactId>logback-jackson</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
+
         <!--         <dependency> -->
         <!--         	<groupId>joda-time</groupId> -->
         <!--         	<artifactId>joda-time</artifactId> -->

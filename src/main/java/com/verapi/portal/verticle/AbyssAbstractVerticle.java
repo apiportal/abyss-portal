@@ -49,6 +49,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     String verticleHost;
     int serverPort;
     Router verticleRouter;
+    private String verticleType = "";
 
 
     //#########################################################
@@ -74,6 +75,10 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     void setAbyssJDBCService(AbyssJDBCService abyssJDBCService) {
         this.abyssJDBCService = abyssJDBCService;
+    }
+
+    void setVerticleType(String verticleType) {
+        this.verticleType = verticleType;
     }
 
     //#########################################################
@@ -175,6 +180,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         abyssRouter.get(Constants.ABYSS_ROOT + "/swagger-editor/*").handler(StaticHandler.create("webroot/swagger-editor"));
 
+        abyssRouter.get(Constants.ABYSS_ROOT + "/openapi/*").handler(StaticHandler.create("openapi"));
+
         abyssRouter.get("/global.js").handler(this::globalJavascript);
 
         FailureController failureController = new FailureController(jdbcAuth, jdbcClient);
@@ -183,9 +190,11 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         abyssRouter.get(Constants.ABYSS_ROOT + "/failure").handler(failureController).failureHandler(this::failureHandler);
 
-        //only rendering page routings' failures shall be handled by using regex
-        //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
-        abyssRouter.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
+        //if verticle is Portal type verticle then handle failures with Abyss error pages
+        if (verticleType.equals(Constants.VERTICLE_TYPE_PORTAL))
+            //only rendering page routings' failures shall be handled by using regex
+            //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
+            abyssRouter.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
 
         return Single.just(abyssRouter);
     }
@@ -237,10 +246,10 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     void globalJavascript(RoutingContext context) {
         String filecontent =
                 "var hostProtocol='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_PROTOCOL) + "';" +
-                "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';" +
-                "var hostPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_API_SERVER_PORT) + "';" +
-                "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_SERVER_PORT) + "';" +
-                "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";";
+                        "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';" +
+                        "var hostPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_API_SERVER_PORT) + "';" +
+                        "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_SERVER_PORT) + "';" +
+                        "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";";
         context.response().putHeader("Content-Type", "application/javascript");
         context.response().setStatusCode(200);
         context.response().end(filecontent);
