@@ -1,6 +1,7 @@
 openapi: 3.0.0
 servers:
   - url: 'http://192.168.21.99:38081/abyss'
+  - url: 'http://192.168.21.139:38081/abyss'  
   - url: 'http://192.168.10.46:38081/abyss' 
   - url: 'https://apiportal.com/abyss'
 info:
