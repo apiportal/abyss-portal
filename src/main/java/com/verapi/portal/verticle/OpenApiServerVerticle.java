@@ -14,15 +14,9 @@ package com.verapi.portal.verticle;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.controller.AbyssController;
-import com.verapi.portal.controller.IController;
-import com.verapi.portal.controller.PortalAbstractController;
 import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.AbyssApiController;
-import com.verapi.portal.oapi.IApiController;
-import com.verapi.portal.oapi.SubjectApiController;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import io.github.lukehutch.fastclasspathscanner.matchprocessor.ClassAnnotationMatchProcessor;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.vertx.core.Future;
@@ -31,7 +25,6 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
-import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.handler.CorsHandler;
 import org.slf4j.Logger;
@@ -119,8 +112,8 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
                     logger.info("AbyssApiController annotated class found and mounted : " + classWithAnnotation);
                     try {
                         AbstractApiController apiControllerInstance = (AbstractApiController) classWithAnnotation
-                                .getConstructor(Vertx.class, Router.class)
-                                .newInstance(vertx, abyssRouter);
+                                .getConstructor(Vertx.class, Router.class, JDBCAuth.class)
+                                .newInstance(vertx, abyssRouter, jdbcAuth);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                         logger.error(e.getLocalizedMessage());
                         logger.error(Arrays.toString(e.getStackTrace()));

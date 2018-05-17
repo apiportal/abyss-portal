@@ -1,0 +1,17 @@
+  securitySchemes:
+    abyssCookieAuth:
+      type: apiKey
+      name: abyss.session
+      in: cookie
+    abyssHttpBasicAuth:
+      type: http
+      description: Authorization method for extra security of sensitive methods
+      scheme: basic
+    abyssApiKeyAuth:
+      type: apiKey
+      name: abyss.api.key
+      in: header
+    abyssJWTBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
