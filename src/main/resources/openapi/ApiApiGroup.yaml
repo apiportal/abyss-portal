@@ -258,11 +258,11 @@ components:
     ApiApiGroup:
       type: object
       properties:
-        apiId:
+        apiid:
           type: integer
           format: int32
           description: FK ID of API for many to many relationship of API groups
-        apiGroupId:
+        apigroupid:
           type: integer
           format: int32
           description: FK ID of API Group for many to many relationship of API groups

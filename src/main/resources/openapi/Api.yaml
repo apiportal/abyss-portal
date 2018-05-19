@@ -262,7 +262,7 @@ components:
           type: string
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
-        organizationId:
+        organizationid:
           type: integer
           format: int32
           description: Id of Organization
@@ -278,46 +278,50 @@ components:
           type: string
           readOnly: true
           description: Timestamp of deletion #readOnly#
-        isDeleted:
+        isdeleted:
           type: boolean
           readOnly: true
           description: Is record logically deleted #readOnly#
-        crudSubjectId:
+        crudsubjectid:
           type: integer
           format: int32
           description: ID of Subject that reads, creates, updates or deletes
-        subjectId:
+        subjectid:
           type: integer
           format: int32
           description: FK ID of owner Subject
-        isProxyApi:
+        isproxyapi:
           type: boolean
           description: Type of API. False - Business API, True - API Proxy
-        apiStateId:
+        apistateid:
           type: integer
           format: int32
           description: FK ID of State of Business API
-        apiVisibilityId:
+        apivisibilityid:
           type: integer
           format: int32
           description: ID of Business API Visibility - Private, Closed Group, Public, ...
-        languageName:
+        languagename:
           type: string
           description: Formal API Description Language - Swagger, OpenAPI, RAML, WADL, WSDL, ...
-        languageVersion:
+        languageversion:
           type: string
           description: Version of Description Language
-        dataFormat:
+        dataformat:
           type: integer
           format: int32
           description: Data format type. 0 - JSON, 1 - YAML, 2 - XML
-        originalDocument:
+        originaldocument:
           type: string
           description: Original API DSL Document
-        openapiDocument:
+        openapidocument:
           type: string
-          description: Transformed API DSL document in Open API json format
-        businessApiId:
+          description: Transformed API DSL document in Open API json format. Shareable.
+        extendeddocument:
+          type: string
+          readOnly: true
+          description: Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #readOnly#
+        businessapiid:
           type: integer
           format: int32
           description: FK ID of Business API for API Proxies
@@ -330,7 +334,7 @@ components:
         deployed:
           type: string
           description: Deployed Date Time of API
-        changeLog:
+        changelog:
           type: string
           description: Release notes and change log of API
   requestBodies:

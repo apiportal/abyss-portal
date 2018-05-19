@@ -49,7 +49,7 @@ import java.util.Set;
 public abstract class AbstractApiController implements IApiController {
     private static Logger logger = LoggerFactory.getLogger(AbstractApiController.class);
 
-    private Vertx vertx;
+    Vertx vertx;
     private Router abyssRouter;
     private JDBCAuth authProvider;
     private String apiSpec;
@@ -103,6 +103,11 @@ public abstract class AbstractApiController implements IApiController {
                         factory.addSecurityHandler("abyssHttpBasicAuth", this::abyssHttpBasicAuthSecurityHandler);
                         factory.addSecurityHandler("abyssApiKeyAuth", this::abyssApiKeyAuthSecurityHandler);
                         factory.addSecurityHandler("abyssJWTBearerAuth", this::abyssJWTBearerAuthSecurityHandler);
+
+/*
+                        ChainAuthHandler chain = ChainAuthHandler.create();
+                        factory.getRouter().route().handler(chain);
+*/
 
                         // Before router creation you can enable/disable various router factory behaviours
                         RouterFactoryOptions factoryOptions = new RouterFactoryOptions()

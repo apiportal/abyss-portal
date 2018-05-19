@@ -262,7 +262,7 @@ components:
           type: string
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
-        organizationId:
+        organizationid:
           type: integer
           format: int32
           description: Id of Organization
@@ -278,41 +278,41 @@ components:
           type: string
           readOnly: true
           description: Timestamp of deletion #readOnly#
-        isDeleted:
+        isdeleted:
           type: boolean
           readOnly: true
           description: Is record logically deleted #readOnly#
-        crudSubjectId:
+        crudsubjectid:
           type: integer
           format: int32
           description: ID of Subject that reads, creates, updates or deletes
-        directoryName:
+        directoryname:
           type: string
           description: Name of subject directory
         description:
           type: string
           description: Description of subject directory
-        isActive:
+        isactive:
           type: boolean
           description: Is the directory active or not
-        isTemplate:
+        istemplate:
           type: boolean
           description: Is the directory template or not
-        directoryTypeId:
+        directorytypeid:
           type: integer
           format: int32
           description: FK ID of directory type to distinguish Internal, LDAP, AD, etc.
-        directoryPriorityOrder:
+        directorypriorityorder:
           type: integer
           format: int32
           description: Priority Order of Subject Directory Precedence
-        directoryAttributes:
+        directoryattributes:
           type: string
           description: Detailed attributes of the directory in json format
-        lastSyncronizedAt:
+        lastsyncronizedat:
           type: string
           description: Last syncronization date time of directory
-        lastSyncronizationDuration:
+        lastsyncronizationduration:
           type: integer
           format: int32
           description: Last syncronization duration in milliseconds

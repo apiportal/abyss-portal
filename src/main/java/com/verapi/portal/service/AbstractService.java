@@ -32,13 +32,13 @@ public abstract class AbstractService<T> implements IService<T>, AutoCloseable {
     protected JDBCClient jdbcClient;
     private AbyssJDBCService abyssJDBCService;
 
-    public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) throws Exception {
+    public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         logger.info("AbstractService() invoked " + vertx + abyssJDBCService);
         this.vertx = vertx;
         this.abyssJDBCService = abyssJDBCService;
     }
 
-    public AbstractService(Vertx vertx) throws Exception {
+    public AbstractService(Vertx vertx) {
         logger.info("AbstractService() invoked");
         this.vertx = vertx;
     }

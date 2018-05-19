@@ -85,6 +85,7 @@ public class LoginController extends PortalAbstractController {
                                 redirect(routingContext, Constants.ABYSS_ROOT + "/index");
                             },
                             throwable -> {
+                                logger.error("LoginController.handle() subjectService.findBySubjectName replied error : ", throwable.getLocalizedMessage());
                                 logger.error("LoginController.handle() subjectService.findBySubjectName replied error : ", Arrays.toString(throwable.getStackTrace()));
                             });
                 } catch (Exception e) {

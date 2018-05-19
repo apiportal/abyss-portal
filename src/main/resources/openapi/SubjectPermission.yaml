@@ -258,15 +258,11 @@ components:
     SubjectPermission:
       type: object
       properties:
-        id:
-          type: integer
-          format: int32
-          description: Primary Key
         uuid:
           type: string
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
-        organizationId:
+        organizationid:
           type: integer
           format: int32
           description: Id of Organization
@@ -282,27 +278,27 @@ components:
           type: string
           readOnly: true
           description: Timestamp of deletion #readOnly#
-        isDeleted:
+        isdeleted:
           type: boolean
           readOnly: true
           description: Is record logically deleted #readOnly#
-        crudSubjectId:
+        crudsubjectid:
           type: integer
           format: int32
-          description: ID of Subject that creates, updates or deletes
+          description: ID of Subject that reads, creates, updates or deletes
         permission:
           type: string
           description: Permission of user
         description:
           type: string
           description: Description of permission record
-        effectiveStartDate:
+        effectivestartdate:
           type: string
           description: Effective start date time of permission that it is active
-        effectiveEndDate:
+        effectiveenddate:
           type: string
           description: Effective end date time of permission that is active until
-        subjectId:
+        subjectid:
           type: integer
           format: int32
           description: FK ID of Subject having the permission

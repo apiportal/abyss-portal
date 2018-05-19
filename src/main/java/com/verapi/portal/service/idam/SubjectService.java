@@ -19,12 +19,15 @@ import com.verapi.portal.service.AbstractService;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.reflect.generics.tree.TypeTree;
 
 import java.time.Instant;
 import java.util.List;
@@ -35,12 +38,12 @@ public class SubjectService extends AbstractService<Subject> {
 
     private static Logger logger = LoggerFactory.getLogger(SubjectService.class);
 
-    public SubjectService(Vertx vertx, AbyssJDBCService abyssJDBCService) throws Exception {
+    public SubjectService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
         logger.info("SubjectService() invoked " + vertx + abyssJDBCService);
     }
 
-    public SubjectService(Vertx vertx) throws Exception {
+    public SubjectService(Vertx vertx) {
         super(vertx);
         logger.info("SubjectService() invoked " + vertx);
     }
@@ -67,6 +70,45 @@ public class SubjectService extends AbstractService<Subject> {
                 .add(subject.getPasswordSalt());
         return jdbcClient.rxUpdateWithParams(SQL_INSERT, insertParams)
                 .map(e -> subject);
+    }
+
+
+    public Single<UpdateResult> insert(JsonObject subjectAsJson) {
+        JsonArray insertParams = new JsonArray()
+                .add(((Number) subjectAsJson.getValue("organizationid")).longValue())
+                .add(((Number) subjectAsJson.getValue("crudsubjectid")).longValue())
+                .add(((Number) subjectAsJson.getValue("subjecttypeid")).longValue())
+                .add(((String) subjectAsJson.getValue("subjectname")))
+                .add(((String) subjectAsJson.getValue("firstname")))
+                .add(((String) subjectAsJson.getValue("lastname")))
+                .add(((String) subjectAsJson.getValue("displayname")))
+                .add(((String) subjectAsJson.getValue("email")))
+                .add(((String) subjectAsJson.getValue("secondaryemail")))
+                .add((subjectAsJson.getInstant("effectivestartdate")))
+                .add((subjectAsJson.getInstant("effectiveenddate")))
+                .add(((String) subjectAsJson.getValue("password")))
+                .add(((String) subjectAsJson.getValue("passwordsalt")))
+                .add(((String) subjectAsJson.getValue("picture")))
+                .add(((Number) subjectAsJson.getValue("subjectdirectoryid")).longValue());
+        return jdbcClient
+                .rxGetConnection().flatMap(conn -> conn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
+                        // Disable auto commit to handle transaction manually
+                        .rxSetAutoCommit(false)
+                        // Switch from Completable to default Single value
+                        .toSingleDefault(false)
+                        //Check if user already exists
+                        .flatMap(insertConn -> conn.rxUpdateWithParams(SQL_INSERT, insertParams))
+                        .flatMap(insertResult -> {
+                            if (insertResult.getUpdated() == 0)
+                                return Single.error(new Exception("unable to insert new record into database"));
+                            logger.info("[" + insertResult.getUpdated() + "] subject created successfully: " + insertResult.getKeys().encodePrettily() + " | subject id: " + insertResult.getKeys().getInteger(0));
+                            return Single.just(insertResult);
+                        })
+                        // close the connection regardless succeeded or failed
+                        .doAfterTerminate(conn::close)
+                );
+
     }
 
     @Override
@@ -114,6 +156,26 @@ public class SubjectService extends AbstractService<Subject> {
                         .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_WITH_GROUPS_PERMISSIONS))
                         .flatMap(resultSet -> {
                             logger.trace("SubjectService findAll() # of records :[" + resultSet.getNumRows() + "]");
+                            return Single.just(resultSet);
+                        })
+                        // close the connection regardless succeeded or failed
+                        .doAfterTerminate(conn::close)
+                );
+    }
+
+    public Single<ResultSet> findBySubjectId(long subjectId) {
+        logger.info("SubjectService findBySubjectId() invoked" + jdbcClient);
+        return jdbcClient
+                .rxGetConnection().flatMap(conn -> conn
+                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
+                        // Disable auto commit to handle transaction manually
+                        .rxSetAutoCommit(false)
+                        // Switch from Completable to default Single value
+                        .toSingleDefault(false)
+                        //Check if user already exists
+                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FIND_BY_SUBJECTID, new JsonArray().add(subjectId)))
+                        .flatMap(resultSet -> {
+                            logger.trace("SubjectService findBySubjectId() # of records :[" + resultSet.getNumRows() + "]");
                             return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
@@ -274,6 +336,50 @@ public class SubjectService extends AbstractService<Subject> {
     private static final String SQL_UPDATE_IS_DELETED = "UPDATE Subject SET is_deleted = ? WHERE id = ?";
     private static final String SQL_UPDATE_EFFECTIVE_END_DATE = "UPDATE Subject SET effective_end_date = ? WHERE id = ?";
 
+    //#########################################################
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  isactivated,\n" +
+            "  subjecttypeid,\n" +
+            "  subjectname,\n" +
+            "  firstname,\n" +
+            "  lastname,\n" +
+            "  displayname,\n" +
+            "  email,\n" +
+            "  secondaryemail,\n" +
+            "  effectivestartdate,\n" +
+            "  effectiveenddate,\n" +
+            "  picture,\n" +
+            "  totallogincount,\n" +
+            "  failedlogincount,\n" +
+            "  invalidpasswordattemptcount,\n" +
+            "  ispasswordchangerequired,\n" +
+            "  passwordexpiresat,\n" +
+            "  lastloginat,\n" +
+            "  lastpasswordchangeat,\n" +
+            "  lastauthenticatedat,\n" +
+            "  lastfailedloginat,\n" +
+            "  subjectdirectoryid\n" +
+            "from subject\n";
+
+    private static final String SQL_WHERE = "where id = ?\n";
+
+    private static final String SQL_WHERE_SUBJECTNAME_IS = "where lower(subjectname) = lower(?)";
+
+    private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
+
+    private static final String SQL_FIND_BY_SUBJECTID = SQL_SELECT + SQL_WHERE;
+
+    private static final String SQL_FIND_BY_SUBJECTNAME = SQL_SELECT + SQL_WHERE_SUBJECTNAME_IS;
+
+    //#########################################################
+
     private static final String SQL_FIND_ALL_COMPACT = "select\n" +
 //            "  id,\n" +
             "  uuid,\n" +
@@ -340,7 +446,7 @@ public class SubjectService extends AbstractService<Subject> {
             "where lower(subject_name) like lower(?)\n" +
             "order by subject_name";
 
-    private static final String SQL_FIND_BY_SUBJECTNAME = "select\n" +
+    private static final String SQL_FIND_BY_SUBJECTNAME_OLD = "select\n" +
 //            "  id,\n" +
             "  uuid,\n" +
 //            "  organization_id,\n" +
@@ -373,8 +479,8 @@ public class SubjectService extends AbstractService<Subject> {
             "from subject\n" +
             "where lower(subject_name) = lower(?)";
 
-    private static final String SQL_INSERT = "insert into subject (id, uuid, organization_id, created, updated, deleted, is_deleted, crud_subject_id, is_activated, subject_type_id, subject_name, first_name, last_name, display_name, email, secondary_email, effective_start_date, effective_end_date, password, password_salt, picture, total_login_count, failed_login_count, invalid_password_attempt_count, is_password_change_required, password_expires_at, last_login_at, last_password_change_at, last_authenticated_at)\n" +
-            "values ();";
+    private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid)\n" +
+            "values (:organizationid, :crudsubjectid, :subjecttypeid, :subjectname, :firstname, :lastname, :displayname, :email, :secondaryemail, :effectivestartdate, :effectiveenddate, :password, :passwordsalt, :picture, :subjectdirectoryid);";
 
     private static final String SQL_FIND_ALL_WITH_GROUPS_PERMISSIONS = "select row_to_json(t)  rowjson\n" +
             "from (\n" +

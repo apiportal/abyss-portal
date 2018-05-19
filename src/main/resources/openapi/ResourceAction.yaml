@@ -262,7 +262,7 @@ components:
           type: string
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
-        organizationId:
+        organizationid:
           type: integer
           format: int32
           description: Id of Organization
@@ -275,20 +275,20 @@ components:
         deleted:
           type: string
           description: Timestamp of deletion
-        isDeleted:
+        isdeleted:
           type: boolean
           description: Is record logically deleted
-        crudSubjectId:
+        crudsubjectid:
           type: integer
           format: int32
           description: ID of Subject that reads, creates, updates or deletes
-        actionName:
+        action_name:
           type: string
           description: Action Name
         description:
           type: string
           description: Description of Action
-        subjectPermissionId:
+        subjectpermissionid:
           type: integer
           format: int32
           description: FK ID of Subject Permission

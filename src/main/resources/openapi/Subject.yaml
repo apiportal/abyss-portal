@@ -17,16 +17,16 @@ info:
     name: Abyss 1.0
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: idam
+  - name: TODO
     externalDocs:
       url: 'https://apiportal.com'
       description: Find out more
-    description: Abyss Identity and Access Management Subject APIs
+    description: Abyss ... [TODO]  
 paths:
   /subjects:
     get:
       tags:
-        - idam
+        - TODO
       summary: Get list of subjects
       description: 'Returns list of subjects'
       operationId: getSubjects
@@ -51,7 +51,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - idam
+        - TODO
       summary: Add a new Subject
       description: 'Provide a new Subject to be inserted'
       operationId: addSubjects
@@ -78,7 +78,7 @@ paths:
         $ref: '#/components/requestBodies/Subject'
     put:
       tags:
-        - idam
+        - TODO
       summary: Update a bulk of Subject
       description: 'Provide an altered Subject array to be updated'
       operationId: updateSubjects
@@ -114,7 +114,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubject'          
     delete:
       tags:
-        - idam
+        - TODO
       summary: Delete all subjects
       description: 'Deletes all subjects'
       operationId: deleteSubjects
@@ -136,7 +136,7 @@ paths:
   /subjects/{uuid}:
     get:
       tags:
-        - idam
+        - TODO
       summary: Get an existing Subject by uuid
       description: 'Provide an uuid of Subject to be get'
       operationId: getSubject
@@ -168,7 +168,7 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - idam
+        - TODO
       summary: Update an existing Subject
       description: 'Provide an altered Subject to be updated'
       operationId: updateSubject
@@ -202,7 +202,7 @@ paths:
         $ref: '#/components/requestBodies/Subject'
     delete:
       tags:
-        - idam
+        - TODO
       summary: Delete Subject
       description: 'Provide an uuid parameter of Subject to be updated'
       operationId: deleteSubject
@@ -262,7 +262,7 @@ components:
           type: string
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
-        organizationId:
+        organizationid:
           type: integer
           format: int32
           description: Id of Organization
@@ -278,96 +278,97 @@ components:
           type: string
           readOnly: true
           description: Timestamp of deletion #readOnly#
-        isDeleted:
+        isdeleted:
           type: boolean
           readOnly: true
           description: Is record logically deleted #readOnly#
-        crudSubjectId:
+        crudsubjectid:
           type: integer
           format: int32
-          description: ID of Subject that creates, updates or deletes
-        isActivated:
+          description: ID of Subject that reads, creates, updates or deletes
+        isactivated:
           type: boolean
           readOnly: true
           description: Is user activated after signup by validating secondary verification mechanism #readOnly#
-        subjectTypeId:
+        subjecttypeid:
           type: integer
           format: int32
           description: Id of Subject Type
-        subjectName:
+        subjectname:
           type: string
           description: Username of user that is going to be used as credential
-        firstName:
+        firstname:
           type: string
           description: First name of user
-        lastName:
+        lastname:
           type: string
           description: Surname of user
-        displayName:
+        displayname:
           type: string
           description: Display name or alias of user
         email:
           type: string
           format: email
           description: Main contact email of user #email#
-        secondaryEmail:
+        secondaryemail:
           type: string
           format: email
           description: Secondary email of user for recovering account etc. #email#
-        effectiveStartDate:
+        effectivestartdate:
           type: string
           description: Effective start date time of user that he or she can start using the platform
-        effectiveEndDate:
+        effectiveenddate:
           type: string
           description: Effective end date time of user that he or she can use the platform until
         password:
           type: string
           format: password
-          description: Password of user that is going to be used as credential #Level:1#
+          writeOnly: true
+          description: Password of user that is going to be used as credential #Level:1# #writeOnly#
         picture:
           type: string
           format: byte
           description: Picture of subject #base64#
-        totalLoginCount:
+        totallogincount:
           type: integer
           format: int32
           readOnly: true
           description: Total Login Count of Subject #readOnly#
-        failedLoginCount:
+        failedlogincount:
           type: integer
           format: int32
           readOnly: true
           description: Failed Login Count of Subject #readOnly#
-        invalidPasswordAttemptCount:
+        invalidpasswordattemptcount:
           type: integer
           format: int32
           readOnly: true
           description: Invalid Password Attempt Count of Subject #readOnly#
-        isPasswordChangeRequired:
+        ispasswordchangerequired:
           type: boolean
           readOnly: true
           description: Does subject have to change password #readOnly#
-        passwordExpiresAt:
+        passwordexpiresat:
           type: string
           readOnly: true
           description: Password expire date time. After this time subject must change password is still logon else should reset password to get a new one. #readOnly#
-        lastLoginAt:
+        lastloginat:
           type: string
           readOnly: true
           description: Last login date time of subject #readOnly#
-        lastPasswordChangeAt:
+        lastpasswordchangeat:
           type: string
           readOnly: true
           description: Last password change date time #readOnly#
-        lastAuthenticatedAt:
+        lastauthenticatedat:
           type: string
           readOnly: true
           description: Last successful authentication date time #readOnly#
-        lastFailedLoginAt:
+        lastfailedloginat:
           type: string
           readOnly: true
           description: Last failed login attempt date time #readOnly#
-        subjectDirectoryId:
+        subjectdirectoryid:
           type: integer
           format: int32
           description: FK ID of Subject Directory

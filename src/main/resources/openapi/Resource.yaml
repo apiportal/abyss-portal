@@ -262,37 +262,41 @@ components:
           type: string
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
-        organizationId:
+        organizationid:
           type: integer
           format: int32
           description: Id of Organization
         created:
           type: string
-          description: Timestamp of creation
+          readOnly: true
+          description: Timestamp of creation #readOnly#
         updated:
           type: string
-          description: Timestamp of update
+          readOnly: true
+          description: Timestamp of update #readOnly#
         deleted:
           type: string
-          description: Timestamp of deletion
-        isDeleted:
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isdeleted:
           type: boolean
-          description: Is record logically deleted
-        crudSubjectId:
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudsubjectid:
           type: integer
           format: int32
           description: ID of Subject that reads, creates, updates or deletes
-        resourceTypeId:
+        resourcetypeid:
           type: integer
           format: int32
           description: FK ID of resource type
-        resourceName:
+        resource_name:
           type: string
           description: Name of protected resource
         description:
           type: string
           description: Description of resource
-        subjectPermissionId:
+        subjectpermissionid:
           type: integer
           format: int32
           description: FK ID of Subject Permission
