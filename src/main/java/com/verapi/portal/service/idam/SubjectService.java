@@ -19,6 +19,7 @@ import com.verapi.portal.service.AbstractService;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
+import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import sun.reflect.generics.tree.TypeTree;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -73,7 +75,7 @@ public class SubjectService extends AbstractService<Subject> {
     }
 
 
-    public Single<UpdateResult> insert(JsonObject subjectAsJson) {
+    public Single<UpdateResult> insertJson(JsonObject subjectAsJson) {
         JsonArray insertParams = new JsonArray()
                 .add(((Number) subjectAsJson.getValue("organizationid")).longValue())
                 .add(((Number) subjectAsJson.getValue("crudsubjectid")).longValue())
@@ -91,22 +93,50 @@ public class SubjectService extends AbstractService<Subject> {
                 .add(((String) subjectAsJson.getValue("picture")))
                 .add(((Number) subjectAsJson.getValue("subjectdirectoryid")).longValue());
         return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        .toSingleDefault(false)
-                        //Check if user already exists
-                        .flatMap(insertConn -> conn.rxUpdateWithParams(SQL_INSERT, insertParams))
-                        .flatMap(insertResult -> {
-                            if (insertResult.getUpdated() == 0)
-                                return Single.error(new Exception("unable to insert new record into database"));
-                            logger.info("[" + insertResult.getUpdated() + "] subject created successfully: " + insertResult.getKeys().encodePrettily() + " | subject id: " + insertResult.getKeys().getInteger(0));
-                            return Single.just(insertResult);
-                        })
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
+                .rxGetConnection().flatMap(conn -> {
+                            return conn
+                                    .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
+                                    // Disable auto commit to handle transaction manually
+                                    .rxSetAutoCommit(false)
+                                    // Switch from Completable to default Single value
+                                    .toSingleDefault(false)
+                                    //Check if user already exists
+                                    .flatMap(insertConn -> conn.rxUpdateWithParams(SQL_INSERT, insertParams))
+                                    .flatMap(insertResult -> {
+                                        if (insertResult.getUpdated() == 0)
+                                            return Single.error(new Exception("unable to insert new record into database"));
+                                        //conn.rxCommit();
+                                        logger.trace("[" + insertResult.getUpdated() + "] subject created successfully: " + insertResult.getKeys().encodePrettily() + " | subject id: " + insertResult.getKeys().getInteger(0));
+                                        return Single.just(insertResult);
+                                    })
+
+                                    // commit if all succeeded
+/*
+                                    .flatMap(updateResult -> {
+                                        conn.rxCommit().subscribe(() -> logger.info("commit ok"));
+                                        return Single.just(updateResult);
+                                    })
+*/
+                                    .flatMap(updateResult -> conn.rxCommit().toSingleDefault(updateResult))
+
+                                    // Rollback if any failed with exception propagation
+                                    .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(true)
+                                            .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
+                                            .flatMap(ignore -> {
+                                                logger.warn("rollback!!");
+                                                logger.error(ex.getLocalizedMessage());
+                                                logger.error(Arrays.toString(ex.getStackTrace()));
+                                                return Single.error(ex);
+                                            })
+                                    )
+
+                                    .doAfterSuccess(succ -> {
+                                        logger.info("Subject record created successfully");
+                                    })
+
+                                    // close the connection regardless succeeded or failed
+                                    .doAfterTerminate(conn::close);
+                        }
                 );
 
     }
@@ -480,7 +510,8 @@ public class SubjectService extends AbstractService<Subject> {
             "where lower(subject_name) = lower(?)";
 
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid)\n" +
-            "values (:organizationid, :crudsubjectid, :subjecttypeid, :subjectname, :firstname, :lastname, :displayname, :email, :secondaryemail, :effectivestartdate, :effectiveenddate, :password, :passwordsalt, :picture, :subjectdirectoryid);";
+            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, ?)";
+//            "values (:organizationid, :crudsubjectid, :subjecttypeid, :subjectname, :firstname, :lastname, :displayname, :email, :secondaryemail, coalesce(:effectivestartdate, now()), :effectiveenddate, :password, :passwordsalt, :picture, :subjectdirectoryid)";
 
     private static final String SQL_FIND_ALL_WITH_GROUPS_PERMISSIONS = "select row_to_json(t)  rowjson\n" +
             "from (\n" +

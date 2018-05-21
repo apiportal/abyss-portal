@@ -15,6 +15,7 @@ import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.common.Util;
 import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
@@ -46,12 +47,15 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Set;
 
+import static com.verapi.portal.common.Util.nnvl;
+import static com.verapi.portal.common.Util.nvl;
+
 public abstract class AbstractApiController implements IApiController {
     private static Logger logger = LoggerFactory.getLogger(AbstractApiController.class);
 
     Vertx vertx;
     private Router abyssRouter;
-    private JDBCAuth authProvider;
+    protected JDBCAuth authProvider;
     private String apiSpec;
 
     AbstractApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
@@ -62,7 +66,7 @@ public abstract class AbstractApiController implements IApiController {
         this.init();
     }
 
-    public void init(){
+    public void init() {
         logger.info("initializing");
 
         OpenAPI3RouterFactory.createRouterFactoryFromFile(vertx, apiSpec, ar -> {
@@ -162,6 +166,13 @@ public abstract class AbstractApiController implements IApiController {
 
     public <T> void throwApiException(RoutingContext routingContext, Class<T> clazz, String userMessage, String detailedMessage, String recommendation, String moreInfo) {
         logger.trace("throwApiException for " + userMessage);
+        //replace Vertx Routing Context prohibited characters
+        if (userMessage != null)
+            userMessage = nnvl(userMessage, userMessage.replace("\r", "").replace("\n", ""));
+        if (detailedMessage != null)
+            detailedMessage = nnvl(detailedMessage, detailedMessage.replace("\r", "").replace("\n", ""));
+
+
         ApiSchemaError apiSchemaError = new ApiSchemaError();
         apiSchemaError.setCode(0)
                 .setUsermessage(userMessage)

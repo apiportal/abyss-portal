@@ -11,10 +11,15 @@
 
 package com.verapi.portal.oapi.exception;
 
+import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AbyssApiException extends AbyssException {
+    private static Logger logger = LoggerFactory.getLogger(AbyssApiException.class);
+
     ApiSchemaError apiSchemaError;
     HttpResponseStatus httpResponseStatus; //http://www.restapitutorial.com/httpstatuscodes.html
 
@@ -36,6 +41,7 @@ public class AbyssApiException extends AbyssException {
 
     public AbyssApiException(ApiSchemaError apiSchemaError) {
         super(apiSchemaError.toString());
+        logger.error(this.getClass().getName(), apiSchemaError);
         this.apiSchemaError = apiSchemaError;
     }
 

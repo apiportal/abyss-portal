@@ -12,17 +12,14 @@
 package com.verapi.portal.oapi;
 
 import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
-import com.atlassian.oai.validator.model.Request;
-import com.atlassian.oai.validator.model.Request.Method;
-import com.atlassian.oai.validator.model.SimpleRequest;
-import com.atlassian.oai.validator.report.ValidationReport;
+
+import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
+
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
-import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
 import com.verapi.portal.service.idam.SubjectService;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -31,9 +28,10 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
@@ -99,31 +97,92 @@ public class SubjectApiController extends AbstractApiController {
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject subjects = params.body().getJsonObject();
 
+        String salt = authProvider.generateSalt();
+        String hash = authProvider.computeHash(subjects.getString("password"), salt);
+        subjects.put("password", hash);
+        subjects.put("passwordsalt", salt);
+        try {
+            //insert default avatar image TODO: later use request base64 img data
+            ClassLoader classLoader = getClass().getClassLoader();
+            File file = new File(Objects.requireNonNull(classLoader.getResource("webroot/dist/img/avatar.jpg")).getFile());
+            subjects.put("picture", encodeFileToBase64Binary(file));
+        } catch (IOException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+        }
+
         SubjectService subjectService = new SubjectService(vertx);
 
-        Single<JsonObject> serviceResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.insert(subjects))
-                .flatMap(insertResult -> {
-                    logger.trace("inserted row key: " + insertResult.getKeys().toString());
-                    return subjectService.findBySubjectId(insertResult.getKeys().getInteger(0));
+        Single<ResultSet> insertResult = subjectService.initJDBCClient()
+                .flatMap(jdbcClient -> subjectService.insertJson(subjects))
+                .flatMap(result -> {
+                    logger.trace("inserted row key: " + result.getKeys().toString());
+                    return Single.just(result);
                 })
-                .flatMap(findResult -> {
-                    logger.trace("inserted row: " + findResult.getRows());
-                    return Single.just(findResult.toJson());
+                .flatMap(insResult -> {
+                    Single<ResultSet> updResult = subjectService.findBySubjectId(insResult.getKeys().getInteger(0));
+                    logger.trace("selected row: " + insResult.toString());
+                    return updResult;
                 });
-
-        serviceResult.subscribe(resp -> {
+        insertResult.subscribe(resp -> {
                     routingContext.response()
                             .putHeader("content-type", "application/json; charset=utf-8")
                             .setStatusCode(201)
-                            .end(resp.encode(), "UTF-8");
-                    logger.trace(methodName + " replied successfully " + resp.encodePrettily());
+                            .end(resp.getRows().get(0).encode(), "UTF-8");
+                    logger.trace(methodName + " replied successfully " + resp.toJson().encodePrettily());
                 },
                 throwable -> {
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                     logger.error(methodName + " exception occured " + throwable.getLocalizedMessage());
                     logger.error(methodName + " exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 });
+
+
+
+/*
+        Single<UpdateResult> insertResult = subjectService.initJDBCClient()
+                .flatMap(jdbcClient -> subjectService.insertJson(subjects))
+                .flatMap(result -> {
+                    logger.trace("inserted row key: " + result.getKeys().toString());
+                    return Single.just(result);
+                });
+*/
+/*
+                .flatMap(findResult -> {
+                    subjectService.findBySubjectId(findResult.getKeys().getInteger(0));
+                    logger.trace("selected row: " + findResult.toString());
+                    return Single.just(findResult.toJson());
+                });
+*//*
+
+
+        insertResult.subscribe(resp -> {
+                    Single<ResultSet> selectResult = subjectService.findBySubjectId(resp.getKeys().getInteger(0))
+                            .flatMap(resultSet -> {
+                                logger.trace("selected row: " + resultSet.toString());
+                                return Single.just(resultSet);
+                            });
+
+                    selectResult.subscribe(res -> {
+                                routingContext.response()
+                                        .putHeader("content-type", "application/json; charset=utf-8")
+                                        .setStatusCode(201)
+                                        .end(res.getRows(true).get(0).encode(), "UTF-8");
+                                logger.trace(methodName + " replied successfully " + res.toJson().encodePrettily());
+                            },
+                            th -> {
+                                logger.error(methodName + " exception occured " + th.getLocalizedMessage());
+                                logger.error(methodName + " exception occured " + Arrays.toString(th.getStackTrace()));
+                                throwApiException(routingContext, InternalServerError500Exception.class, th.getLocalizedMessage());
+                            });
+
+                },
+                throwable -> {
+                    logger.error(methodName + " exception occured " + throwable.getLocalizedMessage());
+                    logger.error(methodName + " exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
+*/
 
     }
 
