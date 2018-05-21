@@ -152,65 +152,65 @@ public class ApiService extends AbstractService<JsonObject> {
 
     private static final String SQL_FILTER_BY_SUBJECTNAME = "SELECT " +
             "uuid," +
-            //"organization_id," +
+            //"organizationid," +
             "created," +
             "updated," +
             "deleted," +
-            "is_deleted," +
-            //"crud_subject_id," +
-            //"subject_id," +
-            "is_proxy_api," +
-            "api_state_id," +
-            "api_visibility_id," +
-            "language_name," +
-            "language_version," +
-            "data_format," +
-            "openapi_document," +
-            "business_api_id," +
+            "isdeleted," +
+            //"crudsubjectid," +
+            //"subjectid," +
+            "isproxyapi," +
+            "apistateid," +
+            "apivisibilityid," +
+            "languagename," +
+            "languageversion," +
+            "dataformat," +
+            "openapidocument," +
+            "businessapiid," +
             "image," +
             "color," +
             "deployed," +
-            "change_log, " +
+            "changelog, " +
             "(SELECT json_agg(json_build_object('uuid', t.uuid,'name', t.\"name\"))" +
-            " FROM api_tag t join api__api_tag axt on t.id = axt.api_tag_id" +
-            " WHERE axt.api_id = a.id) as tags," +
+            " FROM api_tag t join api__api_tag axt on t.id = axt.apitagid" +
+            " WHERE axt.apiid = a.id) as tags," +
             "(SELECT json_agg(json_build_object('uuid', g.uuid,'name', g.\"name\"))" +
-            " FROM api_group g join api__api_group axg on g.id = axg.api_group_id" +
-            " WHERE axg.api_id = a.id) as groups," +
+            " FROM api_group g join api__api_group axg on g.id = axg.apigroupid" +
+            " WHERE axg.apiid = a.id) as groups," +
             "(SELECT json_agg(json_build_object('uuid', c.uuid,'name', c.\"name\"))" +
-            " FROM api_category c join api__api_category axc on c.id = axc.api_category_id" +
-            " WHERE axc.api_id = a.id) as categories " +
+            " FROM api_category c join api__api_category axc on c.id = axc.apicategoryid" +
+            " WHERE axc.apiid = a.id) as categories " +
             "FROM portalschema.api a " +
-            "WHERE openapi_document ?? 'servers' " +
-            "AND subject_id = (SELECT id FROM subject WHERE lower(subject_name) like lower(?)) " +
-            "ORDER BY openapi_document -> 'info' -> 'title'" +
+            "WHERE openapidocument ?? 'servers' " +
+            "AND subjectid = (SELECT id FROM subject WHERE lower(subjectname) like lower(?)) " +
+            "ORDER BY openapidocument -> 'info' -> 'title'" +
             ";";
 
 
-    private static final String SQL_FIND_ALL_COMPACT_JSON = "select row_to_json(jayson) rowjson, to_json(openapi_document) openapi\n" +
+    private static final String SQL_FIND_ALL_COMPACT_JSON = "select row_to_json(jayson) rowjson, to_json(openapidocument) openapi\n" +
             "from (\n" +
             "       select\n" +
             "         uuid,\n" +
-            "         organization_id,\n" +
+            "         organizationid,\n" +
             "         created,\n" +
             "         updated,\n" +
             "         deleted,\n" +
-            "         is_deleted,\n" +
-            "         crud_subject_id,\n" +
-            "         subject_id,\n" +
-            "         is_proxy_api,\n" +
-            "         api_state_id,\n" +
-            "         api_visibility_id,\n" +
-            "         language_name,\n" +
-            "         language_version,\n" +
-            "         data_format,\n" +
-            "         original_document,\n" +
-            "         openapi_document,\n" +
-            "         business_api_id,\n" +
+            "         isdeleted,\n" +
+            "         crudsubjectid,\n" +
+            "         subjectid,\n" +
+            "         isproxyapi,\n" +
+            "         apistateid,\n" +
+            "         apivisibilityid,\n" +
+            "         languagename,\n" +
+            "         languageversion,\n" +
+            "         dataformat,\n" +
+            "         originaldocument,\n" +
+            "         openapidocument,\n" +
+            "         businessapiid,\n" +
             "         image,\n" +
             "         color,\n" +
             "         deployed,\n" +
-            "         change_log,\n" +
+            "         changelog,\n" +
             "         (\n" +
             "           select json_agg(\n" +
             "               json_build_object(\n" +
@@ -223,29 +223,29 @@ public class ApiService extends AbstractService<JsonObject> {
             "           from\n" +
             "             api_tag t\n" +
             "             join api__api_tag axt on\n" +
-            "                                     t.id = axt.api_tag_id\n" +
+            "                                     t.id = axt.apitagid\n" +
             "           where\n" +
-            "             axt.api_id = a.id\n" +
+            "             axt.apiid = a.id\n" +
             "         ) as tags,\n" +
             "         (\n" +
             "           select json_agg(json_build_object('uuid', g.uuid, 'name', g.\"name\"))\n" +
             "           from\n" +
             "             api_group g\n" +
-            "             join api__api_group axg on g.id = axg.api_group_id\n" +
+            "             join api__api_group axg on g.id = axg.apigroupid\n" +
             "           where\n" +
-            "             axg.api_id = a.id\n" +
+            "             axg.apiid = a.id\n" +
             "         ) as groups,\n" +
             "         (\n" +
             "           select json_agg(json_build_object('uuid', c.uuid, 'name', c.\"name\"))\n" +
             "           from\n" +
             "             api_category c\n" +
-            "             join api__api_category axc on c.id = axc.api_category_id\n" +
+            "             join api__api_category axc on c.id = axc.apicategoryid\n" +
             "           where\n" +
-            "             axc.api_id = a.id\n" +
+            "             axc.apiid = a.id\n" +
             "         ) as categories\n" +
             "       from api a\n" +
-            "       where openapi_document ?? 'servers'\n" +
-            "       order by openapi_document -> 'info' -> 'title'\n" +
+            "       where openapidocument ?? 'servers'\n" +
+            "       order by openapidocument -> 'info' -> 'title'\n" +
             "     ) as jayson;\n";
 
 
