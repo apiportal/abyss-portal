@@ -64,7 +64,7 @@ public class LoginController extends PortalAbstractController {
                     SubjectService subjectService = new SubjectService(routingContext.vertx());
 
                     Single<JsonObject> apiResponse = subjectService.initJDBCClient()
-                            .flatMap(jdbcClient -> subjectService.findBySubjectName(username))
+                            .flatMap(jdbcClient -> subjectService.findByName(username))
                             .flatMap(result -> {
                                 //result.toJson().getValue("rows")
                                 logger.trace(result.toJson().encodePrettily());

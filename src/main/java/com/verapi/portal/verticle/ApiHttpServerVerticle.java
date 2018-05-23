@@ -11,7 +11,6 @@
 
 package com.verapi.portal.verticle;
 
-import com.google.common.collect.Lists;
 import com.verapi.portal.api.RestRouterHttpServerRequest;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
@@ -20,17 +19,13 @@ import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.ClassAnnotationMatchProcessor;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
-import io.swagger.jaxrs.listing.ApiListingResource;
-import io.swagger.jaxrs.listing.SwaggerSerializers;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.reactivex.core.http.HttpServer;
-import io.vertx.reactivex.core.shareddata.LocalMap;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.handler.ResponseTimeHandler;
 import org.jboss.resteasy.plugins.server.vertx.VertxRequestHandler;
 import org.jboss.resteasy.plugins.server.vertx.VertxResteasyDeployment;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

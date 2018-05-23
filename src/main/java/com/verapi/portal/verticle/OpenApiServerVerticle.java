@@ -109,7 +109,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
         new FastClasspathScanner("com.verapi")
                 //.verbose()
                 .matchClassesWithAnnotation(AbyssApiController.class, classWithAnnotation -> {
-                    logger.info("AbyssApiController annotated class found and mounted : " + classWithAnnotation);
+                    logger.trace("creating a new instance of {} which has an annonation of {}", classWithAnnotation.getName(), AbyssApiController.class.getName());
                     try {
                         AbstractApiController apiControllerInstance = (AbstractApiController) classWithAnnotation
                                 .getConstructor(Vertx.class, Router.class, JDBCAuth.class)

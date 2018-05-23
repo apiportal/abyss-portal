@@ -93,7 +93,7 @@ public class SubjectPermissionController extends ApiAbstractController {
                     });
 
         } catch (Exception e) {
-            logger.error("SubjectPermissionController.getAll() new SubjectService exception occured " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+            logger.error("SubjectPermissionController.getAll() new SubjectServiceOld exception occured " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
             asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
         }
 

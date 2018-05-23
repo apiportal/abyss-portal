@@ -16,6 +16,7 @@ import com.verapi.portal.common.Constants;
 import com.verapi.portal.entity.idam.SubjectGroup;
 import com.verapi.portal.entity.idam.SubjectPermission;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbstractServiceOld;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -27,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-public class SubjectPermissionService extends AbstractService<SubjectPermission> {
+public class SubjectPermissionService extends AbstractServiceOld<SubjectPermission> {
 
     private static Logger logger = LoggerFactory.getLogger(SubjectPermissionService.class);
 
