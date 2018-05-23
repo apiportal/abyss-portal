@@ -1,10 +1,16 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.generate.impl;
 
 import java.io.UnsupportedEncodingException;
-import java.rmi.RemoteException;
 
 
 import java.util.Base64;
@@ -22,9 +28,9 @@ public class ApiKey implements ApiKeyRemoteIntf {
 	private Base64.Encoder base64UrlEncoder = Base64.getUrlEncoder();
 	private Base64.Decoder base64UrlDecoder = Base64.getUrlDecoder();
 	
-	public static final String UTF8_ENCODING = "UTF8";
+	static final String UTF8_ENCODING = "UTF8";
 	
-	public ApiKey() {
+	ApiKey() {
 		super();
 	}
 	
@@ -33,27 +39,28 @@ public class ApiKey implements ApiKeyRemoteIntf {
 		return base64UrlEncoder.encodeToString(input.getBytes(UTF8_ENCODING));
 	}
 	
-	String encodeBase64(byte[] inputBytes) throws UnsupportedEncodingException {
+	String encodeBase64(byte[] inputBytes) {
 		
 		return base64UrlEncoder.encodeToString(inputBytes);	
 	
 	}
 
-	byte[] decodeBase64(String input) throws UnsupportedEncodingException {
+	byte[] decodeBase64(String input) {
 		//TODO IllegalArgumentException
 		return base64UrlDecoder.decode(input);   //decodeToString(input.getBytes("UTF8"));
 	}
 	
-	byte[] decodeBase64(byte[] inputBytes) {
+/*	byte[] decodeBase64(byte[] inputBytes) {
 		//TODO IllegalArgumentException		
 		return base64UrlDecoder.decode(inputBytes); //encodeToString(inputBytes);	
 	
-	}
+	}*/
 	
 	/**
 	 * Generate Base64 Encoded Api Key
 	 * 
 	 * @author faik.saglar
+	 * @return base64 url encoded random api key
 	 * 
 	 */
 /*	public String generateApiKey() throws RemoteException { 
@@ -68,7 +75,7 @@ public class ApiKey implements ApiKeyRemoteIntf {
         return base64UrlEncoder.encodeToString(uuidByteArray).replaceAll("=", ""); //TODO: is thread-safe?
 	}*/
 	
-	public String generateRandomKey() throws RemoteException { 
+	public String generateRandomKey() {
 		
 		UUID uuid = UUID.randomUUID(); //TODO: is thread-safe?
 
@@ -80,7 +87,7 @@ public class ApiKey implements ApiKeyRemoteIntf {
         return base64UrlEncoder.encodeToString(uuidByteArray).replaceAll("=", ""); //TODO: is thread-safe?
 	}
 	
-	public static void main(String[] args) throws RemoteException {
+	public static void main(String[] args) {
 		
 		ApiKey apiKey = new ApiKey();
 		

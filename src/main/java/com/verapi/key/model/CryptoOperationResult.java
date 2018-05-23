@@ -1,5 +1,12 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.model;
 
@@ -14,10 +21,10 @@ public class CryptoOperationResult {
 	private String resultText;
 	private Exception exception;	
 	/**
-	 * @param outputBytes
-	 * @param isValid
-	 * @param resultText
-	 * @param exception
+	 * @param outputBytes output bytes
+	 * @param isValid is valid
+	 * @param resultText result text
+	 * @param exception exception
 	 */
 	public CryptoOperationResult(byte[] outputBytes, boolean isValid, String resultText, Exception exception) {
 		this.outputBytes = outputBytes;

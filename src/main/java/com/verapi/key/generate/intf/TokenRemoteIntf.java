@@ -1,5 +1,12 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.generate.intf;
 
@@ -17,10 +24,10 @@ import com.verapi.key.model.TokenRequest;
  */
 public interface TokenRemoteIntf extends Remote {
 
-	public AuthenticationInfo encodeToken(TokenRequest tokenRequest) throws UnsupportedEncodingException, NoSuchAlgorithmException, RemoteException;
+	AuthenticationInfo encodeToken(TokenRequest tokenRequest) throws UnsupportedEncodingException, NoSuchAlgorithmException, RemoteException;
 	
-	public AuthenticationInfo decodeAndValidateToken(String token, AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
-	public AuthenticationInfo decodeAndValidateToken(AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
+	AuthenticationInfo decodeAndValidateToken(String token, AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
+	AuthenticationInfo decodeAndValidateToken(AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
 
 	
 }

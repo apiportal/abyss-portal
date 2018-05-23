@@ -1,5 +1,12 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.model;
 
@@ -18,8 +25,8 @@ public class TokenRequest implements Serializable{
 	private long secondsToExpire;
 
 	/**
-	 * @param userData
-	 * @param secondsToExpire
+	 * @param userData user data
+	 * @param secondsToExpire seconds to expire
 	 */
 	public TokenRequest(String userData, long secondsToExpire) {
 		this.userData = userData;

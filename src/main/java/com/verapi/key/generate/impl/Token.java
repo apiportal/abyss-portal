@@ -1,11 +1,18 @@
-/**
- * Token Generation for User Activation & Forgot Password Scenarios
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.generate.impl;
 
 import java.io.UnsupportedEncodingException;
-import java.rmi.RemoteException;
-import java.security.NoSuchAlgorithmException;
+//import java.rmi.RemoteException;
+//import java.security.NoSuchAlgorithmException;
 //import java.time.ZonedDateTime;
 //import java.time.LocalDateTime;
 import java.time.Instant;
@@ -30,12 +37,14 @@ import com.verapi.key.generate.intf.TokenRemoteIntf;
 
 
 /**
+ * Token Generation for User Activation and Forgot Password Scenarios
+ *
  * @author faik.saglar
  * @version 1.1
  */
 public class Token implements TokenRemoteIntf{
 
-	public static final String PRECHECKS_OK = "prechecks.ok";
+	private static final String PRECHECKS_OK = "prechecks.ok";
 	private static Logger logger = LoggerFactory.getLogger(Token.class);
 	
 	//http://www.oracle.com/technetwork/articles/java/jf14-date-time-2125367.html
@@ -61,9 +70,11 @@ public class Token implements TokenRemoteIntf{
 	}
 
 	/**
+	 * Print Date Time
+	 *
 	 * @author faik.saglar
-	 * @param date
-	 * @param name
+	 * @param date date to be printed as {@link Instant} type
+	 * @param name name of date variable to be used as label while printing
 	 */
 //	private void printDateTime(ZonedDateTime date, String name) {
 //		System.out.println(name + ":" + date.format(DATETIME_FORMATTER));
@@ -89,10 +100,11 @@ public class Token implements TokenRemoteIntf{
 	*/
 	
 	/**
-	 * Is Token Expired
+	 * Is Token Expired compared current date time (now)
+	 *
 	 * @author faik.saglar
-	 * @param receivedExpireDateStr
-	 * @return boolean
+	 * @param receivedExpireDateStr received expire date in {@link String}
+	 * @return boolean true if expired, false otherwise
 	 */
 	private boolean isExpired(String receivedExpireDateStr) {
 		
@@ -118,10 +130,11 @@ public class Token implements TokenRemoteIntf{
 	}
 
 	/**
-	 * Is Token Expired
+	 * Is Token Expired compared current date time (now)
+	 *
 	 * @author faik.saglar
-	 * @param expireDate
-	 * @return boolean
+	 * @param expireDate received expire date in {@link Instant}
+	 * @return boolean true if expired, false otherwise
 	 */
 	private boolean isExpired(Instant expireDate) {
 
@@ -135,9 +148,13 @@ public class Token implements TokenRemoteIntf{
 	
 	/**
 	 * Generate Token without Encryption Using Vertx PRNG and Hashing
+	 *
 	 * @author faik.saglar
+	 * @param secondsToExpire seconds to expire
+	 * @param userData user data
+	 * @param vertx vertx
 	 * @return {@link AuthenticationInfo}
-	 * @throws UnsupportedEncodingException
+	 * @throws UnsupportedEncodingException if base64 encoding has errors
 	 */
 	public AuthenticationInfo generateToken(long secondsToExpire, String userData, Vertx vertx) throws UnsupportedEncodingException {
 		
@@ -176,9 +193,7 @@ public class Token implements TokenRemoteIntf{
 		
 		String token = apiKey.encodeBase64(input).replaceAll("=", "");
 		
-		AuthenticationInfo authenticationInfo = new AuthenticationInfo(token, nonceBase64, expireDate, userData);
-		
-		return authenticationInfo;
+		return new AuthenticationInfo(token, nonceBase64, expireDate, userData);
 	}
 
 	private AuthenticationInfo doPreChecksBeforeValidateToken(String token, AuthenticationInfo authInfo) {
@@ -209,11 +224,12 @@ public class Token implements TokenRemoteIntf{
 
 	/**
 	 * Validate Token
+	 *
 	 * @author faik.saglar
-	 * @param receivedToken
-	 * @param storedAuthInfo
+	 * @param receivedToken received Token to be validated
+	 * @param storedAuthInfo stored Authentication Information
 	 * @return {@link AuthenticationInfo}
-	 * @throws UnsupportedEncodingException
+	 * @throws UnsupportedEncodingException if base64 encoding has errors
 	 */
 	public AuthenticationInfo validateToken(String receivedToken, AuthenticationInfo storedAuthInfo) throws UnsupportedEncodingException  {
 
@@ -296,13 +312,13 @@ public class Token implements TokenRemoteIntf{
 	
 	/**
 	 * Encode Token
+	 *
 	 * @author faik.saglar
-	 * @param tokenRequest
+	 * @param tokenRequest {@link TokenRequest}
 	 * @return {@link AuthenticationInfo}
-	 * @throws UnsupportedEncodingException
-	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException if base64 encoding has errors
 	 */
-	public AuthenticationInfo encodeToken(TokenRequest tokenRequest) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+	public AuthenticationInfo encodeToken(TokenRequest tokenRequest) throws UnsupportedEncodingException {
 		
 		///////////////////////////////////////////////////////////////////
 		// Input Handling
@@ -315,13 +331,8 @@ public class Token implements TokenRemoteIntf{
 		String userDataBase64 = apiKey.encodeBase64(userData.getBytes(ApiKey.UTF8_ENCODING));
 		
 		String nonceBase64;
-		try {
-			nonceBase64 = apiKey.generateRandomKey();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-			return new AuthenticationInfo(Token.class.getName() + ".encodeToken - Exception:" + e.getClass().getName() + " Message:" + e.getMessage());
-		}
-		
+		nonceBase64 = apiKey.generateRandomKey();
+
 		//Calculate Expire Date
 		//ZonedDateTime expireDate = ZonedDateTime.now();
 		//LocalDateTime expireDate = LocalDateTime.now();
@@ -355,19 +366,17 @@ public class Token implements TokenRemoteIntf{
 		// Prepare Cipher Text for Export
 		
 		String token = apiKey.encodeBase64(encBytes).replaceAll("=", "");
-		
-		AuthenticationInfo authenticationInfo = new AuthenticationInfo(token, nonceBase64, expireDate, userData);
-		
-		return authenticationInfo;
+
+		return new AuthenticationInfo(token, nonceBase64, expireDate, userData);
 	}
 	
 	/**
 	 * Decode and Validate Token
 	 * @author faik.saglar
-	 * @param token
-	 * @param authInfo
+	 * @param token token to be validated
+	 * @param authInfo stored {@link AuthenticationInfo}
 	 * @return {@link AuthenticationInfo}
-	 * @throws UnsupportedEncodingException
+	 * @throws UnsupportedEncodingException if base64 encoding has errors
 	 */
 	public AuthenticationInfo decodeAndValidateToken(String token, AuthenticationInfo authInfo) throws UnsupportedEncodingException  {
 
@@ -464,11 +473,12 @@ public class Token implements TokenRemoteIntf{
 	}
 		
 	/**
-	 * @param args
-	 * @throws NoSuchAlgorithmException 
-	 * @throws UnsupportedEncodingException 
+	 * Unit Test
+	 *
+	 * @param args ars
+	 * @throws UnsupportedEncodingException if base64 encoding has errors
 	 */
-	public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	public static void main(String[] args) throws UnsupportedEncodingException {
 
 		Token token = new Token();
 		

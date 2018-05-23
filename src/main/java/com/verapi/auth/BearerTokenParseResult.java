@@ -19,8 +19,10 @@ public class BearerTokenParseResult {
     private String token;
 
     /**
-     * @param isFailed
-     * @param token
+     * Http Basic Auth Bearer Token Parse Result
+     *
+     * @param isFailed is parse failed
+     * @param token token
      */
     public BearerTokenParseResult(Boolean isFailed, String token) {
         this.isFailed = isFailed;

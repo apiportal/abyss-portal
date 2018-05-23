@@ -1,5 +1,12 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.model;
 
@@ -31,10 +38,10 @@ public class AuthenticationInfo implements Serializable{
 	
 	/**
 	 * @author faik.saglar
-	 * @param token
-	 * @param nonce
-	 * @param expireDate
-	 * @param userData
+	 * @param token token
+	 * @param nonce nonce
+	 * @param expireDate expire date
+	 * @param userData user data
 	 */
 	//public AuthenticationInfo(String token, String nonce, ZonedDateTime expireDate, String userData) {
 	//public AuthenticationInfo(String token, String nonce, DateTime expireDate, String userData) {
@@ -49,12 +56,12 @@ public class AuthenticationInfo implements Serializable{
 
 	/**
 	 * @author faik.saglar
-	 * @param token
-	 * @param nonce
-	 * @param expireDate
-	 * @param userData
-	 * @param isValid
-	 * @param resultText
+	 * @param token token
+	 * @param nonce nonce
+	 * @param expireDate expire date
+	 * @param userData user data
+	 * @param isValid is valid
+	 * @param resultText result text
 	 */
 	//public AuthenticationInfo(String token, String nonce, ZonedDateTime expireDate, String userData,
 	//public AuthenticationInfo(String token, String nonce, DateTime expireDate, String userData,
@@ -70,7 +77,7 @@ public class AuthenticationInfo implements Serializable{
 	
 	/**
 	 * @author faik.saglar
-	 * @param resultText
+	 * @param resultText result text
 	 */
 	public AuthenticationInfo(String resultText) {
 		this.token = "";

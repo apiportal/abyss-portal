@@ -1,10 +1,16 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.generate.impl;
 
 import java.io.UnsupportedEncodingException;
-import java.rmi.RemoteException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -45,8 +51,10 @@ public class Hash implements HashRemoteIntf{
 	}
 
 	/**
+	 * Returns the hash of input data
+	 *
 	 * @author faik.saglar
-	 * @param inputData
+	 * @param inputData data to be used for calculating hash
 	 * @return hash {@link String}
 	 */
 	public String generateHash(String inputData) {
@@ -85,6 +93,8 @@ public class Hash implements HashRemoteIntf{
 	 */
 	
 	/**
+	 * Returns random salt to be used for password hashing
+	 *
 	 * @author faik.saglar
 	 * @return salt byte[]
 	 */
@@ -101,8 +111,10 @@ public class Hash implements HashRemoteIntf{
 
 	
 	/**
+	 * Returns string formatted salted hash of input password
+	 *
 	 * @author faik.saglar
-	 * @param password {@link String}
+	 * @param password clear password to be hashed {@link String}
 	 * @return salted Password Hash {@link String}
 	 */
 	public String generateSaltedPasswordHash(String password) {
@@ -111,21 +123,23 @@ public class Hash implements HashRemoteIntf{
 	}
 	
 	/**
+	 * Returns string formatted salted hash of input password
+	 *
 	 * @author faik.saglar
-	 * @param password {@link String}
-	 * @param saltBytes byte[]
+	 * @param password clear password to be hashed as {@link String}
+	 * @param saltBytes random salt to be used for password hashing in byte[]
 	 * @return salted Password Hash {@link String}
 	 */
 	private String generateSaltedPasswordHash(String password, byte[] saltBytes) {
 		
 		char[] passwordChars = password.toCharArray();
 		
-		byte[] hashedPassword = null;
+		byte[] hashedPassword;
 		
 		String saltPlusHashedPasswordString;
 		
 		PBEKeySpec spec = null;
-		SecretKey key = null;
+		SecretKey key;
 
 		try {
 		    spec = new PBEKeySpec(
@@ -166,9 +180,11 @@ public class Hash implements HashRemoteIntf{
 	}
 
 	/**
+	 * Extract salt from stored salted password hash
+	 *
 	 * @author faik.saglar
-	 * @param storedSaltedPasswordHash {@link String}
-	 * @return salt byte[]
+	 * @param storedSaltedPasswordHash stored salted password hash as {@link String}
+	 * @return salt random salt used for password hashing in byte[]
 	 */
 	public byte[] extractSalt(String storedSaltedPasswordHash) {
 		
@@ -185,14 +201,16 @@ public class Hash implements HashRemoteIntf{
 	}
 	
 	/**
+	 * Check given password
+	 *
 	 * @author faik.saglar
-	 * @param enteredPassword {@link String}
-	 * @param storedSaltedPasswordHash {@link String}
+	 * @param enteredPassword clear password to be checked for correctness in {@link String} format
+	 * @param storedSaltedPasswordHash stored salted password hash as {@link String}
 	 * @return is Correct boolean
 	 */
 	public boolean isSaltedPasswordHashCorrect(String enteredPassword, String storedSaltedPasswordHash) {
 		
-		if (enteredPassword == null | enteredPassword.isEmpty()) {
+		if (enteredPassword == null || enteredPassword.isEmpty()) {
 			return false;
 		}
 		
@@ -212,9 +230,7 @@ public class Hash implements HashRemoteIntf{
 	 * Generates a random password of a given length, using letters and digits.
 	 * Reference: http://stackoverflow.com/questions/18142745/how-do-i-generate-a-salt-in-java-for-salted-hash
 	 *
-	 * @param length
-	 *            the length of the password
-	 *
+	 * @param length the length of the password
 	 * @return a random password
 	 */
 	public String generateRandomPassword(int length) {
@@ -233,11 +249,12 @@ public class Hash implements HashRemoteIntf{
 	}
 	
 	/**
+	 * Unit Test
+	 *
 	 * @author faik.saglar
-	 * @param args
-	 * @throws RemoteException 
+	 * @param args args
 	 */
-	public static void main(String[] args) throws RemoteException {
+	public static void main(String[] args) {
 
 		Hash hash = new Hash();
 		
