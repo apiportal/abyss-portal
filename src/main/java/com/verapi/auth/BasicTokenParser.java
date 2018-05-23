@@ -26,8 +26,10 @@ public class BasicTokenParser {
     private static Base64.Encoder base64UrlEncoder = Base64.getUrlEncoder();
 
     /**
-     * @param authorizationBasicToken
-     * @return BasicTokenParseResult
+     * Http Basic Auth Token Parser
+     *
+     * @param authorizationBasicToken token to be parsed having "Basic base64(user:pass)" format
+     * @return {@link BasicTokenParseResult}
      */
     public static BasicTokenParseResult authorizationBasicTokenParser(String authorizationBasicToken) {
         if (authorizationBasicToken==null||authorizationBasicToken.isEmpty()) {
@@ -49,7 +51,7 @@ public class BasicTokenParser {
             return new BasicTokenParseResult(true, "", "");
         }
 
-        String credentials = "";
+        String credentials;
         try {
             byte[] bytes = DatatypeConverter.parseBase64Binary(pieces[pieces.length-1]);
 
@@ -69,7 +71,9 @@ public class BasicTokenParser {
     }
 
     /**
-     * @param authorizationBearerToken
+     * Http Basic Auth Bearer Token Parser
+     *
+     * @param authorizationBearerToken token to be parsed having "Bearer base64(token)" format
      * @return BearerTokenParseResult
      */
     public static BearerTokenParseResult authorizationBearerTokenParser(String authorizationBearerToken) {

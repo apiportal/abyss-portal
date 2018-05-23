@@ -321,7 +321,7 @@ public class SubjectService extends AbstractService<Subject> {
                 .toCompletable();
     }
 
-    /**
+    /*
      * Entity specific methods
      */
     public Maybe<Subject> updateIsDeleted(long id) {

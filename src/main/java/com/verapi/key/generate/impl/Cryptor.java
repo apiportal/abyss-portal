@@ -1,5 +1,12 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.generate.impl;
 
@@ -22,7 +29,7 @@ import com.verapi.key.model.CryptoOperationResult;
  * @version 1.0
  */
 
-public class Cryptor {
+class Cryptor {
 
 	private	static final byte[] IV = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
 	
@@ -52,9 +59,7 @@ public class Cryptor {
 	/**
 	 * Generate Aes Key
 	 * @author faik.saglar
-	 * @param
-	 * @return
-	 * 
+	 *
 	 */
 	private void generateAesKey() { //TODO: input key type: enc / mac
 		KeyGenerator keyGenerator;
@@ -80,7 +85,7 @@ public class Cryptor {
 	/**
 	 * Encrypt Input Bytes
 	 * @author faik.saglar
-	 * @param plainInput
+	 * @param plainInput plain Input
 	 * @return {@link CryptoOperationResult}
 	 */
 	CryptoOperationResult enc (byte[] plainInput) {
@@ -90,7 +95,7 @@ public class Cryptor {
 	/**
 	 * Decrypt Input Bytes
 	 * @author faik.saglar
-	 * @param cipherInput
+	 * @param cipherInput cipher Input
 	 * @return {@link CryptoOperationResult}
 	 */
 	CryptoOperationResult dec (byte[] cipherInput) {
@@ -100,37 +105,37 @@ public class Cryptor {
 	/**
 	 * Common Encrypt Decrypt Method
 	 * @author faik.saglar
-	 * @param inputBytes
+	 * @param inputBytes input Bytes
 	 * @param operationMode (Encrypt / Decrypt)
 	 * @return {@link CryptoOperationResult}
 	 */
 	private CryptoOperationResult crypt (byte[] inputBytes, int operationMode) {
 		
-		Cipher aesCipher = null;
+		Cipher aesCipher;
 		//String cipherText = "";
-		byte[] outputBytes = null;
+		byte[] outputBytes;
 		
 		try {
 			aesCipher = Cipher.getInstance(CRYPT_ALGORITHM);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new CryptoOperationResult(outputBytes, false, "NoSuchAlgorithmException", e);
+			return new CryptoOperationResult(null, false, "NoSuchAlgorithmException", e);
 		} catch (NoSuchPaddingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new CryptoOperationResult(outputBytes, false, "NoSuchPaddingException", e);
+			return new CryptoOperationResult(null, false, "NoSuchPaddingException", e);
 		}
 		try {
 			aesCipher.init(operationMode, aesEncKey, ivParameterSpec);
 		} catch (InvalidKeyException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new CryptoOperationResult(outputBytes, false, "InvalidKeyException", e);
+			return new CryptoOperationResult(null, false, "InvalidKeyException", e);
 		} catch (InvalidAlgorithmParameterException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new CryptoOperationResult(outputBytes, false, "InvalidAlgorithmParameterException", e);
+			return new CryptoOperationResult(null, false, "InvalidAlgorithmParameterException", e);
 		}
 		
 		try {
@@ -138,12 +143,12 @@ public class Cryptor {
 		} catch (IllegalBlockSizeException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new CryptoOperationResult(outputBytes, false, "IllegalBlockSizeException", e);
+			return new CryptoOperationResult(null, false, "IllegalBlockSizeException", e);
 			
 		} catch (BadPaddingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new CryptoOperationResult(outputBytes, false, "BadPaddingException", e);
+			return new CryptoOperationResult(null, false, "BadPaddingException", e);
 		}
 		
 		//System.out.println("Len:"+outputBytes.length); //TODO Kaldır

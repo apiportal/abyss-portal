@@ -1,5 +1,12 @@
-/**
- * 
+/*
+ *
+ *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
+ *  *
+ *  *  Unauthorized copying of this file, via any medium is strictly prohibited
+ *  *  Proprietary and confidential
+ *  *
+ *  *  Written by Ismet Faik SAGLAR <faik.saglar@verapi.com>, 12 2017
+ *
  */
 package com.verapi.key.generate.intf;
 
@@ -12,6 +19,6 @@ import java.rmi.RemoteException;
  */
 public interface ApiKeyRemoteIntf extends Remote {
 
-	public String generateRandomKey() throws RemoteException; 
+	String generateRandomKey() throws RemoteException;
 	
 }

@@ -21,9 +21,11 @@ public class BasicTokenParseResult {
     private String password;
 
     /**
-     * @param isFailed
-     * @param username
-     * @param password
+     * Http Basic Auth Token Parse Result
+     *
+     * @param isFailed is parse failed
+     * @param username username
+     * @param password password
      */
     public BasicTokenParseResult(Boolean isFailed, String username, String password) {
         this.isFailed = isFailed;
