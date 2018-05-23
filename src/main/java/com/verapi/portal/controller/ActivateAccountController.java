@@ -63,7 +63,7 @@ public class ActivateAccountController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.display_name FROM portalschema.SUBJECT_ACTIVATION A, portalschema.SUBJECT S WHERE TOKEN = ? and A.subject_id = S.id", new JsonArray().add(token)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.id", new JsonArray().add(token)))
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
@@ -73,13 +73,13 @@ public class ActivateAccountController extends PortalAbstractController {
                                 JsonObject row = resultSet.getRows(true).get(0);
                                 logger.info("Token found:" + row.encodePrettily());
 
-                                if (row.getBoolean("is_deleted")) {
+                                if (row.getBoolean("isDeleted")) {
                                     logger.error("Received Token is deleted");
                                     return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
                                 }
 
-                                if (!(row.getString("token_type", "").equals(Constants.ACTIVATION_TOKEN))) {
-                                    logger.error("Received Token Type does not match: " + row.getString("token_type", "NULL"));
+                                if (!(row.getString("tokenType", "").equals(Constants.ACTIVATION_TOKEN))) {
+                                    logger.error("Received Token Type does not match: " + row.getString("tokenType", "NULL"));
                                     return Single.error(new Exception("Right token does not exist in our records. Please request a new token."));
                                 }
 
@@ -88,8 +88,8 @@ public class ActivateAccountController extends PortalAbstractController {
                                 AuthenticationInfo authInfo = new AuthenticationInfo(
                                         row.getString("token"),
                                         row.getString("nonce"),
-                                        row.getInstant("expire_date"),
-                                        row.getString("user_data"));
+                                        row.getInstant("expireDate"),
+                                        row.getString("userData"));
 
                                 Token tokenValidator = new Token();
 
@@ -99,12 +99,12 @@ public class ActivateAccountController extends PortalAbstractController {
                                     logger.info("Received Token is valid.");
 
                                     email = row.getString("email");
-                                    displayName = row.getString("display_name");
+                                    displayName = row.getString("displayName");
 
                                     return Single.just(row);
                                 } else {
-                                    logger.error("Received Token is NOT valid: " + authResult.getResultText());
-                                    return Single.error(new Exception("Token is not valid. Please request a new token."));
+                                    logger.error("Received Token is NOT valid: " + authResult.getResultText()); //TODO: Update Token as deleted.
+                                    return Single.error(new Exception("Token is not valid. Please request a new activation token by singing up again with same username."));
                                 }
 
                             } else {
@@ -113,16 +113,16 @@ public class ActivateAccountController extends PortalAbstractController {
                             }
                         })
                         .flatMap(row -> {
-                                    logger.info("Activate Account - Updating Subject with id:[" + row.getInteger("subject_id") + "] -> " + row.encodePrettily());
-                                    return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET " +
+                                    logger.info("Activate Account - Updating Subject with id:[" + row.getInteger("subjectId") + "] -> " + row.encodePrettily());
+                                    return resConn.rxUpdateWithParams("UPDATE subject SET " +
                                                     "updated = now()," +
-                                                    "crud_subject_id = ?," +
-                                                    "is_activated = true" +
+                                                    "crudSubjectId = ?," +
+                                                    "isActivated = true" +
                                                     " WHERE " +
                                                     "id = ?;",
                                             new JsonArray()
-                                                    .add(1)
-                                                    .add(row.getInteger("subject_id")));
+                                                    .add(Constants.SYSTEM_USER_ID)
+                                                    .add(row.getInteger("subjectId")));
                                 }
                         )
                         .flatMap(updateResult -> {
@@ -130,14 +130,14 @@ public class ActivateAccountController extends PortalAbstractController {
                             //logger.info("Activate Account - Subject Update Result information:" + updateResult.getKeys().encodePrettily());
                             logger.info("Activate Account - Updating Subject Activation...");
                             if (updateResult.getUpdated() == 1) {
-                                return resConn.rxUpdateWithParams("UPDATE portalschema.subject_activation SET " +
+                                return resConn.rxUpdateWithParams("UPDATE subject_activation SET " +
                                                 "deleted = now()," +
-                                                "crud_subject_id = ?," +
-                                                "is_deleted = true" +
+                                                "crudSubjectId = ?," +
+                                                "isDeleted = true" +
                                                 " WHERE " +
                                                 "id = ?;",
                                         new JsonArray()
-                                                .add(1)
+                                                .add(Constants.SYSTEM_USER_ID)
                                                 .add(tokenId));
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));

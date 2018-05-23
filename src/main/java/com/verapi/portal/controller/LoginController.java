@@ -61,6 +61,9 @@ public class LoginController extends PortalAbstractController {
         authProvider.authenticate(creds, authResult -> {
             if (authResult.succeeded()) {
                 try {
+
+                    //TODO: Check if password has expired and force change
+
                     SubjectService subjectService = new SubjectService(routingContext.vertx());
 
                     Single<JsonObject> apiResponse = subjectService.initJDBCClient()

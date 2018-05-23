@@ -121,4 +121,16 @@ public class Constants {
     public static final String VERTICLE_TYPE_PORTAL = "verticle.type.portal";
     public static final String VERTICLE_TYPE_API = "verticle.type.api";
 
+
+    public static final int PASSWORD_EXPIRATION_DAYS = 90;
+
+    public static final int INTERNAL_SUBJECT_DIRECTORY_ID = 1;
+
+    public static final int SYSTEM_USER_ID = 1;
+
+    public static final int DEFAULT_ORGANIZATION_ID = 0;
+
+    public static final int SUBJECT_TYPE_USER = 1;
+    public static final int SUBJECT_TYPE_APP = 2;
+    public static final int SUBJECT_TYPE_SYSTEM = 3;
 }
