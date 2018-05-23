@@ -15,6 +15,7 @@ import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.entity.idam.SubjectGroup;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbstractServiceOld;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -26,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-public class SubjectGroupService extends AbstractService<SubjectGroup> {
+public class SubjectGroupService extends AbstractServiceOld<SubjectGroup> {
 
     private static Logger logger = LoggerFactory.getLogger(SubjectGroupService.class);
 

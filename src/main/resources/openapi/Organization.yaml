@@ -23,16 +23,16 @@ tags:
       description: Find out more
     description: Abyss ... [TODO]  
 paths:
-  /api-api-tags:
+  /organizations:
     get:
       tags:
         - TODO
-      summary: Get list of apiApiTags
-      description: 'Returns list of apiApiTags'
-      operationId: getApiApiTags
+      summary: Get list of organizations
+      description: 'Returns list of organizations'
+      operationId: getOrganizations
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApiApiTag'
+          $ref: '#/components/responses/200-ListOfOrganization'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -52,9 +52,9 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a new ApiApiTag
-      description: 'Provide a new ApiApiTag to be inserted'
-      operationId: addApiApiTags
+      summary: Add a new Organization
+      description: 'Provide a new Organization to be inserted'
+      operationId: addOrganizations
       responses:
         '201':
           $ref: '#/components/responses/201'
@@ -75,13 +75,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ApiApiTag'
+        $ref: '#/components/requestBodies/Organization'
     put:
       tags:
         - TODO
-      summary: Update a bulk of ApiApiTags
-      description: 'Provide a bulk list of  ApiApiTag objects to be updated'
-      operationId: updateApiApiTags
+      summary: Update a bulk of Organizations
+      description: 'Provide a bulk list of  Organization objects to be updated'
+      operationId: updateOrganizations
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -102,13 +102,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfApiApiTagObject'
+        $ref: '#/components/requestBodies/ListOfOrganizationObject'
     delete:
       tags:
         - TODO
-      summary: Delete all apiApiTags
-      description: 'Deletes all apiApiTags'
-      operationId: deleteApiApiTags
+      summary: Delete all organizations
+      description: 'Deletes all organizations'
+      operationId: deleteOrganizations
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -124,17 +124,17 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /api-api-tags/{uuid}:
+  /organizations/{uuid}:
     get:
       tags:
         - TODO
-      summary: Get an existing ApiApiTag by uuid
-      description: 'Provide an uuid of ApiApiTag to be get'
-      operationId: getApiApiTag
+      summary: Get an existing Organization by uuid
+      description: 'Provide an uuid of Organization to be get'
+      operationId: getOrganization
       parameters:
         - name: uuid
           in: path
-          description: uuid of ApiApiTag that need to be get
+          description: uuid of Organization that need to be get
           required: true
           schema:
             type: string
@@ -160,13 +160,13 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update an existing ApiApiTag
-      description: 'Provide an altered ApiApiTag to be updated'
-      operationId: updateApiApiTag
+      summary: Update an existing Organization
+      description: 'Provide an altered Organization to be updated'
+      operationId: updateOrganization
       parameters:
         - name: uuid
           in: path
-          description: uuid of ApiApiTag that need to be updated
+          description: uuid of Organization that need to be updated
           required: true
           schema:
             type: string
@@ -190,17 +190,17 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ApiApiTag'
+        $ref: '#/components/requestBodies/Organization'
     delete:
       tags:
         - TODO
-      summary: Delete ApiApiTag
-      description: 'Provide an uuid parameter of ApiApiTag to be updated'
-      operationId: deleteApiApiTag
+      summary: Delete Organization
+      description: 'Provide an uuid parameter of Organization to be updated'
+      operationId: deleteOrganization
       parameters:
         - name: uuid
           in: path
-          description: The uuid of ApiApiTag that needs to be deleted
+          description: The uuid of Organization that needs to be deleted
           required: true
           schema:
             type: string
@@ -255,44 +255,70 @@ components:
           type: integer
           format: int32
         response:
-          $ref: '#/components/schemas/ApiApiTag'
+          $ref: '#/components/schemas/Organization'
         error:
           $ref: '#/components/schemas/Error'
-    ApiApiTag:
+    Organization:
       type: object
       properties:
-        apiid:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationid:
           type: integer
           format: int32
-          description: FK ID of API for many to many relationship of API tags
-        apitagid:
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudsubjectid:
           type: integer
           format: int32
-          description: FK ID of API tags for many to many relationship of API tags
+          description: ID of Subject that reads, creates, updates or deletes
+        name:
+          type: string
+          description: Name of organization
+        description:
+          type: string
+          description: Description of organization
   requestBodies:
-    ApiApiTag:
+    Organization:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiApiTag'          
-      description: ApiApiTag object that needs to be added or updated
+            $ref: '#/components/schemas/Organization'          
+      description: Organization object that needs to be added or updated
       required: true
-    ListOfApiApiTag:
+    ListOfOrganization:
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/ApiApiTag'          
-      description: ApiApiTag array that needs to be added
+              $ref: '#/components/schemas/Organization'          
+      description: Organization array that needs to be added
       required: true
-    ListOfApiApiTagObject:
+    ListOfOrganizationObject:
       content:
         application/json:
           schema:
             type: object
             additionalProperties: true
-      description:  list of ApiApiTag objects that needs to be updated, each additional property name should be the uuid of coresponding ApiApiTag record
+      description:  list of Organization objects that needs to be updated, each additional property name should be the uuid of coresponding Organization record
       required: true
   responses:
     '200':
@@ -300,23 +326,23 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiApiTag'
-    '200-ListOfApiApiTag':
-      description: A ApiApiTag array
+            $ref: '#/components/schemas/Organization'
+    '200-ListOfOrganization':
+      description: A Organization array
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/ApiApiTag'
+              $ref: '#/components/schemas/Organization'
     '201':
-      description: New ApiApiTag resource has been created
+      description: New Organization resource has been created
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiApiTag'
+            $ref: '#/components/schemas/Organization'
     '204':
-      description: The ApiApiTag resource was successfully deleted
+      description: The Organization resource was successfully deleted
     '207':
       description: Multi Status for bulk operation
       content:
@@ -330,7 +356,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiApiTag'
+            $ref: '#/components/schemas/Organization'
     '400':
       description: Invalid UUID supplied
       content:

@@ -11,15 +11,14 @@
 
 package com.verapi.portal.oapi;
 
-import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
-
-import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
-
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.oapi.exception.NotImplemented501Exception;
 import com.verapi.portal.service.idam.SubjectService;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.UpdateResult;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -32,14 +31,19 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
+
+import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
     private static Logger logger = LoggerFactory.getLogger(SubjectApiController.class);
 
+/*
     private final SwaggerRequestResponseValidator validator = SwaggerRequestResponseValidator
             .createFor("/openapi/Subject.yaml")
             .build();
+*/
 
     public SubjectApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
         super(vertx, router, authProvider);
@@ -47,31 +51,35 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubjects(RoutingContext routingContext) {
-        String methodName = new Object() {
-        }.getClass().getEnclosingMethod().getName();
-        logger.info(methodName + " invoked");
+        SubjectService subjectService = new SubjectService(vertx);
+        Single<ResultSet> findAllResult = subjectService.initJDBCClient()
+                .flatMap(jdbcClient -> subjectService.findAll())
+                .flatMap(result -> {
+                    logger.trace(result.getNumRows() + " rows selected");
+                    return Single.just(result);
+                });
 
-        JsonObject subjects = new JsonObject().put("path", "getSubjects invoked");
-        if (routingContext.user() != null) {
-            subjects
-                    .put("user", routingContext.user().toString())
-                    .put("user.principal", routingContext.user().principal().toString())
-                    .put("method", methodName);
+        findAllResult.subscribe(resp -> {
+                    JsonArray arr = new JsonArray();
+                    resp.getRows().forEach(arr::add);
 
-        }
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(200)
+                            .end(arr.encode(), "UTF-8");
 
-        routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
-                .setStatusCode(200)
-                .end(subjects.toString(), "UTF-8");
+                    logger.trace("replied successfully " + arr.encodePrettily());
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
 
     }
 
     @AbyssApiOperationHandler
     public void addSubjects(RoutingContext routingContext) {
-        String methodName = new Object() {
-        }.getClass().getEnclosingMethod().getName();
-        logger.info(methodName + " invoked");
 
 /*
         // ### STAR - request swagger validation using Atlassian SwaggerRequestResponseValidator ###
@@ -101,156 +109,154 @@ public class SubjectApiController extends AbstractApiController {
         String hash = authProvider.computeHash(subjects.getString("password"), salt);
         subjects.put("password", hash);
         subjects.put("passwordsalt", salt);
-        try {
-            //insert default avatar image TODO: later use request base64 img data
-            ClassLoader classLoader = getClass().getClassLoader();
-            File file = new File(Objects.requireNonNull(classLoader.getResource("webroot/dist/img/avatar.jpg")).getFile());
-            subjects.put("picture", encodeFileToBase64Binary(file));
-        } catch (IOException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-        }
+        if ((!subjects.containsKey("picture")) || (subjects.getValue("picture") == null))
+            try {
+                //insert default avatar image TODO: later use request base64 img data
+                ClassLoader classLoader = getClass().getClassLoader();
+                File file = new File(Objects.requireNonNull(classLoader.getResource("webroot/dist/img/avatar.jpg")).getFile());
+                subjects.put("picture", encodeFileToBase64Binary(file));
+            } catch (IOException e) {
+                logger.error(e.getLocalizedMessage());
+                logger.error(Arrays.toString(e.getStackTrace()));
+            }
 
         SubjectService subjectService = new SubjectService(vertx);
 
         Single<ResultSet> insertResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.insertJson(subjects))
+                .flatMap(jdbcClient -> subjectService.insert(subjects))
                 .flatMap(result -> {
                     logger.trace("inserted row key: " + result.getKeys().toString());
                     return Single.just(result);
                 })
                 .flatMap(insResult -> {
-                    Single<ResultSet> updResult = subjectService.findBySubjectId(insResult.getKeys().getInteger(0));
-                    logger.trace("selected row: " + insResult.toString());
-                    return updResult;
+                    Single<ResultSet> findResult = subjectService.findById(insResult.getKeys().getInteger(0));
+                    logger.trace("selected row: " + findResult.toString());
+                    return findResult;
                 });
         insertResult.subscribe(resp -> {
                     routingContext.response()
                             .putHeader("content-type", "application/json; charset=utf-8")
                             .setStatusCode(201)
                             .end(resp.getRows().get(0).encode(), "UTF-8");
-                    logger.trace(methodName + " replied successfully " + resp.toJson().encodePrettily());
+                    logger.trace("replied successfully " + resp.toJson().encodePrettily());
                 },
                 throwable -> {
-                    logger.error(methodName + " exception occured " + throwable.getLocalizedMessage());
-                    logger.error(methodName + " exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
                     throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 });
-
-
-
-/*
-        Single<UpdateResult> insertResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.insertJson(subjects))
-                .flatMap(result -> {
-                    logger.trace("inserted row key: " + result.getKeys().toString());
-                    return Single.just(result);
-                });
-*/
-/*
-                .flatMap(findResult -> {
-                    subjectService.findBySubjectId(findResult.getKeys().getInteger(0));
-                    logger.trace("selected row: " + findResult.toString());
-                    return Single.just(findResult.toJson());
-                });
-*//*
-
-
-        insertResult.subscribe(resp -> {
-                    Single<ResultSet> selectResult = subjectService.findBySubjectId(resp.getKeys().getInteger(0))
-                            .flatMap(resultSet -> {
-                                logger.trace("selected row: " + resultSet.toString());
-                                return Single.just(resultSet);
-                            });
-
-                    selectResult.subscribe(res -> {
-                                routingContext.response()
-                                        .putHeader("content-type", "application/json; charset=utf-8")
-                                        .setStatusCode(201)
-                                        .end(res.getRows(true).get(0).encode(), "UTF-8");
-                                logger.trace(methodName + " replied successfully " + res.toJson().encodePrettily());
-                            },
-                            th -> {
-                                logger.error(methodName + " exception occured " + th.getLocalizedMessage());
-                                logger.error(methodName + " exception occured " + Arrays.toString(th.getStackTrace()));
-                                throwApiException(routingContext, InternalServerError500Exception.class, th.getLocalizedMessage());
-                            });
-
-                },
-                throwable -> {
-                    logger.error(methodName + " exception occured " + throwable.getLocalizedMessage());
-                    logger.error(methodName + " exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
-*/
 
     }
 
     @AbyssApiOperationHandler
     public void updateSubjects(RoutingContext routingContext) {
-        String methodName = new Object() {
-        }.getClass().getEnclosingMethod().getName();
-        logger.info(methodName + " invoked");
-
-        // Get the parsed parameters
-        //RequestParameters params = routingContext.get("parsedParameters");
-
-        // We get an user JSON object validated by Vert.x Open API validator
-        //JsonObject subjects = params.body().getJsonObject();
-
-        JsonObject subjects = new JsonObject().put("path", "addSubjects invoked");
-        if (routingContext.user() != null) {
-            subjects
-                    .put("user", routingContext.user().toString())
-                    .put("user.principal", routingContext.user().principal().toString());
-            //.put("method", getClass().getEnclosingMethod().getName());
-
-        }
-/*
-        if (1 == 1) {
-            throwApiException(routingContext, BadRequest400Exception.class, "test exception", "very detailed message");
-            return;
-        }
-*/
-
-        routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
-                .setStatusCode(200)
-                .end(subjects.toString(), "UTF-8");
-
+        throwApiException(routingContext, NotImplemented501Exception.class);
     }
 
     @AbyssApiOperationHandler
     public void deleteSubjects(RoutingContext routingContext) {
-        String methodName = new Object() {
-        }.getClass().getEnclosingMethod().getName();
-        logger.info(methodName + " invoked");
+        throwApiException(routingContext, NotImplemented501Exception.class);
+    }
 
+    @AbyssApiOperationHandler
+    public void getSubject(RoutingContext routingContext) {
         // Get the parsed parameters
-        //RequestParameters params = routingContext.get("parsedParameters");
+        RequestParameters params = routingContext.get("parsedParameters");
 
-        // We get an user JSON object validated by Vert.x Open API validator
-        //JsonObject subjects = params.body().getJsonObject();
+        SubjectService subjectService = new SubjectService(vertx);
+        Single<ResultSet> findResult = subjectService.initJDBCClient()
+                .flatMap(jdbcClient -> subjectService.findById(UUID.fromString(params.pathParameter("uuid").getString())))
+                .flatMap(result -> {
+                    logger.trace(result.getNumRows() + " rows selected");
+                    return Single.just(result);
+                });
 
-        JsonObject subjects = new JsonObject().put("path", "addSubjects invoked");
-        if (routingContext.user() != null) {
-            subjects
-                    .put("user", routingContext.user().toString())
-                    .put("user.principal", routingContext.user().principal().toString());
-            //.put("method", getClass().getEnclosingMethod().getName());
+        findResult.subscribe(resp -> {
 
-        }
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(200)
+                            .end(resp.toJson().getJsonObject("rows").encode(), "UTF-8");
+
+                    logger.trace("replied successfully " + resp.toJson().getJsonObject("rows").encodePrettily());
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
+
+    }
+
 /*
-        if (1 == 1) {
-            throwApiException(routingContext, BadRequest400Exception.class, "test exception", "very detailed message");
-            return;
-        }
+    @AbyssApiOperationHandler
+    public void addSubject(RoutingContext routingContext) {
+        throwApiException(routingContext, MethodNotAllowed405Exception.class);
+    }
 */
 
-        routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
-                .setStatusCode(200)
-                .end(subjects.toString(), "UTF-8");
+    @AbyssApiOperationHandler
+    public void updateSubject(RoutingContext routingContext) {
+
+        // Get the parsed parameters
+        RequestParameters params = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject subjects = params.body().getJsonObject();
+
+        SubjectService subjectService = new SubjectService(vertx);
+
+        Single<ResultSet> updateResult = subjectService.initJDBCClient()
+                .flatMap(jdbcClient -> subjectService.update(UUID.fromString(params.pathParameter("uuid").getString()), subjects))
+                .flatMap(result -> {
+                    logger.trace("updated row key: " + result.getKeys().toString());
+                    return Single.just(result);
+                })
+                .flatMap(updResult -> {
+                    Single<ResultSet> findResult = subjectService.findById(updResult.getKeys().getInteger(0));
+                    logger.trace("updated row: " + findResult.toString());
+                    return findResult;
+                });
+        updateResult.subscribe(resp -> {
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(200)
+                            .end(resp.getRows().get(0).encode(), "UTF-8");
+                    logger.trace("replied successfully " + resp.toJson().encodePrettily());
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteSubject(RoutingContext routingContext) {
+
+        // Get the parsed parameters
+        RequestParameters params = routingContext.get("parsedParameters");
+
+        SubjectService subjectService = new SubjectService(vertx);
+
+        Single<UpdateResult> updateResult = subjectService.initJDBCClient()
+                .flatMap(jdbcClient -> subjectService.delete(UUID.fromString(params.pathParameter("uuid").getString())))
+                .flatMap(result -> {
+                    logger.trace("deleted row key: " + result.getKeys().toString());
+                    return Single.just(result);
+                });
+        updateResult.subscribe(resp -> {
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(204)
+                            .end();
+                    logger.trace("replied successfully " + resp.toJson().encodePrettily());
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
 
     }
 

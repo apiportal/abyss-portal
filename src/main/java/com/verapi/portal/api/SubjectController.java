@@ -17,6 +17,7 @@ import com.verapi.portal.common.Constants;
 import com.verapi.portal.entity.idam.Subject;
 import com.verapi.portal.service.idam.SubjectIndexService;
 import com.verapi.portal.service.idam.SubjectService;
+import com.verapi.portal.service.idam.SubjectServiceOld;
 import io.reactivex.Single;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -173,7 +174,7 @@ public class SubjectController extends ApiAbstractController {
             Vertx reactiveVertx = Vertx.newInstance(vertx);
             //logger.info("SubjectController.getAll() io.vertx.reactivex.core.Vertx : " + reactiveVertx.toString());
 
-            SubjectService subjectService = new SubjectService(reactiveVertx);
+            SubjectServiceOld subjectService = new SubjectServiceOld(reactiveVertx);
 
             Single<JsonObject> apiResponse = subjectService.initJDBCClient()
                     .flatMap(jdbcClient -> (subjectName == null) ? subjectService.findAll() : subjectService.filterBySubjectName(subjectName))
@@ -217,7 +218,7 @@ public class SubjectController extends ApiAbstractController {
                     });
 
         } catch (Exception e) {
-            logger.error("SubjectController.getAll() new SubjectService exception occured " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+            logger.error("SubjectController.getAll() new SubjectServiceOld exception occured " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
             asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
         }
 
@@ -279,7 +280,7 @@ public class SubjectController extends ApiAbstractController {
                     });
 
         } catch (Exception e) {
-            logger.error("SubjectController.getIndex() new SubjectService exception occured " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+            logger.error("SubjectController.getIndex() new SubjectServiceOld exception occured " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
             asyncResponse.resume(Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e).build());
         }
 

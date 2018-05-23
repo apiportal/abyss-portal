@@ -11,11 +11,11 @@
 
 package com.verapi.portal.oapi;
 
+import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.Util;
 import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
@@ -33,10 +33,6 @@ import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
-import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +41,8 @@ import java.lang.reflect.Method;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Set;
 
 import static com.verapi.portal.common.Util.nnvl;
-import static com.verapi.portal.common.Util.nvl;
 
 public abstract class AbstractApiController implements IApiController {
     private static Logger logger = LoggerFactory.getLogger(AbstractApiController.class);
@@ -63,6 +57,9 @@ public abstract class AbstractApiController implements IApiController {
         this.abyssRouter = router;
         this.authProvider = authProvider;
         this.apiSpec = this.getClass().getAnnotation(AbyssApiController.class).apiSpec();
+        final SwaggerRequestResponseValidator validator = SwaggerRequestResponseValidator
+                .createFor(this.apiSpec)
+                .build();
         this.init();
     }
 
@@ -75,32 +72,25 @@ public abstract class AbstractApiController implements IApiController {
                         logger.info("OpenAPI3RouterFactory created");
                         OpenAPI3RouterFactory factory = ar.result();
 
-                        Reflections reflections = new Reflections(
-                                new ConfigurationBuilder()
-                                        .setUrls(ClasspathHelper.forClass(this.getClass()))
-                                        .setScanners(new MethodAnnotationsScanner()));
+                        Method[] methods = this.getClass().getMethods();
+                        for (Method method : methods) {
+                            if (method.getAnnotation(AbyssApiOperationHandler.class) != null) {
+                                logger.trace("adding OpenAPI handler for the class {} and the method {}", getClass().getName(), method.getName());
 
-                        Set<Method> resources =
-                                reflections.getMethodsAnnotatedWith(AbyssApiOperationHandler.class);
-                        logger.info("AbyssApiOperationHandler annotated methods; " + resources.toString());
-                        resources.forEach(method -> {
-                            logger.info("method name: " + method.getName());
+                                // Now you can use the factory to mount map endpoints to Vert.x handlers
+                                factory.addHandlerByOperationId(method.getName(), routingContext -> {
+                                    try {
+                                        getClass().getDeclaredMethod(method.getName(), RoutingContext.class).invoke(this, routingContext);
+                                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                                        logger.error(e.getLocalizedMessage());
+                                        logger.error(Arrays.toString(e.getStackTrace()));
+                                    }
+                                });
 
-                            // Now you can use the factory to mount map endpoints to Vert.x handlers
-                            factory.addHandlerByOperationId(method.getName(), routingContext -> {
-                                try {
-                                    //SubjectApiController instance = this;
-                                    //instance.getClass().getDeclaredMethod(method.getName(), RoutingContext.class).invoke(routingContext);
-                                    getClass().getDeclaredMethod(method.getName(), RoutingContext.class).invoke(this, routingContext);
-                                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                                    logger.error(e.getLocalizedMessage());
-                                    logger.error(Arrays.toString(e.getStackTrace()));
-                                }
-                            });
-
-                            // Add a failure handler
-                            factory.addFailureHandlerByOperationId(method.getName(), this::failureHandler);
-                        });
+                                // Add a failure handler
+                                factory.addFailureHandlerByOperationId(method.getName(), this::failureHandler);
+                            }
+                        }
 
                         // Add a security handlers
                         factory.addSecurityHandler("abyssCookieAuth", this::abyssCookieAuthSecurityHandler);
@@ -282,7 +272,7 @@ public abstract class AbstractApiController implements IApiController {
                         SubjectService subjectService = new SubjectService(routingContext.vertx());
 
                         Single<JsonObject> apiResponse = subjectService.initJDBCClient()
-                                .flatMap(jdbcClient -> subjectService.findBySubjectName(basicTokenParseResult.getUsername()))
+                                .flatMap(jdbcClient -> subjectService.findByName(basicTokenParseResult.getUsername()))
                                 .flatMap(result -> {
                                     //result.toJson().getValue("rows")
                                     logger.trace(result.toJson().encodePrettily());

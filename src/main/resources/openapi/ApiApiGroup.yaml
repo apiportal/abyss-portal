@@ -79,21 +79,12 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of ApiApiGroup
-      description: 'Provide an altered ApiApiGroup array to be updated'
+      summary: Update a bulk of ApiApiGroups
+      description: 'Provide a bulk list of  ApiApiGroup objects to be updated'
       operationId: updateApiApiGroups
-      parameters:
-        - name: uuid
-          in: path
-          description: bulk of uuids of apiApiGroups that need to be updated
-          required: true
-          schema:
-            type: array
-            items:
-              type: string
       responses:
-        '200':
-          $ref: '#/components/responses/200-ListOfApiApiGroup'
+        '207':
+          $ref: '#/components/responses/207'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -111,7 +102,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfApiApiGroup'          
+        $ref: '#/components/requestBodies/ListOfApiApiGroupObject'
     delete:
       tags:
         - TODO
@@ -255,6 +246,18 @@ components:
         moreinfo:
           type: string
           format: uri
+    MultiStatus:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int32
+        response:
+          $ref: '#/components/schemas/ApiApiGroup'
+        error:
+          $ref: '#/components/schemas/Error'
     ApiApiGroup:
       type: object
       properties:
@@ -272,7 +275,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiApiGroup'          
-      description: ApiApiGroup object that needs to be added
+      description: ApiApiGroup object that needs to be added or updated
       required: true
     ListOfApiApiGroup:
       content:
@@ -282,6 +285,14 @@ components:
             items:
               $ref: '#/components/schemas/ApiApiGroup'          
       description: ApiApiGroup array that needs to be added
+      required: true
+    ListOfApiApiGroupObject:
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+      description:  list of ApiApiGroup objects that needs to be updated, each additional property name should be the uuid of coresponding ApiApiGroup record
       required: true
   responses:
     '200':
@@ -297,8 +308,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/ApiApiGroup'          
-            
+              $ref: '#/components/schemas/ApiApiGroup'
     '201':
       description: New ApiApiGroup resource has been created
       content:
@@ -307,6 +317,14 @@ components:
             $ref: '#/components/schemas/ApiApiGroup'
     '204':
       description: The ApiApiGroup resource was successfully deleted
+    '207':
+      description: Multi Status for bulk operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/MultiStatus'
     '304':
       description: Not Modified – The client can use cached data
       content:
