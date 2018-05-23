@@ -12,9 +12,17 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.IService;
+import io.vertx.reactivex.ext.web.RoutingContext;
+
+import java.lang.reflect.InvocationTargetException;
 
 public interface IApiController {
     String mountPoint = Constants.ABYSS_ROOT + "/oapi";
 
     void init();
+
+    <T extends IService> void getSubjects(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException;
+
 }

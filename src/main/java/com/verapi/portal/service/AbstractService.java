@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
-public abstract class AbstractService implements IService {
+public abstract class AbstractService<T> implements IService<T> {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractService.class);
 
@@ -104,8 +104,11 @@ public abstract class AbstractService implements IService {
         this.jdbcClient = jdbcClient;
     }
 
-    @Override
-    public Single<UpdateResult> insert(final JsonArray insertParams, final String insertQuery) {
+    private Single<UpdateResult> rxUpdateWithParams(String sql) {
+        return rxUpdateWithParams(sql, null);
+    }
+
+    private Single<UpdateResult> rxUpdateWithParams(String sql, JsonArray params) {
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
@@ -114,11 +117,14 @@ public abstract class AbstractService implements IService {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //execute query
-                        .flatMap(insertConn -> conn.rxUpdateWithParams(insertQuery, insertParams))
+                        .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql) : conn.rxUpdateWithParams(sql, params))
                         .flatMap(resultSet -> {
-                            if (resultSet.getUpdated() == 0)
-                                return Single.error(new Exception("unable to insert new record"));
-                            logger.trace("{}::insert >> {} row(s) updated", this.getClass().getName(), resultSet.getUpdated());
+                            if (resultSet.getUpdated() == 0) {
+                                logger.error("unable to process sql with parameters");
+                                logger.error("unable to process sql {} with parameters {}", sql, params);
+                                return Single.error(new Exception("unable to process sql with parameters"));
+                            }
+                            logger.trace("{}::rxUpdateWithParams >> {} row(s) processed", this.getClass().getName(), resultSet.getUpdated());
                             return Single.just(resultSet);
                         })
 
@@ -129,7 +135,7 @@ public abstract class AbstractService implements IService {
                         .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(true)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> {
-                                    logger.warn("rollback!!");
+                                    logger.warn("rollback");
                                     logger.error(ex.getLocalizedMessage());
                                     logger.error(Arrays.toString(ex.getStackTrace()));
                                     return Single.error(ex);
@@ -137,7 +143,7 @@ public abstract class AbstractService implements IService {
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.trace("inserted successfully");
+                            logger.trace("sql processed successfully");
                         })
 
                         // close the connection regardless succeeded or failed
@@ -145,8 +151,11 @@ public abstract class AbstractService implements IService {
                 );
     }
 
-    @Override
-    public Single<UpdateResult> update(final UUID uuid, final JsonArray updateParams, final String updateQuery) {
+    private Single<ResultSet> rxQueryWithParams(String sql) {
+        return rxQueryWithParams(sql, null);
+    }
+
+    private Single<ResultSet> rxQueryWithParams(String sql, JsonArray params) {
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
@@ -155,136 +164,9 @@ public abstract class AbstractService implements IService {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //execute query
-                        .flatMap(updateConn -> conn.rxUpdateWithParams(updateQuery, updateParams))
+                        .flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
                         .flatMap(resultSet -> {
-                            if (resultSet.getUpdated() == 0)
-                                return Single.error(new Exception("unable to update record"));
-                            logger.trace("{}::update >> {} row(s) updated", this.getClass().getName(), resultSet.getUpdated());
-                            return Single.just(resultSet);
-                        })
-
-                        // commit if all succeeded
-                        .flatMap(updateResult -> conn.rxCommit().toSingleDefault(updateResult))
-
-                        // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(true)
-                                .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-                                .flatMap(ignore -> {
-                                    logger.warn("rollback!!");
-                                    logger.error(ex.getLocalizedMessage());
-                                    logger.error(Arrays.toString(ex.getStackTrace()));
-                                    return Single.error(ex);
-                                })
-                        )
-
-                        .doAfterSuccess(succ -> {
-                            logger.trace("updated successfully");
-                        })
-
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
-                );
-    }
-
-    @Override
-    public Single<UpdateResult> updateAll(ArrayList<UUID> uuid, JsonObject updateRecord) {
-        return null;
-    }
-
-    @Override
-    public Single<UpdateResult> delete(final UUID uuid, final String deleteQuery) {
-        JsonArray whereConditionParam = new JsonArray().add(uuid);
-        return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        .toSingleDefault(false)
-                        //execute query
-                        .flatMap(conn1 -> conn.rxUpdateWithParams(deleteQuery, whereConditionParam))
-                        .flatMap(resultSet -> {
-                            if (resultSet.getUpdated() == 0)
-                                return Single.error(new Exception("unable to update record for deletion marking"));
-                            logger.trace("{}::deleteAll >> {} row(s) updated for deletion marking", this.getClass().getName(), resultSet.getUpdated());
-                            return Single.just(resultSet);
-                        })
-                        // commit if all succeeded
-                        .flatMap(updateResult -> conn.rxCommit().toSingleDefault(updateResult))
-
-                        // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(true)
-                                .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-                                .flatMap(ignore -> {
-                                    logger.warn("rollback!!");
-                                    logger.error(ex.getLocalizedMessage());
-                                    logger.error(Arrays.toString(ex.getStackTrace()));
-                                    return Single.error(ex);
-                                })
-                        )
-
-                        .doAfterSuccess(succ -> {
-                            logger.trace("logically deleted successfully");
-                        })
-
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
-                );
-    }
-
-    @Override
-    public Single<UpdateResult> deleteAll(final String deleteAllQuery) {
-        return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        .toSingleDefault(false)
-                        //execute query
-                        .flatMap(conn1 -> conn.rxUpdate(deleteAllQuery))
-                        .flatMap(resultSet -> {
-                            if (resultSet.getUpdated() == 0)
-                                return Single.error(new Exception("unable to update record(s) for deletion marking"));
-                            logger.trace("{}::deleteAll >> {} row(s) updated for deletion marking", this.getClass().getName(), resultSet.getUpdated());
-                            return Single.just(resultSet);
-                        })
-                        // commit if all succeeded
-                        .flatMap(updateResult -> conn.rxCommit().toSingleDefault(updateResult))
-
-                        // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(true)
-                                .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-                                .flatMap(ignore -> {
-                                    logger.warn("rollback!!");
-                                    logger.error(ex.getLocalizedMessage());
-                                    logger.error(Arrays.toString(ex.getStackTrace()));
-                                    return Single.error(ex);
-                                })
-                        )
-
-                        .doAfterSuccess(succ -> {
-                            logger.trace("logically deleted successfully");
-                        })
-
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
-                );
-    }
-
-    @Override
-    public Single<ResultSet> findById(final long id, final String findByIdQuery) {
-        return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        .toSingleDefault(false)
-                        //execute query
-                        .flatMap(conn1 -> conn.rxQueryWithParams(findByIdQuery, new JsonArray().add(id)))
-                        .flatMap(resultSet -> {
-                            logger.trace("{}::findById >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
+                            logger.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
                             return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
@@ -292,63 +174,44 @@ public abstract class AbstractService implements IService {
                 );
     }
 
-    @Override
-    public Single<ResultSet> findById(final UUID uuid, final String findByIdQuery) {
-        return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        .toSingleDefault(false)
-                        //execute query
-                        .flatMap(conn1 -> conn.rxQueryWithParams(findByIdQuery, new JsonArray().add(uuid)))
-                        .flatMap(resultSet -> {
-                            logger.trace("{}::findById >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
-                            return Single.just(resultSet);
-                        })
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
-                );
+    //@Override
+    protected Single<UpdateResult> insert(final JsonArray insertParams, final String insertQuery) {
+        return rxUpdateWithParams(insertQuery, insertParams);
     }
 
-    @Override
-    public Single<ResultSet> findByName(final String name, final String findByNameQuery) {
-        return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        .toSingleDefault(false)
-                        //execute query
-                        .flatMap(conn1 -> conn.rxQueryWithParams(findByNameQuery, new JsonArray().add(name)))
-                        .flatMap(resultSet -> {
-                            logger.trace("{}::findByName >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
-                            return Single.just(resultSet);
-                        })
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
-                );
+    //@Override
+    protected Single<UpdateResult> update(final JsonArray updateParams, final String updateQuery) {
+        return rxUpdateWithParams(updateQuery, updateParams);
     }
 
-    @Override
-    public Single<ResultSet> findAll(final String findAllQuery) {
-        return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        .toSingleDefault(false)
-                        //execute query
-                        .flatMap(conn1 -> conn.rxQuery(findAllQuery))
-                        .flatMap(resultSet -> {
-                            logger.trace("{}::findAll >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
-                            return Single.just(resultSet);
-                        })
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
-                );
+    //@Override
+    protected Single<UpdateResult> delete(final JsonArray deleteParams, final String deleteQuery) {
+        return rxUpdateWithParams(deleteQuery, deleteParams);
     }
+
+    //@Override
+    protected Single<UpdateResult> deleteAll(final String deleteAllQuery) {
+        return rxUpdateWithParams(deleteAllQuery);
+    }
+
+    //@Override
+    protected Single<ResultSet> findById(final long id, final String findByIdQuery) {
+        return rxQueryWithParams(findByIdQuery, new JsonArray().add(id));
+    }
+
+    //@Override
+    protected Single<ResultSet> findById(final UUID uuid, final String findByIdQuery) {
+        return rxQueryWithParams(findByIdQuery, new JsonArray().add(uuid));
+    }
+
+    //@Override
+    protected Single<ResultSet> findByName(final String name, final String findByNameQuery) {
+        return rxQueryWithParams(findByNameQuery, new JsonArray().add(name));
+    }
+
+    //@Override
+    protected Single<ResultSet> findAll(final String findAllQuery) {
+        return rxQueryWithParams(findAllQuery);
+    }
+
 }

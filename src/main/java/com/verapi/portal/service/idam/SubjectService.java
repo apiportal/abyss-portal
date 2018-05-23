@@ -12,26 +12,20 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
+import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
-import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class SubjectService extends AbstractService {
-
-    private static Logger logger = LoggerFactory.getLogger(SubjectService.class);
+public class SubjectService extends AbstractService<UpdateResult> {
 
     public SubjectService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -77,15 +71,64 @@ public class SubjectService extends AbstractService {
                 .add(((String) updateRecord.getValue("picture")))
                 .add(((Number) updateRecord.getValue("subjectdirectoryid")).longValue())
                 .add(uuid);
-        return update(uuid, updateParams, SQL_UPDATE_BY_UUID);
+        return update(updateParams, SQL_UPDATE_BY_UUID);
     }
 
-    public Single<UpdateResult> updateAll(ArrayList<UUID> uuid, JsonObject updateRecord) {
-        return updateAll(uuid, updateRecord);
+
+    public Single<JsonArray> updateAll(JsonObject updateRecord) {
+        JsonArray result = new JsonArray();
+        updateRecord.forEach(record -> {
+            JsonArray updateParams = new JsonArray()
+                    .add(((Number) ((JsonObject) record.getValue()).getValue("organizationid")).longValue())
+                    .add(((Number) ((JsonObject) record.getValue()).getValue("crudsubjectid")).longValue())
+                    .add(((Number) ((JsonObject) record.getValue()).getValue("subjecttypeid")).longValue())
+                    .add(((String) ((JsonObject) record.getValue()).getValue("subjectname")))
+                    .add(((String) ((JsonObject) record.getValue()).getValue("firstname")))
+                    .add(((String) ((JsonObject) record.getValue()).getValue("lastname")))
+                    .add(((String) ((JsonObject) record.getValue()).getValue("displayname")))
+                    .add(((String) ((JsonObject) record.getValue()).getValue("email")))
+                    .add(((String) ((JsonObject) record.getValue()).getValue("secondaryemail")))
+                    .add((((JsonObject) record.getValue()).getValue("effectivestartdate")))
+                    .add((((JsonObject) record.getValue()).getValue("effectiveenddate")))
+                    .add(((String) ((JsonObject) record.getValue()).getValue("picture")))
+                    .add(((Number) ((JsonObject) record.getValue()).getValue("subjectdirectoryid")).longValue())
+                    .add(record.getKey());
+
+            Single<ResultSet> recordUpdateResult = initJDBCClient()
+                    .flatMap(jdbcClient -> update(updateParams, SQL_UPDATE_BY_UUID))
+                    .flatMap(updateResult -> findById(updateResult.getKeys().getInteger(0), SQL_FIND_BY_ID))
+                    .flatMap(Single::just);
+            recordUpdateResult.subscribe(resp -> {
+                        JsonArray arr = new JsonArray();
+                        resp.getRows().forEach(arr::add);
+                        JsonObject recordStatus = new JsonObject()
+                                .put("uuid", record.getKey())
+                                .put("response", arr.getJsonObject(0))
+                                .put("error", new ApiSchemaError().toJson());
+                        result.add(recordStatus);
+                    },
+                    throwable -> {
+                        //SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(apiSpec, null, OpenApi3Utils.getParseOptions());
+                        //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
+                        JsonObject recordStatus = new JsonObject()
+                                .put("uuid", record.getKey())
+                                .put("response", new JsonArray().getJsonObject(0)) //TODO: fill with empty Subject response json
+                                .put("error", new ApiSchemaError()
+                                        .setUsermessage(throwable.getLocalizedMessage())
+                                        .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                        .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
+                                        .setInternalmessage(Arrays.toString(Thread.currentThread().getStackTrace()))
+                                        .toJson());
+                        result.add(recordStatus);
+                    });
+        });
+        return Single.just(result);
     }
+
 
     public Single<UpdateResult> delete(UUID uuid) {
-        return delete(uuid, SQL_DELETE_BY_UUID);
+        JsonArray deleteParams = new JsonArray().add(uuid);
+        return delete(deleteParams, SQL_DELETE_BY_UUID);
     }
 
     public Single<UpdateResult> deleteAll() {

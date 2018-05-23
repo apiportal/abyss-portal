@@ -14,16 +14,21 @@ package com.verapi.portal.oapi;
 import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
+import com.verapi.portal.api.ApiAbstractController;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
+import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.web.api.contract.RouterFactoryOptions;
 import io.vertx.ext.web.api.validation.ValidationException;
 import io.vertx.reactivex.core.Vertx;
@@ -365,6 +370,30 @@ public abstract class AbstractApiController implements IApiController {
         //if authorized then set this security handler's flag and route next
         routingContext.session().put(methodName, "OK");
         routingContext.next();
+    }
+
+    public <T extends IService> void getSubjects(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        IService service = clazz.getConstructor(Vertx.class).newInstance(vertx);
+        Single<ResultSet> findAllResult = service.initJDBCClient()
+                .flatMap(jdbcClient -> service.findAll())
+                .flatMap(Single::just);
+
+        findAllResult.subscribe(resp -> {
+                    JsonArray arr = new JsonArray();
+                    resp.getRows().forEach(arr::add);
+
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(200)
+                            .end(arr.encode(), "UTF-8");
+
+                    logger.trace("replied successfully " + arr.encodePrettily());
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
     }
 
 }

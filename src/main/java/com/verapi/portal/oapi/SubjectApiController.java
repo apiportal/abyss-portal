@@ -13,6 +13,7 @@ package com.verapi.portal.oapi;
 
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.NotImplemented501Exception;
+import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
@@ -51,31 +53,12 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubjects(RoutingContext routingContext) {
-        SubjectService subjectService = new SubjectService(vertx);
-        Single<ResultSet> findAllResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.findAll())
-                .flatMap(result -> {
-                    logger.trace(result.getNumRows() + " rows selected");
-                    return Single.just(result);
-                });
-
-        findAllResult.subscribe(resp -> {
-                    JsonArray arr = new JsonArray();
-                    resp.getRows().forEach(arr::add);
-
-                    routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .setStatusCode(200)
-                            .end(arr.encode(), "UTF-8");
-
-                    logger.trace("replied successfully " + arr.encodePrettily());
-                },
-                throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
-
+        try {
+            getSubjects(routingContext, SubjectService.class);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+        }
     }
 
     @AbyssApiOperationHandler

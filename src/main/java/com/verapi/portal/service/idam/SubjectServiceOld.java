@@ -323,9 +323,6 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
                 .toCompletable();
     }
 
-    /**
-     * Entity specific methods
-     */
     public Maybe<Subject> updateIsDeleted(long id) {
         return findById(id)
                 .flatMap(old -> {
