@@ -66,7 +66,7 @@ public class ForgotPasswordController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?", new JsonArray().add(username)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM subject WHERE subjectName = ? and isDeleted = false", new JsonArray().add(username)))
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
@@ -74,7 +74,7 @@ public class ForgotPasswordController extends PortalAbstractController {
                                 return Single.error(new Exception("Username not found in our records"));
                             } else if (numOfRows == 1) {
                                 JsonObject row = resultSet.getRows(true).get(0);
-                                if (row.getBoolean("is_activated") == false) {
+                                if (row.getBoolean("isActivated") == false) {
                                     logger.info("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
@@ -94,20 +94,20 @@ public class ForgotPasswordController extends PortalAbstractController {
                                         logger.error("Reset Password: tokenGenerator.generateToken :" + e.getLocalizedMessage());
                                         return Single.error(new Exception("Reset Password: token could not be generated"));
                                     }
-                                    return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
-                                                    "organization_id," +
-                                                    "crud_subject_id," +
-                                                    "subject_id," +
-                                                    "expire_date," +
+                                    return resConn.rxUpdateWithParams("INSERT INTO subject_activation (" +
+                                                    "organizationId," +
+                                                    "crudSubjectId," +
+                                                    "subjectId," +
+                                                    "expireDate," +
                                                     "token," +
-                                                    "token_type, " +
+                                                    "tokenType, " +
                                                     "email," +
                                                     "nonce," +
-                                                    "user_data) " +
+                                                    "userData) " +
                                                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                             new JsonArray()
-                                                    .add(0)
-                                                    .add(1)
+                                                    .add(Constants.DEFAULT_ORGANIZATION_ID)
+                                                    .add(Constants.SYSTEM_USER_ID)
                                                     .add(subjectId)
                                                     .add(authInfo.getExpireDate())
                                                     .add(authInfo.getToken())
@@ -126,14 +126,14 @@ public class ForgotPasswordController extends PortalAbstractController {
                             logger.info("ForgotPasswordController - Deactivating Subject with id:[" + subjectId + "] -> " + updateResult.getKeys().encodePrettily());
                             if (updateResult.getUpdated() == 1) {
 
-                                return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET " +
+                                return resConn.rxUpdateWithParams("UPDATE subject SET " +
                                                 "updated = now()," +
-                                                "crud_subject_id = ?," +
-                                                "is_activated = false" +
+                                                "crudSubjectId = ?," +
+                                                "isActivated = false" +
                                                 " WHERE " +
                                                 "id = ?;",
                                         new JsonArray()
-                                                .add(1)
+                                                .add(Constants.SYSTEM_USER_ID)
                                                 .add(subjectId));
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));

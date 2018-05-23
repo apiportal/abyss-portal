@@ -30,8 +30,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
-@AbyssController(routePathGET = "signup", routePathPOST = "sign-up", htmlTemplateFile = "sign-up.html", isPublic = true)
+@AbyssController(routePathGET = "signup", routePathPOST = "sign-up", htmlTemplateFile = "signup.html", isPublic = true)
 public class SignupController extends PortalAbstractController {
+
     private static Logger logger = LoggerFactory.getLogger(SignupController.class);
 
     private Integer subjectId;
@@ -78,12 +79,12 @@ public class SignupController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?", new JsonArray().add(username)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM subject WHERE subjectName = ?", new JsonArray().add(username))) //DO NOT CHECK: isDeleted = false
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 subjectId = resultSet.getRows(true).get(0).getInteger("id");
                                 logger.info("user found: " + resultSet.toJson().encodePrettily());
-                                if (resultSet.getRows(true).get(0).getBoolean("is_activated")) {
+                                if (resultSet.getRows(true).get(0).getBoolean("isActivated")) {
                                     return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
                                 } else {
                                     //TODO: Cancel previous activation - Is it really required.
@@ -96,35 +97,39 @@ public class SignupController extends PortalAbstractController {
                                 String hash = authProvider.computeHash(password, salt);
 
                                 // save user to the database
-                                return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject(" +
-                                                "organization_id," +
+                                return resConn.rxUpdateWithParams("INSERT INTO subject(" +
+                                                "organizationId," +
                                                 //"now()," +          //created
                                                 //"now()," +          //updated
-                                                "crud_subject_id," +
-                                                "is_activated," +
-                                                "subject_type_id," +
-                                                "subject_name," +
-                                                "first_name," +
-                                                "last_name," +
-                                                "display_name," +
+                                                "crudSubjectId," +
+                                                "isActivated," +
+                                                "subjectTypeId," +
+                                                "subjectName," +
+                                                "firstname," +
+                                                "lastname," +
+                                                "displayName," +
                                                 "email," +
-                                                "effective_start_date," +
-                                                //"effective_end_date," +
+                                                "effectiveStartDate," +
+                                                //"effectiveEndDate," +
                                                 "password," +
-                                                "password_salt) " +
-                                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?) RETURNING id",
+                                                "passwordSalt," +
+                                                "isPasswordChangeRequired," +
+                                                "passwordExpiresAt," +
+                                                "subjectDirectoryId) " +
+                                                "VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', ?) RETURNING id",
                                         new JsonArray()
-                                                .add(0)
-                                                .add(1)
-                                                .add(0)
-                                                .add(1)
+                                                .add(Constants.DEFAULT_ORGANIZATION_ID)
+                                                .add(Constants.SYSTEM_USER_ID)
+                                                .add(Constants.SUBJECT_TYPE_USER)
                                                 .add(username)
                                                 .add(firstname)
                                                 .add(lastname)
                                                 .add(firstname + " " + lastname)
                                                 .add(email)
                                                 .add(hash)
-                                                .add(salt));
+                                                .add(salt)
+                                                .add(Constants.PASSWORD_EXPIRATION_DAYS)
+                                                .add(Constants.INTERNAL_SUBJECT_DIRECTORY_ID));
                             }
                         })
                         .flatMap(updateResult -> {
@@ -147,20 +152,20 @@ public class SignupController extends PortalAbstractController {
                                 logger.error("tokenGenerator.generateToken :" + e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
-                            return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
-                                            "organization_id," +
-                                            "crud_subject_id," +
-                                            "subject_id," +
-                                            "expire_date," +
+                            return resConn.rxUpdateWithParams("INSERT INTO subject_activation (" +
+                                            "organizationId," +
+                                            "crudSubjectId," +
+                                            "subjectId," +
+                                            "expireDate," +
                                             "token," +
-                                            "token_type, " +
+                                            "tokenType, " +
                                             "email," +
                                             "nonce," +
-                                            "user_data) " +
+                                            "userData) " +
                                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                     new JsonArray()
-                                            .add(0)
-                                            .add(1)
+                                            .add(Constants.DEFAULT_ORGANIZATION_ID)
+                                            .add(Constants.SYSTEM_USER_ID)
                                             .add(subjectId)
                                             .add(authInfo.getExpireDate())
                                             .add(authInfo.getToken())

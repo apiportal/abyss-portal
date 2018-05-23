@@ -90,15 +90,15 @@ public class ChangePasswordController extends PortalAbstractController {
                             String salt = authProvider.generateSalt();
                             String hash = authProvider.computeHash(newPassword, salt);
 
-                            return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET \n" +
+                            return resConn.rxUpdateWithParams("UPDATE subject SET \n" +
                                             "  updated = now(), \n" +
-                                            "  crud_subject_id = ?, \n" +
+                                            "  crudSubjectId = ?, \n" +
                                             "  password = ?, \n" +
-                                            "  password_salt = ? \n" +
+                                            "  passwordSalt = ? \n" +
                                             "WHERE\n" +
-                                            "  subject_name = ?;",
+                                            "  subjectName = ?;",
                                     new JsonArray()
-                                            .add(1)
+                                            .add(Constants.SYSTEM_USER_ID)
                                             .add(hash)
                                             .add(salt)
                                             .add(username));
