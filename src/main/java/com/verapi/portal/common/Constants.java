@@ -107,6 +107,7 @@ public class Constants {
 
     public static final String ACTIVATION_TOKEN = "token.type.activation";
     public static final String RESET_PASSWORD_TOKEN = "token.type.reset.password";
+    public static final String INVITE_USER_TOKEN = "token.type.invite.user";
     public static final String WELCOME_TOKEN = "token.type.welcome"; //No token
     public static final String PASSWORD_RESET_TOKEN = "token.type.password.reset"; //No token
 
