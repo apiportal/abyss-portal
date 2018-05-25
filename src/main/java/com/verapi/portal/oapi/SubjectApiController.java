@@ -11,15 +11,11 @@
 
 package com.verapi.portal.oapi;
 
+import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
-import com.verapi.portal.oapi.exception.NotImplemented501Exception;
-import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.idam.SubjectService;
-import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -33,13 +29,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
-    private static Logger logger = LoggerFactory.getLogger(SubjectApiController.class);
+    private static final Logger logger = LoggerFactory.getLogger(SubjectApiController.class);
 
 /*
     private final SwaggerRequestResponseValidator validator = SwaggerRequestResponseValidator
@@ -47,17 +42,27 @@ public class SubjectApiController extends AbstractApiController {
             .build();
 */
 
+    /**
+     * This API Controller instance is created by Api verticle using this constructor
+     * @param vertx Vertx content
+     * @param router Vertx router
+     * @param authProvider JDBC Auth provider
+     */
     public SubjectApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
         super(vertx, router, authProvider);
     }
 
     @AbyssApiOperationHandler
     public void getSubjects(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
         try {
-            getSubjects(routingContext, SubjectService.class);
+            getEntities(routingContext, SubjectService.class, requestParameters);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
@@ -83,164 +88,113 @@ public class SubjectApiController extends AbstractApiController {
 */
 
         // Get the parsed parameters
-        RequestParameters params = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
 
-        // We get an user JSON object validated by Vert.x Open API validator
-        JsonObject subjects = params.body().getJsonObject();
+        // We get an user JSON array validated by Vert.x Open API validator
+        JsonArray requestBody = requestParameters.body().getJsonArray();
 
-        String salt = authProvider.generateSalt();
-        String hash = authProvider.computeHash(subjects.getString("password"), salt);
-        subjects.put("password", hash);
-        subjects.put("passwordsalt", salt);
-        if ((!subjects.containsKey("picture")) || (subjects.getValue("picture") == null))
-            try {
-                //insert default avatar image TODO: later use request base64 img data
-                ClassLoader classLoader = getClass().getClassLoader();
-                File file = new File(Objects.requireNonNull(classLoader.getResource("webroot/dist/img/avatar.jpg")).getFile());
-                subjects.put("picture", encodeFileToBase64Binary(file));
-            } catch (IOException e) {
-                logger.error(e.getLocalizedMessage());
-                logger.error(Arrays.toString(e.getStackTrace()));
-            }
+        // 1- generate password salt and password
+        // 2-check subject request contains picture, if not then load default avatar picture
+        requestBody.forEach(requestItem -> {
+            String salt = authProvider.generateSalt();
+            String hash = authProvider.computeHash(((JsonObject) requestItem).getString("password"), salt);
+            ((JsonObject) requestItem).put("password", hash);
+            ((JsonObject) requestItem).put("passwordsalt", salt);
+            if ((!((JsonObject) requestItem).containsKey("picture")) || (((JsonObject) requestItem).getValue("picture") == null))
+                try {
+                    //insert default avatar image TODO: later use request base
+                    ClassLoader classLoader = getClass().getClassLoader();
+                    File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_AVATAR)).getFile());
+                    ((JsonObject) requestItem).put("picture", encodeFileToBase64Binary(file));
+                } catch (IOException e) {
+                    logger.error(e.getLocalizedMessage());
+                    logger.error(Arrays.toString(e.getStackTrace()));
+                }
+        });
 
-        SubjectService subjectService = new SubjectService(vertx);
-
-        Single<ResultSet> insertResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.insert(subjects))
-                .flatMap(result -> {
-                    logger.trace("inserted row key: " + result.getKeys().toString());
-                    return Single.just(result);
-                })
-                .flatMap(insResult -> {
-                    Single<ResultSet> findResult = subjectService.findById(insResult.getKeys().getInteger(0));
-                    logger.trace("selected row: " + findResult.toString());
-                    return findResult;
-                });
-        insertResult.subscribe(resp -> {
-                    routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .setStatusCode(201)
-                            .end(resp.getRows().get(0).encode(), "UTF-8");
-                    logger.trace("replied successfully " + resp.toJson().encodePrettily());
-                },
-                throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
-
+        //now it is time to add entries
+        try {
+            addEntities(routingContext, SubjectService.class, requestBody, requestParameters);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
 
     @AbyssApiOperationHandler
     public void updateSubjects(RoutingContext routingContext) {
-        throwApiException(routingContext, NotImplemented501Exception.class);
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        try {
+            updateEntities(routingContext, SubjectService.class, requestBody, requestParameters);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
 
     @AbyssApiOperationHandler
     public void deleteSubjects(RoutingContext routingContext) {
-        throwApiException(routingContext, NotImplemented501Exception.class);
+        try {
+            deleteEntities(routingContext, SubjectService.class);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
 
     @AbyssApiOperationHandler
     public void getSubject(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters params = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
 
-        SubjectService subjectService = new SubjectService(vertx);
-        Single<ResultSet> findResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.findById(UUID.fromString(params.pathParameter("uuid").getString())))
-                .flatMap(result -> {
-                    logger.trace(result.getNumRows() + " rows selected");
-                    return Single.just(result);
-                });
-
-        findResult.subscribe(resp -> {
-
-                    routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .setStatusCode(200)
-                            .end(resp.toJson().getJsonObject("rows").encode(), "UTF-8");
-
-                    logger.trace("replied successfully " + resp.toJson().getJsonObject("rows").encodePrettily());
-                },
-                throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
-
+        try {
+            getEntity(routingContext, SubjectService.class, requestParameters);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
-
-/*
-    @AbyssApiOperationHandler
-    public void addSubject(RoutingContext routingContext) {
-        throwApiException(routingContext, MethodNotAllowed405Exception.class);
-    }
-*/
 
     @AbyssApiOperationHandler
     public void updateSubject(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters params = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         // We get an user JSON object validated by Vert.x Open API validator
-        JsonObject subjects = params.body().getJsonObject();
+        JsonObject requestBody = requestParameters.body().getJsonObject();
 
-        SubjectService subjectService = new SubjectService(vertx);
-
-        Single<ResultSet> updateResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.update(UUID.fromString(params.pathParameter("uuid").getString()), subjects))
-                .flatMap(result -> {
-                    logger.trace("updated row key: " + result.getKeys().toString());
-                    return Single.just(result);
-                })
-                .flatMap(updResult -> {
-                    Single<ResultSet> findResult = subjectService.findById(updResult.getKeys().getInteger(0));
-                    logger.trace("updated row: " + findResult.toString());
-                    return findResult;
-                });
-        updateResult.subscribe(resp -> {
-                    routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .setStatusCode(200)
-                            .end(resp.getRows().get(0).encode(), "UTF-8");
-                    logger.trace("replied successfully " + resp.toJson().encodePrettily());
-                },
-                throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
+        try {
+            updateEntity(routingContext, SubjectService.class, requestBody, requestParameters);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
 
     @AbyssApiOperationHandler
     public void deleteSubject(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters params = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
 
-        SubjectService subjectService = new SubjectService(vertx);
-
-        Single<UpdateResult> updateResult = subjectService.initJDBCClient()
-                .flatMap(jdbcClient -> subjectService.delete(UUID.fromString(params.pathParameter("uuid").getString())))
-                .flatMap(result -> {
-                    logger.trace("deleted row key: " + result.getKeys().toString());
-                    return Single.just(result);
-                });
-        updateResult.subscribe(resp -> {
-                    routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .setStatusCode(204)
-                            .end();
-                    logger.trace("replied successfully " + resp.toJson().encodePrettily());
-                },
-                throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
-
+        try {
+            deleteEntity(routingContext, SubjectService.class, requestParameters);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
 
 }

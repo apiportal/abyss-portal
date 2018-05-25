@@ -111,18 +111,18 @@ public class SubjectGroupService extends AbstractServiceOld<SubjectGroup> {
     private static final String SQL_FIND_ALL_COMPACT = "select\n" +
 //            "  id,\n" +
             "  uuid,\n" +
-            "  organization_id,\n" +
+            "  organizationid,\n" +
             "  created,\n" +
             "  updated,\n" +
             "  deleted,\n" +
-            "  is_deleted,\n" +
+            "  isdeleted,\n" +
 //            "  crud_subject_id,\n" +
-            "  is_enabled,\n" +
-            "  group_name,\n" +
+            "  isenabled,\n" +
+            "  groupname,\n" +
             "  description,\n" +
-            "  effective_start_date,\n" +
-            "  effective_end_date\n" +
-            "from subject_group order by group_name";
+            "  effectivestartdate,\n" +
+            "  effectiveenddate\n" +
+            "from subject_group order by groupname";
 
     private static final String SQL_FILTER_BY_GROUPNAME = "select\n" +
 //            "  id,\n" +
@@ -134,11 +134,11 @@ public class SubjectGroupService extends AbstractServiceOld<SubjectGroup> {
 //            "  is_deleted,\n" +
 //            "  crud_subject_id,\n" +
 //            "  is_enabled,\n" +
-            "  group_name\n" +
+            "  groupname\n" +
 //            "  description,\n" +
 //            "  effective_start_date,\n" +
 //            "  effective_end_date\n" +
             "from subject_group\n" +
-            "where lower(group_name) like lower(?)\n" +
-            "order by group_name";
+            "where lower(groupname) like lower(?)\n" +
+            "order by groupname";
 }

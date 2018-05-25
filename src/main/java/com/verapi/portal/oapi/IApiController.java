@@ -12,17 +12,32 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.service.AbstractService;
-import com.verapi.portal.service.IService;
 import io.vertx.reactivex.ext.web.RoutingContext;
-
-import java.lang.reflect.InvocationTargetException;
 
 public interface IApiController {
     String mountPoint = Constants.ABYSS_ROOT + "/oapi";
 
-    void init();
+/*
+    @SuppressWarnings("unused")
+    void getSubjects(RoutingContext routingContext);
 
-    <T extends IService> void getSubjects(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException;
+    @SuppressWarnings("unused")
+    void addSubjects(RoutingContext routingContext);
+
+    @SuppressWarnings("unused")
+    void updateSubjects(RoutingContext routingContext);
+
+    @SuppressWarnings("unused")
+    void deleteSubjects(RoutingContext routingContext);
+
+    @SuppressWarnings("unused")
+    void getSubject(RoutingContext routingContext);
+
+    @SuppressWarnings("unused")
+    void updateSubject(RoutingContext routingContext);
+
+    @SuppressWarnings("unused")
+    void deleteSubject(RoutingContext routingContext);
+*/
 
 }

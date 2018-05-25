@@ -52,12 +52,12 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a new Api
-      description: 'Provide a new Api to be inserted'
+      summary: Add a bulk of apis
+      description: 'Provide a list of Api objects to be inserted'
       operationId: addApis
       responses:
-        '201':
-          $ref: '#/components/responses/201'
+        '207':
+          $ref: '#/components/responses/207'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -75,11 +75,11 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/Api'
+        $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
         - TODO
-      summary: Update a bulk of Apis
+      summary: Update a bulk of apis
       description: 'Provide a bulk list of  Api objects to be updated'
       operationId: updateApis
       responses:
@@ -249,11 +249,11 @@ components:
     MultiStatus:
       type: object
       required:
-        - id
+        - uuid
       properties:
-        id:
-          type: integer
-          format: int32
+        uuid:
+          type: string
+          readOnly: true
         response:
           $ref: '#/components/schemas/Api'
         error:

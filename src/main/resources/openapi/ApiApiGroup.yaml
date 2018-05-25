@@ -52,12 +52,12 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a new ApiApiGroup
-      description: 'Provide a new ApiApiGroup to be inserted'
+      summary: Add a bulk of apiApiGroups
+      description: 'Provide a list of ApiApiGroup objects to be inserted'
       operationId: addApiApiGroups
       responses:
-        '201':
-          $ref: '#/components/responses/201'
+        '207':
+          $ref: '#/components/responses/207'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -75,11 +75,11 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ApiApiGroup'
+        $ref: '#/components/requestBodies/ListOfApiApiGroup'
     put:
       tags:
         - TODO
-      summary: Update a bulk of ApiApiGroups
+      summary: Update a bulk of apiApiGroups
       description: 'Provide a bulk list of  ApiApiGroup objects to be updated'
       operationId: updateApiApiGroups
       responses:
@@ -249,11 +249,11 @@ components:
     MultiStatus:
       type: object
       required:
-        - id
+        - uuid
       properties:
-        id:
-          type: integer
-          format: int32
+        uuid:
+          type: string
+          readOnly: true
         response:
           $ref: '#/components/schemas/ApiApiGroup'
         error:

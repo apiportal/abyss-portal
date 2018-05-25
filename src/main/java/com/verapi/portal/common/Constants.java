@@ -133,4 +133,13 @@ public class Constants {
     public static final int SUBJECT_TYPE_USER = 1;
     public static final int SUBJECT_TYPE_APP = 2;
     public static final int SUBJECT_TYPE_SYSTEM = 3;
+
+    public static final String RESOURCE_DEFAULT_AVATAR = "webroot/dist/img/avatar.jpg";
+
+    public static final String RESTAPI_FILTERING_NAME = "name";
+    public static final String RESTAPI_SORTING_SORT = "sort";
+    public static final String RESTAPI_FILTERING_FIELDS = "fields";
+    public static final String RESTAPI_PAGINATION_OFFSET = "offset";
+    public static final String RESTAPI_PAGINATION_LIMIT = "limit";
+    public static final String RESTAPI_PAGINATION_TOTAL = "total";
 }

@@ -350,7 +350,7 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
     }
 
     private static final String SQL_INSERT_OLD = "INSERT INTO Subject " +
-            "(organization_id, created, updated, deleted, is_deleted, crud_subject_id, is_activated, subject_type_id, subject_name, first_name, last_name, display_name, email, secondary_email, effective_start_date, effective_end_date, password, password_salt) " +
+            "(organizationid, created, updated, deleted, isdeleted, crudsubjectid, isactivated, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt) " +
             "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
     private static final String SQL_FIND_ALL = "SELECT * FROM Subject";
     private static final String SQL_FINB_BY_ID = "SELECT * FROM todo WHERE id = ?";
@@ -358,12 +358,12 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
     private static final String SQL_DELETE = "DELETE FROM Subject WHERE id = ?";
     private static final String SQL_DELETE_ALL = "DELETE FROM Subject";
     private static final String SQL_UPDATE = "UPDATE Subject SET " +
-            "organization_id = ?, created = ?, updated = ?, deleted = ?, is_deleted = ?, crud_subject_id = ?, is_activated = ?, " +
-            "subject_type_id = ?, subject_name = ?, first_name = ?, last_name = ?, display_name = ?, email = ?, secondary_email = ?, " +
-            "effective_start_date = ?, effective_end_date = ? " +
+            "organization_id = ?, created = ?, updated = ?, deleted = ?, isdeleted = ?, crudsubjectid = ?, isactivated = ?, " +
+            "subjecttypeid = ?, subjectname = ?, firstname = ?, lastname = ?, displayname = ?, email = ?, secondaryemail = ?, " +
+            "effectivestartdate = ?, effectiveenddate = ? " +
             "WHERE id = ?";
-    private static final String SQL_UPDATE_IS_DELETED = "UPDATE Subject SET is_deleted = ? WHERE id = ?";
-    private static final String SQL_UPDATE_EFFECTIVE_END_DATE = "UPDATE Subject SET effective_end_date = ? WHERE id = ?";
+    private static final String SQL_UPDATE_IS_DELETED = "UPDATE Subject SET isdeleted = ? WHERE id = ?";
+    private static final String SQL_UPDATE_EFFECTIVE_END_DATE = "UPDATE Subject SET effectiveenddate = ? WHERE id = ?";
 
     //#########################################################
     private static final String SQL_SELECT = "select\n" +
@@ -416,30 +416,30 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
             "  created,\n" +
             "  updated,\n" +
             "  deleted,\n" +
-            "  is_deleted,\n" +
+            "  isdeleted,\n" +
 //            "  crud_subject_id,\n" +
-            "  is_activated,\n" +
+            "  isactivated,\n" +
 //            "  subject_type_id,\n" +
-            "  subject_name,\n" +
-            "  first_name,\n" +
-            "  last_name,\n" +
-            "  display_name,\n" +
+            "  subjectname,\n" +
+            "  firstname,\n" +
+            "  lastname,\n" +
+            "  displayname,\n" +
             "  email,\n" +
 //            "  secondary_email,\n" +
-            "  effective_start_date,\n" +
-            "  effective_end_date,\n" +
+            "  effectivestartdate,\n" +
+            "  effectiveenddate,\n" +
 //            "  password,\n" +
 //            "  password_salt,\n" +
             "  picture,\n" +
-            "  total_login_count,\n" +
-            "  failed_login_count,\n" +
-            "  invalid_password_attempt_count,\n" +
-            "  is_password_change_required,\n" +
-            "  password_expires_at,\n" +
-            "  last_login_at,\n" +
-            "  last_password_change_at,\n" +
-            "  last_authenticated_at\n" +
-            "from subject order by subject_name";
+            "  totallogincount,\n" +
+            "  failedlogincount,\n" +
+            "  invalidpasswordattempt_count,\n" +
+            "  ispasswordchangerequired,\n" +
+            "  passwordexpiresat,\n" +
+            "  lastloginat,\n" +
+            "  lastpasswordchangeat,\n" +
+            "  lastauthenticatedat\n" +
+            "from subject order by subjectname";
 
     private static final String SQL_FILTER_BY_SUBJECTNAME = "select\n" +
 //            "  id,\n" +
@@ -452,10 +452,10 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
 //            "  crud_subject_id,\n" +
 //            "  is_activated,\n" +
 //            "  subject_type_id,\n" +
-            "  subject_name,\n" +
-            "  first_name,\n" +
-            "  last_name,\n" +
-            "  display_name,\n" +
+            "  subjectname,\n" +
+            "  firstname,\n" +
+            "  lastname,\n" +
+            "  displayname,\n" +
             "  email,\n" +
 //            "  secondary_email,\n" +
 //            "  effective_start_date,\n" +
@@ -472,8 +472,8 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
 //            "  last_password_change_at,\n" +
 //            "  last_authenticated_at\n" +
             "from subject\n" +
-            "where lower(subject_name) like lower(?)\n" +
-            "order by subject_name";
+            "where lower(subjectname) like lower(?)\n" +
+            "order by subjectname";
 
     private static final String SQL_FIND_BY_SUBJECTNAME_OLD = "select\n" +
 //            "  id,\n" +
@@ -486,10 +486,10 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
 //            "  crud_subject_id,\n" +
 //            "  is_activated,\n" +
 //            "  subject_type_id,\n" +
-            "  subject_name,\n" +
-            "  first_name,\n" +
-            "  last_name,\n" +
-            "  display_name,\n" +
+            "  subjectname,\n" +
+            "  firstname,\n" +
+            "  lastname,\n" +
+            "  displayname,\n" +
             "  email,\n" +
 //            "  secondary_email,\n" +
 //            "  effective_start_date,\n" +
@@ -506,7 +506,7 @@ public class SubjectServiceOld extends AbstractServiceOld<Subject> {
 //            "  last_password_change_at,\n" +
 //            "  last_authenticated_at\n" +
             "from subject\n" +
-            "where lower(subject_name) = lower(?)";
+            "where lower(subjectname) = lower(?)";
 
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid)\n" +
             "values (?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, ?)";

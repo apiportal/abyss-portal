@@ -14,6 +14,8 @@ package com.verapi.portal.service;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.oapi.schema.ApiSchemaError;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
@@ -135,7 +137,7 @@ public abstract class AbstractService<T> implements IService<T> {
                         .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(true)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> {
-                                    logger.warn("rollback");
+                                    logger.warn("rollback transacation completed");
                                     logger.error(ex.getLocalizedMessage());
                                     logger.error(Arrays.toString(ex.getStackTrace()));
                                     return Single.error(ex);
@@ -174,44 +176,64 @@ public abstract class AbstractService<T> implements IService<T> {
                 );
     }
 
-    //@Override
     protected Single<UpdateResult> insert(final JsonArray insertParams, final String insertQuery) {
         return rxUpdateWithParams(insertQuery, insertParams);
     }
 
-    //@Override
     protected Single<UpdateResult> update(final JsonArray updateParams, final String updateQuery) {
         return rxUpdateWithParams(updateQuery, updateParams);
     }
 
-    //@Override
     protected Single<UpdateResult> delete(final JsonArray deleteParams, final String deleteQuery) {
         return rxUpdateWithParams(deleteQuery, deleteParams);
     }
 
-    //@Override
     protected Single<UpdateResult> deleteAll(final String deleteAllQuery) {
         return rxUpdateWithParams(deleteAllQuery);
     }
 
-    //@Override
     protected Single<ResultSet> findById(final long id, final String findByIdQuery) {
         return rxQueryWithParams(findByIdQuery, new JsonArray().add(id));
     }
 
-    //@Override
     protected Single<ResultSet> findById(final UUID uuid, final String findByIdQuery) {
         return rxQueryWithParams(findByIdQuery, new JsonArray().add(uuid));
     }
 
-    //@Override
     protected Single<ResultSet> findByName(final String name, final String findByNameQuery) {
         return rxQueryWithParams(findByNameQuery, new JsonArray().add(name));
     }
 
-    //@Override
     protected Single<ResultSet> findAll(final String findAllQuery) {
         return rxQueryWithParams(findAllQuery);
+    }
+
+    protected void subscribeAndProcess(JsonArray result, Single<ResultSet> resultSetSingle, int httpResponseStatus) {
+        resultSetSingle.subscribe(resp -> {
+                    JsonArray arr = new JsonArray();
+                    resp.getRows().forEach(arr::add);
+                    JsonObject recordStatus = new JsonObject()
+                            .put("uuid", resp.getRows().get(0).getString("uuid"))
+                            .put("status", httpResponseStatus)
+                            .put("response", arr.getJsonObject(0))
+                            .put("error", new ApiSchemaError().toJson());
+                    result.add(recordStatus);
+                },
+                throwable -> {
+                    //SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(apiSpec, null, OpenApi3Utils.getParseOptions());
+                    //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
+                    JsonObject recordStatus = new JsonObject()
+                            .put("uuid", "0")
+                            .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                            .put("response", new JsonObject()) //TODO: fill with empty Subject response json
+                            .put("error", new ApiSchemaError()
+                                    .setUsermessage(throwable.getLocalizedMessage())
+                                    .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                    .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
+                                    .setInternalmessage(Arrays.toString(Thread.currentThread().getStackTrace()))
+                                    .toJson());
+                    result.add(recordStatus);
+                });
     }
 
 }
