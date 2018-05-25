@@ -121,7 +121,7 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
             "created," +
             "updated," +
             "deleted," +
-            "is_deleted," +
+            "isdeleted," +
             //"crud_subject_id," +
             //"subject_id," +
             "is_proxy_api," +

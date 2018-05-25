@@ -11,11 +11,19 @@
 
 package com.verapi.portal.common;
 
+
+import io.vertx.core.json.JsonObject;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -25,6 +33,7 @@ public class Util {
     /**
      * Null value<br>
      * Returns a value if tested value is null, like Oracle NVL function
+     *
      * @param a   value to be checked if null
      * @param b   value to be returned if a is null
      * @param <T> any
@@ -37,6 +46,7 @@ public class Util {
     /**
      * Not Null Value<br>
      * Returns its calculated value if it is not null
+     *
      * @param a   value to be checked if null
      * @param b   value to be returned if a is <b>not</b> null
      * @param <T> any
@@ -57,5 +67,20 @@ public class Util {
         return new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
     }
 
+    private static JsonObject convertYamlToJson(String yamlString) {
+        Yaml yaml = new Yaml();
+        Map<String, Object> map = (Map<String, Object>) yaml.load(yamlString);
 
+        JsonObject jsonObject = new JsonObject(map);
+        return jsonObject;
+    }
+
+    public static JsonObject loadYamlFile(File yamlFileName) throws FileNotFoundException {
+//        ClassLoader classLoader = getClass().getClassLoader();
+//        File file = new File(Objects.requireNonNull(classLoader.getResource(yamlFileName)).getFile());
+        InputStream inputStream = new FileInputStream(yamlFileName);
+        Yaml yaml = new Yaml();
+        Map<String, Object> map = (Map<String, Object>) yaml.load(inputStream);
+        return new JsonObject(map);
+    }
 }

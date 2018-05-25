@@ -52,12 +52,12 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a new ApiState
-      description: 'Provide a new ApiState to be inserted'
+      summary: Add a bulk of apiStates
+      description: 'Provide a list of ApiState objects to be inserted'
       operationId: addApiStates
       responses:
-        '201':
-          $ref: '#/components/responses/201'
+        '207':
+          $ref: '#/components/responses/207'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -75,11 +75,11 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ApiState'
+        $ref: '#/components/requestBodies/ListOfApiState'
     put:
       tags:
         - TODO
-      summary: Update a bulk of ApiStates
+      summary: Update a bulk of apiStates
       description: 'Provide a bulk list of  ApiState objects to be updated'
       operationId: updateApiStates
       responses:
@@ -249,11 +249,11 @@ components:
     MultiStatus:
       type: object
       required:
-        - id
+        - uuid
       properties:
-        id:
-          type: integer
-          format: int32
+        uuid:
+          type: string
+          readOnly: true
         response:
           $ref: '#/components/schemas/ApiState'
         error:

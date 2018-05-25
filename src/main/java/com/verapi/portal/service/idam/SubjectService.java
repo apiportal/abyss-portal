@@ -12,7 +12,7 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.oapi.schema.ApiSchemaError;
+import com.verapi.portal.common.Util;
 import com.verapi.portal.service.AbstractService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
@@ -21,11 +21,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 public class SubjectService extends AbstractService<UpdateResult> {
+    private static final Logger logger = LoggerFactory.getLogger(SubjectService.class);
+
+    private JsonObject requestJsonObject;
 
     public SubjectService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -33,8 +41,21 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     public SubjectService(Vertx vertx) {
         super(vertx);
+
+        //************ TODO: test amaçlı, kontrol et...
+/*
+        ClassLoader classLoader = getClass().getClassLoader();
+        File yamlFile = new File(Objects.requireNonNull(classLoader.getResource("/openapi/Subject.yaml")).getFile());
+        try {
+            requestJsonObject = Util.loadYamlFile(yamlFile);
+        } catch (FileNotFoundException e) {
+            logger.error(e.getLocalizedMessage(), (Object[]) e.getStackTrace());
+        }
+*/
+        //*******
     }
 
+    /*
     public Single<UpdateResult> insert(JsonObject newRecord) {
         JsonArray insertParams = new JsonArray()
                 .add(((Number) newRecord.getValue("organizationid")).longValue())
@@ -53,6 +74,35 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(((String) newRecord.getValue("picture")))
                 .add(((Number) newRecord.getValue("subjectdirectoryid")).longValue());
         return insert(insertParams, SQL_INSERT);
+    }
+*/
+
+    public Single<JsonArray> insertAll(JsonArray insertParams) {
+        JsonArray result = new JsonArray();
+        insertParams.forEach(record -> {
+            JsonArray insertParam = new JsonArray()
+                    .add(((Number) ((JsonObject) record).getValue("organizationid")).longValue())
+                    .add(((Number) ((JsonObject) record).getValue("crudsubjectid")).longValue())
+                    .add(((Number) ((JsonObject) record).getValue("subjecttypeid")).longValue())
+                    .add(((String) ((JsonObject) record).getValue("subjectname")))
+                    .add(((String) ((JsonObject) record).getValue("firstname")))
+                    .add(((String) ((JsonObject) record).getValue("lastname")))
+                    .add(((String) ((JsonObject) record).getValue("displayname")))
+                    .add(((String) ((JsonObject) record).getValue("email")))
+                    .add(((String) ((JsonObject) record).getValue("secondaryemail")))
+                    .add(((JsonObject) record).getInstant("effectivestartdate"))
+                    .add(((JsonObject) record).getInstant("effectiveenddate"))
+                    .add(((String) ((JsonObject) record).getValue("password")))
+                    .add(((String) ((JsonObject) record).getValue("passwordsalt")))
+                    .add(((String) ((JsonObject) record).getValue("picture")))
+                    .add(((Number) ((JsonObject) record).getValue("subjectdirectoryid")).longValue());
+            Single<ResultSet> recordInsertResult = initJDBCClient()
+                    .flatMap(jdbcClient -> insert(insertParam, SQL_INSERT))
+                    .flatMap(insertResult -> findById(insertResult.getKeys().getInteger(0), SQL_FIND_BY_ID))
+                    .flatMap(Single::just);
+            subscribeAndProcess(result, recordInsertResult, HttpResponseStatus.CREATED.code());
+        });
+        return Single.just(result);
     }
 
     public Single<UpdateResult> update(UUID uuid, JsonObject updateRecord) {
@@ -74,7 +124,6 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
 
-
     public Single<JsonArray> updateAll(JsonObject updateRecord) {
         JsonArray result = new JsonArray();
         updateRecord.forEach(record -> {
@@ -88,43 +137,19 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     .add(((String) ((JsonObject) record.getValue()).getValue("displayname")))
                     .add(((String) ((JsonObject) record.getValue()).getValue("email")))
                     .add(((String) ((JsonObject) record.getValue()).getValue("secondaryemail")))
-                    .add((((JsonObject) record.getValue()).getValue("effectivestartdate")))
-                    .add((((JsonObject) record.getValue()).getValue("effectiveenddate")))
+                    .add(((Instant) ((JsonObject) record.getValue()).getValue("effectivestartdate")))
+                    .add(((Instant) ((JsonObject) record.getValue()).getValue("effectiveenddate")))
                     .add(((String) ((JsonObject) record.getValue()).getValue("picture")))
                     .add(((Number) ((JsonObject) record.getValue()).getValue("subjectdirectoryid")).longValue())
                     .add(record.getKey());
-
             Single<ResultSet> recordUpdateResult = initJDBCClient()
                     .flatMap(jdbcClient -> update(updateParams, SQL_UPDATE_BY_UUID))
                     .flatMap(updateResult -> findById(updateResult.getKeys().getInteger(0), SQL_FIND_BY_ID))
                     .flatMap(Single::just);
-            recordUpdateResult.subscribe(resp -> {
-                        JsonArray arr = new JsonArray();
-                        resp.getRows().forEach(arr::add);
-                        JsonObject recordStatus = new JsonObject()
-                                .put("uuid", record.getKey())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
-                        result.add(recordStatus);
-                    },
-                    throwable -> {
-                        //SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(apiSpec, null, OpenApi3Utils.getParseOptions());
-                        //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
-                        JsonObject recordStatus = new JsonObject()
-                                .put("uuid", record.getKey())
-                                .put("response", new JsonArray().getJsonObject(0)) //TODO: fill with empty Subject response json
-                                .put("error", new ApiSchemaError()
-                                        .setUsermessage(throwable.getLocalizedMessage())
-                                        .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                        .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
-                                        .setInternalmessage(Arrays.toString(Thread.currentThread().getStackTrace()))
-                                        .toJson());
-                        result.add(recordStatus);
-                    });
+            subscribeAndProcess(result, recordUpdateResult, HttpResponseStatus.OK.code());
         });
         return Single.just(result);
     }
-
 
     public Single<UpdateResult> delete(UUID uuid) {
         JsonArray deleteParams = new JsonArray().add(uuid);

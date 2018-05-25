@@ -113,17 +113,17 @@ public class SubjectPermissionService extends AbstractServiceOld<SubjectPermissi
     private static final String SQL_FIND_ALL_COMPACT = "select\n" +
 //            "  id,\n" +
             "  uuid,\n" +
-            "  organization_id,\n" +
+            "  organizationid,\n" +
             "  created,\n" +
             "  updated,\n" +
             "  deleted,\n" +
-            "  is_deleted,\n" +
+            "  isdeleted,\n" +
 //            "  crud_subject_id,\n" +
             "  permission,\n" +
             "  description,\n" +
-            "  effective_start_date,\n" +
-            "  effective_end_date,\n" +
-            "  subject_id\n" +
+            "  effectivestartdate,\n" +
+            "  effectiveenddate,\n" +
+            "  subjectid\n" +
             "from subject_permission\n" +
             "order by permission";
 
