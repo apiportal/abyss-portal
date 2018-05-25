@@ -58,7 +58,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                 // Switch from Completable to default Single value
                                 .toSingleDefault(false)
                                 //Check if user already exists
-                                .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE TOKEN = ? and A.subjectId = S.id and S.isDeleted = false", new JsonArray().add(token)))
+                                .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE TOKEN = ? and A.subjectId = S.id", new JsonArray().add(token)))
                                 .flatMap(resultSet -> {
                                     int numOfRows = resultSet.getNumRows();
                                     if (numOfRows == 0) {
@@ -68,7 +68,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                         JsonObject row = resultSet.getRows(true).get(0);
                                         logger.info("Token found:" + row.encodePrettily());
 
-                                        if (row.getBoolean("is_deleted")) {
+                                        if (row.getBoolean("isDeleted")) {
                                             logger.error("Received Token is deleted");
                                             return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
                                         }
