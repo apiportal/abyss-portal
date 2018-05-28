@@ -49,6 +49,7 @@ import java.lang.reflect.Method;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import static com.verapi.portal.common.Util.nnvl;
@@ -424,6 +425,23 @@ public abstract class AbstractApiController implements IApiController {
                 });
     }
 
+    private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonArraySingle, int httpResponseStatus) {
+        jsonArraySingle.subscribe(resp -> {
+                    JsonArray jsonArray = new JsonArray(resp);
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(httpResponseStatus)
+                            .end(jsonArray.encode(), "UTF-8");
+                    logger.trace("replied successfully " + jsonArray.encodePrettily());
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
+    }
+
+
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         RequestParameter filterByNameParameter = requestParameters.queryParameter(Constants.RESTAPI_FILTERING_NAME);
@@ -447,9 +465,9 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<JsonArray> insertAllResult = service.initJDBCClient()
+        Single<List<JsonObject>> insertAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.insertAll(requestBody));
-        subscribeAndResponseBulk(routingContext, insertAllResult, HttpResponseStatus.MULTI_STATUS.code());
+        subscribeAndResponseBulkList(routingContext, insertAllResult, HttpResponseStatus.MULTI_STATUS.code());
     }
 
     <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

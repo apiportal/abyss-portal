@@ -16,6 +16,7 @@ import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public abstract class AbstractService<T> implements IService<T> {
@@ -106,47 +108,48 @@ public abstract class AbstractService<T> implements IService<T> {
         this.jdbcClient = jdbcClient;
     }
 
-    private Single<UpdateResult> rxUpdateWithParams(String sql) {
+    private Observable<UpdateResult> rxUpdateWithParams(String sql) {
         return rxUpdateWithParams(sql, null);
     }
 
-    private Single<UpdateResult> rxUpdateWithParams(String sql, JsonArray params) {
+    private Observable<UpdateResult> rxUpdateWithParams(String sql, JsonArray params) {
         return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
+                .rxGetConnection().toObservable().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        //.toSingleDefault(false)
+                        .toObservable()
                         //execute query
-                        .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql) : conn.rxUpdateWithParams(sql, params))
+                        .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql).toObservable() : conn.rxUpdateWithParams(sql, params).toObservable())
                         .flatMap(resultSet -> {
                             if (resultSet.getUpdated() == 0) {
                                 logger.error("unable to process sql with parameters");
                                 logger.error("unable to process sql {} with parameters {}", sql, params);
-                                return Single.error(new Exception("unable to process sql with parameters"));
+                                return Observable.error(new Exception("unable to process sql with parameters"));
                             }
                             logger.trace("{}::rxUpdateWithParams >> {} row(s) processed", this.getClass().getName(), resultSet.getUpdated());
-                            return Single.just(resultSet);
+                            return Observable.just(resultSet);
                         })
 
                         // commit if all succeeded
-                        .flatMap(updateResult -> conn.rxCommit().toSingleDefault(updateResult))
+                        .flatMap(updateResult -> {conn.rxCommit(); return Observable.just(updateResult);})
 
                         // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(true)
-                                .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-                                .flatMap(ignore -> {
-                                    logger.warn("rollback transacation completed");
+                        .onErrorReturn(ex -> {conn.rxRollback();
+                                //.onErrorResumeNext(ex2 -> Observable.error(new Exception(ex2)))
+                                //.flatMap(ignore -> {
+                                    logger.warn("rollback transaction completed");
                                     logger.error(ex.getLocalizedMessage());
                                     logger.error(Arrays.toString(ex.getStackTrace()));
-                                    return Single.error(ex);
+                                    return (new UpdateResult().setKeys(new JsonArray(ex.getLocalizedMessage())).setKeys(new JsonArray(Arrays.toString(ex.getStackTrace()))));
                                 })
-                        )
 
-                        .doAfterSuccess(succ -> {
+
+                        /*.doAfterSuccess(succ -> {
                             logger.trace("sql processed successfully");
-                        })
+                        })*/
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(conn::close)
@@ -176,19 +179,19 @@ public abstract class AbstractService<T> implements IService<T> {
                 );
     }
 
-    protected Single<UpdateResult> insert(final JsonArray insertParams, final String insertQuery) {
+    protected Observable<UpdateResult> insert(final JsonArray insertParams, final String insertQuery) {
         return rxUpdateWithParams(insertQuery, insertParams);
     }
 
-    protected Single<UpdateResult> update(final JsonArray updateParams, final String updateQuery) {
+    protected Observable<UpdateResult> update(final JsonArray updateParams, final String updateQuery) {
         return rxUpdateWithParams(updateQuery, updateParams);
     }
 
-    protected Single<UpdateResult> delete(final JsonArray deleteParams, final String deleteQuery) {
+    protected Observable<UpdateResult> delete(final JsonArray deleteParams, final String deleteQuery) {
         return rxUpdateWithParams(deleteQuery, deleteParams);
     }
 
-    protected Single<UpdateResult> deleteAll(final String deleteAllQuery) {
+    protected Observable<UpdateResult> deleteAll(final String deleteAllQuery) {
         return rxUpdateWithParams(deleteAllQuery);
     }
 
@@ -230,7 +233,33 @@ public abstract class AbstractService<T> implements IService<T> {
                                     .setUsermessage(throwable.getLocalizedMessage())
                                     .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                     .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
-                                    .setInternalmessage(Arrays.toString(Thread.currentThread().getStackTrace()))
+                                    .toJson());
+                    result.add(recordStatus);
+                });
+    }
+
+    protected void subscribeAndProcess(JsonArray result, Observable<ResultSet> resultSetObservable, int httpResponseStatus) {
+        resultSetObservable.subscribe(resp -> {
+                    JsonArray arr = new JsonArray();
+                    resp.getRows().forEach(arr::add);
+                    JsonObject recordStatus = new JsonObject()
+                            .put("uuid", resp.getRows().get(0).getString("uuid"))
+                            .put("status", httpResponseStatus)
+                            .put("response", arr.getJsonObject(0))
+                            .put("error", new ApiSchemaError().toJson());
+                    result.add(recordStatus);
+                },
+                throwable -> {
+                    //SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(apiSpec, null, OpenApi3Utils.getParseOptions());
+                    //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
+                    JsonObject recordStatus = new JsonObject()
+                            .put("uuid", "0")
+                            .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                            .put("response", new JsonObject()) //TODO: fill with empty Subject response json
+                            .put("error", new ApiSchemaError()
+                                    .setUsermessage(throwable.getLocalizedMessage())
+                                    .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                    .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
                                     .toJson());
                     result.add(recordStatus);
                 });

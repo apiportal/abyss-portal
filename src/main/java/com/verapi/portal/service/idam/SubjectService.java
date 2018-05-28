@@ -13,9 +13,13 @@ package com.verapi.portal.service.idam;
 
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Util;
+import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.Single;
+import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -27,8 +31,11 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class SubjectService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(SubjectService.class);
@@ -77,8 +84,130 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 */
 
-    public Single<JsonArray> insertAll(JsonArray insertParams) {
-        JsonArray result = new JsonArray();
+    public Single<List<JsonObject>> insertAll(JsonArray insertParams) {
+        //JsonArray result = new JsonArray();
+
+        Observable<Object> insertParamsObservable = Observable.fromIterable(insertParams);
+
+        return insertParamsObservable
+                .flatMap(o -> {
+
+                    JsonObject jsonObj = (JsonObject) o;
+
+                    JsonArray insertParam = new JsonArray()
+                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
+                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(((Number) jsonObj.getValue("subjecttypeid")).longValue())
+                            .add(jsonObj.getString("subjectname"))
+                            .add(jsonObj.getString("firstname"))
+                            .add(jsonObj.getString("lastname"))
+                            .add(jsonObj.getString("displayname"))
+                            .add(jsonObj.getString("email"))
+                            .add(jsonObj.getString("secondaryemail"))
+                            .add(jsonObj.getInstant("effectivestartdate"))
+                            .add(jsonObj.getInstant("effectiveenddate"))
+                            .add(jsonObj.getValue("password"))
+                            .add(jsonObj.getValue("passwordsalt"))
+                            .add(jsonObj.getValue("picture"))
+                            .add(((Number) jsonObj.getValue("subjectdirectoryid")).longValue());
+
+                    return insert(insertParam, SQL_INSERT);
+
+                })
+                .flatMap(updateResult -> findById(updateResult.getKeys().getInteger(0), SQL_FIND_BY_ID).toObservable())
+                .flatMap(resultSet -> {
+                    JsonArray arr = new JsonArray();
+                    resultSet.getRows().forEach(arr::add);
+                    JsonObject recordStatus = new JsonObject()
+                            .put("uuid", resultSet.getRows().get(0).getString("uuid"))
+                            .put("status", HttpResponseStatus.CREATED.code())
+                            .put("response", arr.getJsonObject(0))
+                            .put("error", new ApiSchemaError().toJson());
+                    //result.add(recordStatus);
+
+                    return Observable.just(recordStatus);
+                })
+
+                .onErrorReturn(throwable -> new JsonObject().put("uuid", "0")
+                        .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                        .put("response", new JsonObject()) //TODO: fill with empty Subject response json
+                        .put("error", new ApiSchemaError()
+                                .setUsermessage(throwable.getLocalizedMessage())
+                                .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
+                                .toJson()))
+/*
+                    -> {
+                    JsonObject recordStatus = new JsonObject()
+                            .put("uuid", "0")
+                            .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                            .put("response", new JsonObject()) //TODO: fill with empty Subject response json
+                            .put("error", new ApiSchemaError()
+                                    .setUsermessage(throwable.getLocalizedMessage())
+                                    .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                    .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
+                                    .toJson());
+                    //result.add(recordStatus);
+
+                    return Observable.just(recordStatus);
+
+                })
+*/
+
+/*
+                .onExceptionResumeNext(observer -> {
+
+                })
+*/
+
+/*                .onErrorResumeNext(throwable -> {
+                    JsonObject recordStatus = new JsonObject()
+                            .put("uuid", "0")
+                            .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                            .put("response", new JsonObject()) //TODO: fill with empty Subject response json
+                            .put("error", new ApiSchemaError()
+                                    .setUsermessage(throwable.getLocalizedMessage())
+                                    .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                    .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
+                                    .toJson());
+                    //result.add(recordStatus);
+
+                    return Observable.just(recordStatus);
+
+                })*/
+                .toList();
+                //.collect(Collectors.toList());
+
+
+/*
+        Single<ResultSet> recordInsertResult = Single
+                .fromObservable(insertParamsObservable)
+                .flatMap(record -> {
+                    JsonArray insertParam = new JsonArray()
+                            .add(((Number) ((JsonObject) record).getValue("organizationid")).longValue())
+                            .add(((Number) ((JsonObject) record).getValue("crudsubjectid")).longValue())
+                            .add(((Number) ((JsonObject) record).getValue("subjecttypeid")).longValue())
+                            .add(((String) ((JsonObject) record).getValue("subjectname")))
+                            .add(((String) ((JsonObject) record).getValue("firstname")))
+                            .add(((String) ((JsonObject) record).getValue("lastname")))
+                            .add(((String) ((JsonObject) record).getValue("displayname")))
+                            .add(((String) ((JsonObject) record).getValue("email")))
+                            .add(((String) ((JsonObject) record).getValue("secondaryemail")))
+                            .add(((JsonObject) record).getInstant("effectivestartdate"))
+                            .add(((JsonObject) record).getInstant("effectiveenddate"))
+                            .add(((String) ((JsonObject) record).getValue("password")))
+                            .add(((String) ((JsonObject) record).getValue("passwordsalt")))
+                            .add(((String) ((JsonObject) record).getValue("picture")))
+                            .add(((Number) ((JsonObject) record).getValue("subjectdirectoryid")).longValue());
+
+                    return insert(insertParam, SQL_INSERT);
+                })
+                .flatMap(updateResult -> findById(updateResult.getKeys().getInteger(0), SQL_FIND_BY_ID));
+
+        subscribeAndProcess(result, recordInsertResult, HttpResponseStatus.CREATED.code());
+*/
+
+/*
         insertParams.forEach(record -> {
             JsonArray insertParam = new JsonArray()
                     .add(((Number) ((JsonObject) record).getValue("organizationid")).longValue())
@@ -102,7 +231,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     .flatMap(Single::just);
             subscribeAndProcess(result, recordInsertResult, HttpResponseStatus.CREATED.code());
         });
-        return Single.just(result);
+*/
+        //return Single.just(result);
     }
 
     public Single<UpdateResult> update(UUID uuid, JsonObject updateRecord) {
@@ -121,7 +251,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(((String) updateRecord.getValue("picture")))
                 .add(((Number) updateRecord.getValue("subjectdirectoryid")).longValue())
                 .add(uuid);
-        return update(updateParams, SQL_UPDATE_BY_UUID);
+        return update(updateParams, SQL_UPDATE_BY_UUID).toList()
+                .flatMap(updateResults -> Single.just(updateResults.get(0)));
     }
 
     public Single<JsonArray> updateAll(JsonObject updateRecord) {
@@ -153,11 +284,12 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     public Single<UpdateResult> delete(UUID uuid) {
         JsonArray deleteParams = new JsonArray().add(uuid);
-        return delete(deleteParams, SQL_DELETE_BY_UUID);
+        return delete(deleteParams, SQL_DELETE_BY_UUID).toList()
+                .flatMap(updateResults -> Single.just(updateResults.get(0)));
     }
 
-    public Single<UpdateResult> deleteAll() {
-        return deleteAll(SQL_DELETE);
+    public Single<List<UpdateResult>> deleteAll() {
+        return deleteAll(SQL_DELETE).toList();
     }
 
     public Single<ResultSet> findById(long id) {

@@ -18,6 +18,7 @@ import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface IService<T> {
@@ -26,7 +27,9 @@ public interface IService<T> {
 
     //Single<UpdateResult> insert(JsonObject newRecord);
 
-    Single<JsonArray> insertAll(JsonArray insertParams);
+    //Single<JsonArray> insertAll(JsonArray insertParams);
+
+    Single<List<JsonObject>> insertAll(JsonArray insertParams);
 
     Single<UpdateResult> update(UUID uuid, JsonObject updateRecord);
 
@@ -34,7 +37,9 @@ public interface IService<T> {
 
     Single<UpdateResult> delete(UUID uuid);
 
-    Single<UpdateResult> deleteAll();
+    //Single<UpdateResult> deleteAll();
+
+    Single<List<UpdateResult>> deleteAll();
 
     Single<ResultSet> findById(long id);
 
