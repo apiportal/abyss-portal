@@ -137,7 +137,8 @@ public class Constants {
 
     public static final String RESOURCE_DEFAULT_AVATAR = "webroot/dist/img/avatar.jpg";
 
-    public static final String RESTAPI_FILTERING_NAME = "name";
+    public static final String RESTAPI_FILTERING_BY_NAME = "byname";
+    public static final String RESTAPI_FILTERING_LIKE_NAME = "likename";
     public static final String RESTAPI_SORTING_SORT = "sort";
     public static final String RESTAPI_FILTERING_FIELDS = "fields";
     public static final String RESTAPI_PAGINATION_OFFSET = "offset";

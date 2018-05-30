@@ -20,7 +20,6 @@ import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
-import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -36,7 +35,6 @@ import io.vertx.ext.web.api.validation.ValidationException;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
-import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -377,7 +375,7 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.next();
     }
 
-    private void subscribeAndResponseStatusOnly(RoutingContext routingContext, Single<UpdateResult> updateResultSingle, int httpResponseStatus) {
+    private void subscribeAndResponseStatusOnly(RoutingContext routingContext, Single<CompositeResult> updateResultSingle, int httpResponseStatus) {
         updateResultSingle.subscribe(resp -> {
                     routingContext.response()
                             .putHeader("content-type", "application/json; charset=utf-8")
@@ -392,7 +390,21 @@ public abstract class AbstractApiController implements IApiController {
                 });
     }
 
-    //private  <T extends ResultSet, UpdateResult> void subscribeAndResponse(RoutingContext routingContext, Single<T> resultSetSingle, int httpResponseStatus) {
+    private void subscribeAndResponseStatusOnlyList(RoutingContext routingContext, Single<List<UpdateResult>> updateResultListSingle, int httpResponseStatus) {
+        updateResultListSingle.subscribe(resp -> {
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(httpResponseStatus)
+                            .end();
+                    logger.trace("replied successfully");
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
+    }
+
     private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, int httpResponseStatus) {
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
@@ -425,8 +437,9 @@ public abstract class AbstractApiController implements IApiController {
                 });
     }
 
-    private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonArraySingle, int httpResponseStatus) {
-        jsonArraySingle.subscribe(resp -> {
+    private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, int httpResponseStatus) {
+        logger.trace("---subscribeAndResponseBulkList invoked");
+        jsonListSingle.subscribe(resp -> {
                     JsonArray jsonArray = new JsonArray(resp);
                     routingContext.response()
                             .putHeader("content-type", "application/json; charset=utf-8")
@@ -442,11 +455,21 @@ public abstract class AbstractApiController implements IApiController {
     }
 
 
-    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        RequestParameter filterByNameParameter = requestParameters.queryParameter(Constants.RESTAPI_FILTERING_NAME);
+        String filterByNameParameter = null;
+        String filterLikeNameParameter = null;
+        if (!routingContext.queryParams().isEmpty()){
+            if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).isEmpty()) {
+                filterByNameParameter = routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0);
+            } else if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).isEmpty()) {
+                filterLikeNameParameter = routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).get(0);
+            }
+        }
+        String finalFilterByNameParameter = filterByNameParameter;
+        String finalFilterLikeNameParameter = filterLikeNameParameter;
         Single<ResultSet> findAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> (filterByNameParameter == null) ? service.findAll() : service.findByName(filterByNameParameter.getString()))
+                .flatMap(jdbcClient -> ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) ? service.findAll() : (finalFilterLikeNameParameter == null) ? service.findByName(finalFilterByNameParameter) : service.findLikeName(finalFilterLikeNameParameter))
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0)
                         return Single.error(new Exception("no_data_found"));
@@ -456,32 +479,33 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponse(routingContext, findAllResult, HttpResponseStatus.OK.code());
     }
 
-    <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> findAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.findById(UUID.fromString(requestParameters.pathParameter("uuid").getString())));
+                .flatMap(jdbcClient -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))));
         subscribeAndResponse(routingContext, findAllResult, HttpResponseStatus.OK.code());
     }
 
-    <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        logger.trace("---addEntities invoked");
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<List<JsonObject>> insertAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.insertAll(requestBody));
         subscribeAndResponseBulkList(routingContext, insertAllResult, HttpResponseStatus.MULTI_STATUS.code());
     }
 
-    <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<JsonArray> updateAllResult = service.initJDBCClient()
+        Single<List<JsonObject>> updateAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.updateAll(requestBody));
-        subscribeAndResponseBulk(routingContext, updateAllResult, HttpResponseStatus.MULTI_STATUS.code());
+        subscribeAndResponseBulkList(routingContext, updateAllResult, HttpResponseStatus.MULTI_STATUS.code());
     }
 
-    <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> updateAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.update(UUID.fromString(requestParameters.pathParameter("uuid").getString()), requestBody))
-                .flatMap(resultSet -> service.findById(UUID.fromString(requestParameters.pathParameter("uuid").getString())))
+                .flatMap(jdbcClient -> service.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
+                .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0)
                         return Single.error(new Exception("no_data_found"));
@@ -493,16 +517,16 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<UpdateResult> deleteAllResult = service.initJDBCClient()
+        Single<CompositeResult> deleteAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.deleteAll());
         subscribeAndResponseStatusOnly(routingContext, deleteAllResult, HttpResponseStatus.NO_CONTENT.code());
     }
 
-    <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz, RequestParameters requestParameters) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<UpdateResult> deleteAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.delete(UUID.fromString(requestParameters.pathParameter("uuid").getString())));
-        subscribeAndResponseStatusOnly(routingContext, deleteAllResult, HttpResponseStatus.NO_CONTENT.code());
+        Single<CompositeResult> deleteResult = service.initJDBCClient()
+                .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))));
+        subscribeAndResponseStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
     }
 
 }

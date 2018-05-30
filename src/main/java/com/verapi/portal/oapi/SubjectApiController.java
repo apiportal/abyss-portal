@@ -43,7 +43,7 @@ public class SubjectApiController extends AbstractApiController {
 */
 
     /**
-     * This API Controller instance is created by Api verticle using this constructor
+     * API verticle creates new API Controller instance via this constructor
      * @param vertx Vertx content
      * @param router Vertx router
      * @param authProvider JDBC Auth provider
@@ -54,11 +54,8 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubjects(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
-            getEntities(routingContext, SubjectService.class, requestParameters);
+            getEntities(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -112,9 +109,9 @@ public class SubjectApiController extends AbstractApiController {
                 }
         });
 
-        //now it is time to add entries
+        //now it is time to add entities
         try {
-            addEntities(routingContext, SubjectService.class, requestBody, requestParameters);
+            addEntities(routingContext, SubjectService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -130,8 +127,9 @@ public class SubjectApiController extends AbstractApiController {
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
+        //now it is time to update entities
         try {
-            updateEntities(routingContext, SubjectService.class, requestBody, requestParameters);
+            updateEntities(routingContext, SubjectService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -156,7 +154,7 @@ public class SubjectApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntity(routingContext, SubjectService.class, requestParameters);
+            getEntity(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -174,7 +172,7 @@ public class SubjectApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, SubjectService.class, requestBody, requestParameters);
+            updateEntity(routingContext, SubjectService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -185,11 +183,8 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void deleteSubject(RoutingContext routingContext) {
 
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
-            deleteEntity(routingContext, SubjectService.class, requestParameters);
+            deleteEntity(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

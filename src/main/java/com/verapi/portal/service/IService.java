@@ -11,11 +11,11 @@
 
 package com.verapi.portal.service;
 
+import com.verapi.portal.oapi.CompositeResult;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 
 import java.util.List;
@@ -29,23 +29,25 @@ public interface IService<T> {
 
     //Single<JsonArray> insertAll(JsonArray insertParams);
 
-    Single<List<JsonObject>> insertAll(JsonArray insertParams);
+    Single<List<JsonObject>> insertAll(JsonArray insertRecords);
 
-    Single<UpdateResult> update(UUID uuid, JsonObject updateRecord);
+    Single<CompositeResult> update(UUID uuid, JsonObject updateRecord);
 
-    Single<JsonArray> updateAll(JsonObject updateRecord);
+    Single<List<JsonObject>> updateAll(JsonObject updateRecords);
 
-    Single<UpdateResult> delete(UUID uuid);
+    Single<CompositeResult> delete(UUID uuid);
 
     //Single<UpdateResult> deleteAll();
 
-    Single<List<UpdateResult>> deleteAll();
+    Single<CompositeResult> deleteAll();
 
     Single<ResultSet> findById(long id);
 
     Single<ResultSet> findById(UUID uuid);
 
     Single<ResultSet> findByName(String name);
+
+    Single<ResultSet> findLikeName(String name);
 
     Single<ResultSet> findAll();
 

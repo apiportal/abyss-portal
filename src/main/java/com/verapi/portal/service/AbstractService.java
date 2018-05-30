@@ -14,6 +14,7 @@ package com.verapi.portal.service;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -108,51 +109,79 @@ public abstract class AbstractService<T> implements IService<T> {
         this.jdbcClient = jdbcClient;
     }
 
-    private Observable<UpdateResult> rxUpdateWithParams(String sql) {
+    private Single<CompositeResult> rxUpdateWithParams(String sql) {
         return rxUpdateWithParams(sql, null);
     }
 
-    private Observable<UpdateResult> rxUpdateWithParams(String sql, JsonArray params) {
+    private Single<CompositeResult> rxUpdateWithParams(String sql, JsonArray params) {
+        logger.trace("---rxUpdateWithParams invoked");
         return jdbcClient
-                .rxGetConnection().toObservable().flatMap(conn -> conn
-                        .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
-                        // Disable auto commit to handle transaction manually
-                        .rxSetAutoCommit(false)
-                        // Switch from Completable to default Single value
-                        //.toSingleDefault(false)
-                        .toObservable()
-                        //execute query
-                        .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql).toObservable() : conn.rxUpdateWithParams(sql, params).toObservable())
-                        .flatMap(resultSet -> {
-                            if (resultSet.getUpdated() == 0) {
-                                logger.error("unable to process sql with parameters");
-                                logger.error("unable to process sql {} with parameters {}", sql, params);
-                                return Observable.error(new Exception("unable to process sql with parameters"));
-                            }
-                            logger.trace("{}::rxUpdateWithParams >> {} row(s) processed", this.getClass().getName(), resultSet.getUpdated());
-                            return Observable.just(resultSet);
-                        })
-
-                        // commit if all succeeded
-                        .flatMap(updateResult -> {conn.rxCommit(); return Observable.just(updateResult);})
-
-                        // Rollback if any failed with exception propagation
-                        .onErrorReturn(ex -> {conn.rxRollback();
-                                //.onErrorResumeNext(ex2 -> Observable.error(new Exception(ex2)))
-                                //.flatMap(ignore -> {
-                                    logger.warn("rollback transaction completed");
-                                    logger.error(ex.getLocalizedMessage());
-                                    logger.error(Arrays.toString(ex.getStackTrace()));
-                                    return (new UpdateResult().setKeys(new JsonArray(ex.getLocalizedMessage())).setKeys(new JsonArray(Arrays.toString(ex.getStackTrace()))));
+                .rxGetConnection()
+                .flatMap(conn -> conn
+                                .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
+                                // Disable auto commit to handle transaction manually
+                                .rxSetAutoCommit(false)
+                                // Switch from Completable to default Single value
+                                .toSingleDefault(false)
+                                //.toObservable()
+                                //execute query
+                                .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql)
+                                        //.onErrorReturnItem(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1))
+                                        //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
+                                        :
+                                        conn.rxUpdateWithParams(sql, params))
+                                //       .onErrorReturnItem(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1)))
+                                //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
+                                .flatMap(resultSet -> {
+                                    if (resultSet.getUpdated() == 0) {
+                                        logger.error("unable to process sql with parameters");
+                                        logger.error("unable to process sql {} with parameters {}", sql, params);
+                                        //return Observable.error(new Exception("unable to process sql with parameters"));
+                                        return Single.error(new Exception("unable to process sql with parameters"));
+                                    }
+                                    logger.trace("{}::rxUpdateWithParams >> {} row(s) processed", this.getClass().getName(), resultSet.getUpdated());
+                                    //return Observable.just(resultSet);
+                                    return Single.just(resultSet);
                                 })
 
+                                .flatMap(updateResult -> conn.rxCommit().toSingleDefault(updateResult).map(commit -> new CompositeResult(updateResult)))
 
-                        /*.doAfterSuccess(succ -> {
-                            logger.trace("sql processed successfully");
-                        })*/
 
-                        // close the connection regardless succeeded or failed
-                        .doAfterTerminate(conn::close)
+/*
+                        // commit if all succeeded
+                        .flatMap(updateResult -> {
+                            logger.trace("{}::rxUpdateWithParams >> commit processed", this.getClass().getName());
+                            return conn.rxCommit().toSingleDefault(new CompositeResult(updateResult));
+                        })
+*/
+
+
+                                // Rollback if any failed with exception propagation
+                                .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(new CompositeResult(ex)).map(compositeResult -> compositeResult)
+                                        .onErrorResumeNext(ex2 -> Single.just(new CompositeResult(new CompositeException(ex, ex2)))) //Single.error(new CompositeException(ex, ex2)))
+                                        .flatMap(ignore -> {
+                                            logger.warn("rollback transaction completed");
+                                            logger.error(ex.getLocalizedMessage());
+                                            logger.error(Arrays.toString(ex.getStackTrace()));
+                                            //return Single.just(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1));
+                                            return Single.just(new CompositeResult(ex));
+                                        }))
+
+
+//                                .onErrorResumeNext(throwable -> {
+//                                    logger.warn("rollback transaction completed");
+//                                    logger.error(throwable.getLocalizedMessage());
+//                                    logger.error(Arrays.toString(throwable.getStackTrace()));
+//                                    conn.rxRollback().toSingleDefault(true);
+//                                    return Single.just(new CompositeResult(new UpdateResult(), throwable));
+//                                })
+//
+                                .doAfterSuccess(succ -> {
+                                    logger.trace("sql processed successfully");
+                                })
+
+                                // close the connection regardless succeeded or failed
+                                .doAfterTerminate(conn::close)
                 );
     }
 
@@ -172,6 +201,7 @@ public abstract class AbstractService<T> implements IService<T> {
                         .flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
                         .flatMap(resultSet -> {
                             logger.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
+                            logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
                             return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
@@ -179,19 +209,20 @@ public abstract class AbstractService<T> implements IService<T> {
                 );
     }
 
-    protected Observable<UpdateResult> insert(final JsonArray insertParams, final String insertQuery) {
+    protected Single<CompositeResult> insert(final JsonArray insertParams, final String insertQuery) {
+        logger.trace("---insert invoked");
         return rxUpdateWithParams(insertQuery, insertParams);
     }
 
-    protected Observable<UpdateResult> update(final JsonArray updateParams, final String updateQuery) {
+    protected Single<CompositeResult> update(final JsonArray updateParams, final String updateQuery) {
         return rxUpdateWithParams(updateQuery, updateParams);
     }
 
-    protected Observable<UpdateResult> delete(final JsonArray deleteParams, final String deleteQuery) {
-        return rxUpdateWithParams(deleteQuery, deleteParams);
+    protected Single<CompositeResult> delete(final UUID uuid, final String deleteQuery) {
+        return rxUpdateWithParams(deleteQuery, new JsonArray().add(uuid.toString()));
     }
 
-    protected Observable<UpdateResult> deleteAll(final String deleteAllQuery) {
+    protected Single<CompositeResult> deleteAll(final String deleteAllQuery) {
         return rxUpdateWithParams(deleteAllQuery);
     }
 
@@ -200,11 +231,15 @@ public abstract class AbstractService<T> implements IService<T> {
     }
 
     protected Single<ResultSet> findById(final UUID uuid, final String findByIdQuery) {
-        return rxQueryWithParams(findByIdQuery, new JsonArray().add(uuid));
+        return rxQueryWithParams(findByIdQuery, new JsonArray().add(uuid.toString()));
     }
 
     protected Single<ResultSet> findByName(final String name, final String findByNameQuery) {
         return rxQueryWithParams(findByNameQuery, new JsonArray().add(name));
+    }
+
+    protected Single<ResultSet> findLikeName(final String name, final String findLikeNameQuery) {
+        return rxQueryWithParams(findLikeNameQuery, new JsonArray().add(name + "%"));
     }
 
     protected Single<ResultSet> findAll(final String findAllQuery) {
