@@ -23,12 +23,12 @@ public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
 
     public SubjectIndexService(Vertx vertx, AbyssJDBCService abyssJDBCService) throws Exception {
         super(vertx, abyssJDBCService);
-        logger.info("SubjectIndexService() invoked " + vertx + abyssJDBCService);
+        logger.trace("SubjectIndexService() invoked " + vertx + abyssJDBCService);
     }
 
     public SubjectIndexService(Vertx vertx) throws Exception {
         super(vertx);
-        logger.info("SubjectIndexService() invoked " + vertx);
+        logger.trace("SubjectIndexService() invoked " + vertx);
     }
 
 
@@ -49,7 +49,7 @@ public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
 
     @Override
     public Single<ResultSet> findAll() {
-        logger.info("SubjectIndexService findAll() invoked " + jdbcClient);
+        logger.trace("SubjectIndexService findAll() invoked " + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -61,10 +61,10 @@ public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
                         .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FIND_BY_SUBJECTNAME, new JsonArray().add("faik"))) //TODO: GET USER
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
-                                logger.info("SubjectIndexService findAll() # of records :[" + resultSet.getNumRows() + "]");
+                                logger.trace("SubjectIndexService findAll() # of records :[" + resultSet.getNumRows() + "]");
                                 return Single.just(resultSet);
                             } else {
-                                logger.info("SubjectIndexService findAll() # of records : 0");
+                                logger.trace("SubjectIndexService findAll() # of records : 0");
                                 return Single.just(resultSet);//return Single.error(new Exception("ApiService findAll() # of records : 0"));
                             }
                         })
@@ -74,7 +74,7 @@ public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
     }
 
     public Single<ResultSet> findBySubjectUuid(String subjectUuid) {
-        logger.info("SubjectIndexService findBySubjectUuid() invoked " + jdbcClient);
+        logger.trace("SubjectIndexService findBySubjectUuid() invoked " + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -86,10 +86,10 @@ public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
                         .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FIND_BY_UUID, new JsonArray().add(subjectUuid)))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
-                                logger.info("SubjectIndexService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
+                                logger.trace("SubjectIndexService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
                                 return Single.just(resultSet);
                             } else {
-                                logger.info("SubjectIndexService filterBySubjectName() # of records : 0");
+                                logger.trace("SubjectIndexService filterBySubjectName() # of records : 0");
                                 return Single.just(resultSet);
                             }
                         })

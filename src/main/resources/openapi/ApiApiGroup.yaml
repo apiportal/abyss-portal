@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiApiGroups
-      description: 'Returns list of apiApiGroups'
+      summary: Get list of ApiApiGroups
+      description: 'Returns list of ApiApiGroups'
       operationId: getApiApiGroups
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiApiGroups
+      summary: Add a bulk of ApiApiGroups
       description: 'Provide a list of ApiApiGroup objects to be inserted'
       operationId: addApiApiGroups
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiApiGroups
+      summary: Update a bulk of ApiApiGroups
       description: 'Provide a bulk list of  ApiApiGroup objects to be updated'
       operationId: updateApiApiGroups
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiApiGroups
-      description: 'Deletes all apiApiGroups'
+      summary: Delete all ApiApiGroups
+      description: 'Deletes all ApiApiGroups'
       operationId: deleteApiApiGroups
       responses:
         '204':
@@ -276,6 +276,34 @@ components:
     ApiApiGroup:
       type: object
       properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationid:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudsubjectid:
+          type: integer
+          format: int32
+          description: ID of Subject that reads, creates, updates or deletes
         apiid:
           type: integer
           format: int32

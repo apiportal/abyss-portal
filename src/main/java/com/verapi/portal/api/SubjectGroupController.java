@@ -12,7 +12,7 @@
 package com.verapi.portal.api;
 
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.service.idam.SubjectGroupService;
+import com.verapi.portal.service.idam.SubjectGroupServiceOld;
 import io.reactivex.Single;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -53,7 +53,7 @@ public class SubjectGroupController extends ApiAbstractController {
             Vertx reactiveVertx = Vertx.newInstance(vertx);
             logger.info("io.vertx.reactivex.core.Vertx : " + reactiveVertx.toString());
 
-            SubjectGroupService subjectGroupService = new SubjectGroupService(reactiveVertx);
+            SubjectGroupServiceOld subjectGroupService = new SubjectGroupServiceOld(reactiveVertx);
 
             Single<JsonObject> apiResponse = subjectGroupService.initJDBCClient()
                     .flatMap(jdbcClient -> (groupName == null) ? subjectGroupService.findAll() : subjectGroupService.filterByGroupName(groupName))

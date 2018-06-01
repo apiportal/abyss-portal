@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiTags
-      description: 'Returns list of apiTags'
+      summary: Get list of ApiTags
+      description: 'Returns list of ApiTags'
       operationId: getApiTags
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiTags
+      summary: Add a bulk of ApiTags
       description: 'Provide a list of ApiTag objects to be inserted'
       operationId: addApiTags
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiTags
+      summary: Update a bulk of ApiTags
       description: 'Provide a bulk list of  ApiTag objects to be updated'
       operationId: updateApiTags
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiTags
-      description: 'Deletes all apiTags'
+      summary: Delete all ApiTags
+      description: 'Deletes all ApiTags'
       operationId: deleteApiTags
       responses:
         '204':

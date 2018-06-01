@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of resourceActions
-      description: 'Returns list of resourceActions'
+      summary: Get list of ResourceActions
+      description: 'Returns list of ResourceActions'
       operationId: getResourceActions
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of resourceActions
+      summary: Add a bulk of ResourceActions
       description: 'Provide a list of ResourceAction objects to be inserted'
       operationId: addResourceActions
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of resourceActions
+      summary: Update a bulk of ResourceActions
       description: 'Provide a bulk list of  ResourceAction objects to be updated'
       operationId: updateResourceActions
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all resourceActions
-      description: 'Deletes all resourceActions'
+      summary: Delete all ResourceActions
+      description: 'Deletes all ResourceActions'
       operationId: deleteResourceActions
       responses:
         '204':

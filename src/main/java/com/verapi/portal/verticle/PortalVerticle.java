@@ -34,7 +34,7 @@ public class PortalVerticle extends AbstractPortalVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.info("PortalVerticle.start invoked");
+        logger.trace("PortalVerticle.start invoked");
         super.setVerticleHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_SERVER_HOST));
         super.setServerPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_PORT));
         super.setVerticleType(Constants.VERTICLE_TYPE_PORTAL);
@@ -43,19 +43,19 @@ public class PortalVerticle extends AbstractPortalVerticle {
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
-        logger.info("PortalVerticle.stop invoked");
+        logger.trace("PortalVerticle.stop invoked");
         super.stop(stopFuture);
     }
 
     @Override
     protected void mountControllerRouters() {
-        logger.info("PortalVerticle.mountControllerRouters() invoked");
+        logger.trace("PortalVerticle.mountControllerRouters() invoked");
         new FastClasspathScanner("com.verapi")
                 //.verbose()
                 .matchClassesWithAnnotation(AbyssController.class, new ClassAnnotationMatchProcessor() {
                     @Override
                     public void processMatch(Class<?> classWithAnnotation) {
-                        logger.info("AbyssController annotated class found and mounted : " + classWithAnnotation);
+                        logger.trace("AbyssController annotated class found and mounted : " + classWithAnnotation);
                         IController<PortalAbstractController> requestHandlerInstance = null;
                         try {
                             requestHandlerInstance = (IController<PortalAbstractController>) classWithAnnotation

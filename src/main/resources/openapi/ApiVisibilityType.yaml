@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiVisibilityTypes
-      description: 'Returns list of apiVisibilityTypes'
+      summary: Get list of ApiVisibilityTypes
+      description: 'Returns list of ApiVisibilityTypes'
       operationId: getApiVisibilityTypes
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiVisibilityTypes
+      summary: Add a bulk of ApiVisibilityTypes
       description: 'Provide a list of ApiVisibilityType objects to be inserted'
       operationId: addApiVisibilityTypes
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiVisibilityTypes
+      summary: Update a bulk of ApiVisibilityTypes
       description: 'Provide a bulk list of  ApiVisibilityType objects to be updated'
       operationId: updateApiVisibilityTypes
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiVisibilityTypes
-      description: 'Deletes all apiVisibilityTypes'
+      summary: Delete all ApiVisibilityTypes
+      description: 'Deletes all ApiVisibilityTypes'
       operationId: deleteApiVisibilityTypes
       responses:
         '204':

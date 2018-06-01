@@ -28,7 +28,7 @@ public class IndexController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("IndexController.defaultGetHandler invoked...");
+        logger.trace("IndexController.defaultGetHandler invoked...");
         routingContext.put("user.name", routingContext.user().principal().getValue("username"));
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }

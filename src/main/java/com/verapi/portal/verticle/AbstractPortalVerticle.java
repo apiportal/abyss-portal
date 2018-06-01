@@ -42,7 +42,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.info("AbstractPortalVerticle.start invoked");
+        logger.trace("AbstractPortalVerticle.start invoked");
         setAbyssJDBCService(new AbyssJDBCService(vertx));
         Disposable disposable
                 =
@@ -54,7 +54,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
                         .flatMap(verticleRouter -> createHttpServer())
                         .subscribe(httpServer -> {
                             super.start(startFuture);
-                            logger.info("AbstractPortalVerticle httpServer started " + httpServer.toString());
+                            logger.trace("AbstractPortalVerticle httpServer started " + httpServer.toString());
                         }, t -> {
                             logger.error("AbstractPortalVerticle httpServer unable to start", t);
                             startFuture.fail(t);
@@ -62,7 +62,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
     }
 
     private Single<Router> configureRouter() {
-        logger.info("AbstractPortalVerticle.configureRouter() invoked");
+        logger.trace("AbstractPortalVerticle.configureRouter() invoked");
         verticleRouter.route().handler(ResponseTimeHandler.create());
 
         verticleRouter.route("/logout").handler(context -> {
@@ -74,7 +74,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
             logger.trace("Cookie list before logout:");
             for (Cookie c : context.cookies()) {
-                logger.info(c.getName() + ":" + c.getValue());
+                logger.debug(c.getName() + ":" + c.getValue());
             }
 
             context.removeCookie("abyss.principal.uuid");
@@ -83,7 +83,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
             logger.trace("Cookie list after logout:");
             for (Cookie c : context.cookies()) {
-                logger.info(c.getName() + ":" + c.getValue());
+                logger.debug(c.getName() + ":" + c.getValue());
             }
 
             context.response().putHeader("location", Constants.ABYSS_ROOT + "/index").setStatusCode(302).end();
@@ -100,7 +100,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
         abyssRouter.mountSubRouter(Constants.ABYSS_ROOT, verticleRouter);
 
         abyssRouter.route().handler(ctx -> {
-            logger.info("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
+            logger.trace("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
             ctx.fail(404);
         });
 
@@ -112,7 +112,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
     //protected <T extends PortalAbstractController> void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef, IController<T> requestHandler) throws IllegalAccessException, InstantiationException {
     void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        logger.info("AbstractPortalVerticle.mountControllerRouter invoked : " + controllerDef.className.getName());
+        logger.trace("AbstractPortalVerticle.mountControllerRouter invoked : " + controllerDef.className.getName());
         IController<PortalAbstractController> requestHandlerInstance = (IController<PortalAbstractController>) controllerDef.className.getConstructor(JDBCAuth.class, JDBCClient.class).newInstance(jdbcAuth, jdbcClient);
         if (!controllerDef.isPublic)
             verticleRouter.route("/" + controllerDef.routePathGET).handler(authHandler).failureHandler(this::failureHandler);
@@ -124,12 +124,12 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
-        logger.info("AbstractPortalVerticle.stop invoked");
+        logger.trace("AbstractPortalVerticle.stop invoked");
         super.stop(stopFuture);
     }
 
     protected Single<HttpServer> createHttpServer() {
-        logger.info("createHttpServer() running");
+        logger.trace("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setCompressionSupported(true)
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));

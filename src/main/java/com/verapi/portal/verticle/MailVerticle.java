@@ -39,7 +39,7 @@ public class MailVerticle extends AbstractVerticle {
 
 
     public void start() {
-        logger.info("MailClient is starting");
+        logger.trace("MailClient is starting");
 
         MailConfig mailConfig = new MailConfig()
                 .setHostname(Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SMTP_HOST, "verapi-com.mail.protection.outlook.com")) //"dev.apiportal.com"; //"localhost"
@@ -57,17 +57,17 @@ public class MailVerticle extends AbstractVerticle {
         }
 
         mailClient = MailClient.createShared(vertx, mailConfig);
-        logger.info("MailClient is configured and created.");
+        logger.trace("MailClient is configured and created.");
 
         vertx.eventBus().<JsonObject>consumer(Constants.ABYSS_MAIL_CLIENT).handler(mailSender());
-        logger.info("MailClient is listening on Event Bus @ " + Constants.ABYSS_MAIL_CLIENT);
+        logger.trace("MailClient is listening on Event Bus @ " + Constants.ABYSS_MAIL_CLIENT);
     }
 
     private Handler<Message<JsonObject>>mailSender() {
         return msg -> {
 
-            logger.info("MailVerticle - mailSender invoked...");
-            logger.info("Msg:" + msg.body().encodePrettily());
+            logger.trace("MailVerticle - mailSender invoked...");
+            logger.debug("Msg:" + msg.body().encodePrettily());
 
             String token = msg.body().getString(Constants.EB_MSG_TOKEN, "");
             String toEmail = msg.body().getString(Constants.EB_MSG_TO_EMAIL, "");
@@ -132,8 +132,8 @@ public class MailVerticle extends AbstractVerticle {
 
             mailClient.sendMail(email, result -> {
                 if (result.succeeded()) {
-                    logger.info(result.result().toString());
-                    logger.info("Mail successfully sent");
+                    logger.debug(result.result().toString());
+                    logger.trace("Mail successfully sent");
                 } else {
                     logger.error("Mail client got exception:"+result.cause());
                     //result.cause().printStackTrace();

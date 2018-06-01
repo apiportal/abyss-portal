@@ -99,20 +99,6 @@ public class SubjectsGroupsPermissionsApiController extends AbstractApiControlle
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject subjects = params.body().getJsonObject();
 
-        String salt = authProvider.generateSalt();
-        String hash = authProvider.computeHash(subjects.getString("password"), salt);
-        subjects.put("password", hash);
-        subjects.put("passwordsalt", salt);
-        try {
-            //insert default avatar image TODO: later use request base64 img data
-            ClassLoader classLoader = getClass().getClassLoader();
-            File file = new File(Objects.requireNonNull(classLoader.getResource("webroot/dist/img/avatar.jpg")).getFile());
-            subjects.put("picture", encodeFileToBase64Binary(file));
-        } catch (IOException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-        }
-
         SubjectServiceOld subjectService = new SubjectServiceOld(vertx);
 
         Single<ResultSet> insertResult = subjectService.initJDBCClient()

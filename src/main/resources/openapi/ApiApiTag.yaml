@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiApiTags
-      description: 'Returns list of apiApiTags'
+      summary: Get list of ApiApiTags
+      description: 'Returns list of ApiApiTags'
       operationId: getApiApiTags
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiApiTags
+      summary: Add a bulk of ApiApiTags
       description: 'Provide a list of ApiApiTag objects to be inserted'
       operationId: addApiApiTags
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiApiTags
+      summary: Update a bulk of ApiApiTags
       description: 'Provide a bulk list of  ApiApiTag objects to be updated'
       operationId: updateApiApiTags
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiApiTags
-      description: 'Deletes all apiApiTags'
+      summary: Delete all ApiApiTags
+      description: 'Deletes all ApiApiTags'
       operationId: deleteApiApiTags
       responses:
         '204':
@@ -276,6 +276,34 @@ components:
     ApiApiTag:
       type: object
       properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationid:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudsubjectid:
+          type: integer
+          format: int32
+          description: ID of Subject that reads, creates, updates or deletes
         apiid:
           type: integer
           format: int32

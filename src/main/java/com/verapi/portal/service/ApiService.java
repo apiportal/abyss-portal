@@ -21,12 +21,12 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
 
     public ApiService(Vertx vertx, AbyssJDBCService abyssJDBCService) throws Exception {
         super(vertx, abyssJDBCService);
-        logger.info("ApiService() invoked " + vertx + abyssJDBCService);
+        logger.trace("ApiService() invoked " + vertx + abyssJDBCService);
     }
 
     public ApiService(Vertx vertx) throws Exception {
         super(vertx);
-        logger.info("ApiService() invoked " + vertx);
+        logger.trace("ApiService() invoked " + vertx);
     }
 
 
@@ -47,7 +47,7 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
 
     @Override
     public Single<ResultSet> findAll() {
-        logger.info("ApiService findAll() invoked " + jdbcClient);
+        logger.trace("ApiService findAll() invoked " + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -59,10 +59,10 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
                         .flatMap(conn1 -> conn.rxQuery(SQL_FIND_ALL_COMPACT_JSON))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
-                                logger.info("ApiService findAll() # of records :[" + resultSet.getNumRows() + "]");
+                                logger.trace("ApiService findAll() # of records :[" + resultSet.getNumRows() + "]");
                                 return Single.just(resultSet);
                             } else {
-                                logger.info("ApiService findAll() # of records : 0");
+                                logger.trace("ApiService findAll() # of records : 0");
                                 return Single.just(resultSet);//return Single.error(new Exception("ApiService findAll() # of records : 0"));
                             }
                         })
@@ -72,7 +72,7 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
     }
 
     public Single<ResultSet> filterBySubjectName(String subjectName) {
-        logger.info("ApiService filterBySubjectName() invoked" + jdbcClient);
+        logger.trace("ApiService filterBySubjectName() invoked" + jdbcClient);
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
@@ -84,10 +84,10 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
                         .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName+"%")))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
-                                logger.info("ApiService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
+                                logger.trace("ApiService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
                                 return Single.just(resultSet);
                             } else {
-                                logger.info("ApiService filterBySubjectName() # of records : 0");
+                                logger.trace("ApiService filterBySubjectName() # of records : 0");
                                 return Single.just(resultSet);
                             }
                         })

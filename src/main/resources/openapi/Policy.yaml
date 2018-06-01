@@ -1,0 +1,474 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi' 
+  - url: 'https://apiportal.com/abyss/oapi'
+info:
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: info@apiportal.com
+    name: Abyss
+    url: 'https://apiportal.com'
+  license:
+    name: Abyss 1.0
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: TODO
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: Abyss ... [TODO]  
+paths:
+  /policies:
+    get:
+      tags:
+        - TODO
+      summary: Get list of Policies
+      description: 'Returns list of Policies'
+      operationId: getPolicies
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search Subjects which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search Subjects which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfPolicy'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - TODO
+      summary: Add a bulk of Policies
+      description: 'Provide a list of Policy objects to be inserted'
+      operationId: addPolicies
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfPolicy'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of Policies
+      description: 'Provide a bulk list of  Policy objects to be updated'
+      operationId: updatePolicies
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfPolicyObject'
+    delete:
+      tags:
+        - TODO
+      summary: Delete all Policies
+      description: 'Deletes all Policies'
+      operationId: deletePolicies
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /policies/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing Policy by uuid
+      description: 'Provide an uuid of Policy to be get'
+      operationId: getPolicy
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Policy that need to be get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    put:
+      tags:
+        - TODO
+      summary: Update an existing Policy
+      description: 'Provide an altered Policy to be updated'
+      operationId: updatePolicy
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Policy that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/Policy'
+    delete:
+      tags:
+        - TODO
+      summary: Delete Policy
+      description: 'Provide an uuid parameter of Policy to be updated'
+      operationId: deletePolicy
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of Policy that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+externalDocs:
+  description: See Abyss example
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    MultiStatus:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+        response:
+          $ref: '#/components/schemas/Policy'
+        error:
+          $ref: '#/components/schemas/Error'
+    Policy:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationid:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudsubjectid:
+          type: integer
+          format: int32
+          description: ID of Subject that reads, creates, updates or deletes
+        name:
+          type: string
+          description: Name of policy
+        description:
+          type: string
+          description: Description of policy
+        policytypeid:
+          type: integer
+          format: int32
+          description: Type of Policy - Operational, Service Level, Logging
+        policysubtypeid:
+          type: integer
+          format: int32
+          description: Sub Type of Policy
+        policyconfiguration:
+          type: object
+          description: Configuration of Policy in Json Format  #jsonb#
+  requestBodies:
+    Policy:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Policy'          
+      description: Policy object that needs to be added or updated
+      required: true
+    ListOfPolicy:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Policy'          
+      description: Policy array that needs to be added
+      required: true
+    ListOfPolicyObject:
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+      description:  list of Policy objects that needs to be updated, each additional property name should be the uuid of coresponding Policy record
+      required: true
+  responses:
+    '200':
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Policy'
+    '200-ListOfPolicy':
+      description: A Policy array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Policy'
+    '201':
+      description: New Policy resource has been created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Policy'
+    '204':
+      description: The Policy resource was successfully deleted
+    '207':
+      description: Multi Status for bulk operation
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/MultiStatus'
+    '304':
+      description: Not Modified – The client can use cached data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Policy'
+    '400':
+      description: Invalid UUID supplied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: Authorization information is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Not found – There is no resource behind the URI
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: Method not allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: Unprocessable Entity – server cannot process the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too many request(rate limiting)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: The number of items to skip before starting to collect the result set
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: The numbers of items to return
+  securitySchemes:
+    abyssCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+    abyssHttpBasicAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+    abyssApiKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+    abyssJWTBearerAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+  links: {}
+  callbacks: {}
+security:
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []

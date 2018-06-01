@@ -27,9 +27,9 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiCategories
-      description: 'Returns list of apiCategories'
-      operationId: getApiCategorys
+      summary: Get list of ApiCategories
+      description: 'Returns list of ApiCategories'
+      operationId: getApiCategories
       parameters:
         - name: byname
           in: query
@@ -67,9 +67,9 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiCategories
+      summary: Add a bulk of ApiCategories
       description: 'Provide a list of ApiCategory objects to be inserted'
-      operationId: addApiCategorys
+      operationId: addApiCategories
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -94,9 +94,9 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiCategories
+      summary: Update a bulk of ApiCategories
       description: 'Provide a bulk list of  ApiCategory objects to be updated'
-      operationId: updateApiCategorys
+      operationId: updateApiCategories
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -121,9 +121,9 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiCategories
-      description: 'Deletes all apiCategories'
-      operationId: deleteApiCategorys
+      summary: Delete all ApiCategories
+      description: 'Deletes all ApiCategories'
+      operationId: deleteApiCategories
       responses:
         '204':
           $ref: '#/components/responses/204'

@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiStates
-      description: 'Returns list of apiStates'
+      summary: Get list of ApiStates
+      description: 'Returns list of ApiStates'
       operationId: getApiStates
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiStates
+      summary: Add a bulk of ApiStates
       description: 'Provide a list of ApiState objects to be inserted'
       operationId: addApiStates
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiStates
+      summary: Update a bulk of ApiStates
       description: 'Provide a bulk list of  ApiState objects to be updated'
       operationId: updateApiStates
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiStates
-      description: 'Deletes all apiStates'
+      summary: Delete all ApiStates
+      description: 'Deletes all ApiStates'
       operationId: deleteApiStates
       responses:
         '204':

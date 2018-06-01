@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of subjectGroups
-      description: 'Returns list of subjectGroups'
+      summary: Get list of SubjectGroups
+      description: 'Returns list of SubjectGroups'
       operationId: getSubjectGroups
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of subjectGroups
+      summary: Add a bulk of SubjectGroups
       description: 'Provide a list of SubjectGroup objects to be inserted'
       operationId: addSubjectGroups
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of subjectGroups
+      summary: Update a bulk of SubjectGroups
       description: 'Provide a bulk list of  SubjectGroup objects to be updated'
       operationId: updateSubjectGroups
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all subjectGroups
-      description: 'Deletes all subjectGroups'
+      summary: Delete all SubjectGroups
+      description: 'Deletes all SubjectGroups'
       operationId: deleteSubjectGroups
       responses:
         '204':

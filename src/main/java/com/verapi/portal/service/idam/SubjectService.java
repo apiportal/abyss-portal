@@ -19,9 +19,6 @@ import com.verapi.portal.service.AbstractService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.exceptions.CompositeException;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -32,12 +29,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 
 import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
@@ -133,6 +128,17 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
+        if ((!updateRecord.containsKey("picture")) || (updateRecord.getValue("picture") == null)) {
+            try {
+                //update default avatar image TODO: later use request base
+                ClassLoader classLoader = getClass().getClassLoader();
+                File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_AVATAR)).getFile());
+                updateRecord.put("picture", encodeFileToBase64Binary(file));
+            } catch (IOException e) {
+                logger.error(e.getLocalizedMessage());
+                logger.error(Arrays.toString(e.getStackTrace()));
+            }
+        }
         JsonArray updateParams = new JsonArray()
                 .add(((Number) updateRecord.getValue("organizationid")).longValue())
                 .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
@@ -316,30 +322,36 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , picture             = ?\n" +
             "  , subjectdirectoryid = ?\n";
 
-    private static final String SQL_WHERE = "where id = ?\n";
+    private static final String SQL_AND = "and\n";
 
-    private static final String SQL_WHERE_UUID_IS = "where uuid = CAST(? AS uuid)\n";
+    private static final String SQL_WHERE = "where\n";
 
-    private static final String SQL_WHERE_NAME_IS = "where lower(subjectname) = lower(?)\n";
+    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
 
-    private static final String SQL_WHERE_NAME_LIKE = "where lower(subjectname) like lower(?)\n";
+    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
-    private static final String SQL_WHERE_ONLY_USERS = "where subjecttypeid=" + Constants.SUBJECT_TYPE_USER + "\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(subjectname) = lower(?)\n";
+
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(subjectname) like lower(?)\n";
+
+    private static final String SQL_CONDITION_ONLY_USERS = "subjecttypeid=" + Constants.SUBJECT_TYPE_USER + "\n";
 
     private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
 
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE;
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE_UUID_IS;
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE_NAME_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT +SQL_WHERE+ SQL_CONDITION_UUID_IS;
 
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE_NAME_LIKE;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT +SQL_WHERE+ SQL_CONDITION_NAME_IS;
 
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE + SQL_WHERE_UUID_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE+ SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE_UUID_IS;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE +SQL_WHERE+ SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
-    private static final String SQL_DELETE_ALL_USERS = SQL_DELETE + SQL_WHERE_ONLY_USERS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE +SQL_WHERE+ SQL_CONDITION_UUID_IS;
+
+    private static final String SQL_DELETE_ALL_USERS = SQL_DELETE + SQL_WHERE+ SQL_CONDITION_ONLY_USERS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
 }

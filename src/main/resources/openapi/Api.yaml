@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apis
-      description: 'Returns list of apis'
+      summary: Get list of Apis
+      description: 'Returns list of Apis'
       operationId: getApis
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apis
+      summary: Add a bulk of Apis
       description: 'Provide a list of Api objects to be inserted'
       operationId: addApis
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apis
+      summary: Update a bulk of Apis
       description: 'Provide a bulk list of  Api objects to be updated'
       operationId: updateApis
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apis
-      description: 'Deletes all apis'
+      summary: Delete all Apis
+      description: 'Deletes all Apis'
       operationId: deleteApis
       responses:
         '204':
@@ -333,12 +333,12 @@ components:
           type: string
           description: Original API DSL Document
         openapidocument:
-          type: string
-          description: Transformed API DSL document in Open API json format. Shareable.
+          type: object
+          description: Transformed API DSL document in Open API json format. Shareable. #jsonb#
         extendeddocument:
-          type: string
+          type: object
           readOnly: true
-          description: Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #readOnly#
+          description: Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #readOnly#  #jsonb#
         businessapiid:
           type: integer
           format: int32

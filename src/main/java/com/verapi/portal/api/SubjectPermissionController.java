@@ -12,15 +12,10 @@
 package com.verapi.portal.api;
 
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
-import com.verapi.portal.service.idam.SubjectGroupService;
-import com.verapi.portal.service.idam.SubjectPermissionService;
+import com.verapi.portal.service.idam.SubjectPermissionServiceOld;
 import io.reactivex.Single;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
 import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +54,7 @@ public class SubjectPermissionController extends ApiAbstractController {
             Vertx reactiveVertx = Vertx.newInstance(vertx);
             logger.info("io.vertx.reactivex.core.Vertx : " + reactiveVertx.toString());
 
-            SubjectPermissionService subjectPermissionService = new SubjectPermissionService(reactiveVertx);
+            SubjectPermissionServiceOld subjectPermissionService = new SubjectPermissionServiceOld(reactiveVertx);
 
             Single<JsonObject> apiResponse = subjectPermissionService.initJDBCClient()
                     .flatMap(jdbcClient -> (permissionName == null) ? subjectPermissionService.findAll() : subjectPermissionService.filterByPermissionName(permissionName))

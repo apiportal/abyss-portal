@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of resourceTypes
-      description: 'Returns list of resourceTypes'
+      summary: Get list of ResourceTypes
+      description: 'Returns list of ResourceTypes'
       operationId: getResourceTypes
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of resourceTypes
+      summary: Add a bulk of ResourceTypes
       description: 'Provide a list of ResourceType objects to be inserted'
       operationId: addResourceTypes
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of resourceTypes
+      summary: Update a bulk of ResourceTypes
       description: 'Provide a bulk list of  ResourceType objects to be updated'
       operationId: updateResourceTypes
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all resourceTypes
-      description: 'Deletes all resourceTypes'
+      summary: Delete all ResourceTypes
+      description: 'Deletes all ResourceTypes'
       operationId: deleteResourceTypes
       responses:
         '204':

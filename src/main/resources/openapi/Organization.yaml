@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of organizations
-      description: 'Returns list of organizations'
+      summary: Get list of Organizations
+      description: 'Returns list of Organizations'
       operationId: getOrganizations
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of organizations
+      summary: Add a bulk of Organizations
       description: 'Provide a list of Organization objects to be inserted'
       operationId: addOrganizations
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of organizations
+      summary: Update a bulk of Organizations
       description: 'Provide a bulk list of  Organization objects to be updated'
       operationId: updateOrganizations
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all organizations
-      description: 'Deletes all organizations'
+      summary: Delete all Organizations
+      description: 'Deletes all Organizations'
       operationId: deleteOrganizations
       responses:
         '204':

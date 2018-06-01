@@ -40,19 +40,19 @@ public class LoginController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("LoginController.defaultGetHandler invoked...");
+        logger.trace("LoginController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("LoginController.handle invoked..");
+        logger.trace("LoginController.handle invoked..");
 
         String username = routingContext.request().getFormAttribute("username");
         String password = routingContext.request().getFormAttribute("password");
 
-        logger.info("Received user:" + username);
-        logger.info("Received pass:" + password);
+        logger.debug("Received user:" + username);
+        logger.debug("Received pass:" + password);
 
         JsonObject creds = new JsonObject()
                 .put("username", username)
@@ -83,7 +83,7 @@ public class LoginController extends PortalAbstractController {
                                 routingContext.session().put("user.uuid", userUUID);
                                 routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)
                                         .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
-                                logger.info("Logged in user: " + user.principal().encodePrettily());
+                                logger.debug("Logged in user: " + user.principal().encodePrettily());
                                 routingContext.put("username", user.principal().getString("username"));
                                 redirect(routingContext, Constants.ABYSS_ROOT + "/index");
                             },

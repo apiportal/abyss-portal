@@ -38,7 +38,7 @@ public class ApiHttpServerVerticle extends AbyssAbstractVerticle {
 
     @Override
     protected Single<HttpServer> createHttpServer() {
-        logger.info("createHttpServer() running");
+        logger.trace("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setCompressionSupported(true)
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
@@ -50,7 +50,7 @@ public class ApiHttpServerVerticle extends AbyssAbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.info("ApiHttpServerVerticle.start invoked");
+        logger.trace("ApiHttpServerVerticle.start invoked");
         super.setVerticleHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_API_SERVER_HOST));
         super.setServerPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_API_SERVER_PORT));
         super.setVerticleType(Constants.VERTICLE_TYPE_API);
@@ -79,7 +79,7 @@ public class ApiHttpServerVerticle extends AbyssAbstractVerticle {
                 .matchClassesWithAnnotation(Path.class, new ClassAnnotationMatchProcessor() {
                     @Override
                     public void processMatch(Class<?> classWithAnnotation) {
-                        logger.info("Path annotated class found : " + classWithAnnotation);
+                        logger.trace("Path annotated class found : " + classWithAnnotation);
                         deployment.getRegistry().addPerInstanceResource(classWithAnnotation);
                     }
                 })
@@ -99,9 +99,9 @@ public class ApiHttpServerVerticle extends AbyssAbstractVerticle {
                         .flatMap(verticleRouter -> createHttpServer())
                         .subscribe(httpServer -> {
                             super.start(startFuture);
-                            logger.info("ApiHttpServerVerticle httpServer started " + httpServer.toString());
+                            logger.trace("ApiHttpServerVerticle httpServer started " + httpServer.toString());
                         }, t -> {
-                            logger.error("ApiHttpServerVerticle httpServer unable to start", t);
+                            logger.trace("ApiHttpServerVerticle httpServer unable to start", t);
                             startFuture.fail(t);
                         });
 

@@ -62,7 +62,7 @@ public class SubjectController extends ApiAbstractController {
 
             @PathParam("subjectID") String subjectID
     ) {
-        logger.info("SubjectController.getSubject() invoked");
+        logger.trace("SubjectController.getSubject() invoked");
 
         if (subjectID == null) {
             asyncResponse.resume(Response.status(Response.Status.BAD_REQUEST).build());
@@ -70,7 +70,7 @@ public class SubjectController extends ApiAbstractController {
         }
         //Vertx reactiveVertx = ResteasyProviderFactory.popContextData(Vertx.class);
         Vertx reactiveVertx = Vertx.newInstance(vertx);
-        logger.info("io.vertx.reactivex.core.Vertx got from ResteasyProviderFactory : " + reactiveVertx.toString());
+        logger.trace("io.vertx.reactivex.core.Vertx got from ResteasyProviderFactory : " + reactiveVertx.toString());
 
         // Send a get message to the backend
         DeliveryOptions deliveryOptions = new DeliveryOptions();
@@ -80,16 +80,16 @@ public class SubjectController extends ApiAbstractController {
                 <JsonObject>send(Config.getInstance().getConfigJsonObject().getString(Constants.EB_API_SERVER_ADDRESS),
                         new JsonObject().put("op", "get").put("id", subjectID), deliveryOptions,
                         msg -> {
-                            logger.info("SubjectController.getSubject() : we have got the response from event bus");
+                            logger.trace("SubjectController.getSubject() : we have got the response from event bus");
                             // When we get the response we resume the Jax-RS async response
                             if (msg.succeeded()) {
                                 JsonObject json = msg.result().body();
                                 if (json != null) {
-                                    logger.info("SubjectController.getSubject() : we have got the response from event bus with message: " + msg.result().body().encodePrettily());
+                                    logger.trace("SubjectController.getSubject() : we have got the response from event bus with message: " + msg.result().body().encodePrettily());
                                     //asyncResponse.resume(json.encode());
                                     asyncResponse.resume(Response.status(Response.Status.OK).encoding("UTF-8").type(MediaType.APPLICATION_JSON).entity(json.encode()).build());
                                 } else {
-                                    logger.info("SubjectController.getSubject() : we have got *null* response from event bus");
+                                    logger.trace("SubjectController.getSubject() : we have got *null* response from event bus");
                                     asyncResponse.resume(Response.status(Response.Status.NOT_FOUND).build());
                                 }
                             } else {
@@ -102,10 +102,10 @@ public class SubjectController extends ApiAbstractController {
 
     @Override
     public Single<JsonObject> handle(Vertx vertx, Message message, AbyssJDBCService abyssJDBCService) throws Exception {
-        logger.info("SubjectController.handle() invoked");
+        logger.trace("SubjectController.handle() invoked");
         String messageUUID = message.headers().get("uuid");
         String methodName = message.headers().get("method");
-        logger.info(new JsonObject().put("uuid", messageUUID).put("method", methodName).encodePrettily());
+        logger.trace(new JsonObject().put("uuid", messageUUID).put("method", methodName).encodePrettily());
 
         SubjectService subjectService = new SubjectService(vertx, abyssJDBCService);
 
@@ -133,7 +133,7 @@ public class SubjectController extends ApiAbstractController {
                                     .put("last", true)
                                     .put("first", true)
                                     .put("sort", "ASC SUBJECT NAME");
-                            logger.info(jsonObject.encodePrettily());
+                            logger.debug(jsonObject.encodePrettily());
                             return Single.just(jsonObject);
                         });
 
@@ -167,7 +167,7 @@ public class SubjectController extends ApiAbstractController {
             @QueryParam("q") String subjectName
 
     ) {
-        logger.info("SubjectController.getAll() invoked");
+        logger.trace("SubjectController.getAll() invoked");
 
         try {
             //logger.info("SubjectController.getAll() injected vertx : " + vertx.toString());
@@ -198,7 +198,7 @@ public class SubjectController extends ApiAbstractController {
                                 .put("last", true)
                                 .put("first", true)
                                 .put("sort", "ASC SUBJECT NAME");
-                        logger.trace(jsonObject.encodePrettily());
+                        logger.debug(jsonObject.encodePrettily());
                         return Single.just(jsonObject);
                     });
 
@@ -240,7 +240,7 @@ public class SubjectController extends ApiAbstractController {
             @QueryParam("q") String subjectUUID
 
     ) {
-        logger.info("SubjectController.getIndex() invoked");
+        logger.trace("SubjectController.getIndex() invoked");
 
         try {
             //logger.info("SubjectController.getAll() injected vertx : " + vertx.toString());
@@ -298,7 +298,7 @@ public class SubjectController extends ApiAbstractController {
             @Context io.vertx.core.Vertx vertx,
 
             @RequestBody(description = "New subject to add", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Subject.class))) String subject) {
-        logger.info("SubjectController.addSubject() invoked");
+        logger.trace("SubjectController.addSubject() invoked");
         asyncResponse.resume(Response.status(Response.Status.OK)
                 .encoding("UTF-8")
                 .type(MediaType.APPLICATION_JSON)

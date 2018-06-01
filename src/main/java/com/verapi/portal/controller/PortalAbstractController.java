@@ -45,10 +45,10 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
         templateEngine.render(routingContext, Constants.TEMPLATE_DIR_ROOT, templateFileName, res -> {
             if (res.succeeded()) {
                 responseHTML(routingContext, res.result(), statusCode);
-                logger.info("renderTemplate using " + templateFileName + " finished successfully");
+                logger.trace("renderTemplate using " + templateFileName + " finished successfully");
             } else {
                 routingContext.fail(res.cause());
-                logger.info("renderTemplate using " + templateFileName + " failed with " + res.cause().getLocalizedMessage());
+                logger.trace("renderTemplate using " + templateFileName + " failed with " + res.cause().getLocalizedMessage());
             }
         });
     }
@@ -82,7 +82,7 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
 
     public void redirect(RoutingContext routingContext, String redirectTo, int redirectCode) {
         routingContext.response().putHeader("location", redirectTo).setStatusCode(redirectCode).end();
-        logger.info("redirecting into " + redirectTo + " with http status code " + redirectCode);
+        logger.trace("redirecting into " + redirectTo + " with http status code " + redirectCode);
     }
 
     public void redirect(RoutingContext routingContext, String redirectTo) {
@@ -90,7 +90,7 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
     }
 
     protected void showTrxResult(RoutingContext routingContext, Logger logger, int statusCode, String errorMessage, String errorAtUrl, String contextFailureMessage) {
-        logger.info("showTrxResult invoked...");
+        logger.trace("showTrxResult invoked...");
 
         //Use user's session for storage
         routingContext.session().put(Constants.HTTP_STATUSCODE, statusCode);

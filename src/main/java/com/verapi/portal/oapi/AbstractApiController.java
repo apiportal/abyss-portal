@@ -46,6 +46,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -72,12 +73,12 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void init() {
-        logger.info("initializing");
+        logger.trace("initializing");
 
         OpenAPI3RouterFactory.createRouterFactoryFromFile(vertx, apiSpec, ar -> {
                     // The router factory instantiation could fail
                     if (ar.succeeded()) {
-                        logger.info("OpenAPI3RouterFactory created");
+                        logger.trace("OpenAPI3RouterFactory created");
                         OpenAPI3RouterFactory factory = ar.result();
 
                         Method[] methods = this.getClass().getMethods();
@@ -191,7 +192,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     public void failureHandler(RoutingContext routingContext) {
-        logger.info("failureHandler invoked; " + routingContext.failure().getLocalizedMessage());
+        logger.trace("failureHandler invoked; " + routingContext.failure().getLocalizedMessage());
         logger.trace("failureHandler invoked; " + Arrays.toString(routingContext.failure().getStackTrace()));
 
         // This is the failure handler
@@ -265,7 +266,7 @@ public abstract class AbstractApiController implements IApiController {
 
         //http basic auth trial
         String authorizationBasicToken = routingContext.request().getHeader("Authorization");
-        logger.info(authorizationBasicToken);
+        logger.trace(authorizationBasicToken);
         BasicTokenParseResult basicTokenParseResult = BasicTokenParser.authorizationBasicTokenParser(authorizationBasicToken);
         if (basicTokenParseResult.getIsFailed()) {
             throwApiException(routingContext, UnAuthorized401Exception.class);
@@ -296,7 +297,7 @@ public abstract class AbstractApiController implements IApiController {
                                     routingContext.session().put("user.uuid", userUUID);
                                     routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)
                                             .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
-                                    logger.info("Logged in user: " + user.principal().encodePrettily());
+                                    logger.trace("Logged in user: " + user.principal().encodePrettily());
                                     routingContext.put("username", user.principal().getString("username"));
 
                                     //if authorized then set this security handler's flag and route next
@@ -422,6 +423,41 @@ public abstract class AbstractApiController implements IApiController {
                 });
     }
 
+    private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
+        resultSetSingle.subscribe(resp -> {
+                    JsonArray arr = new JsonArray();
+                    if (jsonColumns.isEmpty()) {
+                        resp.getRows().forEach(arr::add);
+                    } else {
+                        resp.getResults().forEach(eachRow -> {
+                            JsonObject row = new JsonObject();
+                            for (int i = 0; i < resp.getColumnNames().size(); i++) {
+                                if (jsonColumns.contains(resp.getColumnNames().get(i))) {
+                                    if (eachRow.getString(i) == null) {
+                                        row.put(resp.getColumnNames().get(i), new JsonObject());
+                                    } else {
+                                        row.put(resp.getColumnNames().get(i), new JsonObject(eachRow.getString(i)));
+                                    }
+                                } else {
+                                    row.put(resp.getColumnNames().get(i), eachRow.getValue(i));
+                                }
+                            }
+                            arr.add(row);
+                        });
+                    }
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(httpResponseStatus)
+                            .end(arr.encode(), "UTF-8");
+                    logger.trace("replied successfully " + arr.encodePrettily());
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
+    }
+
     private void subscribeAndResponseBulk(RoutingContext routingContext, Single<JsonArray> jsonArraySingle, int httpResponseStatus) {
         jsonArraySingle.subscribe(resp -> {
                     routingContext.response()
@@ -456,10 +492,14 @@ public abstract class AbstractApiController implements IApiController {
 
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        getEntities(routingContext, clazz, new ArrayList<String>());
+    }
+
+    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         String filterByNameParameter = null;
         String filterLikeNameParameter = null;
-        if (!routingContext.queryParams().isEmpty()){
+        if (!routingContext.queryParams().isEmpty()) {
             if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).isEmpty()) {
                 filterByNameParameter = routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0);
             } else if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).isEmpty()) {
@@ -476,7 +516,7 @@ public abstract class AbstractApiController implements IApiController {
                     else
                         return Single.just(resultSet);
                 });
-        subscribeAndResponse(routingContext, findAllResult, HttpResponseStatus.OK.code());
+        subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

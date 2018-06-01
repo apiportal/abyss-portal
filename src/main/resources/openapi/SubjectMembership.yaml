@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of subjectMemberships
-      description: 'Returns list of subjectMemberships'
+      summary: Get list of SubjectMemberships
+      description: 'Returns list of SubjectMemberships'
       operationId: getSubjectMemberships
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of subjectMemberships
+      summary: Add a bulk of SubjectMemberships
       description: 'Provide a list of SubjectMembership objects to be inserted'
       operationId: addSubjectMemberships
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of subjectMemberships
+      summary: Update a bulk of SubjectMemberships
       description: 'Provide a bulk list of  SubjectMembership objects to be updated'
       operationId: updateSubjectMemberships
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all subjectMemberships
-      description: 'Deletes all subjectMemberships'
+      summary: Delete all SubjectMemberships
+      description: 'Deletes all SubjectMemberships'
       operationId: deleteSubjectMemberships
       responses:
         '204':

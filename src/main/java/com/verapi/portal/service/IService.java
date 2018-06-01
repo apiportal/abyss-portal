@@ -25,10 +25,6 @@ public interface IService<T> {
 
     Single<JDBCClient> initJDBCClient();
 
-    //Single<UpdateResult> insert(JsonObject newRecord);
-
-    //Single<JsonArray> insertAll(JsonArray insertParams);
-
     Single<List<JsonObject>> insertAll(JsonArray insertRecords);
 
     Single<CompositeResult> update(UUID uuid, JsonObject updateRecord);
@@ -36,8 +32,6 @@ public interface IService<T> {
     Single<List<JsonObject>> updateAll(JsonObject updateRecords);
 
     Single<CompositeResult> delete(UUID uuid);
-
-    //Single<UpdateResult> deleteAll();
 
     Single<CompositeResult> deleteAll();
 

@@ -27,9 +27,9 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiApiCategories
-      description: 'Returns list of apiApiCategories'
-      operationId: getApiApiCategorys
+      summary: Get list of ApiApiCategories
+      description: 'Returns list of ApiApiCategories'
+      operationId: getApiApiCategories
       parameters:
         - name: byname
           in: query
@@ -67,9 +67,9 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiApiCategories
+      summary: Add a bulk of ApiApiCategories
       description: 'Provide a list of ApiApiCategory objects to be inserted'
-      operationId: addApiApiCategorys
+      operationId: addApiApiCategories
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -94,9 +94,9 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiApiCategories
+      summary: Update a bulk of ApiApiCategories
       description: 'Provide a bulk list of  ApiApiCategory objects to be updated'
-      operationId: updateApiApiCategorys
+      operationId: updateApiApiCategories
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -121,9 +121,9 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiApiCategories
-      description: 'Deletes all apiApiCategories'
-      operationId: deleteApiApiCategorys
+      summary: Delete all ApiApiCategories
+      description: 'Deletes all ApiApiCategories'
+      operationId: deleteApiApiCategories
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -276,6 +276,34 @@ components:
     ApiApiCategory:
       type: object
       properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationid:
+          type: integer
+          format: int32
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudsubjectid:
+          type: integer
+          format: int32
+          description: ID of Subject that reads, creates, updates or deletes
         apiid:
           type: integer
           format: int32

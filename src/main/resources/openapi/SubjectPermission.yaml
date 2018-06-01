@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of subjectPermissions
-      description: 'Returns list of subjectPermissions'
+      summary: Get list of SubjectPermissions
+      description: 'Returns list of SubjectPermissions'
       operationId: getSubjectPermissions
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of subjectPermissions
+      summary: Add a bulk of SubjectPermissions
       description: 'Provide a list of SubjectPermission objects to be inserted'
       operationId: addSubjectPermissions
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of subjectPermissions
+      summary: Update a bulk of SubjectPermissions
       description: 'Provide a bulk list of  SubjectPermission objects to be updated'
       operationId: updateSubjectPermissions
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all subjectPermissions
-      description: 'Deletes all subjectPermissions'
+      summary: Delete all SubjectPermissions
+      description: 'Deletes all SubjectPermissions'
       operationId: deleteSubjectPermissions
       responses:
         '204':

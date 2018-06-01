@@ -31,18 +31,18 @@ public abstract class AbstractServiceOld<T> implements IServiceOld<T>, AutoClose
     private AbyssJDBCService abyssJDBCService;
 
     public AbstractServiceOld(Vertx vertx, AbyssJDBCService abyssJDBCService) {
-        logger.info("AbstractServiceOld() invoked " + vertx + abyssJDBCService);
+        logger.trace("AbstractServiceOld() invoked " + vertx + abyssJDBCService);
         this.vertx = vertx;
         this.abyssJDBCService = abyssJDBCService;
     }
 
     public AbstractServiceOld(Vertx vertx) {
-        logger.info("AbstractServiceOld() invoked");
+        logger.trace("AbstractServiceOld() invoked");
         this.vertx = vertx;
     }
 
     public Single<JDBCClient> initJDBCClient() {
-        logger.info("AbstractServiceOld() initJDBCClient ok");
+        logger.trace("AbstractServiceOld() initJDBCClient ok");
 
 /*
         return JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.API_DATA_SOURCE_SERVICE))
@@ -103,6 +103,6 @@ public abstract class AbstractServiceOld<T> implements IServiceOld<T>, AutoClose
     @Override
     public void close() throws Exception {
         abyssJDBCService.releaseJDBCServiceObject(jdbcClient);
-        logger.info("AbstractServiceOld.close() invoked " + vertx);
+        logger.trace("AbstractServiceOld.close() invoked " + vertx);
     }
 }

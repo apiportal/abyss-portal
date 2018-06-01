@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of subjectTypes
-      description: 'Returns list of subjectTypes'
+      summary: Get list of SubjectTypes
+      description: 'Returns list of SubjectTypes'
       operationId: getSubjectTypes
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of subjectTypes
+      summary: Add a bulk of SubjectTypes
       description: 'Provide a list of SubjectType objects to be inserted'
       operationId: addSubjectTypes
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of subjectTypes
+      summary: Update a bulk of SubjectTypes
       description: 'Provide a bulk list of  SubjectType objects to be updated'
       operationId: updateSubjectTypes
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all subjectTypes
-      description: 'Deletes all subjectTypes'
+      summary: Delete all SubjectTypes
+      description: 'Deletes all SubjectTypes'
       operationId: deleteSubjectTypes
       responses:
         '204':

@@ -27,9 +27,9 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of subjectDirectories
-      description: 'Returns list of subjectDirectories'
-      operationId: getSubjectDirectorys
+      summary: Get list of SubjectDirectories
+      description: 'Returns list of SubjectDirectories'
+      operationId: getSubjectDirectories
       parameters:
         - name: byname
           in: query
@@ -67,9 +67,9 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of subjectDirectories
+      summary: Add a bulk of SubjectDirectories
       description: 'Provide a list of SubjectDirectory objects to be inserted'
-      operationId: addSubjectDirectorys
+      operationId: addSubjectDirectories
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -94,9 +94,9 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of subjectDirectories
+      summary: Update a bulk of SubjectDirectories
       description: 'Provide a bulk list of  SubjectDirectory objects to be updated'
-      operationId: updateSubjectDirectorys
+      operationId: updateSubjectDirectories
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -121,9 +121,9 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all subjectDirectories
-      description: 'Deletes all subjectDirectories'
-      operationId: deleteSubjectDirectorys
+      summary: Delete all SubjectDirectories
+      description: 'Deletes all SubjectDirectories'
+      operationId: deleteSubjectDirectories
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -325,7 +325,7 @@ components:
           format: int32
           description: Priority Order of Subject Directory Precedence
         directoryattributes:
-          type: string
+          type: object
           description: Detailed attributes of the directory in json format
         lastsyncronizedat:
           type: string

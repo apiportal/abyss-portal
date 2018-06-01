@@ -40,7 +40,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
 
     @Override
     protected Single<HttpServer> createHttpServer() {
-        logger.info("createHttpServer() running");
+        logger.trace("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setCompressionSupported(true)
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
@@ -53,7 +53,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.info("OpenApiServerVerticle.start invoked");
+        logger.trace("OpenApiServerVerticle.start invoked");
 
         super.setVerticleHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_OPENAPI_SERVER_HOST));
         super.setServerPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_OPENAPI_SERVER_PORT));
@@ -70,7 +70,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
                         .flatMap(verticleRouter -> createHttpServer())
                         .subscribe(httpServer -> {
                             super.start(startFuture);
-                            logger.info("OpenApiServerVerticle httpServer started " + httpServer.toString());
+                            logger.trace("OpenApiServerVerticle httpServer started " + httpServer.toString());
                         }, t -> {
                             logger.error("OpenApiServerVerticle httpServer unable to start", t);
                             startFuture.fail(t);
@@ -78,7 +78,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
     }
 
     Single<Router> enableCorsSupport(Router router) {
-        logger.info("enableCorsSupport() running");
+        logger.trace("enableCorsSupport() running");
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");
         allowHeaders.add("Access-Control-Allow-Origin");
@@ -103,7 +103,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
     }
 
     private Single<Router> configureRouter() {
-        logger.info("configureRouter() running");
+        logger.trace("configureRouter() running");
 
         //create instances for each Api Controller annotated by @AbyssApiController
         new FastClasspathScanner("com.verapi")

@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of subjectDirectoryTypes
-      description: 'Returns list of subjectDirectoryTypes'
+      summary: Get list of SubjectDirectoryTypes
+      description: 'Returns list of SubjectDirectoryTypes'
       operationId: getSubjectDirectoryTypes
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of subjectDirectoryTypes
+      summary: Add a bulk of SubjectDirectoryTypes
       description: 'Provide a list of SubjectDirectoryType objects to be inserted'
       operationId: addSubjectDirectoryTypes
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of subjectDirectoryTypes
+      summary: Update a bulk of SubjectDirectoryTypes
       description: 'Provide a bulk list of  SubjectDirectoryType objects to be updated'
       operationId: updateSubjectDirectoryTypes
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all subjectDirectoryTypes
-      description: 'Deletes all subjectDirectoryTypes'
+      summary: Delete all SubjectDirectoryTypes
+      description: 'Deletes all SubjectDirectoryTypes'
       operationId: deleteSubjectDirectoryTypes
       responses:
         '204':

@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of resources
-      description: 'Returns list of resources'
+      summary: Get list of Resources
+      description: 'Returns list of Resources'
       operationId: getResources
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of resources
+      summary: Add a bulk of Resources
       description: 'Provide a list of Resource objects to be inserted'
       operationId: addResources
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of resources
+      summary: Update a bulk of Resources
       description: 'Provide a bulk list of  Resource objects to be updated'
       operationId: updateResources
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all resources
-      description: 'Deletes all resources'
+      summary: Delete all Resources
+      description: 'Deletes all Resources'
       operationId: deleteResources
       responses:
         '204':
@@ -308,7 +308,7 @@ components:
           type: integer
           format: int32
           description: FK ID of resource type
-        resource_name:
+        resourcename:
           type: string
           description: Name of protected resource
         description:
@@ -318,6 +318,10 @@ components:
           type: integer
           format: int32
           description: FK ID of Subject Permission
+        resourceid:
+          type: integer
+          format: int32
+          description: FK ID of Resource for Subscription
   requestBodies:
     Resource:
       content:

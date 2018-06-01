@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of subjectActivations
-      description: 'Returns list of subjectActivations'
+      summary: Get list of SubjectActivations
+      description: 'Returns list of SubjectActivations'
       operationId: getSubjectActivations
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of subjectActivations
+      summary: Add a bulk of SubjectActivations
       description: 'Provide a list of SubjectActivation objects to be inserted'
       operationId: addSubjectActivations
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of subjectActivations
+      summary: Update a bulk of SubjectActivations
       description: 'Provide a bulk list of  SubjectActivation objects to be updated'
       operationId: updateSubjectActivations
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all subjectActivations
-      description: 'Deletes all subjectActivations'
+      summary: Delete all SubjectActivations
+      description: 'Deletes all SubjectActivations'
       operationId: deleteSubjectActivations
       responses:
         '204':

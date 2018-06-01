@@ -144,4 +144,10 @@ public class Constants {
     public static final String RESTAPI_PAGINATION_OFFSET = "offset";
     public static final String RESTAPI_PAGINATION_LIMIT = "limit";
     public static final String RESTAPI_PAGINATION_TOTAL = "total";
+
+    public static final String JSONB_COLUMN_API_OPENAPIDOCUMENT = "openapidocument";
+    public static final String JSONB_COLUMN_API_EXTENDEDDOCUMENT = "extendeddocument";
+    public static final String JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES = "directoryattributes";
+    public static final String JSONB_COLUMN_POLICY_POLICYCONFIGURATION = "policyconfiguration";
+
 }

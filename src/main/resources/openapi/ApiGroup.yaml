@@ -27,8 +27,8 @@ paths:
     get:
       tags:
         - TODO
-      summary: Get list of apiGroups
-      description: 'Returns list of apiGroups'
+      summary: Get list of ApiGroups
+      description: 'Returns list of ApiGroups'
       operationId: getApiGroups
       parameters:
         - name: byname
@@ -67,7 +67,7 @@ paths:
     post:
       tags:
         - TODO
-      summary: Add a bulk of apiGroups
+      summary: Add a bulk of ApiGroups
       description: 'Provide a list of ApiGroup objects to be inserted'
       operationId: addApiGroups
       responses:
@@ -94,7 +94,7 @@ paths:
     put:
       tags:
         - TODO
-      summary: Update a bulk of apiGroups
+      summary: Update a bulk of ApiGroups
       description: 'Provide a bulk list of  ApiGroup objects to be updated'
       operationId: updateApiGroups
       responses:
@@ -121,8 +121,8 @@ paths:
     delete:
       tags:
         - TODO
-      summary: Delete all apiGroups
-      description: 'Deletes all apiGroups'
+      summary: Delete all ApiGroups
+      description: 'Deletes all ApiGroups'
       operationId: deleteApiGroups
       responses:
         '204':

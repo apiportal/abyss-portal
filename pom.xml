@@ -137,7 +137,6 @@
         <dependency>
             <groupId>org.fusesource.jansi</groupId>
             <artifactId>jansi</artifactId>
-            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
@@ -226,7 +225,6 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
-            <version>0.1.19</version>
         </dependency>
 <!--
         <dependency>
@@ -281,6 +279,12 @@
         <dependency>
             <groupId>com.atlassian.oai</groupId>
             <artifactId>swagger-request-validator-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>swagger-parser</artifactId>
+                    <groupId>io.swagger.parser.v3</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -437,7 +441,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>1.14</version>
                 <executions>
                     <execution>
                         <id>aggregate-download-licenses</id>

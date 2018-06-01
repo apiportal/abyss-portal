@@ -85,13 +85,13 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.info("AbyssAbstractVerticle.start invoked");
+        logger.trace("AbyssAbstractVerticle.start invoked");
         super.start(startFuture);
     }
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
-        logger.info("AbyssAbstractVerticle.stop invoked");
+        logger.trace("AbyssAbstractVerticle.stop invoked");
         jdbcClient.close();
         abyssJDBCService.releaseJDBCServiceObject(jdbcClient);
         abyssJDBCService.unpublishDataSource();
@@ -108,16 +108,16 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     Single<JDBCClient> initializeJdbcClient(String dataSourceName) {
 
-        logger.info("AbyssAbstractVerticle.initializeJdbcClient() running for " + dataSourceName);
+        logger.trace("AbyssAbstractVerticle.initializeJdbcClient() running for " + dataSourceName);
 
         return abyssJDBCService.publishDataSource(dataSourceName)
                 .flatMap(rec -> {
-                    logger.info("AbyssAbstractVerticle - getting Jdbc Data Service ...");
+                    logger.trace("AbyssAbstractVerticle - getting Jdbc Data Service ...");
                     return abyssJDBCService.getJDBCServiceObject(dataSourceName);
                 })
                 .flatMap(jdbcClient1 -> {
                     this.jdbcClient = jdbcClient1;
-                    logger.info("AbyssAbstractVerticle - Got jdbcClient successfully - " + jdbcClient1.toString());
+                    logger.trace("AbyssAbstractVerticle - Got jdbcClient successfully - " + jdbcClient1.toString());
                     return Single.just(jdbcClient1);
                 });
     }
@@ -126,7 +126,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     private Single<Router> configureAbyssRouter() {
 
-        logger.info("createRouter() running");
+        logger.trace("createRouter() running");
 
         //log HTTP requests
         abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
@@ -150,7 +150,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //It requires that the session handler is already present on previous matching routes
         //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
 
-        logger.info("createRouter() - " + jdbcClient.toString());
+        logger.debug("createRouter() - " + jdbcClient.toString());
         jdbcAuth = JDBCAuth.create(vertx, jdbcClient);
 
         jdbcAuth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
@@ -200,7 +200,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     Single<Router> enableCorsSupport(Router router) {
-        logger.info("enableCorsSupport() running");
+        logger.trace("enableCorsSupport() running");
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");
         allowHeaders.add("Access-Control-Allow-Origin");
@@ -225,20 +225,20 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     void failureHandler(RoutingContext context) {
-        logger.info("failureHandler invoked.. statusCode: " + context.statusCode());
+        logger.trace("failureHandler invoked.. statusCode: " + context.statusCode());
 
         //Use user's session for storage
         context.session().put(Constants.HTTP_STATUSCODE, context.statusCode());
-        logger.info(Constants.HTTP_STATUSCODE + " is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
+        logger.trace(Constants.HTTP_STATUSCODE + " is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
 
         context.session().put(Constants.HTTP_URL, context.request().path());
-        logger.info(Constants.HTTP_URL + " is put in context session:" + context.session().get(Constants.HTTP_URL));
+        logger.trace(Constants.HTTP_URL + " is put in context session:" + context.session().get(Constants.HTTP_URL));
 
         context.session().put(Constants.HTTP_ERRORMESSAGE, context.statusCode() > 0 ? HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase() : "0");
-        logger.info(Constants.HTTP_ERRORMESSAGE + " is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
+        logger.trace(Constants.HTTP_ERRORMESSAGE + " is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
 
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
-        logger.info(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+        logger.trace(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
         context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
     }
