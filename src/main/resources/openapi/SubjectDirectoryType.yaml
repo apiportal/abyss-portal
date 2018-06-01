@@ -3,6 +3,7 @@ servers:
   - url: 'http://192.168.21.99:38083/abyss/oapi'
   - url: 'http://192.168.21.139:38083/abyss/oapi'
   - url: 'http://192.168.10.46:38083/abyss/oapi' 
+  - url: 'http://dev2.apiportal.com/abyss/oapi'
   - url: 'https://apiportal.com/abyss/oapi'
 info:
   description: Abyss platform APIs
@@ -304,10 +305,10 @@ components:
           type: integer
           format: int32
           description: ID of Subject that reads, creates, updates or deletes
-        type_name:
+        typename:
           type: string
           description: Subject Directory Type Name
-        decription:
+        description:
           type: string
           description: Description of Directory Type
   requestBodies:

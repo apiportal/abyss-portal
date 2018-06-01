@@ -3,6 +3,7 @@ servers:
   - url: 'http://192.168.21.99:38083/abyss/oapi'
   - url: 'http://192.168.21.139:38083/abyss/oapi'
   - url: 'http://192.168.10.46:38083/abyss/oapi' 
+  - url: 'http://dev2.apiportal.com/abyss/oapi'
   - url: 'https://apiportal.com/abyss/oapi'
 info:
   description: Abyss platform APIs
@@ -326,7 +327,7 @@ components:
           description: Priority Order of Subject Directory Precedence
         directoryattributes:
           type: object
-          description: Detailed attributes of the directory in json format
+          description: Detailed attributes of the directory in json format  #jsonb#
         lastsyncronizedat:
           type: string
           description: Last syncronization date time of directory
