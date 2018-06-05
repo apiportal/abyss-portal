@@ -57,8 +57,8 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
                     JsonArray insertParam = new JsonArray()
                             .add(((Number) jsonObj.getValue("organizationid")).longValue())
                             .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("apiid")).longValue())
-                            .add(((Number) jsonObj.getValue("apitagid")).longValue());
+                            .add(jsonObj.getString("apiid"))
+                            .add(jsonObj.getString("apitagid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -108,8 +108,8 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
         JsonArray updateParams = new JsonArray()
                 .add(((Number) updateRecord.getValue("organizationid")).longValue())
                 .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
-                .add(((Number) updateRecord.getValue("apiid")).longValue())
-                .add(((Number) updateRecord.getValue("apitagid")).longValue())
+                .add(updateRecord.getString("apiid"))
+                .add(updateRecord.getString("apitagid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -127,8 +127,8 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
                     JsonArray updateParam = new JsonArray()
                             .add(((Number) jsonObj.getValue("organizationid")).longValue())
                             .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("apiid")).longValue())
-                            .add(((Number) jsonObj.getValue("apitagid")).longValue())
+                            .add(jsonObj.getString("apiid"))
+                            .add(jsonObj.getString("apitagid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })

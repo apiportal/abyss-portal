@@ -15,13 +15,20 @@ package com.verapi.portal.common;
 public class Constants {
 
     private static final String ABYSS = "abyss";
+    private static final String ABYSS_GW = "abyss-gw";
     public static final String ABYSS_ROOT = "/"+ABYSS;
+    public static final String ABYSS_GATEWAY_ROOT = "/"+ABYSS_GW;
     public static final String ABYSS_PORTAL = "abyss-portal";
     public static final String HOST_PROTOCOL = "hostProtocol";
     public static final String HOST = "host";
     public static final String ISSANDBOX = "issandbox";
 
     public static final String BROWSER_SESSION_TIMEOUT = "browser.session.timeout";
+
+    public static final String HTTP_ECHO_SERVER_HOST = "http.echo.server.host";
+    public static final String HTTP_ECHO_SERVER_PORT = "http.echo.server.port";
+    public static final String HTTP_ECHO_PROXY_SERVER_PORT = "http.echo.proxy.server.port";
+    public static final String HTTP_ECHO_SERVER_TIMEOUT = "http.echo.server.timeout";
 
     public static final String HTTP_SERVER_HOST = "http.server.host";
     public static final String HTTP_SERVER_PORT = "http.server.port";
@@ -39,6 +46,21 @@ public class Constants {
     public static final String HTTP_PROXY_OPENAPI_SERVER_PORT = "http.proxy.openapi.server.port";
     public static final String HTTP_OPENAPI_SERVER_TIMEOUT = "http.openapi.server.timeout";
 
+    public static final String HTTP_GATEWAY_SERVER_HOST = "http.gateway.server.host";
+    public static final String HTTP_GATEWAY_SERVER_PORT = "http.gateway.server.port";
+    public static final String HTTP_PROXY_GATEWAY_SERVER_PORT = "http.proxy.gateway.server.port";
+    public static final String HTTP_GATEWAY_SERVER_TIMEOUT = "http.gateway.server.timeout";
+
+    public static final String HTTPS_GATEWAY_SERVER_HOST = "https.gateway.server.host";
+    public static final String HTTPS_GATEWAY_SERVER_PORT = "https.gateway.server.port";
+    public static final String HTTPS_GATEWAY_OPENAPI_SERVER_PORT = "https.proxy.gateway.server.port";
+    public static final String HTTPS_GATEWAY_SERVER_TIMEOUT = "https.gateway.server.timeout";
+
+    public static final String HTTPS_GATEWAY_SSL_KEYSTORE_PATH = "";
+    public static final String HTTPS_GATEWAY_SSL_KEYSTORE_PASSWORD = "";
+    public static final String HTTPS_GATEWAY_SSL_TRUSTSTORE_PATH = "";
+    public static final String HTTPS_GATEWAY_SSL_TRUSTSTORE_PASSWORD = "";
+
     public static final String CONTEXT_FAILURE_MESSAGE = "context.failureMessage";
     public static final String HTTP_ERRORMESSAGE = "http.errorMessage";
     public static final String HTTP_URL = "http.url";
@@ -51,11 +73,14 @@ public class Constants {
     public static final String PORTAL_DBUSER_NAME = "portal.dbuser.name";
     public static final String PORTAL_DBUSER_PASSWORD = "portal.dbuser.password";
     public static final String PORTAL_DBCONN_MAX_POOL_SIZE = "portal.dbconn.max.pool.size";
+
     public static final String PORTAL_DATA_SOURCE_SERVICE = "portal-data-source-service";
     public static final String PORTAL_DBQUERY_TIMEOUT = "portal.dbconn.query.timeout";
-
     public static final String API_DATA_SOURCE_SERVICE = "api-data-source-service";
     public static final String API_DBQUERY_TIMEOUT = "api.dbconn.query.timeout";
+    public static final String GATEWAY_DATA_SOURCE_SERVICE = "gateway-data-source-service";
+    public static final String GATEWAY_DBQUERY_TIMEOUT = "gateway.dbconn.query.timeout";
+    public static final String ECHO_HTTP_SERVICE = "echo-http-service";
 
     public static final String TEMPLATE_DIR_ROOT = "webroot/";
     static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT +"email/";

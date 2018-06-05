@@ -114,7 +114,7 @@
         <appender-ref ref="ASYNC_FILE"/>
     </logger>
 
-    <root level="TRACE">
+    <root level="WARN">
         <appender-ref ref="ASYNC_FILE"/>
     </root>
 

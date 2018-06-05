@@ -27,6 +27,7 @@ public abstract class AbyssException extends VertxException  {
     }
 
     public AbyssException(String message, boolean noStackTrace) {
-        super(message, noStackTrace);
+        //super(message, noStackTrace);
+        super(message);
     }
 }

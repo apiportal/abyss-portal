@@ -57,8 +57,8 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
                     JsonArray insertParam = new JsonArray()
                             .add(((Number) jsonObj.getValue("organizationid")).longValue())
                             .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("apiid")).longValue())
-                            .add(((Number) jsonObj.getValue("apigroupid")).longValue());
+                            .add(jsonObj.getString("apiid"))
+                            .add(jsonObj.getString("apigroupid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -108,8 +108,8 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
         JsonArray updateParams = new JsonArray()
                 .add(((Number) updateRecord.getValue("organizationid")).longValue())
                 .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
-                .add(((Number) updateRecord.getValue("apiid")).longValue())
-                .add(((Number) updateRecord.getValue("apigroupid")).longValue())
+                .add(updateRecord.getString("apiid"))
+                .add(updateRecord.getString("apigroupid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -127,8 +127,8 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
                     JsonArray updateParam = new JsonArray()
                             .add(((Number) jsonObj.getValue("organizationid")).longValue())
                             .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("apiid")).longValue())
-                            .add(((Number) jsonObj.getValue("apigroupid")).longValue())
+                            .add(jsonObj.getString("apiid"))
+                            .add(jsonObj.getString("apigroupid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -211,7 +211,6 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
             "  deleted     = now()\n" +
             "  , isdeleted = true\n";
 
-/*
     private static final String SQL_SELECT = "select\n" +
             "  uuid,\n" +
             "  organizationid,\n" +
@@ -223,20 +222,6 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
             "  apiid,\n" +
             "  apigroupid\n" +
             "from api__api_group\n";
-*/
-
-    private static final String SQL_SELECT = "select\n" +
-            "  aag.uuid,\n" +
-            "  aag.organizationid,\n" +
-            "  aag.created,\n" +
-            "  aag.updated,\n" +
-            "  aag.deleted,\n" +
-            "  aag.isdeleted,\n" +
-            "  aag.crudsubjectid,\n" +
-            "  a.uuid as apiid,\n" +
-            "  ag.uuid as apigroupid\n" +
-            "from api__api_group aag, api a, api_group ag\n" +
-            "where aag.apiid = a.id and aag.apigroupid = ag.id\n";
 
     private static final String SQL_UPDATE = "UPDATE api__api_group\n" +
             "SET\n" +
@@ -250,21 +235,21 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
 
     private static final String SQL_WHERE = "where\n";
 
-    private static final String SQL_CONDITION_ID_IS = "aag.id = ?\n";
+    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
 
-    private static final String SQL_CONDITION_UUID_IS = "aag.uuid = CAST(? AS uuid)\n";
+    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
-    private static final String SQL_CONDITION_NAME_IS = "lower(aag.name) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(aag.name) like lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
 
-    private static final String SQL_ORDERBY_NAME = "order by aag.name\n";
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
 
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "aag.isdeleted=false\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + /*SQL_WHERE */ SQL_AND+ SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + /*SQL_WHERE*/ SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_FIND_BY_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_IS;
 
@@ -274,6 +259,6 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
 }

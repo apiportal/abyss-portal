@@ -242,6 +242,11 @@ public class ApiService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
+    public Single<ResultSet> findAllProxies() {
+        return findAll(SQL_FIND_ALL_PROXIES);
+    }
+
+
     private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion, dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog)\n" +
             "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
@@ -306,6 +311,8 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_NAME_LIKE = "openapidocument -> 'info' ->> 'title' like ?\n";
 
+    private static final String SQL_ISPROXYAPI_IS = "isproxyapi = true\n";
+
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
@@ -317,6 +324,8 @@ public class ApiService extends AbstractService<UpdateResult> {
     private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
 
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+
+    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_ISPROXYAPI_IS;
 
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE + SQL_WHERE + SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 

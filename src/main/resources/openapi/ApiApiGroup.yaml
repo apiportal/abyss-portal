@@ -3,8 +3,7 @@ servers:
   - url: 'http://192.168.21.99:38083/abyss/oapi'
   - url: 'http://192.168.21.139:38083/abyss/oapi'
   - url: 'http://192.168.10.46:38083/abyss/oapi' 
-  - url: 'http://dev2.apiportal.com/abyss/oapi'
-  - url: 'https://apiportal.com/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: Abyss platform APIs
   version: 1.0.0
@@ -306,13 +305,11 @@ components:
           format: int32
           description: ID of Subject that reads, creates, updates or deletes
         apiid:
-          type: integer
-          format: int32
-          description: FK ID of API for many to many relationship of API groups
+          type: string
+          description: FK UUID of API for many to many relationship of API groups
         apigroupid:
-          type: integer
-          format: int32
-          description: FK ID of API Group for many to many relationship of API groups
+          type: string
+          description: FK UUID of API Group for many to many relationship of API groups
   requestBodies:
     ApiApiGroup:
       content:
