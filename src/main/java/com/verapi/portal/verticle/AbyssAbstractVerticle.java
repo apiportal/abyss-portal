@@ -211,7 +211,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         allowHeaders.add("accept");
         allowHeaders.add("Cookie");
         // CORS support
-        router.route().handler(CorsHandler.create("http(s)?:\\/\\/(.+\\.)?(192\\.168\\..*|apiportal\\.com)(:\\d{1,5})?$")
+        router.route().handler(CorsHandler.create("http(s)?:\\/\\/(.+\\.)?(192\\.168\\..*|apiportal\\.com|local\\.abyss\\.com)(:\\d{1,5})?$")
                 .allowCredentials(true)
                 .allowedHeaders(allowHeaders)
                 .allowedMethod(HttpMethod.GET)
