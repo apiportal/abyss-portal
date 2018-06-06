@@ -308,8 +308,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  lastpasswordchangeat,\n" +
             "  lastauthenticatedat,\n" +
             "  lastfailedloginat,\n" +
-            "  subjectdirectoryid\n" +
-            "  islocked\n" +
+            "  subjectdirectoryid,\n" +
+            "  islocked,\n" +
             "  issandbox\n" +
             "from subject\n";
 
