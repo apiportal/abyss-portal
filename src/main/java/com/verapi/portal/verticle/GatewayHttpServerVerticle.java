@@ -16,12 +16,10 @@ import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.service.idam.ApiService;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.HttpLocation;
@@ -61,7 +59,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
 
     public void routingContextHandler(RoutingContext context) {
         logger.trace("---routingContextHandler invoked");
-        //String apiPathParamValue = context.request().getParam("api");
+        //String apiPathParamValue = context.request().getParam("apipath");
         //logger.trace("captured path parameter: {}", apiPathParamValue);
 
         //if (apiPathParamValue.equals("echo")) {
@@ -85,8 +83,15 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                         return Observable.fromIterable(resultSet.getRows());
                     }
                 })
-                //.toObservable()
                 .flatMap(o -> {
+                            createSubRouter(o.getString("uuid"))
+                                    .flatMap(this::enableCorsSupport)
+                                    .subscribe(subRouter -> logger.trace("gatewayRouter route list{} \n subRouter route list: {}", gatewayRouter.getRoutes(), subRouter.getRoutes()));
+                            return Observable.just(o);
+                        }
+                )
+                .flatMap(o -> {
+/*
                             String mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + o.getString("uuid");
                             Router subRouter = Router.router(vertx);
                             gatewayRouter.mountSubRouter(mountPoint, subRouter);
@@ -95,6 +100,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             //logger.trace("route added for path {} and openapi spec is {}", o.getString("openapidocument"));
                             logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
                             logger.trace("subRouter route list: {}", subRouter.getRoutes());
+*/
                             return Observable.just(new Record()
                                     .setType("http-endpoint")
                                     //.setLocation(new JsonObject().put("endpoint", "the-service-address"))

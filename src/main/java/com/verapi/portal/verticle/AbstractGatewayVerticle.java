@@ -101,8 +101,38 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         router.route(Constants.ABYSS_GATEWAY_ROOT).handler(this::routingContextHandler);
 
         //router.route().handler(ctx -> ctx.fail(HttpResponseStatus.NOT_FOUND.code()));
+        logger.trace("router route list: {}", router.getRoutes());
 
         return Single.just(router);
+    }
+
+    Single<Router> createSubRouter(String mountPoint) {
+        logger.trace("---createSubRouter invoked");
+
+        mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + mountPoint;
+        Router subRouter = Router.router(vertx);
+        gatewayRouter.mountSubRouter(mountPoint, subRouter);
+
+        //log HTTP requests
+        subRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+
+        //install body handler
+        //A handler which gathers the entire request body and sets it on the RoutingContext
+        //It also handles HTTP file uploads and can be used to limit body sizes
+        subRouter.route().handler(BodyHandler.create());
+
+        //If a request times out before the response is written a 503 response will be returned to the client, default abyss-gw timeout 30 secs
+        subRouter.route().handler(TimeoutHandler.create(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_TIMEOUT)));
+
+        //Handler which adds a header `x-response-time` in the response of matching requests containing the time taken in ms to process the request.
+        subRouter.route().handler(ResponseTimeHandler.create());
+
+        subRouter.route().failureHandler(this::failureHandler);
+
+        //subRouter.route(mountPoint + "/:apipath").handler(this::routingContextHandler);
+        subRouter.route(mountPoint).handler(this::routingContextHandler);
+
+        return Single.just(subRouter);
     }
 
     private void failureHandler(RoutingContext context) {
@@ -150,7 +180,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 */
     }
 
-    private Single<Router> enableCorsSupport(Router router) {
+    Single<Router> enableCorsSupport(Router router) {
         logger.trace("---enableCorsSupport invoked");
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");

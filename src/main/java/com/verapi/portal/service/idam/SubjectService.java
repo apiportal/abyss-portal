@@ -273,7 +273,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid, islocked, issandbox)\n" +
-            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, ?,?,?)";
+            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +

@@ -55,24 +55,24 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getBoolean("isproxyapi"))
-                            .add(((Number) jsonObj.getValue("apistateid")).longValue())
-                            .add(((Number) jsonObj.getValue("apivisibilityid")).longValue())
+                            .add(jsonObj.getString("apistateid"))
+                            .add(jsonObj.getString("apivisibilityid"))
                             .add(jsonObj.getString("languagename"))
                             .add(jsonObj.getString("languageversion"))
                             .add(((Number) jsonObj.getValue("dataformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
                             .add(jsonObj.getJsonObject("openapidocument"))
                             .add(jsonObj.getJsonObject("extendeddocument"))
-                            .add(((Number) jsonObj.getValue("businessapiid")).longValue())
+                            .add(jsonObj.getString("businessapiid"))
                             .add(jsonObj.getValue("image"))
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
-                            .add(jsonObj.getString("apiOriginUuid"))
+                            .add(jsonObj.getString("apioriginuuid"))
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getBoolean("islive"))
@@ -126,19 +126,19 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
-                .add(((Number) updateRecord.getValue("subjectid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.getString("subjectid"))
                 .add(updateRecord.getBoolean("isproxyapi"))
-                .add(((Number) updateRecord.getValue("apistateid")).longValue())
-                .add(((Number) updateRecord.getValue("apivisibilityid")).longValue())
+                .add(updateRecord.getString("apistateid"))
+                .add(updateRecord.getString("apivisibilityid"))
                 .add(updateRecord.getString("languagename"))
                 .add(updateRecord.getString("languageversion"))
                 .add(((Number) updateRecord.getValue("dataformat")).longValue())
                 .add(updateRecord.getString("originaldocument"))
                 .add(updateRecord.getJsonObject("openapidocument"))
                 .add(updateRecord.getJsonObject("extendeddocument"))
-                .add(((Number) updateRecord.getValue("businessapiid")).longValue())
+                .add(updateRecord.getString("businessapiid"))
                 .add(updateRecord.getValue("image"))
                 .add(updateRecord.getString("color"))
                 .add(updateRecord.getInstant("deployed"))
@@ -164,19 +164,19 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getBoolean("isproxyapi"))
-                            .add(((Number) jsonObj.getValue("apistateid")).longValue())
-                            .add(((Number) jsonObj.getValue("apivisibilityid")).longValue())
+                            .add(jsonObj.getString("apistateid"))
+                            .add(jsonObj.getString("apivisibilityid"))
                             .add(jsonObj.getString("languagename"))
                             .add(jsonObj.getString("languageversion"))
                             .add(((Number) jsonObj.getValue("dataformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
                             .add(jsonObj.getJsonObject("openapidocument"))
                             .add(jsonObj.getJsonObject("extendeddocument"))
-                            .add(((Number) jsonObj.getValue("businessapiid")).longValue())
+                            .add(jsonObj.getString("businessapiid"))
                             .add(jsonObj.getValue("image"))
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
@@ -266,7 +266,7 @@ public class ApiService extends AbstractService<UpdateResult> {
     }
 
 
-    private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion, dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog, apiOriginUuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
+    private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion, dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog, apioriginuuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
             "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_DELETE = "update api\n" +
