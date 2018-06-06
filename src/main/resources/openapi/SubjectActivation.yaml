@@ -281,8 +281,7 @@ components:
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
         organizationid:
-          type: integer
-          format: int32
+          type: string
           description: Id of Organization
         created:
           type: string
@@ -301,12 +300,10 @@ components:
           readOnly: true
           description: Is record logically deleted #readOnly#
         crudsubjectid:
-          type: integer
-          format: int32
+          type: string
           description: ID of Subject that reads, creates, updates or deletes
         subjectid:
-          type: integer
-          format: int32
+          type: string
           description: The user that the activation code is generated
         expiredate:
           type: string

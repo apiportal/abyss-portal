@@ -55,9 +55,9 @@ public class SubjectActivationService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getInstant("expiredate"))
                             .add(jsonObj.getString("token"))
                             .add(jsonObj.getString("tokentype"))
@@ -111,9 +111,9 @@ public class SubjectActivationService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
-                .add(((Number) updateRecord.getValue("subjectid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.getString("subjectid"))
                 .add((updateRecord.getInstant("expiredate")))
                 .add(((String) updateRecord.getValue("token")))
                 .add(((String) updateRecord.getValue("tokentype")))
@@ -135,9 +135,9 @@ public class SubjectActivationService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("subjectid"))
                             .add((jsonObj.getInstant("expiredate")))
                             .add(((String) jsonObj.getValue("token")))
                             .add(((String) jsonObj.getValue("tokentype")))

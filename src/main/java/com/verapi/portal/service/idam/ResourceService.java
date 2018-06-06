@@ -55,13 +55,13 @@ public class ResourceService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("resourcetypeid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("resourcetypeid"))
                             .add(jsonObj.getString("resourcename"))
                             .add(jsonObj.getString("description"))
-                            .add(((Number) jsonObj.getValue("subjectpermissionid")).longValue())
-                            .add(((Number) jsonObj.getValue("resourceid")).longValue());
+                            .add(jsonObj.getString("subjectpermissionid"))
+                            .add(jsonObj.getString("resourceid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -109,13 +109,13 @@ public class ResourceService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
-                .add(((Number) updateRecord.getValue("resourcetypeid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.getString("resourcetypeid"))
                 .add(updateRecord.getString("resourcename"))
                 .add(updateRecord.getString("description"))
-                .add(((Number) updateRecord.getValue("subjectpermissionid")).longValue())
-                .add(((Number) updateRecord.getValue("resourceid")).longValue())
+                .add(updateRecord.getString("subjectpermissionid"))
+                .add(updateRecord.getString("resourceid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -131,13 +131,13 @@ public class ResourceService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("resourcetypeid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("resourcetypeid"))
                             .add(jsonObj.getString("resourcename"))
                             .add(jsonObj.getString("description"))
-                            .add(((Number) jsonObj.getValue("subjectpermissionid")).longValue())
-                            .add(((Number) jsonObj.getValue("resourceid")).longValue())
+                            .add(jsonObj.getString("subjectpermissionid"))
+                            .add(jsonObj.getString("resourceid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
