@@ -234,7 +234,7 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  isenabled,\n" +
             "  groupname,\n" +
-            "  description\n" +
+            "  description,\n" +
             "  effectivestartdate,\n" +
             "  effectiveenddate,\n" +
             "  subjectdirectoryid\n" +

@@ -142,7 +142,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
         loggerList.forEach(tmpLogger -> {
-            if (tmpLogger.getName().startsWith("com.verapi")) {
+            if (tmpLogger.getName().startsWith("com.verapi") || tmpLogger.getName().startsWith("io.vertx")) {
                 logger.trace("setting log level [{}] for the class: {}", Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL), tmpLogger.getName());
                 tmpLogger.setLevel(Level.toLevel(Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL)));
             }
