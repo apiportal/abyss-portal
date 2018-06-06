@@ -204,7 +204,7 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into api__api_tag (organizationid, crudsubjectid, apiid, apitagid)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update api__api_tag\n" +
             "set\n" +
@@ -225,11 +225,11 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE api__api_tag\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
-            "  , apiid      = ?\n" +
-            "  , apitagid      = ?\n";
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , apitagid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 

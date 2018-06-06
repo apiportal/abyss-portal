@@ -281,7 +281,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid, islocked, issandbox)\n" +
-            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, ?, ?, ?)";
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, CAST(? AS uuid), ?, ?)";
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +
@@ -323,10 +323,10 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE subject\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , subjecttypeid      = ?\n" +
+            "  , subjecttypeid      = CAST(? AS uuid)\n" +
             "  , subjectname       = ?\n" +
             "  , firstname            = ?\n" +
             "  , lastname            = ?\n" +
@@ -336,7 +336,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , effectivestartdate = ?\n" +
             "  , effectiveenddate  = ?\n" +
             "  , picture             = ?\n" +
-            "  , subjectdirectoryid = ?\n" +
+            "  , subjectdirectoryid = CAST(? AS uuid)\n" +
             "  , islocked = ?\n" +
             "  , issandbox = ?\n";
     private static final String SQL_AND = "and\n";
@@ -351,7 +351,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_NAME_LIKE = "lower(subjectname) like lower(?)\n";
 
-    private static final String SQL_CONDITION_ONLY_USERS = "subjecttypeid=" + Constants.SUBJECT_TYPE_USER + "\n";
+    private static final String SQL_CONDITION_ONLY_USERS = "subjecttypeid=CAST(" + Constants.SUBJECT_TYPE_USER + " AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
 

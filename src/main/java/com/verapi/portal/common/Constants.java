@@ -156,7 +156,7 @@ public class Constants {
 
     public static final int DEFAULT_ORGANIZATION_ID = 0;
 
-    public static final int SUBJECT_TYPE_USER = 1;
+    public static final String SUBJECT_TYPE_USER = "21371a15-04f8-445e-a899-006ee11c0e09";
     public static final int SUBJECT_TYPE_APP = 2;
     public static final int SUBJECT_TYPE_SYSTEM = 3;
 

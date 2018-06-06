@@ -266,8 +266,13 @@ public class ApiService extends AbstractService<UpdateResult> {
     }
 
 
-    private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion, dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog, apioriginuuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
-            "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion,\n" +
+            "                 dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog,\n" +
+            "                 apioriginuuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
+            "values\n" +
+            "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
+            "                    ?, ?, ?, ?, CAST(? AS uuid), ?, ?, ?, ?,\n" +
+            "                             CAST(? AS uuid), ?, ?, ?, ?, ?);";
 
     private static final String SQL_DELETE = "update api\n" +
             "set\n" +
@@ -306,25 +311,25 @@ public class ApiService extends AbstractService<UpdateResult> {
             "from api\n";
     private static final String SQL_UPDATE = "UPDATE api\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
-            "  , subjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
             "  , isproxyapi      = ?\n" +
-            "  , apistateid      = ?\n" +
-            "  , apivisibilityid      = ?\n" +
+            "  , apistateid      = CAST(? AS uuid)\n" +
+            "  , apivisibilityid      = CAST(? AS uuid)\n" +
             "  , languagename      = ?\n" +
             "  , languageversion      = ?\n" +
             "  , dataformat      = ?\n" +
             "  , originaldocument      = ?\n" +
             "  , openapidocument      = ?\n" +
             "  , extendeddocument      = ?\n" +
-            "  , businessapiid      = ?\n" +
+            "  , businessapiid      = CAST(? AS uuid)\n" +
             "  , image      = ?\n" +
             "  , color      = ?\n" +
             "  , deployed      = ?\n" +
             "  , changelog      = ?\n" +
-            "  , apioriginuuid      = ?\n" +
+            "  , apioriginuuid      = CAST(? AS uuid)\n" +
             "  , version      = ?\n" +
             "  , issandbox      = ?\n" +
             "  , islive      = ?\n" +

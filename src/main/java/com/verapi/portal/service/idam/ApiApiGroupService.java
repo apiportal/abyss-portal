@@ -204,7 +204,7 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into api__api_group (organizationid, crudsubjectid, apiid, apigroupid)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update api__api_group\n" +
             "set\n" +
@@ -225,11 +225,11 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE api__api_group\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
-            "  , apiid      = ?\n" +
-            "  , apigroupid      = ?\n";
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , apigroupid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 

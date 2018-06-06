@@ -204,7 +204,7 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into api__api_category (organizationid, crudsubjectid, apiid, apicategoryid)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update api__api_category\n" +
             "set\n" +
@@ -225,11 +225,11 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE api__api_category\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
-            "  , apiid      = ?\n" +
-            "  , apicategoryid      = ?\n";
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , apicategoryid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 
