@@ -111,7 +111,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                             .setRoot("/")
                                             .toJson()))
                                     .setName(o.getString("uuid"))
-                                    .setMetadata(new JsonObject().put("organization", o.getInteger("organizationid"))));
+                                    .setMetadata(new JsonObject().put("organization", o.getString("organizationid"))));
                         }
                 )
                 .flatMap(record -> AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).toObservable()))
