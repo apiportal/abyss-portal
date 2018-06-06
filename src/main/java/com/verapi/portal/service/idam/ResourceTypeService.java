@@ -201,7 +201,7 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into resource_type (organizationid, crudsubjectid, type)\n" +
-            "values (?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,?)";
 
     private static final String SQL_DELETE = "update resource_type\n" +
             "set\n" +
@@ -221,9 +221,9 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE resource_type\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , type      = ?\n";
 
     private static final String SQL_AND = "and\n";

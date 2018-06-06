@@ -224,8 +224,10 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
-    private static final String SQL_INSERT = "insert into subject_directory (organizationid, crudsubjectid, directoryname, description, isactive, istemplate, directorytypeid, directorypriorityorder, directoryattributes, lastsyncronizedat, lastsyncronizationduration)\n" +
-            "values (?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT = "insert into subject_directory (organizationid, crudsubjectid, directoryname, description, isactive, istemplate,\n" +
+            "                               directorytypeid, directorypriorityorder, directoryattributes, lastsyncronizedat, lastsyncronizationduration)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?,\n" +
+            "  CAST(? AS uuid), ?, ?, ?, ?);";
 
     private static final String SQL_DELETE = "update subject_directory\n" +
             "set\n" +
@@ -252,14 +254,14 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
             "from subject_directory\n";
     private static final String SQL_UPDATE = "UPDATE subject_directory\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , directoryname      = ?\n" +
             "  , description       = ?\n" +
             "  , isactive            = ?\n" +
             "  , istemplate            = ?\n" +
-            "  , directorytypeid                 = ?\n" +
+            "  , directorytypeid                 = CAST(? AS uuid)\n" +
             "  , directorypriorityorder    = ?\n" +
             "  , directoryattributes = ?\n" +
             "  , lastsyncronizedat = ?\n" +

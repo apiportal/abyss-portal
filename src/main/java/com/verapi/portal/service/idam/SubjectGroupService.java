@@ -216,8 +216,10 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
-    private static final String SQL_INSERT = "insert into subject_group (organizationid, crudsubjectid, isenabled, groupname, description, effectivestartdate, effectiveenddate, subjectdirectoryid)\n" +
-            "values (?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT = "insert into subject_group (organizationid, crudsubjectid, isenabled, groupname, description,\n" +
+            "                           effectivestartdate, effectiveenddate, subjectdirectoryid)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?,\n" +
+            "        ?, ?, CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update subject_group\n" +
             "set\n" +
@@ -242,15 +244,15 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE subject_group\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , isenabled      = ?\n" +
             "  , groupname      = ?\n" +
             "  , description       = ?\n" +
             "  , effectivestartdate      = ?\n" +
             "  , effectiveenddate      = ?\n" +
-            "  , subjectdirectoryid      = ?\n";
+            "  , subjectdirectoryid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 

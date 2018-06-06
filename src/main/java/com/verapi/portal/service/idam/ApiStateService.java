@@ -204,7 +204,7 @@ public class ApiStateService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into api_state (organizationid, crudsubjectid, name, description)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
 
     private static final String SQL_DELETE = "update api_state\n" +
             "set\n" +
@@ -225,9 +225,9 @@ public class ApiStateService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE api_state\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
             "  , description      = ?\n";
 

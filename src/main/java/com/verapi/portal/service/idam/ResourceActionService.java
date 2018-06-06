@@ -207,7 +207,7 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into resource_action (organizationid, crudsubjectid, actionname, description, subjectpermissionid)\n" +
-            "values (?,?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,? ,CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update resource_action\n" +
             "set\n" +
@@ -229,12 +229,12 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE resource_action\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , actionname      = ?\n" +
             "  , description      = ?\n" +
-            "  , subjectpermissionid       = ?\n";
+            "  , subjectpermissionid       = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 

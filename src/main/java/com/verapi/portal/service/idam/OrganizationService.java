@@ -204,7 +204,7 @@ public class OrganizationService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into organization (organizationid, crudsubjectid, name, description)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
 
     private static final String SQL_DELETE = "update organization\n" +
             "set\n" +
@@ -225,9 +225,9 @@ public class OrganizationService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE organization\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
             "  , description      = ?\n";
 

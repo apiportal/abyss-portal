@@ -213,7 +213,7 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into subject_permission (organizationid, crudsubjectid, permission, description, effectivestartdate, effectiveenddate, subjectid)\n" +
-            "values (?,?,?,?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,? ,? ,? ,CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update subject_permission\n" +
             "set\n" +
@@ -237,14 +237,14 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE subject_permission\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , permission      = ?\n" +
             "  , description       = ?\n" +
             "  , effectivestartdate      = ?\n" +
             "  , effectiveenddate      = ?\n" +
-            "  , subjectid      = ?\n";
+            "  , subjectid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 

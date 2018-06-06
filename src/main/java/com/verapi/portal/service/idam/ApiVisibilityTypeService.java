@@ -204,7 +204,7 @@ public class ApiVisibilityTypeService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into api_visibility_type (organizationid, crudsubjectid, name, description)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
 
     private static final String SQL_DELETE = "update api_visibility_type\n" +
             "set\n" +
@@ -225,9 +225,9 @@ public class ApiVisibilityTypeService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE api_visibility_type\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
             "  , description      = ?\n";
 

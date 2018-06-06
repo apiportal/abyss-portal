@@ -280,8 +280,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
-    private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid, islocked, issandbox)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, CAST(? AS uuid), ?, ?)";
+    private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
+            "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
+            "                     subjectdirectoryid, islocked, issandbox)\n" +
+            "values\n" +
+            "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
+            "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
+            "   CAST(? AS uuid), ?, ?)";
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +

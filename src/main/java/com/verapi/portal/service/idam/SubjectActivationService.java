@@ -219,7 +219,7 @@ public class SubjectActivationService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into subject_activation (organizationid, crudsubjectid, subjectid, expiredate, token, tokentype, email, nonce, userdata)\n" +
-            "values (?,?,?,?,?,?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,? ,? ,? ,? ,? ,?)";
 
     private static final String SQL_DELETE = "update subject_activation\n" +
             "set\n" +
@@ -245,10 +245,10 @@ public class SubjectActivationService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE subject_activation\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
-            "  , subjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
             "  , expiredate       = ?\n" +
             "  , token            = ?\n" +
             "  , tokentype            = ?\n" +

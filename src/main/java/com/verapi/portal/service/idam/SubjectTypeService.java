@@ -204,7 +204,7 @@ public class SubjectTypeService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into subject_type (organizationid, crudsubjectid, typename, typedescription)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
 
     private static final String SQL_DELETE = "update subject_type\n" +
             "set\n" +
@@ -225,9 +225,9 @@ public class SubjectTypeService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE subject_type\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , typename      = ?\n" +
             "  , typedescription       = ?\n";
 

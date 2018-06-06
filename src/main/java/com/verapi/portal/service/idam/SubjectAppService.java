@@ -204,7 +204,7 @@ public class SubjectAppService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into subject_app (organizationid, crudsubjectid, subjectid, appid)\n" +
-            "values (?,?,?,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update subject_app\n" +
             "set\n" +
@@ -225,11 +225,11 @@ public class SubjectAppService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE = "UPDATE subject_app\n" +
             "SET\n" +
-            "  organizationid      = ?\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
-            "  , crudsubjectid      = ?\n" +
-            "  , subjectid      = ?\n" +
-            "  , appid      = ?\n";
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
+            "  , appid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 
