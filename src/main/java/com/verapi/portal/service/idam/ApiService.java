@@ -143,7 +143,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("color"))
                 .add(updateRecord.getInstant("deployed"))
                 .add(updateRecord.getString("changelog"))
-                .add(updateRecord.getString("apiOriginUuid"))
+                .add(updateRecord.getString("apioriginuuid"))
                 .add(updateRecord.getString("version"))
                 .add(updateRecord.getBoolean("issandbox"))
                 .add(updateRecord.getBoolean("islive"))
@@ -181,7 +181,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
-                            .add(jsonObj.getString("apiOriginUuid"))
+                            .add(jsonObj.getString("apioriginuuid"))
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getBoolean("islive"))
@@ -297,7 +297,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  color,\n" +
             "  deployed,\n" +
             "  changelog,\n" +
-            "  apiOriginUuid,\n" +
+            "  apioriginuuid,\n" +
             "  version,\n" +
             "  issandbox,\n" +
             "  islive,\n" +
@@ -324,7 +324,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , color      = ?\n" +
             "  , deployed      = ?\n" +
             "  , changelog      = ?\n" +
-            "  , apiOriginUuid      = ?\n" +
+            "  , apioriginuuid      = ?\n" +
             "  , version      = ?\n" +
             "  , issandbox      = ?\n" +
             "  , islive      = ?\n" +
