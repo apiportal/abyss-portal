@@ -272,8 +272,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
-    private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid)\n" +
-            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, ?)";
+    private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email, secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture, subjectdirectoryid, islocked, issandbox)\n" +
+            "values (?, ?, ?, ?, ?, ?, ?, ?, ?, coalesce(?, now()), ?, ?, ?, ?, ?,?,?)";
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +
@@ -309,6 +309,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  lastauthenticatedat,\n" +
             "  lastfailedloginat,\n" +
             "  subjectdirectoryid\n" +
+            "  islocked\n" +
+            "  issandbox\n" +
             "from subject\n";
 
     private static final String SQL_UPDATE = "UPDATE subject\n" +
@@ -326,8 +328,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , effectivestartdate = ?\n" +
             "  , effectiveenddate  = ?\n" +
             "  , picture             = ?\n" +
-            "  , subjectdirectoryid = ?\n";
-
+            "  , subjectdirectoryid = ?\n" +
+            "  , islocked = ?\n" +
+            "  , issandbox = ?\n";
     private static final String SQL_AND = "and\n";
 
     private static final String SQL_WHERE = "where\n";
