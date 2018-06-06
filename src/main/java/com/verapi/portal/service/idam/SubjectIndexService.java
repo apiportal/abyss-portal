@@ -136,17 +136,17 @@ public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
             "\t,\n" +
             "\t'myApiTagList', COALESCE((select json_agg(row_to_json(myApiTagList)) from \n" +
             "\t(select t.uuid, t.\"name\", count(*) as \"count\" from api_tag t, api a, api__api_tag axt \n" +
-            "\t  where t.id = axt.apitagid and axt.apiid = a.id and a.subjectid = subj.id \n" +
+            "\t  where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = subj.id \n" +
             "\t  group by t.uuid, t.\"name\") as myApiTagList), '[]')\n" +
             "\t,  \n" +
             "\t'myApiGroupList', COALESCE((select json_agg(row_to_json(myApiGroupList)) from \n" +
             "\t(select g.uuid, g.\"name\", count(*) as \"count\" from api_group g, api a, api__api_group axg \n" +
-            "\t  where g.id = axg.apigroupid and axg.apiid = a.id and a.subjectid = subj.id \n" +
+            "\t  where g.uuid = axg.apigroupid and axg.apiid = a.uuid and a.subjectid = subj.id \n" +
             "\t  group by g.uuid, g.\"name\") as myApiGroupList), '[]')\n" +
             "\t,  \n" +
             "\t'myApiCategoryList', COALESCE((select json_agg(row_to_json(myApiCategoryList)) from \n" +
             "\t(select c.uuid, c.\"name\", count(*) as \"count\" from api_category c, api a, api__api_category axc \n" +
-            "\t  where c.id = axc.apicategoryid and axc.apiid = a.id and a.subjectid = subj.id \n" +
+            "\t  where c.uuid = axc.apicategoryid and axc.apiid = a.uuid and a.subjectid = subj.id \n" +
             "\t  group by c.uuid, c.\"name\") as myApiCategoryList), '[]')\n" +
             ") as result\n" +
             "from (\n" +
@@ -179,30 +179,30 @@ public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
             "\t'myApiStateList', (select json_agg(row_to_json(myApiStateList)) from \n" +
             "\t(select st.id, st.uuid, st.\"name\", st.description, count(my_apis.subjectid) as \"count\" \n" +
             "\t  from api_state st left outer join \n" +
-            "\t       (select a.id, a.subjectid, a.apistateid from api a where a.subjectid = subj.id) as my_apis \n" + //TODO: remove a.subject_id
+            "\t       (select a.id, a.subjectid, a.apistateid from api a where a.subjectid = subj.id and a.isproxyapi = false and openapidocument ?? 'servers') as my_apis \n" + //TODO: remove a.subject_id
             "\t       on (st.id = my_apis.apistateid)  \n" +
             "\t  group by st.id, st.uuid, st.\"name\", st.description) as myApiStateList)\n" +
             "\t,\n" +
             "\t'myApiVisibilityList', (select json_agg(row_to_json(myApiVisibilityList)) from \n" +
             "\t(select vt.id, vt.uuid, vt.\"name\", count(my_apis.subjectid) as \"count\" \n" +
             "\t  from api_visibility_type vt left outer join \n" +
-            "\t       (select a.id, a.subjectid, a.apivisibilityid from api a where a.subjectid = subj.id) as my_apis\n" + //TODO: remove a.subject_id
+            "\t       (select a.id, a.subjectid, a.apivisibilityid from api a where a.subjectid = subj.id and a.isproxyapi = false and openapidocument ?? 'servers') as my_apis\n" + //TODO: remove a.subject_id
             "\t       on (vt.id = my_apis.apivisibilityid)\n" +
             "\t  group by vt.id, vt.uuid, vt.\"name\") as myApiVisibilityList)\n" +
             "\t,\n" +
             "\t'myApiTagList', COALESCE((select json_agg(row_to_json(myApiTagList)) from \n" +
             "\t(select t.uuid, t.\"name\", count(*) as \"count\" from api_tag t, api a, api__api_tag axt \n" +
-            "\t  where t.id = axt.apitagid and axt.apiid = a.id and a.subjectid = subj.id \n" +
+            "\t  where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = subj.id and a.isproxyapi = false and openapidocument ?? 'servers'\n" +
             "\t  group by t.uuid, t.\"name\") as myApiTagList), '[]')\n" +
             "\t,  \n" +
             "\t'myApiGroupList', COALESCE((select json_agg(row_to_json(myApiGroupList)) from \n" +
             "\t(select g.uuid, g.\"name\", count(*) as \"count\" from api_group g, api a, api__api_group axg \n" +
-            "\t  where g.id = axg.apigroupid and axg.apiid = a.id and a.subjectid = subj.id \n" +
+            "\t  where g.uuid = axg.apigroupid and axg.apiid = a.uuid and a.subjectid = subj.id and a.isproxyapi = false and openapidocument ?? 'servers'\n" +
             "\t  group by g.uuid, g.\"name\") as myApiGroupList), '[]')\n" +
             "\t,  \n" +
             "\t'myApiCategoryList', COALESCE((select json_agg(row_to_json(myApiCategoryList)) from \n" +
             "\t(select c.uuid, c.\"name\", count(*) as \"count\" from api_category c, api a, api__api_category axc \n" +
-            "\t  where c.id = axc.apicategoryid and axc.apiid = a.id and a.subjectid = subj.id \n" +
+            "\t  where c.uuid = axc.apicategoryid and axc.apiid = a.uuid and a.subjectid = subj.id and a.isproxyapi = false and openapidocument ?? 'servers'\n" +
             "\t  group by c.uuid, c.\"name\") as myApiCategoryList), '[]')\n" +
             ") as result\n" +
             "from (\n" +

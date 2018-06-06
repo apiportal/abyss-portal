@@ -113,7 +113,7 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
     }
 
 
-    private static final String SQL_FIND_ALL_COMPACT =
+/*    private static final String SQL_FIND_ALL_COMPACT =
     "SELECT row_to_json(jayson) from (" +
             "SELECT " +
             "uuid," +
@@ -148,7 +148,7 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
             "FROM portalschema.api a " +
             "WHERE openapi_document ?? 'servers' " +
             "ORDER BY openapi_document -> 'info' -> 'title'" +
-            ") as jayson;";
+            ") as jayson;";*/
 
     private static final String SQL_FILTER_BY_SUBJECTNAME = "SELECT " +
             "uuid," +
@@ -172,16 +172,17 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
             "deployed," +
             "changelog, " +
             "(SELECT json_agg(json_build_object('uuid', t.uuid,'name', t.\"name\"))" +
-            " FROM api_tag t join api__api_tag axt on t.id = axt.apitagid" +
-            " WHERE axt.apiid = a.id) as tags," +
+            " FROM api_tag t join api__api_tag axt on t.uuid = axt.apitagid" +
+            " WHERE axt.apiid = a.uuid) as tags," +
             "(SELECT json_agg(json_build_object('uuid', g.uuid,'name', g.\"name\"))" +
-            " FROM api_group g join api__api_group axg on g.id = axg.apigroupid" +
-            " WHERE axg.apiid = a.id) as groups," +
+            " FROM api_group g join api__api_group axg on g.uuid = axg.apigroupid" +
+            " WHERE axg.apiid = a.uuid) as groups," +
             "(SELECT json_agg(json_build_object('uuid', c.uuid,'name', c.\"name\"))" +
-            " FROM api_category c join api__api_category axc on c.id = axc.apicategoryid" +
-            " WHERE axc.apiid = a.id) as categories " +
+            " FROM api_category c join api__api_category axc on c.uuid = axc.apicategoryid" +
+            " WHERE axc.apiid = a.uuid) as categories " +
             "FROM portalschema.api a " +
             "WHERE openapidocument ?? 'servers' " +
+            "  AND isproxyapi = false\n" +
             "AND subjectid = (SELECT id FROM subject WHERE lower(subjectname) like lower(?)) " +
             "ORDER BY openapidocument -> 'info' -> 'title'" +
             ";";
@@ -223,28 +224,29 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
             "           from\n" +
             "             api_tag t\n" +
             "             join api__api_tag axt on\n" +
-            "                                     t.id = axt.apitagid\n" +
+            "                                     t.uuid = axt.apitagid\n" +
             "           where\n" +
-            "             axt.apiid = a.id\n" +
+            "             axt.apiid = a.uuid\n" +
             "         ) as tags,\n" +
             "         (\n" +
             "           select json_agg(json_build_object('uuid', g.uuid, 'name', g.\"name\"))\n" +
             "           from\n" +
             "             api_group g\n" +
-            "             join api__api_group axg on g.id = axg.apigroupid\n" +
+            "             join api__api_group axg on g.uuid = axg.apigroupid\n" +
             "           where\n" +
-            "             axg.apiid = a.id\n" +
+            "             axg.apiid = a.uuid\n" +
             "         ) as groups,\n" +
             "         (\n" +
             "           select json_agg(json_build_object('uuid', c.uuid, 'name', c.\"name\"))\n" +
             "           from\n" +
             "             api_category c\n" +
-            "             join api__api_category axc on c.id = axc.apicategoryid\n" +
+            "             join api__api_category axc on c.uuid = axc.apicategoryid\n" +
             "           where\n" +
-            "             axc.apiid = a.id\n" +
+            "             axc.apiid = a.uuid\n" +
             "         ) as categories\n" +
             "       from api a\n" +
             "       where openapidocument ?? 'servers'\n" +
+            "         and isproxyapi = false\n" +
             "       order by openapidocument -> 'info' -> 'title'\n" +
             "     ) as jayson;\n";
 
