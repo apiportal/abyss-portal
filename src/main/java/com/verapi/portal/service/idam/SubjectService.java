@@ -81,7 +81,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getValue("password"))
                             .add(jsonObj.getValue("passwordsalt"))
                             .add(jsonObj.getValue("picture"))
-                            .add(((Number) jsonObj.getValue("subjectdirectoryid")).longValue());
+                            .add(((Number) jsonObj.getValue("subjectdirectoryid")).longValue())
+                            .add(jsonObj.getBoolean("islocked"))
+                            .add(jsonObj.getBoolean("issandbox"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -153,6 +155,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add((updateRecord.getInstant("effectiveenddate")))
                 .add(((String) updateRecord.getValue("picture")))
                 .add(((Number) updateRecord.getValue("subjectdirectoryid")).longValue())
+                .add(updateRecord.getBoolean("islocked"))
+                .add(updateRecord.getBoolean("issandbox"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -192,6 +196,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getInstant("effectiveenddate"))
                             .add(jsonObj.getValue("picture"))
                             .add(((Number) jsonObj.getValue("subjectdirectoryid")).longValue())
+                            .add(jsonObj.getBoolean("islocked"))
+                            .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -342,16 +348,16 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT +SQL_WHERE+ SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT +SQL_WHERE+ SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
 
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE+ SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE +SQL_WHERE+ SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE + SQL_WHERE + SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE +SQL_WHERE+ SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    private static final String SQL_DELETE_ALL_USERS = SQL_DELETE + SQL_WHERE+ SQL_CONDITION_ONLY_USERS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_ALL_USERS = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_USERS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
 }

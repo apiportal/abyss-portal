@@ -71,7 +71,14 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getValue("image"))
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
-                            .add(jsonObj.getString("changelog"));
+                            .add(jsonObj.getString("changelog"))
+                            .add(jsonObj.getString("apiOriginUuid"))
+                            .add(jsonObj.getString("version"))
+                            .add(jsonObj.getBoolean("issandbox"))
+                            .add(jsonObj.getBoolean("islive"))
+                            .add(jsonObj.getBoolean("isdefaultversion"))
+                            .add(jsonObj.getBoolean("islatestversion"));
+
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -136,6 +143,12 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("color"))
                 .add(updateRecord.getInstant("deployed"))
                 .add(updateRecord.getString("changelog"))
+                .add(updateRecord.getString("apiOriginUuid"))
+                .add(updateRecord.getString("version"))
+                .add(updateRecord.getBoolean("issandbox"))
+                .add(updateRecord.getBoolean("islive"))
+                .add(updateRecord.getBoolean("isdefaultversion"))
+                .add(updateRecord.getBoolean("islatestversion"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -168,6 +181,12 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
+                            .add(jsonObj.getString("apiOriginUuid"))
+                            .add(jsonObj.getString("version"))
+                            .add(jsonObj.getBoolean("issandbox"))
+                            .add(jsonObj.getBoolean("islive"))
+                            .add(jsonObj.getBoolean("isdefaultversion"))
+                            .add(jsonObj.getBoolean("islatestversion"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -247,8 +266,8 @@ public class ApiService extends AbstractService<UpdateResult> {
     }
 
 
-    private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion, dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog)\n" +
-            "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion, dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog, apiOriginUuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
+            "values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_DELETE = "update api\n" +
             "set\n" +
@@ -277,7 +296,13 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  image,\n" +
             "  color,\n" +
             "  deployed,\n" +
-            "  changelog\n" +
+            "  changelog,\n" +
+            "  apiOriginUuid,\n" +
+            "  version,\n" +
+            "  issandbox,\n" +
+            "  islive,\n" +
+            "  isdefaultversion,\n" +
+            "  islatestversion\n" +
             "from api\n";
     private static final String SQL_UPDATE = "UPDATE api\n" +
             "SET\n" +
@@ -298,7 +323,14 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , image      = ?\n" +
             "  , color      = ?\n" +
             "  , deployed      = ?\n" +
-            "  , changelog      = ?\n";
+            "  , changelog      = ?\n" +
+            "  , apiOriginUuid      = ?\n" +
+            "  , version      = ?\n" +
+            "  , issandbox      = ?\n" +
+            "  , islive      = ?\n" +
+            "  , isdefaultversion      = ?\n" +
+            "  , islatestversion      = ?\n";
+
     private static final String SQL_AND = "and\n";
 
     private static final String SQL_WHERE = "where\n";

@@ -58,7 +58,9 @@ public class ApiTagService extends AbstractService<UpdateResult> {
                             .add(((Number) jsonObj.getValue("organizationid")).longValue())
                             .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
                             .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("description"));
+                            .add(jsonObj.getString("description"))
+                            .add(jsonObj.getString("externaldescription"))
+                            .add(jsonObj.getString("externalurl"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -110,6 +112,8 @@ public class ApiTagService extends AbstractService<UpdateResult> {
                 .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
                 .add(updateRecord.getString("name"))
                 .add(updateRecord.getString("description"))
+                .add(updateRecord.getString("externaldescription"))
+                .add(updateRecord.getString("externalurl"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -129,6 +133,8 @@ public class ApiTagService extends AbstractService<UpdateResult> {
                             .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
                             .add(jsonObj.getString("name"))
                             .add(jsonObj.getString("description"))
+                            .add(jsonObj.getString("externaldescription"))
+                            .add(jsonObj.getString("externalurl"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
