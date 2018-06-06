@@ -55,8 +55,8 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("typename"))
                             .add(jsonObj.getString("description"));
                     return insert(insertParam, SQL_INSERT).toObservable();
@@ -106,8 +106,8 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
                 .add(((String) updateRecord.getValue("typename")))
                 .add(((String) updateRecord.getValue("description")))
                 .add(uuid.toString());
@@ -125,8 +125,8 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(((String) jsonObj.getValue("typename")))
                             .add(((String) jsonObj.getValue("description")))
                             .add(jsonObj.getString("uuid"));
