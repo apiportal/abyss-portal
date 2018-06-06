@@ -281,8 +281,7 @@ components:
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
         organizationid:
-          type: integer
-          format: int32
+          type: string
           description: Id of Organization
         created:
           type: string
@@ -301,8 +300,7 @@ components:
           readOnly: true
           description: Is record logically deleted #readOnly#
         crudsubjectid:
-          type: integer
-          format: int32
+          type: string
           description: ID of Subject that reads, creates, updates or deletes
         isenabled:
           type: boolean
@@ -320,8 +318,7 @@ components:
           type: string
           description: Effective end date time of group that is active until
         subjectdirectoryid:
-          type: integer
-          format: int32
+          type: string
           description: FK ID of Subject Directory
   requestBodies:
     SubjectGroup:

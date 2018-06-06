@@ -55,14 +55,14 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getBoolean("isenabled"))
                             .add(jsonObj.getString("groupname"))
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getInstant("effectivestartdate"))
                             .add(jsonObj.getInstant("effectiveenddate"))
-                            .add(((Number) jsonObj.getValue("subjectdirectoryid")).longValue());
+                            .add(jsonObj.getString("subjectdirectoryid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -110,14 +110,14 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getBoolean("isenabled"))
                 .add(updateRecord.getString("groupname"))
                 .add(updateRecord.getString("description"))
                 .add(updateRecord.getInstant("effectivestartdate"))
                 .add(updateRecord.getInstant("effectiveenddate"))
-                .add(((Number) updateRecord.getValue("subjectdirectoryid")).longValue())
+                .add(updateRecord.getString("subjectdirectoryid"))
                 .add(uuid.toString());
 
         return update(updateParams, SQL_UPDATE_BY_UUID);
@@ -134,14 +134,14 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getBoolean("isenabled"))
                             .add(jsonObj.getString("groupname"))
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getInstant("effectivestartdate"))
                             .add(jsonObj.getInstant("effectiveenddate"))
-                            .add(((Number) jsonObj.getValue("subjectdirectoryid")).longValue())
+                            .add(jsonObj.getString("subjectdirectoryid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })

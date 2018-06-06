@@ -55,10 +55,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectgroupid")).longValue());
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("subjectid"))
+                            .add(jsonObj.getString("subjectgroupid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -106,10 +106,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
-                .add(((Number) updateRecord.getValue("subjectid")).longValue())
-                .add(((Number) updateRecord.getValue("subjectgroupid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.getString("subjectid"))
+                .add(updateRecord.getString("subjectgroupid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -125,10 +125,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue())
-                            .add(((Number) jsonObj.getValue("subjectgroupid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("subjectid"))
+                            .add(jsonObj.getString("subjectgroupid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })

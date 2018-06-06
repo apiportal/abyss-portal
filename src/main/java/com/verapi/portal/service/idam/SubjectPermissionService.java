@@ -55,13 +55,13 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("permission"))
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getInstant("effectivestartdate"))
                             .add(jsonObj.getInstant("effectiveenddate"))
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue());
+                            .add(jsonObj.getString("subjectid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -109,13 +109,13 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("permission"))
                 .add(updateRecord.getString("description"))
                 .add(updateRecord.getInstant("effectivestartdate"))
                 .add(updateRecord.getInstant("effectiveenddate"))
-                .add(((Number) updateRecord.getValue("subjectid")).longValue())
+                .add(updateRecord.getString("subjectid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -131,13 +131,13 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("permission"))
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getInstant("effectivestartdate"))
                             .add(jsonObj.getInstant("effectiveenddate"))
-                            .add(((Number) jsonObj.getValue("subjectid")).longValue())
+                            .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
