@@ -55,8 +55,8 @@ public class PolicyService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("name"))
                             .add(jsonObj.getString("description"))
                             .add(((Number) jsonObj.getValue("policytypeid")).longValue())
@@ -109,8 +109,8 @@ public class PolicyService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         JsonArray updateParams = new JsonArray()
-                .add(((Number) updateRecord.getValue("organizationid")).longValue())
-                .add(((Number) updateRecord.getValue("crudsubjectid")).longValue())
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("name"))
                 .add(updateRecord.getString("description"))
                 .add(((Number) updateRecord.getValue("policytypeid")).longValue())
@@ -131,8 +131,8 @@ public class PolicyService extends AbstractService<UpdateResult> {
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = new JsonArray()
-                            .add(((Number) jsonObj.getValue("organizationid")).longValue())
-                            .add(((Number) jsonObj.getValue("crudsubjectid")).longValue())
+                            .add(jsonObj.getString("organizationid"))
+                            .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("name"))
                             .add(jsonObj.getString("description"))
                             .add(((Number) jsonObj.getValue("policytypeid")).longValue())
