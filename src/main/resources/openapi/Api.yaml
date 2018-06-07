@@ -425,8 +425,7 @@ components:
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
         organizationid:
-          type: integer
-          format: int32
+          type: string
           description: Id of Organization
         created:
           type: string
@@ -445,23 +444,19 @@ components:
           readOnly: true
           description: Is record logically deleted #readOnly#
         crudsubjectid:
-          type: integer
-          format: int32
+          type: string
           description: ID of Subject that reads, creates, updates or deletes
         subjectid:
-          type: integer
-          format: int32
+          type: string
           description: FK ID of owner Subject
         isproxyapi:
           type: boolean
           description: Type of API. False - Business API, True - API Proxy
         apistateid:
-          type: integer
-          format: int32
+          type: string
           description: FK ID of State of Business API
         apivisibilityid:
-          type: integer
-          format: int32
+          type: string
           description: ID of Business API Visibility - Private, Closed Group, Public, ...
         languagename:
           type: string
@@ -484,8 +479,7 @@ components:
           readOnly: true
           description: Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #readOnly#  #jsonb#
         businessapiid:
-          type: integer
-          format: int32
+          type: string
           description: FK ID of Business API for API Proxies
         image:
           type: string
@@ -499,7 +493,7 @@ components:
         changelog:
           type: string
           description: Release notes and change log of API
-        apiOriginUuid:
+        apioriginuuid:
           type: string
           description: Origin ID of this API version
         version:
