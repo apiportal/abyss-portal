@@ -380,6 +380,432 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /apis/businesses:
+    get:
+      tags:
+        - TODO
+      summary: Get list of Business APIs
+      description: 'Returns list of Business APIs'
+      operationId: getBusinessApis
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search Business APIs which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search Business APIs which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - TODO
+      summary: Add a bulk of Business APIs
+      description: 'Provide a list of Business APIs objects to be inserted'
+      operationId: addBusinessApis
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApi'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of Business APIs
+      description: 'Provide a bulk list of  Business APIs objects to be updated'
+      operationId: updateBusinessApis
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApiObject'
+    delete:
+      tags:
+        - TODO
+      summary: Delete all Business APIs
+      description: 'Deletes all Business APIs'
+      operationId: deleteBusinessApis
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /apis/businesses/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing Business API by uuid
+      description: 'Provide an uuid of Api to be get'
+      operationId: getBusinessApi
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Business API that need to be get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    put:
+      tags:
+        - TODO
+      summary: Update an existing Business API
+      description: 'Provide an altered Business API to be updated'
+      operationId: updateBusinessApi
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Business API that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/Api'
+    delete:
+      tags:
+        - TODO
+      summary: Delete Business API
+      description: 'Provide an uuid parameter of Business API to be updated'
+      operationId: deleteBusinessApi
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of Business API that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /apis/proxies:
+    get:
+      tags:
+        - TODO
+      summary: Get list of API Proxies
+      description: 'Returns list of API Proxies'
+      operationId: getApiProxies
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search API Proxies which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search API Proxies which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - TODO
+      summary: Add a bulk of API Proxies
+      description: 'Provide a list of API Proxies objects to be inserted'
+      operationId: addApiProxies
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApi'
+    put:
+      tags:
+        - TODO
+      summary: Update a bulk of API Proxies
+      description: 'Provide a bulk list of  API Proxies objects to be updated'
+      operationId: updateApiProxies
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApiObject'
+    delete:
+      tags:
+        - TODO
+      summary: Delete all API Proxies
+      description: 'Deletes all API Proxies'
+      operationId: deleteApiProxies
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /apis/proxies/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get an existing API Proxy by uuid
+      description: 'Provide an uuid of API Proxy to be get'
+      operationId: getApiProxy
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of API Proxy that need to be get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    put:
+      tags:
+        - TODO
+      summary: Update an existing API Proxy
+      description: 'Provide an altered API Proxy to be updated'
+      operationId: updateApiProxy
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of API Proxy that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/Api'
+    delete:
+      tags:
+        - TODO
+      summary: Delete API Proxy
+      description: 'Provide an uuid parameter of API Proxy to be updated'
+      operationId: deleteApiProxy
+      parameters:
+        - name: uuid
+          in: path
+          description: The uuid of API Proxy that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'
