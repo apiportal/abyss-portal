@@ -2,8 +2,9 @@ openapi: 3.0.0
 servers:
   - url: 'http://192.168.21.99:38083/abyss/oapi'
   - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi' 
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
   - url: '/abyss/oapi'
+  - url: '/abyss/openapi'
 info:
   description: Abyss platform APIs
   version: 1.0.0
@@ -21,7 +22,7 @@ tags:
     externalDocs:
       url: 'https://apiportal.com'
       description: Find out more
-    description: Abyss ... [TODO]  
+    description: Abyss ... [TODO]
 paths:
   /apis:
     get:
@@ -236,6 +237,149 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /apis/subject/{uuid}:
+    get:
+      tags:
+        - TODO
+      summary: Get APIs by Subject uuid
+      description: 'Provide an uuid of Subject to get his APIs'
+      operationId: getApisOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Subject that need to get his APIs
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search APIs which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search APIs which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - TODO
+      summary: Add a bulk of new APIs for a Subject
+      description: 'Provide a list of Api objects to be inserted'
+      operationId: addApisOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Subject that need to add his APIs
+          required: true
+          schema:
+            type: string
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApi'
+    put:
+      tags:
+        - TODO
+      summary: Update APIs of Subject
+      description: 'Provide a list of Api objects to be updated'
+      operationId: updateApisOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Subject that need to update his APIs
+          required: true
+          schema:
+            type: string
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApiObject'
+    delete:
+      tags:
+        - TODO
+      summary: Delete all APIs of Subject
+      description: 'Provide an uuid parameter of Api to be deleted'
+      operationId: deleteApisOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of Subject that need to delete his APIs
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'
@@ -281,7 +425,8 @@ components:
           readOnly: true
           description: Secondary primary key. Used in front end messages for security reasons.
         organizationid:
-          type: string
+          type: integer
+          format: int32
           description: Id of Organization
         created:
           type: string
@@ -300,19 +445,23 @@ components:
           readOnly: true
           description: Is record logically deleted #readOnly#
         crudsubjectid:
-          type: string
+          type: integer
+          format: int32
           description: ID of Subject that reads, creates, updates or deletes
         subjectid:
-          type: string
+          type: integer
+          format: int32
           description: FK ID of owner Subject
         isproxyapi:
           type: boolean
           description: Type of API. False - Business API, True - API Proxy
         apistateid:
-          type: string
+          type: integer
+          format: int32
           description: FK ID of State of Business API
         apivisibilityid:
-          type: string
+          type: integer
+          format: int32
           description: ID of Business API Visibility - Private, Closed Group, Public, ...
         languagename:
           type: string
@@ -335,7 +484,8 @@ components:
           readOnly: true
           description: Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #readOnly#  #jsonb#
         businessapiid:
-          type: string
+          type: integer
+          format: int32
           description: FK ID of Business API for API Proxies
         image:
           type: string
@@ -349,7 +499,7 @@ components:
         changelog:
           type: string
           description: Release notes and change log of API
-        apioriginuuid:
+        apiOriginUuid:
           type: string
           description: Origin ID of this API version
         version:
@@ -372,7 +522,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Api'          
+            $ref: '#/components/schemas/Api'
       description: Api object that needs to be added or updated
       required: true
     ListOfApi:
@@ -381,7 +531,7 @@ components:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Api'          
+              $ref: '#/components/schemas/Api'
       description: Api array that needs to be added
       required: true
     ListOfApiObject:
