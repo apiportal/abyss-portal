@@ -23,15 +23,12 @@ import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 public abstract class AbstractService<T> implements IService<T> {
@@ -246,6 +243,10 @@ public abstract class AbstractService<T> implements IService<T> {
         return rxQueryWithParams(findAllQuery);
     }
 
+    protected Single<ResultSet> filter(ServiceFilter serviceFilter) {
+        return rxQueryWithParams(serviceFilter.getFilterQuery(), serviceFilter.getFilterQueryParams());
+    }
+
     protected void subscribeAndProcess(JsonArray result, Single<ResultSet> resultSetSingle, int httpResponseStatus) {
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
@@ -299,5 +300,37 @@ public abstract class AbstractService<T> implements IService<T> {
                     result.add(recordStatus);
                 });
     }
+
+    public static final class ServiceFilter {
+        private String filterQuery = "";
+        private JsonArray filterQueryParams;
+
+        public ServiceFilter() {
+        }
+
+        public ServiceFilter(String filterQuery) {
+            this.filterQuery = filterQuery;
+        }
+
+        public String getFilterQuery() {
+            return filterQuery;
+        }
+
+        public ServiceFilter setFilterQuery(String filterQuery) {
+            this.filterQuery = filterQuery;
+            return this;
+        }
+
+        public JsonArray getFilterQueryParams() {
+            return filterQueryParams;
+        }
+
+        public ServiceFilter setFilterQueryParams(JsonArray filterQueryParams) {
+            this.filterQueryParams = filterQueryParams;
+            return this;
+        }
+    }
+
+    public static final ServiceFilter FILTER_BY_SUBJECT = new ServiceFilter();
 
 }

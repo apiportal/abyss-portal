@@ -261,6 +261,10 @@ public class ApiService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
+    public Single<ResultSet> findAll(AbstractService.ServiceFilter serviceFilter) {
+        return filter(serviceFilter);
+    }
+
     public Single<ResultSet> findAllProxies() {
         return findAll(SQL_FIND_ALL_PROXIES);
     }
@@ -348,6 +352,8 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_NAME_LIKE = "openapidocument -> 'info' ->> 'title' like ?\n";
 
+    private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
+
     private static final String SQL_ISPROXYAPI_IS = "isproxyapi = true\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
@@ -369,5 +375,9 @@ public class ApiService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+
+    static {
+        FILTER_BY_SUBJECT.setFilterQuery(SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS);
+    }
 
 }

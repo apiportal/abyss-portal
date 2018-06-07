@@ -20,6 +20,7 @@ import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
+import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -423,7 +424,7 @@ public abstract class AbstractApiController implements IApiController {
                 });
     }
 
-    private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
+    void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
                     if (jsonColumns.isEmpty()) {
@@ -492,10 +493,14 @@ public abstract class AbstractApiController implements IApiController {
 
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        getEntities(routingContext, clazz, new ArrayList<String>());
+        getEntities(routingContext, clazz, new ArrayList<String>(), new AbstractService.ServiceFilter());
     }
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        getEntities(routingContext, clazz, jsonColumns, new AbstractService.ServiceFilter());
+    }
+
+    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, AbstractService.ServiceFilter serviceFilter) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         String filterByNameParameter = null;
         String filterLikeNameParameter = null;
@@ -509,7 +514,11 @@ public abstract class AbstractApiController implements IApiController {
         String finalFilterByNameParameter = filterByNameParameter;
         String finalFilterLikeNameParameter = filterLikeNameParameter;
         Single<ResultSet> findAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) ? service.findAll() : (finalFilterLikeNameParameter == null) ? service.findByName(finalFilterByNameParameter) : service.findLikeName(finalFilterLikeNameParameter))
+                .flatMap(jdbcClient -> ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) ?
+                        ((serviceFilter.getFilterQuery().isEmpty()) ? service.findAll() : service.findAll(serviceFilter)) :
+                        (finalFilterLikeNameParameter == null) ?
+                                service.findByName(finalFilterByNameParameter) :
+                                service.findLikeName(finalFilterLikeNameParameter))
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0)
                         return Single.error(new Exception("no_data_found"));

@@ -132,7 +132,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         if ((!updateRecord.containsKey("picture")) || (updateRecord.getValue("picture") == null)) {
             try {
-                //update default avatar image TODO: later use request base
+                //update default avatar image TODO: later use picture using request message
                 ClassLoader classLoader = getClass().getClassLoader();
                 File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_AVATAR)).getFile());
                 updateRecord.put("picture", encodeFileToBase64Binary(file));
