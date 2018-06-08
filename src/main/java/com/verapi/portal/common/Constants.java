@@ -160,7 +160,8 @@ public class Constants {
     public static final int SUBJECT_TYPE_APP = 2;
     public static final int SUBJECT_TYPE_SYSTEM = 3;
 
-    public static final String RESOURCE_DEFAULT_AVATAR = "webroot/dist/img/avatar.jpg";
+    public static final String RESOURCE_DEFAULT_SUBJECT_AVATAR = "webroot/dist/img/avatar.jpg";
+    public static final String RESOURCE_DEFAULT_API_AVATAR = "webroot/dist/img/thumb.png";
 
     public static final String RESTAPI_FILTERING_BY_NAME = "byname";
     public static final String RESTAPI_FILTERING_LIKE_NAME = "likename";

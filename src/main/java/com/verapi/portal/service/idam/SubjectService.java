@@ -134,7 +134,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             try {
                 //update default avatar image TODO: later use picture using request message
                 ClassLoader classLoader = getClass().getClassLoader();
-                File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_AVATAR)).getFile());
+                File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
                 updateRecord.put("picture", encodeFileToBase64Binary(file));
             } catch (IOException e) {
                 logger.error(e.getLocalizedMessage());
@@ -179,7 +179,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         try {
                             //update default avatar image TODO: later use request base
                             ClassLoader classLoader = getClass().getClassLoader();
-                            File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_AVATAR)).getFile());
+                            File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
                             jsonObj.put("picture", encodeFileToBase64Binary(file));
                         } catch (IOException e) {
                             logger.error(e.getLocalizedMessage());

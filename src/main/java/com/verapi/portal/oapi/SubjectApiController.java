@@ -44,8 +44,9 @@ public class SubjectApiController extends AbstractApiController {
 
     /**
      * API verticle creates new API Controller instance via this constructor
-     * @param vertx Vertx content
-     * @param router Vertx router
+     *
+     * @param vertx        Vertx content
+     * @param router       Vertx router
      * @param authProvider JDBC Auth provider
      */
     public SubjectApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
@@ -101,8 +102,8 @@ public class SubjectApiController extends AbstractApiController {
                 try {
                     //insert default avatar image TODO: later use request base
                     ClassLoader classLoader = getClass().getClassLoader();
-                    File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_AVATAR)).getFile());
-                    ((JsonObject) requestItem).put("picture", encodeFileToBase64Binary(file));
+                    File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
+                    ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + encodeFileToBase64Binary(file));
                 } catch (IOException e) {
                     logger.error(e.getLocalizedMessage());
                     logger.error(Arrays.toString(e.getStackTrace()));

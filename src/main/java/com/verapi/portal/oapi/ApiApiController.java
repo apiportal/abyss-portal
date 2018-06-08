@@ -13,13 +13,9 @@ package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
-import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.ApiService;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -35,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
@@ -76,6 +71,19 @@ public class ApiApiController extends AbstractApiController {
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        requestBody.forEach(requestItem -> {
+            if ((!((JsonObject) requestItem).containsKey("image")) || (((JsonObject) requestItem).getValue("image") == null))
+                try {
+                    //insert default avatar image TODO: later use request base
+                    ClassLoader classLoader = getClass().getClassLoader();
+                    File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_API_AVATAR)).getFile());
+                    ((JsonObject) requestItem).put("image", "data:image/png;base64," + encodeFileToBase64Binary(file));
+                } catch (IOException e) {
+                    logger.error(e.getLocalizedMessage());
+                    logger.error(Arrays.toString(e.getStackTrace()));
+                }
+        });
 
         try {
             addEntities(routingContext, ApiService.class, requestBody);
