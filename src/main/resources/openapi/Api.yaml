@@ -1188,7 +1188,6 @@ components:
           description: Transformed API DSL document in Open API json format. Shareable. #jsonb#
         extendeddocument:
           type: object
-          readOnly: true
           description: Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #readOnly#  #jsonb#
         businessapiid:
           type: string
