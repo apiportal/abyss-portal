@@ -529,10 +529,14 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        getEntity(routingContext, clazz, new ArrayList<String>());
+    }
+
+    <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> findAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))));
-        subscribeAndResponse(routingContext, findAllResult, HttpResponseStatus.OK.code());
+        subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }
 
     <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

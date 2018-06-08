@@ -114,7 +114,10 @@ public class PolicyApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntity(routingContext, PolicyService.class);
+            List<String> jsonbColumnsList = new ArrayList<String>() {{
+                add(Constants.JSONB_COLUMN_POLICY_POLICYCONFIGURATION);
+            }};
+            getEntity(routingContext, PolicyService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

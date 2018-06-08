@@ -121,7 +121,11 @@ public class ApiApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntity(routingContext, ApiService.class);
+            List<String> jsonbColumnsList = new ArrayList<String>() {{
+                add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
+                add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
+            }};
+            getEntity(routingContext, ApiService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

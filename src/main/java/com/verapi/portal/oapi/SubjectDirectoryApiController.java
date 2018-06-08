@@ -115,7 +115,10 @@ public class SubjectDirectoryApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntity(routingContext, SubjectDirectoryService.class);
+            List<String> jsonbColumnsList = new ArrayList<String>() {{
+                add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES);
+            }};
+            getEntity(routingContext, SubjectDirectoryService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
