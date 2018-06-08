@@ -63,7 +63,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getBoolean("istemplate"))
                             .add(jsonObj.getString("directorytypeid"))
                             .add(((Number) jsonObj.getValue("directorypriorityorder")).longValue())
-                            .add(jsonObj.getJsonObject("directoryattributes"))
+                            .add(jsonObj.getJsonObject("directoryattributes").encode())
                             .add(jsonObj.getInstant("lastsyncronizedat"))
                             .add(((Number) jsonObj.getValue("lastsyncronizationduration")).longValue());
                     return insert(insertParam, SQL_INSERT).toObservable();
@@ -121,7 +121,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getBoolean("istemplate"))
                 .add(updateRecord.getString("directorytypeid"))
                 .add(((Number) updateRecord.getValue("directorypriorityorder")).longValue())
-                .add(updateRecord.getJsonObject("directoryattributes"))
+                .add(updateRecord.getJsonObject("directoryattributes").encode())
                 .add(updateRecord.getInstant("lastsyncronizedat"))
                 .add(((Number) updateRecord.getValue("lastsyncronizationduration")).longValue())
                 .add(uuid.toString());
@@ -147,7 +147,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getBoolean("istemplate"))
                             .add(jsonObj.getString("directorytypeid"))
                             .add(((Number) jsonObj.getValue("directorypriorityorder")).longValue())
-                            .add(jsonObj.getJsonObject("directoryattributes"))
+                            .add(jsonObj.getJsonObject("directoryattributes").encode())
                             .add(jsonObj.getInstant("lastsyncronizedat"))
                             .add(((Number) jsonObj.getValue("lastsyncronizationduration")).longValue())
                             .add(jsonObj.getString("uuid"));
@@ -227,7 +227,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
     private static final String SQL_INSERT = "insert into subject_directory (organizationid, crudsubjectid, directoryname, description, isactive, istemplate,\n" +
             "                               directorytypeid, directorypriorityorder, directoryattributes, lastsyncronizedat, lastsyncronizationduration)\n" +
             "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?,\n" +
-            "  CAST(? AS uuid), ?, ?, ?, ?);";
+            "  CAST(? AS uuid), ?, ?::JSON, ?, ?);";
 
     private static final String SQL_DELETE = "update subject_directory\n" +
             "set\n" +
@@ -263,7 +263,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
             "  , istemplate            = ?\n" +
             "  , directorytypeid                 = CAST(? AS uuid)\n" +
             "  , directorypriorityorder    = ?\n" +
-            "  , directoryattributes = ?\n" +
+            "  , directoryattributes = ?::JSON\n" +
             "  , lastsyncronizedat = ?\n" +
             "  , lastsyncronizationduration = ?\n";
     private static final String SQL_AND = "and\n";

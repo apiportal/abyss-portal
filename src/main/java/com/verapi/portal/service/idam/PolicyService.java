@@ -61,7 +61,7 @@ public class PolicyService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("description"))
                             .add(((Number) jsonObj.getValue("policytypeid")).longValue())
                             .add(((Number) jsonObj.getValue("policysubtypeid")).longValue())
-                            .add(jsonObj.getJsonObject("policyconfiguration"));
+                            .add(jsonObj.getJsonObject("policyconfiguration").encode());
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -115,7 +115,7 @@ public class PolicyService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("description"))
                 .add(((Number) updateRecord.getValue("policytypeid")).longValue())
                 .add(((Number) updateRecord.getValue("policysubtypeid")).longValue())
-                .add(updateRecord.getJsonObject("policyconfiguration"))
+                .add(updateRecord.getJsonObject("policyconfiguration").encode())
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -137,7 +137,7 @@ public class PolicyService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("description"))
                             .add(((Number) jsonObj.getValue("policytypeid")).longValue())
                             .add(((Number) jsonObj.getValue("policysubtypeid")).longValue())
-                            .add(jsonObj.getJsonObject("policyconfiguration"))
+                            .add(jsonObj.getJsonObject("policyconfiguration").encode())
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -213,7 +213,7 @@ public class PolicyService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into policy (organizationid, crudsubjectid, name, description, policytypeid, policysubtypeid, policyconfiguration)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,? ,? ,? ,?)";
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,? ,? ,? ,?::JSON)";
 
     private static final String SQL_DELETE = "update policy\n" +
             "set\n" +
@@ -244,7 +244,7 @@ public class PolicyService extends AbstractService<UpdateResult> {
             "  , description      = ?\n" +
             "  , policytypeid      = ?\n" +
             "  , policysubtypeid      = ?\n" +
-            "  , policyconfiguration      = ?\n";
+            "  , policyconfiguration      = ?::JSON\n";
 
     private static final String SQL_AND = "and\n";
 

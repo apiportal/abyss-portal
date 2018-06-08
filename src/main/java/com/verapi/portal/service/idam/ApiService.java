@@ -65,10 +65,10 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("languageversion"))
                             .add(((Number) jsonObj.getValue("dataformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
-                            .add(jsonObj.getJsonObject("openapidocument"))
-                            .add(jsonObj.getJsonObject("extendeddocument"))
+                            .add(jsonObj.getJsonObject("openapidocument").encode())
+                            .add(jsonObj.getJsonObject("extendeddocument").encode())
                             .add(jsonObj.getString("businessapiid"))
-                            .add(jsonObj.getValue("image"))
+                            .add(jsonObj.getString("image"))
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
@@ -136,8 +136,8 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("languageversion"))
                 .add(((Number) updateRecord.getValue("dataformat")).longValue())
                 .add(updateRecord.getString("originaldocument"))
-                .add(updateRecord.getJsonObject("openapidocument"))
-                .add(updateRecord.getJsonObject("extendeddocument"))
+                .add(updateRecord.getJsonObject("openapidocument").encode())
+                .add(updateRecord.getJsonObject("extendeddocument").encode())
                 .add(updateRecord.getString("businessapiid"))
                 .add(updateRecord.getValue("image"))
                 .add(updateRecord.getString("color"))
@@ -275,7 +275,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "                 apioriginuuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
-            "                    ?, ?, ?, ?, CAST(? AS uuid), ?, ?, ?, ?,\n" +
+            "                    ?, ?, ?::JSON, ?::JSON, CAST(? AS uuid), ?, ?, ?, ?,\n" +
             "                             CAST(? AS uuid), ?, ?, ?, ?, ?);";
 
     private static final String SQL_DELETE = "update api\n" +
@@ -291,8 +291,8 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  deleted,\n" +
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
-            "  subjectid,\n" +
             "  isproxyapi,\n" +
+            "  subjectid,\n" +
             "  apistateid,\n" +
             "  apivisibilityid,\n" +
             "  languagename,\n" +
@@ -326,8 +326,8 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , languageversion      = ?\n" +
             "  , dataformat      = ?\n" +
             "  , originaldocument      = ?\n" +
-            "  , openapidocument      = ?\n" +
-            "  , extendeddocument      = ?\n" +
+            "  , openapidocument      = ?::JSON\n" +
+            "  , extendeddocument      = ?::JSON\n" +
             "  , businessapiid      = CAST(? AS uuid)\n" +
             "  , image      = ?\n" +
             "  , color      = ?\n" +
