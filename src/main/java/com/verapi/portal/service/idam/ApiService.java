@@ -12,7 +12,6 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
@@ -27,14 +26,9 @@ import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-
-import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
 public class ApiService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(ApiService.class);
@@ -63,7 +57,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("apivisibilityid"))
                             .add(jsonObj.getString("languagename"))
                             .add(jsonObj.getString("languageversion"))
-                            .add(((Number) jsonObj.getValue("dataformat")).longValue())
+                            .add(((Number) jsonObj.getValue("languageformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
                             .add(jsonObj.getJsonObject("openapidocument").encode())
                             .add(jsonObj.getJsonObject("extendeddocument").encode())
@@ -134,7 +128,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("apivisibilityid"))
                 .add(updateRecord.getString("languagename"))
                 .add(updateRecord.getString("languageversion"))
-                .add(((Number) updateRecord.getValue("dataformat")).longValue())
+                .add(((Number) updateRecord.getValue("languageformat")).longValue())
                 .add(updateRecord.getString("originaldocument"))
                 .add(updateRecord.getJsonObject("openapidocument").encode())
                 .add(updateRecord.getJsonObject("extendeddocument").encode())
@@ -172,7 +166,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("apivisibilityid"))
                             .add(jsonObj.getString("languagename"))
                             .add(jsonObj.getString("languageversion"))
-                            .add(((Number) jsonObj.getValue("dataformat")).longValue())
+                            .add(((Number) jsonObj.getValue("languageformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
                             .add(jsonObj.getJsonObject("openapidocument").encode())
                             .add(jsonObj.getJsonObject("extendeddocument").encode())
