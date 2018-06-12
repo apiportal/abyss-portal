@@ -11,7 +11,7 @@
 
 package com.verapi.portal.oapi;
 
-import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
+//import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
 import com.verapi.portal.common.Config;
@@ -67,9 +67,11 @@ public abstract class AbstractApiController implements IApiController {
         this.abyssRouter = router;
         this.authProvider = authProvider;
         this.apiSpec = this.getClass().getAnnotation(AbyssApiController.class).apiSpec();
+/*
         final SwaggerRequestResponseValidator validator = SwaggerRequestResponseValidator
                 .createFor(this.apiSpec)
                 .build();
+*/
         this.init();
     }
 
@@ -475,6 +477,10 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, int httpResponseStatus) {
+        subscribeAndResponseBulkList(routingContext, jsonListSingle, new ArrayList<String>(), httpResponseStatus);
+    }
+
+    private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, List<String> jsonColumns, int httpResponseStatus) {
         logger.trace("---subscribeAndResponseBulkList invoked");
         jsonListSingle.subscribe(resp -> {
                     JsonArray jsonArray = new JsonArray(resp);
@@ -540,18 +546,26 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        addEntities(routingContext, clazz, requestBody, new ArrayList<String>());
+    }
+
+    <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         logger.trace("---addEntities invoked");
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<List<JsonObject>> insertAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.insertAll(requestBody));
-        subscribeAndResponseBulkList(routingContext, insertAllResult, HttpResponseStatus.MULTI_STATUS.code());
+        subscribeAndResponseBulkList(routingContext, insertAllResult, jsonColumns, HttpResponseStatus.MULTI_STATUS.code());
     }
 
     <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        updateEntities(routingContext, clazz, requestBody, new ArrayList<String>());
+    }
+
+    <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<List<JsonObject>> updateAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.updateAll(requestBody));
-        subscribeAndResponseBulkList(routingContext, updateAllResult, HttpResponseStatus.MULTI_STATUS.code());
+        subscribeAndResponseBulkList(routingContext, updateAllResult, jsonColumns, HttpResponseStatus.MULTI_STATUS.code());
     }
 
     <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

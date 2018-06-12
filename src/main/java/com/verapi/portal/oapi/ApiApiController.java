@@ -38,6 +38,11 @@ import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 public class ApiApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(ApiApiController.class);
 
+    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
+        add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
+        add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
+    }};
+
     /**
      * API verticle creates new API Controller instance via this constructor
      *
@@ -52,10 +57,6 @@ public class ApiApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getApis(RoutingContext routingContext) {
         try {
-            List<String> jsonbColumnsList = new ArrayList<String>() {{
-                add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
-                add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
-            }};
             getEntities(routingContext, ApiService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
@@ -86,7 +87,7 @@ public class ApiApiController extends AbstractApiController {
         });
 
         try {
-            addEntities(routingContext, ApiService.class, requestBody);
+            addEntities(routingContext, ApiService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

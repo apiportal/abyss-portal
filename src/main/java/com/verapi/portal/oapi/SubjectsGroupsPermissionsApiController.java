@@ -11,7 +11,7 @@
 
 package com.verapi.portal.oapi;
 
-import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
+//import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.SubjectService;
 import com.verapi.portal.service.idam.SubjectServiceOld;
