@@ -15,7 +15,7 @@ package com.verapi.portal.common;
 public class Constants {
 
     private static final String ABYSS = "abyss";
-    private static final String ABYSS_GW = "abyss-gw";
+    public static final String ABYSS_GW = "abyss-gw";
     public static final String ABYSS_ROOT = "/"+ABYSS;
     public static final String ABYSS_GATEWAY_ROOT = "/"+ABYSS_GW;
     public static final String ABYSS_PORTAL = "abyss-portal";

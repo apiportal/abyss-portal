@@ -174,8 +174,8 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("languageversion"))
                             .add(((Number) jsonObj.getValue("dataformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
-                            .add(jsonObj.getJsonObject("openapidocument"))
-                            .add(jsonObj.getJsonObject("extendeddocument"))
+                            .add(jsonObj.getJsonObject("openapidocument").encode())
+                            .add(jsonObj.getJsonObject("extendeddocument").encode())
                             .add(jsonObj.getString("businessapiid"))
                             .add(jsonObj.getValue("image"))
                             .add(jsonObj.getString("color"))
@@ -271,7 +271,7 @@ public class ApiService extends AbstractService<UpdateResult> {
 
 
     private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion,\n" +
-            "                 dataformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog,\n" +
+            "                 languageformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog,\n" +
             "                 apioriginuuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
@@ -297,10 +297,10 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  apivisibilityid,\n" +
             "  languagename,\n" +
             "  languageversion,\n" +
-            "  dataformat,\n" +
+            "  languageformat,\n" +
             "  originaldocument,\n" +
-            "  openapidocument,\n" +
-            "  extendeddocument,\n" +
+            "  openapidocument::JSON,\n" +
+            "  extendeddocument::JSON,\n" +
             "  businessapiid,\n" +
             "  image,\n" +
             "  color,\n" +
@@ -324,7 +324,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , apivisibilityid      = CAST(? AS uuid)\n" +
             "  , languagename      = ?\n" +
             "  , languageversion      = ?\n" +
-            "  , dataformat      = ?\n" +
+            "  , languageformat      = ?\n" +
             "  , originaldocument      = ?\n" +
             "  , openapidocument      = ?::JSON\n" +
             "  , extendeddocument      = ?::JSON\n" +

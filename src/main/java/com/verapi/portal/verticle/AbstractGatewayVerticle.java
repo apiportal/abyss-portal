@@ -11,20 +11,24 @@
 
 package com.verapi.portal.verticle;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.service.idam.ApiService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
-import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.swagger.v3.parser.ObjectMapperFactory;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
+import io.vertx.ext.web.api.contract.RouterFactoryException;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.reactivex.RxHelper;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -42,9 +46,11 @@ import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
 import io.vertx.reactivex.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.HttpLocation;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -72,8 +78,8 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         super.stop(stopFuture);
     }
 
-    private Single<Router> createRouters() {
-        logger.trace("---createRouters invoked");
+    private Single<Router> createRouter() {
+        logger.trace("---createRouter invoked");
         gatewayRouter = Router.router(vertx);
         return configureRouter(gatewayRouter);
     }
@@ -97,7 +103,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
         router.route().failureHandler(this::failureHandler);
 
-        //router.route(Constants.ABYSS_GATEWAY_ROOT + "/:api").handler(this::routingContextHandler);
+        //router.route(Constants.ABYSS_GATEWAY_ROOT + "/:apiUUID/:apiPath").handler(this::routingContextHandler);
         router.route(Constants.ABYSS_GATEWAY_ROOT).handler(this::routingContextHandler);
 
         //router.route().handler(ctx -> ctx.fail(HttpResponseStatus.NOT_FOUND.code()));
@@ -109,9 +115,9 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     Single<Router> createSubRouter(String mountPoint) {
         logger.trace("---createSubRouter invoked");
 
-        mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + mountPoint;
+        if (!mountPoint.startsWith("/"))
+            mountPoint = "/" + mountPoint;
         Router subRouter = Router.router(vertx);
-        gatewayRouter.mountSubRouter(mountPoint, subRouter);
 
         //log HTTP requests
         subRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
@@ -129,8 +135,9 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
         subRouter.route().failureHandler(this::failureHandler);
 
-        //subRouter.route(mountPoint + "/:apipath").handler(this::routingContextHandler);
-        subRouter.route(mountPoint).handler(this::routingContextHandler);
+        subRouter.route(mountPoint + "/:apipath*").handler(this::routingContextHandler);
+
+        gatewayRouter.mountSubRouter(Constants.ABYSS_GATEWAY_ROOT, subRouter);
 
         return Single.just(subRouter);
     }
@@ -170,7 +177,11 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
         return server
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
-                .rxListen(serverPort, serverHost);
+                .rxListen(serverPort, serverHost)
+                .flatMap(httpServer -> {
+                    logger.trace("http server started | {}:{}", serverHost, serverPort);
+                    return Single.just(httpServer);
+                });
 
 /*
         return vertx.createHttpServer(httpServerOptions)
@@ -219,7 +230,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     Completable initializeServer() {
         logger.trace("---initializeServer invoked");
         return Completable.fromSingle(initializeJdbcClient(Constants.GATEWAY_DATA_SOURCE_SERVICE)
-                .flatMap(jdbcClient -> createRouters())
+                .flatMap(jdbcClient -> createRouter())
                 .flatMap(this::enableCorsSupport)
                 .flatMap(router -> createHttpServer(router,
                         verticleConf.serverHost,
@@ -278,38 +289,53 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         );
     }
 
+    public class AbyssServiceReference {
+        ServiceReference serviceReference;
+        HttpClient httpClient;
+
+        AbyssServiceReference(ServiceReference serviceReference, HttpClient httpClient) {
+            this.serviceReference = serviceReference;
+            this.httpClient = httpClient;
+        }
+
+        public ServiceReference getServiceReference() {
+            return serviceReference;
+        }
+
+        public HttpClient getHttpClient() {
+            return httpClient;
+        }
+    }
+
+    Single<AbyssServiceReference> lookupHttpService(String serviceName) {
+        return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", serviceName))
+                .flatMap(record -> {
+                    ServiceReference serviceReference = AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().getReference(record);
+                    HttpClient httpClient = serviceReference.getAs(io.vertx.reactivex.core.http.HttpClient.class);
+                    return Single.just(new AbyssServiceReference(serviceReference, httpClient));
+                })
+                .doOnError(throwable -> {
+                    logger.error("lookupHttpService error - {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                })
+                .doAfterSuccess(serviceReference -> {
+                    logger.trace("{} service lookup completed successfully", serviceName);
+                });
+    }
+
+    Completable releaseHttpService(ServiceReference serviceReference) {
+        if (AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().release(serviceReference)) {
+            logger.trace("{}service released", serviceReference.record().getName());
+            return Completable.complete();
+        } else {
+            logger.error("releaseHttpService error");
+            return Completable.error(Throwable::new);
+        }
+    }
+
+
     Completable loadAllProxyApis() {
         logger.trace("---loadAllProxyApis invoked");
         return Completable.complete();
-/*
-        ApiService apiService = new ApiService(vertx);
-        return Completable.fromObservable(apiService.initJDBCClient()
-                .flatMap(jdbcClient -> apiService.findAllProxies())
-                .toObservable()
-                .flatMap(resultSet -> {
-                    if (resultSet.getNumRows() == 0)
-                        //return Observable.error(new Exception("no_data_found"));
-                        return Observable.empty();
-                    else {
-                        return Observable.fromIterable(resultSet.getRows());
-                    }
-                })
-                //.toObservable()
-                .flatMap(o -> Observable.just(new Record()
-                        .setType("http-endpoint")
-                        //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
-                        .setLocation((new HttpLocation()
-                                .setSsl(false)
-                                .setHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_ECHO_SERVER_HOST))
-                                .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_ECHO_SERVER_PORT))
-                                .setRoot("/")
-                                .toJson()))
-                        .setName(o.getString("uuid"))
-                        .setMetadata(new JsonObject().put("organization", o.getInteger("organizationid"))))
-                )
-                .flatMap(record -> AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).toObservable()))
-                .doOnError(throwable -> logger.error("loadAllProxyApis error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()));
-*/
     }
 
     public void routingContextHandler(RoutingContext context) {
@@ -330,4 +356,38 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
             this.isSandbox = isSandbox;
         }
     }
+
+    public Single<SwaggerParseResult> openAPIParser(JsonObject apiSpec) {
+        logger.trace("---openAPIParser invoked");
+        ObjectMapper mapper;
+        String data = apiSpec.toString();
+        try {
+            if (data.trim().startsWith("{")) {
+                mapper = ObjectMapperFactory.createJson();
+            } else {
+                mapper = ObjectMapperFactory.createYaml();
+            }
+            JsonNode rootNode = mapper.readTree(data);
+            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readWithInfo(rootNode);
+            if (swaggerParseResult.getMessages().isEmpty()) {
+                logger.trace("openAPIParser OK");
+                return Single.just(swaggerParseResult);
+            } else {
+                if (swaggerParseResult.getMessages().size() == 1 && swaggerParseResult.getMessages().get(0).matches("unable to read location")) {
+                    logger.error("openAPIParser error | {}", swaggerParseResult.getMessages());
+                    return Single.error(RouterFactoryException.createSpecNotExistsException(""));
+                } else {
+                    logger.error("openAPIParser error | {}", swaggerParseResult.getMessages());
+                    return Single.error(RouterFactoryException.createSpecInvalidException(StringUtils.join(swaggerParseResult.getMessages(), ", ")));
+                }
+            }
+        } catch (Exception e) {
+            SwaggerParseResult output = new SwaggerParseResult();
+            logger.error("openAPIParser error | {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+            return Single.error(RouterFactoryException.createSpecInvalidException(e.getLocalizedMessage()));
+        }
+
+
+    }
+
 }
