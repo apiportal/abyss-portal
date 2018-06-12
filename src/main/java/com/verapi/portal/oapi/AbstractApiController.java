@@ -12,6 +12,7 @@
 package com.verapi.portal.oapi;
 
 //import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
+
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
 import com.verapi.portal.common.Config;
@@ -410,6 +411,8 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, int httpResponseStatus) {
+        subscribeAndResponse(routingContext, resultSetSingle, new ArrayList<String>(), httpResponseStatus);
+        /*
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
                     resp.getRows().forEach(arr::add);
@@ -424,9 +427,10 @@ public abstract class AbstractApiController implements IApiController {
                     logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
                     throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 });
+*/
     }
 
-    void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
+    private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
                     if (jsonColumns.isEmpty()) {
@@ -482,19 +486,51 @@ public abstract class AbstractApiController implements IApiController {
 
     private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, List<String> jsonColumns, int httpResponseStatus) {
         logger.trace("---subscribeAndResponseBulkList invoked");
-        jsonListSingle.subscribe(resp -> {
-                    JsonArray jsonArray = new JsonArray(resp);
-                    routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .setStatusCode(httpResponseStatus)
-                            .end(jsonArray.encode(), "UTF-8");
-                    logger.trace("replied successfully " + jsonArray.encodePrettily());
-                },
-                throwable -> {
+        JsonArray arr = new JsonArray();
+        jsonListSingle
+                .doOnError(throwable -> {
                     logger.error("exception occured " + throwable.getLocalizedMessage());
                     logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
                     throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
+                })
+                .subscribe(resp -> {
+                            if (jsonColumns.isEmpty()) {
+                                resp.forEach(arr::add);
+                            } else {
+                                resp.forEach(eachJO -> {
+                                    JsonObject newJsonObject = new JsonObject();
+                                    eachJO.forEach(eachJOEntry -> {
+                                        if (eachJOEntry.getKey().equals("response")) {
+                                            JsonObject newResponseJO = new JsonObject();
+                                            ((JsonObject) eachJOEntry.getValue()).forEach(responseJOEntry -> {
+                                                if (jsonColumns.contains(responseJOEntry.getKey())) {
+                                                    if (responseJOEntry.getValue() == null)
+                                                        newResponseJO.put(responseJOEntry.getKey(), new JsonObject());
+                                                    else
+                                                        newResponseJO.put(responseJOEntry.getKey(), new JsonObject(responseJOEntry.getValue().toString()));
+                                                } else {
+                                                    newResponseJO.put(responseJOEntry.getKey(), responseJOEntry.getValue());
+                                                }
+                                            });
+                                            newJsonObject.put(eachJOEntry.getKey(), newResponseJO);
+                                        } else {
+                                            newJsonObject.put(eachJOEntry.getKey(), eachJOEntry.getValue());
+                                        }
+                                    });
+                                    arr.add(newJsonObject);
+                                });
+                            }
+                            routingContext.response()
+                                    .putHeader("content-type", "application/json; charset=utf-8")
+                                    .setStatusCode(httpResponseStatus)
+                                    .end(arr.encode(), "UTF-8");
+                            logger.trace("replied successfully " + arr.encodePrettily());
+                        },
+                        throwable -> {
+                            logger.error("exception occured " + throwable.getLocalizedMessage());
+                            logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                            throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                        });
     }
 
 
@@ -569,6 +605,10 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        updateEntity(routingContext, clazz, requestBody, new ArrayList<String>());
+    }
+
+    <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> updateAllResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
@@ -579,7 +619,7 @@ public abstract class AbstractApiController implements IApiController {
                     else
                         return Single.just(resultSet);
                 });
-        subscribeAndResponse(routingContext, updateAllResult, HttpResponseStatus.OK.code());
+        subscribeAndResponse(routingContext, updateAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }
 
     <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

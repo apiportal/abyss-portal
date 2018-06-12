@@ -39,6 +39,10 @@ import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 public class SubjectDirectoryApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(SubjectDirectoryApiController.class);
 
+    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
+        add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES);
+    }};
+
     /**
      * API verticle creates new API Controller instance via this constructor
      * @param vertx Vertx content
@@ -52,9 +56,6 @@ public class SubjectDirectoryApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectDirectories(RoutingContext routingContext) {
         try {
-            List<String> jsonbColumnsList = new ArrayList<String>() {{
-                add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES);
-            }};
             getEntities(routingContext, SubjectDirectoryService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
@@ -72,7 +73,7 @@ public class SubjectDirectoryApiController extends AbstractApiController {
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
         try {
-            addEntities(routingContext, SubjectDirectoryService.class, requestBody);
+            addEntities(routingContext, SubjectDirectoryService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -90,7 +91,7 @@ public class SubjectDirectoryApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, SubjectDirectoryService.class, requestBody);
+            updateEntities(routingContext, SubjectDirectoryService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -115,9 +116,6 @@ public class SubjectDirectoryApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            List<String> jsonbColumnsList = new ArrayList<String>() {{
-                add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES);
-            }};
             getEntity(routingContext, SubjectDirectoryService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
@@ -136,7 +134,7 @@ public class SubjectDirectoryApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, SubjectDirectoryService.class, requestBody);
+            updateEntity(routingContext, SubjectDirectoryService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

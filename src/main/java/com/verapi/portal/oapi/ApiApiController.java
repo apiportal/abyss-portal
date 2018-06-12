@@ -105,7 +105,7 @@ public class ApiApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, ApiService.class, requestBody);
+            updateEntities(routingContext, ApiService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -130,10 +130,6 @@ public class ApiApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            List<String> jsonbColumnsList = new ArrayList<String>() {{
-                add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
-                add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
-            }};
             getEntity(routingContext, ApiService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
@@ -152,7 +148,7 @@ public class ApiApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, ApiService.class, requestBody);
+            updateEntity(routingContext, ApiService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -178,10 +174,6 @@ public class ApiApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            List<String> jsonbColumnsList = new ArrayList<String>() {{
-                add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
-                add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
-            }};
             getEntities(routingContext, ApiService.class, jsonbColumnsList, ApiService.FILTER_BY_SUBJECT.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());

@@ -38,6 +38,10 @@ import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 public class PolicyApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(PolicyApiController.class);
 
+    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
+        add(Constants.JSONB_COLUMN_POLICY_POLICYCONFIGURATION);
+    }};
+
     /**
      * API verticle creates new API Controller instance via this constructor
      * @param vertx Vertx content
@@ -51,9 +55,6 @@ public class PolicyApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getPolicies(RoutingContext routingContext) {
         try {
-            List<String> jsonbColumnsList = new ArrayList<String>() {{
-                add(Constants.JSONB_COLUMN_POLICY_POLICYCONFIGURATION);
-            }};
             getEntities(routingContext, PolicyService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
@@ -71,7 +72,7 @@ public class PolicyApiController extends AbstractApiController {
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
         try {
-            addEntities(routingContext, PolicyService.class, requestBody);
+            addEntities(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -89,7 +90,7 @@ public class PolicyApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, PolicyService.class, requestBody);
+            updateEntities(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -114,9 +115,6 @@ public class PolicyApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            List<String> jsonbColumnsList = new ArrayList<String>() {{
-                add(Constants.JSONB_COLUMN_POLICY_POLICYCONFIGURATION);
-            }};
             getEntity(routingContext, PolicyService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
@@ -135,7 +133,7 @@ public class PolicyApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, PolicyService.class, requestBody);
+            updateEntity(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
