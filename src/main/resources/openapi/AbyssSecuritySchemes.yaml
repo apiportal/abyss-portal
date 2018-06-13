@@ -11,6 +11,14 @@
       type: apiKey
       name: abyss.api.key
       in: header
+    abyssAppKeyAuth:
+      type: apiKey
+      name: abyss.app.key
+      in: header
+    abyssAppKeyCookieAuth:
+      type: apiKey
+      name: abyss.app.key
+      in: cookie
     abyssJWTBearerAuth:
       type: http
       scheme: bearer

@@ -1180,7 +1180,7 @@ components:
         languageversion:
           type: string
           description: Version of Description Language
-        dataformat:
+        languageformat:
           type: integer
           format: int32
           description: Data format type. 0 - JSON, 1 - YAML, 2 - XML
