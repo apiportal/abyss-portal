@@ -17,42 +17,42 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: ResourceTypes
+  - name: Contracts
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ResourceTypes crud operations'
-  - name: ResourceType
+    description: 'Abyss plaftorm APIs : Contracts crud operations'
+  - name: Contract
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ResourceType crud operations'
+    description: 'Abyss plaftorm APIs : Contract crud operations'
 paths:
-  /resource-types:
+  /contracts:
     get:
       tags:
-        - ResourceTypes
-      summary: 'Get list of ResourceTypes'
-      description: 'Returns list of ResourceTypes'
-      operationId: getResourceTypes
+        - Contracts
+      summary: 'Get list of Contracts'
+      description: 'Returns list of Contracts'
+      operationId: getContracts
       parameters:
         - name: byname
           in: query
           required: false
           schema:
             type: string
-          description: 'search ResourceTypes which names exact match'
+          description: 'search Contracts which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: 'search ResourceTypes which names begin with'
+          description: 'search Contracts which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfResourceType'
+          $ref: '#/components/responses/200-ListOfContract'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -71,10 +71,10 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - ResourceTypes
-      summary: 'Add a bulk of ResourceTypes'
-      description: 'Provide a list of ResourceTypes to be inserted'
-      operationId: addResourceTypes
+        - Contracts
+      summary: 'Add a bulk of Contracts'
+      description: 'Provide a list of Contracts to be inserted'
+      operationId: addContracts
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -95,13 +95,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfResourceType'
+        $ref: '#/components/requestBodies/ListOfContract'
     put:
       tags:
-        - ResourceTypes
-      summary: 'Update a bulk of ResourceTypes'
-      description: 'Provide a bulk list of  ResourceTypes to be updated'
-      operationId: updateResourceTypes
+        - Contracts
+      summary: 'Update a bulk of Contracts'
+      description: 'Provide a bulk list of  Contracts to be updated'
+      operationId: updateContracts
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -122,13 +122,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfResourceTypeObject'
+        $ref: '#/components/requestBodies/ListOfContractObject'
     delete:
       tags:
-        - ResourceTypes
-      summary: 'Delete all ResourceTypes'
-      description: 'Deletes all ResourceTypes'
-      operationId: deleteResourceTypes
+        - Contracts
+      summary: 'Delete all Contracts'
+      description: 'Deletes all Contracts'
+      operationId: deleteContracts
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -144,17 +144,17 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /resource-types/{uuid}:
+  /contracts/{uuid}:
     get:
       tags:
-        - ResourceType
-      summary: 'Get an existing ResourceType by uuid'
-      description: 'Provide an uuid of ResourceType to be get'
-      operationId: getResourceType
+        - Contract
+      summary: 'Get an existing Contract by uuid'
+      description: 'Provide an uuid of Contract to be get'
+      operationId: getContract
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of ResourceType that need to be get'
+          description: 'uuid of Contract that need to be get'
           required: true
           schema:
             type: string
@@ -179,14 +179,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - ResourceType
-      summary: 'Update an existing ResourceType'
-      description: 'Provide an altered ResourceType to be updated'
-      operationId: updateResourceType
+        - Contract
+      summary: 'Update an existing Contract'
+      description: 'Provide an altered Contract to be updated'
+      operationId: updateContract
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of ResourceType that need to be updated'
+          description: 'uuid of Contract that need to be updated'
           required: true
           schema:
             type: string
@@ -210,17 +210,17 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ResourceType'
+        $ref: '#/components/requestBodies/Contract'
     delete:
       tags:
-        - ResourceType
-      summary: 'Delete ResourceType'
-      description: 'Provide an uuid parameter of ResourceType to be updated'
-      operationId: deleteResourceType
+        - Contract
+      summary: 'Delete Contract'
+      description: 'Provide an uuid parameter of Contract to be updated'
+      operationId: deleteContract
       parameters:
         - name: uuid
           in: path
-          description: 'The uuid of ResourceType that needs to be deleted'
+          description: 'The uuid of Contract that needs to be deleted'
           required: true
           schema:
             type: string
@@ -280,10 +280,10 @@ components:
           readOnly: true
           description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
-          $ref: '#/components/schemas/ResourceType'
+          $ref: '#/components/schemas/Contract'
         error:
           $ref: '#/components/schemas/Error'
-    ResourceType:
+    Contract:
       type: object
       properties:
         uuid:
@@ -295,46 +295,94 @@ components:
           description: 'Id of Organization'
         created:
           type: string
-          description: 'Timestamp of creation'
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
         updated:
           type: string
-          description: 'Timestamp of update'
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
         deleted:
           type: string
-          description: 'Timestamp of deletion'
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
         isdeleted:
           type: boolean
-          description: 'Is record logically deleted'
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
         crudsubjectid:
           type: string
           description: 'ID of Subject that reads, creates, updates or deletes'
-        type:
+        name:
           type: string
-          description: 'Resource Type'
+          description: 'Name of contract'
+        description:
+          type: string
+          description: 'The text description of the contract'
+        apiid:
+          type: string
+          description: 'FK ID of API Version that this contract binds'
+        subjectid:
+          type: string
+          description: 'FK ID of Subject / App that this contract binds'
+        environment:
+          type: string
+          description: 'Environment that the contract relates to (Sandbox or Production).'
+        contractstateid:
+          type: string
+          description: 'FK ID of the current state of the contract.
+
+The state values for an API contract are
+
+pending_approval
+config_pending (used only in certain custom workflow scenarios or in LaaS integration)
+approved
+activated
+rejected
+resubmitted
+suspended
+cancelled'
+        targetresources:
+          type: integer
+          format: int32
+          description: 'Contains information about one or more resources associated with the current resource. Used only in response messages.'
+        status:
+          type: string
+          description: 'The status of the contract.
+draft - Indicates the contract has not yet been activated. workflow status of Pending Approval, Approved, and any other state before the contract is activated will have this status value.
+inforce - Indicates that the contract is either Active or Suspended.
+archived - Indicates that the active life of the contract is over. The workflow status of Cancelled, adn any other action that results in the cancellation of the contract (such as deletion of the app or API) will have this status value'
+        isrestrictedtosubsetofapi:
+          type: boolean
+          description: 'Is app's access to the API is restricted to a subset of the API'
+        license:
+          type: object
+          description: 'License of contract. A license is a tailored API access package designed by the Business Admin/API Admin and offered to the app developer. A license includes one or more license terms, each of which can include multiple scopes, giving access to specifically designated operations, and multiple quality of service (QoS) policies, and also one or more legal agreements applicable to the license.
+Terms of Service - QoS, SLA
+Legal'
   requestBodies:
-    ResourceType:
+    Contract:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ResourceType'
-      description: 'ResourceType object that needs to be added or updated'
+            $ref: '#/components/schemas/Contract'
+      description: 'Contract object that needs to be added or updated'
       required: true
-    ListOfResourceType:
+    ListOfContract:
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/ResourceType'
-      description: 'ResourceType array that needs to be added'
+              $ref: '#/components/schemas/Contract'
+      description: 'Contract array that needs to be added'
       required: true
-    ListOfResourceTypeObject:
+    ListOfContractObject:
       content:
         application/json:
           schema:
             type: object
             additionalProperties: true
-      description:  'list of ResourceType objects that needs to be updated, each additional property name should be the uuid of coresponding ResourceType record'
+      description:  'list of Contract objects that needs to be updated, each additional property name should be the uuid of coresponding Contract record'
       required: true
   responses:
     '200':
@@ -342,23 +390,23 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ResourceType'
-    '200-ListOfResourceType':
-      description: 'A ResourceType array'
+            $ref: '#/components/schemas/Contract'
+    '200-ListOfContract':
+      description: 'A Contract array'
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/ResourceType'
+              $ref: '#/components/schemas/Contract'
     '201':
-      description: 'New ResourceType resource has been created'
+      description: 'New Contract resource has been created'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ResourceType'
+            $ref: '#/components/schemas/Contract'
     '204':
-      description: 'The ResourceType resource was successfully deleted'
+      description: 'The Contract resource was successfully deleted'
     '207':
       description: 'Multi Status for bulk operation'
       content:
@@ -372,7 +420,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ResourceType'
+            $ref: '#/components/schemas/Contract'
     '400':
       description: 'Invalid UUID supplied'
       content:

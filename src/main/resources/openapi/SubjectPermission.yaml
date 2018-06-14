@@ -5,29 +5,34 @@ servers:
   - url: 'http://192.168.10.46:38083/abyss/oapi'
   - url: '/abyss/oapi'
 info:
-  description: Abyss platform APIs
-  version: 1.0.0
-  title: Abyss
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
   termsOfService: 'https://apiportal.com/terms/'
   contact:
-    email: info@apiportal.com
-    name: Abyss
+    email: 'info@apiportal.com'
+    name: 'Abyss'
     url: 'https://apiportal.com'
   license:
-    name: Abyss 1.0
+    name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: TODO
+  - name: SubjectPermissions
     externalDocs:
       url: 'https://apiportal.com'
-      description: Find out more
-    description: Abyss ... [TODO]
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : SubjectPermissions crud operations'
+  - name: SubjectPermission
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : SubjectPermission crud operations'
 paths:
   /subject-permissions:
     get:
       tags:
-        - TODO
-      summary: Get list of SubjectPermissions
+        - SubjectPermissions
+      summary: 'Get list of SubjectPermissions'
       description: 'Returns list of SubjectPermissions'
       operationId: getSubjectPermissions
       parameters:
@@ -36,13 +41,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search Subjects which names exact match
+          description: 'search SubjectPermissions which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search Subjects which names begin with
+          description: 'search SubjectPermissions which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -66,9 +71,9 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of SubjectPermissions
-      description: 'Provide a list of SubjectPermission objects to be inserted'
+        - SubjectPermissions
+      summary: 'Add a bulk of SubjectPermissions'
+      description: 'Provide a list of SubjectPermissions to be inserted'
       operationId: addSubjectPermissions
       responses:
         '207':
@@ -93,9 +98,9 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectPermission'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of SubjectPermissions
-      description: 'Provide a bulk list of  SubjectPermission objects to be updated'
+        - SubjectPermissions
+      summary: 'Update a bulk of SubjectPermissions'
+      description: 'Provide a bulk list of  SubjectPermissions to be updated'
       operationId: updateSubjectPermissions
       responses:
         '207':
@@ -120,8 +125,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectPermissionObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all SubjectPermissions
+        - SubjectPermissions
+      summary: 'Delete all SubjectPermissions'
       description: 'Deletes all SubjectPermissions'
       operationId: deleteSubjectPermissions
       responses:
@@ -142,14 +147,14 @@ paths:
   /subject-permissions/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get an existing SubjectPermission by uuid
+        - SubjectPermission
+      summary: 'Get an existing SubjectPermission by uuid'
       description: 'Provide an uuid of SubjectPermission to be get'
       operationId: getSubjectPermission
       parameters:
         - name: uuid
           in: path
-          description: uuid of SubjectPermission that need to be get
+          description: 'uuid of SubjectPermission that need to be get'
           required: true
           schema:
             type: string
@@ -174,14 +179,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - TODO
-      summary: Update an existing SubjectPermission
+        - SubjectPermission
+      summary: 'Update an existing SubjectPermission'
       description: 'Provide an altered SubjectPermission to be updated'
       operationId: updateSubjectPermission
       parameters:
         - name: uuid
           in: path
-          description: uuid of SubjectPermission that need to be updated
+          description: 'uuid of SubjectPermission that need to be updated'
           required: true
           schema:
             type: string
@@ -208,14 +213,14 @@ paths:
         $ref: '#/components/requestBodies/SubjectPermission'
     delete:
       tags:
-        - TODO
-      summary: Delete SubjectPermission
+        - SubjectPermission
+      summary: 'Delete SubjectPermission'
       description: 'Provide an uuid parameter of SubjectPermission to be updated'
       operationId: deleteSubjectPermission
       parameters:
         - name: uuid
           in: path
-          description: The uuid of SubjectPermission that needs to be deleted
+          description: 'The uuid of SubjectPermission that needs to be deleted'
           required: true
           schema:
             type: string
@@ -237,7 +242,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
 externalDocs:
-  description: See Abyss example
+  description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
 components:
   schemas:
@@ -269,11 +274,11 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: uuid of the record
+          description: 'uuid of the record'
         status:
           type: integer
           readOnly: true
-          description: status -Http response code status (2XX, 3XX, 4XX, 5XX)
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
           $ref: '#/components/schemas/SubjectPermission'
         error:
@@ -284,51 +289,51 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: Secondary primary key. Used in front end messages for security reasons.
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
         organizationid:
           type: string
-          description: Id of Organization
+          description: 'Id of Organization'
         created:
           type: string
           readOnly: true
-          description: Timestamp of creation #readOnly#
+          description: 'Timestamp of creation #readOnly#'
         updated:
           type: string
           readOnly: true
-          description: Timestamp of update #readOnly#
+          description: 'Timestamp of update #readOnly#'
         deleted:
           type: string
           readOnly: true
-          description: Timestamp of deletion #readOnly#
+          description: 'Timestamp of deletion #readOnly#'
         isdeleted:
           type: boolean
           readOnly: true
-          description: Is record logically deleted #readOnly#
+          description: 'Is record logically deleted #readOnly#'
         crudsubjectid:
           type: string
-          description: ID of Subject that reads, creates, updates or deletes
+          description: 'ID of Subject that reads, creates, updates or deletes'
         permission:
           type: string
-          description: Permission of user
+          description: 'Permission of user'
         description:
           type: string
-          description: Description of permission record
+          description: 'Description of permission record'
         effectivestartdate:
           type: string
-          description: Effective start date time of permission that it is active
+          description: 'Effective start date time of permission that it is active'
         effectiveenddate:
           type: string
-          description: Effective end date time of permission that is active until
+          description: 'Effective end date time of permission that is active until'
         subjectid:
           type: string
-          description: FK ID of Subject having the permission
+          description: 'FK ID of Subject having the permission'
   requestBodies:
     SubjectPermission:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectPermission'
-      description: SubjectPermission object that needs to be added or updated
+      description: 'SubjectPermission object that needs to be added or updated'
       required: true
     ListOfSubjectPermission:
       content:
@@ -337,7 +342,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/SubjectPermission'
-      description: SubjectPermission array that needs to be added
+      description: 'SubjectPermission array that needs to be added'
       required: true
     ListOfSubjectPermissionObject:
       content:
@@ -345,17 +350,17 @@ components:
           schema:
             type: object
             additionalProperties: true
-      description:  list of SubjectPermission objects that needs to be updated, each additional property name should be the uuid of coresponding SubjectPermission record
+      description:  'list of SubjectPermission objects that needs to be updated, each additional property name should be the uuid of coresponding SubjectPermission record'
       required: true
   responses:
     '200':
-      description: Successful operation
+      description: 'Successful operation'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectPermission'
     '200-ListOfSubjectPermission':
-      description: A SubjectPermission array
+      description: 'A SubjectPermission array'
       content:
         application/json:
           schema:
@@ -363,15 +368,15 @@ components:
             items:
               $ref: '#/components/schemas/SubjectPermission'
     '201':
-      description: New SubjectPermission resource has been created
+      description: 'New SubjectPermission resource has been created'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectPermission'
     '204':
-      description: The SubjectPermission resource was successfully deleted
+      description: 'The SubjectPermission resource was successfully deleted'
     '207':
-      description: Multi Status for bulk operation
+      description: 'Multi Status for bulk operation'
       content:
         application/json:
           schema:
@@ -379,61 +384,61 @@ components:
             items:
               $ref: '#/components/schemas/MultiStatus'
     '304':
-      description: Not Modified – The client can use cached data
+      description: 'Not Modified – The client can use cached data'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectPermission'
     '400':
-      description: Invalid UUID supplied
+      description: 'Invalid UUID supplied'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '401':
-      description: Authorization information is missing or invalid
+      description: 'Authorization information is missing or invalid'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '403':
-      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '404':
-      description: Not found – There is no resource behind the URI
+      description: 'Not found – There is no resource behind the URI'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '405':
-      description: Method not allowed
+      description: 'Method not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '422':
-      description: Unprocessable Entity – server cannot process the request
+      description: 'Unprocessable Entity – server cannot process the request'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '429':
-      description: Too many request(rate limiting)
+      description: 'Too many request(rate limiting)'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '500':
-      description: Internal server error
+      description: 'Internal server error'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     default:
-      description: error
+      description: 'error'
       content:
         application/json:
           schema:
@@ -446,7 +451,7 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: The number of items to skip before starting to collect the result set
+      description: 'The number of items to skip before starting to collect the result set'
     limitParam:
       in: query
       name: limit
@@ -456,7 +461,7 @@ components:
         minimum: 1
         maximum: 50
         default: 20
-      description: The numbers of items to return
+      description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
@@ -466,6 +471,10 @@ components:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
@@ -473,3 +482,5 @@ security:
   - abyssHttpBasicAuth: []
   - abyssApiKeyAuth: []
   - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []

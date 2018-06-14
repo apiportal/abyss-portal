@@ -11,28 +11,33 @@
 
 package com.verapi.portal.verticle;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.common.OpenAPIUtil;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
+import io.reactivex.Flowable;
 import io.reactivex.Single;
-import io.swagger.v3.parser.ObjectMapperFactory;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpClientOptions;
+
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.RequestOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
-import io.vertx.ext.web.api.contract.RouterFactoryException;
+import io.vertx.core.net.ProxyOptions;
+import io.vertx.core.net.ProxyType;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.reactivex.RxHelper;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.core.http.HttpClient;
+import io.vertx.reactivex.core.http.HttpClientRequest;
+import io.vertx.reactivex.core.http.HttpClientResponse;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.core.http.HttpServerRequest;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
@@ -46,12 +51,14 @@ import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
 import io.vertx.reactivex.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.HttpLocation;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 //import io.vertx.core.http.HttpClient;
@@ -331,6 +338,65 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }
     }
 
+    public class AbyssHttpRequest {
+        AbyssServiceReference abyssServiceReference;
+        RoutingContext context;
+
+        public AbyssHttpRequest(AbyssServiceReference abyssServiceReference, RoutingContext context) {
+            this.abyssServiceReference = abyssServiceReference;
+            this.context = context;
+        }
+    }
+
+    Flowable<HttpClientResponse> invokeHttpService(AbyssHttpRequest abyssHttpRequest) {
+        JsonObject apiSpec = new JsonObject(abyssHttpRequest.abyssServiceReference.serviceReference.record().getMetadata().getString("apiSpec"));
+        JsonArray servers = apiSpec.getJsonArray(OpenAPIUtil.OPENAPI_SECTION_SERVERS);
+        URL serverURL;
+        try {
+            serverURL = new URL(servers.getJsonObject(new Random().nextInt(servers.size())).getString("url"));
+        } catch (MalformedURLException e) {
+            logger.error("malformed server url {}", servers.getJsonObject(new Random().nextInt(servers.size())).getString("url"));
+            return Flowable.error(e);
+        }
+
+        HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions()
+                .setSsl("https".equals(serverURL.getProtocol()))
+                .setTrustAll(false) //TODO: re-engineering for parametric trust certificate of api
+                .setVerifyHost(true)); //TODO: re-engineering for parametric trust certificate of api
+//                .setProxyOptions(new ProxyOptions()
+//                        .setType(ProxyType.HTTP)
+//                        .setHost("localhost")
+//                        .setPort(8080)))
+        RequestOptions requestOptions = new RequestOptions()
+                .setHost(serverURL.getHost())
+                .setPort(serverURL.getPort())
+                .setSsl("https".equals(serverURL.getProtocol()))
+                .setURI(serverURL.getPath());
+        HttpClientRequest request = httpClient
+                .request(abyssHttpRequest.context.request().method(), requestOptions);
+        request.headers().setAll(abyssHttpRequest.context.request().headers());
+        return request
+                .toFlowable()
+                .doOnSubscribe(subscription -> request.end());
+
+/*
+*çağrılan yerden aşağıdaki gibi subscribe olunacak ve tüketilecek...
+        request.toFlowable().subscribe(httpClientResponse -> {
+            logger.trace("httpClientResponse statusCode: {} - headers: {}", httpClientResponse.statusCode(), httpClientResponse.headers());
+        });
+*/
+
+
+/*
+                .put(8282, "localhost", "/", resp -> {
+            System.out.println("Got response " + resp.statusCode());
+            resp.bodyHandler(body -> System.out.println("Got data " + body.toString("ISO-8859-1")));
+        });
+*/
+
+
+    }
+
 
     Completable loadAllProxyApis() {
         logger.trace("---loadAllProxyApis invoked");
@@ -355,38 +421,4 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
             this.isSandbox = isSandbox;
         }
     }
-
-    public Single<SwaggerParseResult> openAPIParser(JsonObject apiSpec) {
-        logger.trace("---openAPIParser invoked");
-        ObjectMapper mapper;
-        String data = apiSpec.toString();
-        try {
-            if (data.trim().startsWith("{")) {
-                mapper = ObjectMapperFactory.createJson();
-            } else {
-                mapper = ObjectMapperFactory.createYaml();
-            }
-            JsonNode rootNode = mapper.readTree(data);
-            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readWithInfo(rootNode);
-            if (swaggerParseResult.getMessages().isEmpty()) {
-                logger.trace("openAPIParser OK");
-                return Single.just(swaggerParseResult);
-            } else {
-                if (swaggerParseResult.getMessages().size() == 1 && swaggerParseResult.getMessages().get(0).matches("unable to read location")) {
-                    logger.error("openAPIParser error | {}", swaggerParseResult.getMessages());
-                    return Single.error(RouterFactoryException.createSpecNotExistsException(""));
-                } else {
-                    logger.error("openAPIParser error | {}", swaggerParseResult.getMessages());
-                    return Single.error(RouterFactoryException.createSpecInvalidException(StringUtils.join(swaggerParseResult.getMessages(), ", ")));
-                }
-            }
-        } catch (Exception e) {
-            SwaggerParseResult output = new SwaggerParseResult();
-            logger.error("openAPIParser error | {} | {}", e.getLocalizedMessage(), e.getStackTrace());
-            return Single.error(RouterFactoryException.createSpecInvalidException(e.getLocalizedMessage()));
-        }
-
-
-    }
-
 }

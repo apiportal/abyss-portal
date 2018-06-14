@@ -5,30 +5,70 @@ servers:
   - url: 'http://192.168.10.46:38083/abyss/oapi'
   - url: '/abyss/oapi'
 info:
-  description: Abyss platform APIs
-  version: 1.0.0
-  title: Abyss
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
   termsOfService: 'https://apiportal.com/terms/'
   contact:
-    email: info@apiportal.com
-    name: Abyss
+    email: 'info@apiportal.com'
+    name: 'Abyss'
     url: 'https://apiportal.com'
   license:
-    name: Abyss 1.0
+    name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: TODO
+  - name: Apis
     externalDocs:
       url: 'https://apiportal.com'
-      description: Find out more
-    description: Abyss ... [TODO]
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Apis crud operations'
+  - name: Api
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Api crud operations'
+  - name: Subject-APIs
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject APIs crud operations'
+  - name: Business-APIs
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Business APIs crud operations'
+  - name: Business-API
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Business API crud operations'
+  - name: API-Proxies
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : API Proxies crud operations'
+  - name: API-Proxy
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : API Proxy crud operations'
+  - name: Subject-Business-APIs
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subjects'' Business APIs crud operations'
+  - name: Subject-API-Proxies
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s API Proxies crud operations'
 paths:
   /apis:
     get:
       tags:
-        - TODO
-      summary: Get list of APIs
-      description: 'Returns list of APIs'
+        - Apis
+      summary: 'Get list of Apis'
+      description: 'Returns list of Apis'
       operationId: getApis
       parameters:
         - name: byname
@@ -36,13 +76,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search APIs which names exact match
+          description: 'search Apis which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search APIs which names begin with
+          description: 'search Apis which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -66,9 +106,9 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of APIs
-      description: 'Provide a list of APIs to be inserted'
+        - Apis
+      summary: 'Add a bulk of Apis'
+      description: 'Provide a list of Apis to be inserted'
       operationId: addApis
       responses:
         '207':
@@ -93,9 +133,9 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of APIs
-      description: 'Provide a bulk list of APIs to be updated'
+        - Apis
+      summary: 'Update a bulk of Apis'
+      description: 'Provide a bulk list of  Apis to be updated'
       operationId: updateApis
       responses:
         '207':
@@ -120,9 +160,9 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all APIs
-      description: 'Deletes all APIs'
+        - Apis
+      summary: 'Delete all Apis'
+      description: 'Deletes all Apis'
       operationId: deleteApis
       responses:
         '204':
@@ -142,14 +182,14 @@ paths:
   /apis/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get an existing API by uuid
-      description: 'Provide an uuid of API to be get'
+        - Api
+      summary: 'Get an existing Api by uuid'
+      description: 'Provide an uuid of Api to be get'
       operationId: getApi
       parameters:
         - name: uuid
           in: path
-          description: uuid of API that need to be get
+          description: 'uuid of Api that need to be get'
           required: true
           schema:
             type: string
@@ -174,14 +214,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - TODO
-      summary: Update an existing API
-      description: 'Provide an altered API to be updated'
+        - Api
+      summary: 'Update an existing Api'
+      description: 'Provide an altered Api to be updated'
       operationId: updateApi
       parameters:
         - name: uuid
           in: path
-          description: uuid of API that need to be updated
+          description: 'uuid of Api that need to be updated'
           required: true
           schema:
             type: string
@@ -208,14 +248,14 @@ paths:
         $ref: '#/components/requestBodies/Api'
     delete:
       tags:
-        - TODO
-      summary: Delete API
-      description: 'Provide an uuid parameter of API to be updated'
+        - Api
+      summary: 'Delete Api'
+      description: 'Provide an uuid parameter of Api to be updated'
       operationId: deleteApi
       parameters:
         - name: uuid
           in: path
-          description: The uuid of API that needs to be deleted
+          description: 'The uuid of Api that needs to be deleted'
           required: true
           schema:
             type: string
@@ -239,14 +279,14 @@ paths:
   /apis/subject/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get APIs by Subject uuid
+        - Subject-APIs
+      summary: 'Get APIs by Subject uuid'
       description: 'Provide an uuid of Subject to get his APIs'
       operationId: getApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to get his APIs
+          description: 'uuid of Subject that need to get his APIs'
           required: true
           schema:
             type: string
@@ -255,13 +295,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search APIs which names exact match
+          description: 'search APIs which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search APIs which names begin with
+          description: 'search APIs which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -285,14 +325,14 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of new APIs for a Subject
+        - Subject-APIs
+      summary: 'Add a bulk of new APIs for a Subject'
       description: 'Provide a list of Api objects to be inserted'
       operationId: addApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to add his APIs
+          description: 'uuid of Subject that need to add his APIs'
           required: true
           schema:
             type: string
@@ -319,14 +359,14 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - TODO
-      summary: Update APIs of Subject
+        - Subject-APIs
+      summary: 'Update APIs of Subject'
       description: 'Provide a list of Api objects to be updated'
       operationId: updateApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to update his APIs
+          description: 'uuid of Subject that need to update his APIs'
           required: true
           schema:
             type: string
@@ -353,14 +393,14 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all APIs of Subject
+        - Subject-APIs
+      summary: 'Delete all APIs of Subject'
       description: 'Provide an uuid parameter of Api to be deleted'
       operationId: deleteApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to delete his APIs
+          description: 'uuid of Subject that need to delete his APIs'
           required: true
           schema:
             type: string
@@ -382,8 +422,8 @@ paths:
   /apis/businesses:
     get:
       tags:
-        - TODO
-      summary: Get list of Business APIs
+        - Business-APIs
+      summary: 'Get list of Business APIs'
       description: 'Returns list of Business APIs'
       operationId: getBusinessApis
       parameters:
@@ -392,13 +432,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search Business APIs which names exact match
+          description: 'search Business APIs which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search Business APIs which names begin with
+          description: 'search Business APIs which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -422,8 +462,8 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of Business APIs
+        - Business-APIs
+      summary: 'Add a bulk of Business APIs'
       description: 'Provide a list of Business APIs objects to be inserted'
       operationId: addBusinessApis
       responses:
@@ -449,8 +489,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of Business APIs
+        - Business-APIs
+      summary: 'Update a bulk of Business APIs'
       description: 'Provide a bulk list of  Business APIs objects to be updated'
       operationId: updateBusinessApis
       responses:
@@ -476,8 +516,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all Business APIs
+        - Business-APIs
+      summary: 'Delete all Business APIs'
       description: 'Deletes all Business APIs'
       operationId: deleteBusinessApis
       responses:
@@ -498,14 +538,14 @@ paths:
   /apis/businesses/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get an existing Business API by uuid
+        - Business-API
+      summary: 'Get an existing Business API by uuid'
       description: 'Provide an uuid of Api to be get'
       operationId: getBusinessApi
       parameters:
         - name: uuid
           in: path
-          description: uuid of Business API that need to be get
+          description: 'uuid of Business API that need to be get'
           required: true
           schema:
             type: string
@@ -530,14 +570,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - TODO
-      summary: Update an existing Business API
+        - Business-API
+      summary: 'Update an existing Business API'
       description: 'Provide an altered Business API to be updated'
       operationId: updateBusinessApi
       parameters:
         - name: uuid
           in: path
-          description: uuid of Business API that need to be updated
+          description: 'uuid of Business API that need to be updated'
           required: true
           schema:
             type: string
@@ -564,14 +604,14 @@ paths:
         $ref: '#/components/requestBodies/Api'
     delete:
       tags:
-        - TODO
-      summary: Delete Business API
+        - Business-API
+      summary: 'Delete Business API'
       description: 'Provide an uuid parameter of Business API to be updated'
       operationId: deleteBusinessApi
       parameters:
         - name: uuid
           in: path
-          description: The uuid of Business API that needs to be deleted
+          description: 'The uuid of Business API that needs to be deleted'
           required: true
           schema:
             type: string
@@ -595,8 +635,8 @@ paths:
   /apis/proxies:
     get:
       tags:
-        - TODO
-      summary: Get list of API Proxies
+        - API-Proxies
+      summary: 'Get list of API Proxies'
       description: 'Returns list of API Proxies'
       operationId: getApiProxies
       parameters:
@@ -605,13 +645,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search API Proxies which names exact match
+          description: 'search API Proxies which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search API Proxies which names begin with
+          description: 'search API Proxies which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -635,8 +675,8 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of API Proxies
+        - API-Proxies
+      summary: 'Add a bulk of API Proxies'
       description: 'Provide a list of API Proxies objects to be inserted'
       operationId: addApiProxies
       responses:
@@ -662,8 +702,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of API Proxies
+        - API-Proxies
+      summary: 'Update a bulk of API Proxies'
       description: 'Provide a bulk list of  API Proxies objects to be updated'
       operationId: updateApiProxies
       responses:
@@ -689,8 +729,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all API Proxies
+        - API-Proxies
+      summary: 'Delete all API Proxies'
       description: 'Deletes all API Proxies'
       operationId: deleteApiProxies
       responses:
@@ -711,14 +751,14 @@ paths:
   /apis/proxies/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get an existing API Proxy by uuid
+        - API-Proxy
+      summary: 'Get an existing API Proxy by uuid'
       description: 'Provide an uuid of API Proxy to be get'
       operationId: getApiProxy
       parameters:
         - name: uuid
           in: path
-          description: uuid of API Proxy that need to be get
+          description: 'uuid of API Proxy that need to be get'
           required: true
           schema:
             type: string
@@ -743,14 +783,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - TODO
-      summary: Update an existing API Proxy
+        - API-Proxy
+      summary: 'Update an existing API Proxy'
       description: 'Provide an altered API Proxy to be updated'
       operationId: updateApiProxy
       parameters:
         - name: uuid
           in: path
-          description: uuid of API Proxy that need to be updated
+          description: 'uuid of API Proxy that need to be updated'
           required: true
           schema:
             type: string
@@ -777,14 +817,14 @@ paths:
         $ref: '#/components/requestBodies/Api'
     delete:
       tags:
-        - TODO
-      summary: Delete API Proxy
+        - API-Proxy
+      summary: 'Delete API Proxy'
       description: 'Provide an uuid parameter of API Proxy to be deleted'
       operationId: deleteApiProxy
       parameters:
         - name: uuid
           in: path
-          description: The uuid of API Proxy that needs to be deleted
+          description: 'The uuid of API Proxy that needs to be deleted'
           required: true
           schema:
             type: string
@@ -808,14 +848,14 @@ paths:
   /apis/businesses/subject/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get Business APIs by Subject uuid
+        - Subject-Business-APIs
+      summary: 'Get Business APIs by Subject uuid'
       description: 'Provide an uuid of Subject to get his Business APIs'
       operationId: getBusinessApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to get his Business APIs
+          description: 'uuid of Subject that need to get his Business APIs'
           required: true
           schema:
             type: string
@@ -824,13 +864,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search his Business APIs which names exact match
+          description: 'search his Business APIs which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search his Business APIs which names begin with
+          description: 'search his Business APIs which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -854,14 +894,14 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of Business APIs for Subject
+        - Subject-Business-APIs
+      summary: 'Add a bulk of Business APIs for Subject'
       description: 'Provide a list of his Business APIs objects to be inserted'
       operationId: addBusinessApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to add his Business APIs
+          description: 'uuid of Subject that need to add his Business APIs'
           required: true
           schema:
             type: string
@@ -888,14 +928,14 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of Business APIs for Subject
+        - Subject-Business-APIs
+      summary: 'Update a bulk of Business APIs for Subject'
       description: 'Provide a bulk list of  his Business APIs objects to be updated'
       operationId: updateBusinessApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to update his Business APIs
+          description: 'uuid of Subject that need to update his Business APIs'
           required: true
           schema:
             type: string
@@ -922,14 +962,14 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - TODO
+        - Subject-Business-APIs
       summary: Delete all Business APIs for Subject
       description: 'Deletes his all Business APIs'
       operationId: deleteBusinessApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to delete his Business APIs
+          description: 'uuid of Subject that need to delete his Business APIs'
           required: true
           schema:
             type: string
@@ -951,14 +991,14 @@ paths:
   /apis/proxies/subject/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get API Proxies by Subject uuid
+        - Subject-API-Proxies
+      summary: 'Get API Proxies by Subject uuid'
       description: 'Provide an uuid of Subject to get his API Proxies'
       operationId: getApiProxiesOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to get his API Proxies
+          description: 'uuid of Subject that need to get his API Proxies'
           required: true
           schema:
             type: string
@@ -967,13 +1007,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search his API Proxies which names exact match
+          description: 'search his API Proxies which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search his API Proxies which names begin with
+          description: 'search his API Proxies which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -997,14 +1037,14 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of API Proxies for Subject
+        - Subject-API-Proxies
+      summary: 'Add a bulk of API Proxies for Subject'
       description: 'Provide a list of his API Proxies objects to be inserted'
       operationId: addApiProxiesOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to add his API Proxies
+          description: 'uuid of Subject that need to add his API Proxies'
           required: true
           schema:
             type: string
@@ -1031,14 +1071,14 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of API Proxies for Subject
+        - Subject-API-Proxies
+      summary: 'Update a bulk of API Proxies for Subject'
       description: 'Provide a bulk list of  his API Proxies objects to be updated'
       operationId: updateApiProxiesOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to update his API Proxies
+          description: 'uuid of Subject that need to update his API Proxies'
           required: true
           schema:
             type: string
@@ -1065,14 +1105,14 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all API Proxies for Subject
+        - Subject-API-Proxies
+      summary: 'Delete all API Proxies for Subject'
       description: 'Deletes his all API Proxies'
       operationId: deleteApiProxiesOfSubject
       parameters:
         - name: uuid
           in: path
-          description: uuid of Subject that need to delete his API Proxies
+          description: 'uuid of Subject that need to delete his API Proxies'
           required: true
           schema:
             type: string
@@ -1092,7 +1132,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
 externalDocs:
-  description: See Abyss example
+  description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
 components:
   schemas:
@@ -1124,11 +1164,11 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: uuid of the record
+          description: 'uuid of the record'
         status:
           type: integer
           readOnly: true
-          description: status -Http response code status (2XX, 3XX, 4XX, 5XX)
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
           $ref: '#/components/schemas/Api'
         error:
@@ -1139,100 +1179,100 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: Secondary primary key. Used in front end messages for security reasons.
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
         organizationid:
           type: string
-          description: Id of Organization
+          description: 'Id of Organization'
         created:
           type: string
           readOnly: true
-          description: Timestamp of creation #readOnly#
+          description: 'Timestamp of creation #readOnly#'
         updated:
           type: string
           readOnly: true
-          description: Timestamp of update #readOnly#
+          description: 'Timestamp of update #readOnly#'
         deleted:
           type: string
           readOnly: true
-          description: Timestamp of deletion #readOnly#
+          description: 'Timestamp of deletion #readOnly#'
         isdeleted:
           type: boolean
           readOnly: true
-          description: Is record logically deleted #readOnly#
+          description: 'Is record logically deleted #readOnly#'
         crudsubjectid:
           type: string
-          description: ID of Subject that reads, creates, updates or deletes
+          description: 'ID of Subject that reads, creates, updates or deletes'
         subjectid:
           type: string
-          description: FK ID of owner Subject
+          description: 'FK ID of owner Subject'
         isproxyapi:
           type: boolean
-          description: Type of API. False - Business API, True - API Proxy
+          description: 'Type of API. False - Business API, True - API Proxy'
         apistateid:
           type: string
-          description: FK ID of State of Business API
+          description: 'FK ID of State of Business API'
         apivisibilityid:
           type: string
-          description: ID of Business API Visibility - Private, Closed Group, Public, ...
+          description: 'ID of Business API Visibility - Private, Closed Group, Public, ...'
         languagename:
           type: string
-          description: Formal API Description Language - Swagger, OpenAPI, RAML, WADL, WSDL, ...
+          description: 'Formal API Description Language - Swagger, OpenAPI, RAML, WADL, WSDL, ...'
         languageversion:
           type: string
-          description: Version of Description Language
+          description: 'Version of Description Language'
         languageformat:
           type: integer
           format: int32
-          description: Data format type. 0 - JSON, 1 - YAML, 2 - XML
+          description: 'Data format type. 0 - JSON, 1 - YAML, 2 - XML'
         originaldocument:
           type: string
-          description: Original API DSL Document
+          description: 'Original API DSL Document'
         openapidocument:
           type: object
-          description: Transformed API DSL document in Open API json format. Shareable. #jsonb#
+          description: 'Transformed API DSL document in Open API json format. Shareable. #jsonb#'
         extendeddocument:
           type: object
-          description: Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #jsonb#
+          description: 'Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #jsonb#'
         businessapiid:
           type: string
-          description: FK ID of Business API for API Proxies
+          description: 'FK ID of Business API for API Proxies'
         image:
           type: string
-          description: Image data of Business API
+          description: 'Image data of Business API'
         color:
           type: string
-          description: Color of Business API
+          description: 'Color of Business API'
         deployed:
           type: string
-          description: Deployed Date Time of API
+          description: 'Deployed Date Time of API'
         changelog:
           type: string
-          description: Release notes and change log of API
+          description: 'Release notes and change log of API'
         apioriginuuid:
           type: string
-          description: Origin ID of this API version
+          description: 'Origin ID of this API version'
         version:
           type: string
-          description: Version of API
+          description: 'Version of API'
         issandbox:
           type: boolean
-          description: Is API Sandbox
+          description: 'Is API Sandbox'
         islive:
           type: boolean
-          description: Is API Live
+          description: 'Is API Live'
         isdefaultversion:
           type: boolean
-          description: Is this API Version Default
+          description: 'Is this API Version Default'
         islatestversion:
           type: boolean
-          description: Is this API Version Latest
+          description: 'Is this API Version Latest'
   requestBodies:
     Api:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Api'
-      description: Api object that needs to be added or updated
+      description: 'Api object that needs to be added or updated'
       required: true
     ListOfApi:
       content:
@@ -1241,7 +1281,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Api'
-      description: Api array that needs to be added
+      description: 'Api array that needs to be added'
       required: true
     ListOfApiObject:
       content:
@@ -1249,17 +1289,17 @@ components:
           schema:
             type: object
             additionalProperties: true
-      description:  list of Api objects that needs to be updated, each additional property name should be the uuid of coresponding Api record
+      description:  'list of Api objects that needs to be updated, each additional property name should be the uuid of coresponding Api record'
       required: true
   responses:
     '200':
-      description: Successful operation
+      description: 'Successful operation'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Api'
     '200-ListOfApi':
-      description: A Api array
+      description: 'A Api array'
       content:
         application/json:
           schema:
@@ -1267,15 +1307,15 @@ components:
             items:
               $ref: '#/components/schemas/Api'
     '201':
-      description: New Api resource has been created
+      description: 'New Api resource has been created'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Api'
     '204':
-      description: The Api resource was successfully deleted
+      description: 'The Api resource was successfully deleted'
     '207':
-      description: Multi Status for bulk operation
+      description: 'Multi Status for bulk operation'
       content:
         application/json:
           schema:
@@ -1283,61 +1323,61 @@ components:
             items:
               $ref: '#/components/schemas/MultiStatus'
     '304':
-      description: Not Modified – The client can use cached data
+      description: 'Not Modified – The client can use cached data'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Api'
     '400':
-      description: Invalid UUID supplied
+      description: 'Invalid UUID supplied'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '401':
-      description: Authorization information is missing or invalid
+      description: 'Authorization information is missing or invalid'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '403':
-      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '404':
-      description: Not found – There is no resource behind the URI
+      description: 'Not found – There is no resource behind the URI'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '405':
-      description: Method not allowed
+      description: 'Method not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '422':
-      description: Unprocessable Entity – server cannot process the request
+      description: 'Unprocessable Entity – server cannot process the request'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '429':
-      description: Too many request(rate limiting)
+      description: 'Too many request(rate limiting)'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '500':
-      description: Internal server error
+      description: 'Internal server error'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     default:
-      description: error
+      description: 'error'
       content:
         application/json:
           schema:
@@ -1350,7 +1390,7 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: The number of items to skip before starting to collect the result set
+      description: 'The number of items to skip before starting to collect the result set'
     limitParam:
       in: query
       name: limit
@@ -1360,7 +1400,7 @@ components:
         minimum: 1
         maximum: 50
         default: 20
-      description: The numbers of items to return
+      description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
@@ -1370,6 +1410,10 @@ components:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
@@ -1377,3 +1421,5 @@ security:
   - abyssHttpBasicAuth: []
   - abyssApiKeyAuth: []
   - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []

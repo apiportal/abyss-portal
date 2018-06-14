@@ -5,29 +5,34 @@ servers:
   - url: 'http://192.168.10.46:38083/abyss/oapi'
   - url: '/abyss/oapi'
 info:
-  description: Abyss platform APIs
-  version: 1.0.0
-  title: Abyss
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
   termsOfService: 'https://apiportal.com/terms/'
   contact:
-    email: info@apiportal.com
-    name: Abyss
+    email: 'info@apiportal.com'
+    name: 'Abyss'
     url: 'https://apiportal.com'
   license:
-    name: Abyss 1.0
+    name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: TODO
+  - name: ResourceActions
     externalDocs:
       url: 'https://apiportal.com'
-      description: Find out more
-    description: Abyss ... [TODO]
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ResourceActions crud operations'
+  - name: ResourceAction
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ResourceAction crud operations'
 paths:
   /resource-actions:
     get:
       tags:
-        - TODO
-      summary: Get list of ResourceActions
+        - ResourceActions
+      summary: 'Get list of ResourceActions'
       description: 'Returns list of ResourceActions'
       operationId: getResourceActions
       parameters:
@@ -36,13 +41,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search Subjects which names exact match
+          description: 'search ResourceActions which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search Subjects which names begin with
+          description: 'search ResourceActions which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -66,9 +71,9 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of ResourceActions
-      description: 'Provide a list of ResourceAction objects to be inserted'
+        - ResourceActions
+      summary: 'Add a bulk of ResourceActions'
+      description: 'Provide a list of ResourceActions to be inserted'
       operationId: addResourceActions
       responses:
         '207':
@@ -93,9 +98,9 @@ paths:
         $ref: '#/components/requestBodies/ListOfResourceAction'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of ResourceActions
-      description: 'Provide a bulk list of  ResourceAction objects to be updated'
+        - ResourceActions
+      summary: 'Update a bulk of ResourceActions'
+      description: 'Provide a bulk list of  ResourceActions to be updated'
       operationId: updateResourceActions
       responses:
         '207':
@@ -120,8 +125,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfResourceActionObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all ResourceActions
+        - ResourceActions
+      summary: 'Delete all ResourceActions'
       description: 'Deletes all ResourceActions'
       operationId: deleteResourceActions
       responses:
@@ -142,14 +147,14 @@ paths:
   /resource-actions/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get an existing ResourceAction by uuid
+        - ResourceAction
+      summary: 'Get an existing ResourceAction by uuid'
       description: 'Provide an uuid of ResourceAction to be get'
       operationId: getResourceAction
       parameters:
         - name: uuid
           in: path
-          description: uuid of ResourceAction that need to be get
+          description: 'uuid of ResourceAction that need to be get'
           required: true
           schema:
             type: string
@@ -174,14 +179,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - TODO
-      summary: Update an existing ResourceAction
+        - ResourceAction
+      summary: 'Update an existing ResourceAction'
       description: 'Provide an altered ResourceAction to be updated'
       operationId: updateResourceAction
       parameters:
         - name: uuid
           in: path
-          description: uuid of ResourceAction that need to be updated
+          description: 'uuid of ResourceAction that need to be updated'
           required: true
           schema:
             type: string
@@ -208,14 +213,14 @@ paths:
         $ref: '#/components/requestBodies/ResourceAction'
     delete:
       tags:
-        - TODO
-      summary: Delete ResourceAction
+        - ResourceAction
+      summary: 'Delete ResourceAction'
       description: 'Provide an uuid parameter of ResourceAction to be updated'
       operationId: deleteResourceAction
       parameters:
         - name: uuid
           in: path
-          description: The uuid of ResourceAction that needs to be deleted
+          description: 'The uuid of ResourceAction that needs to be deleted'
           required: true
           schema:
             type: string
@@ -237,7 +242,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
 externalDocs:
-  description: See Abyss example
+  description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
 components:
   schemas:
@@ -269,11 +274,11 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: uuid of the record
+          description: 'uuid of the record'
         status:
           type: integer
           readOnly: true
-          description: status -Http response code status (2XX, 3XX, 4XX, 5XX)
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
           $ref: '#/components/schemas/ResourceAction'
         error:
@@ -284,41 +289,41 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: Secondary primary key. Used in front end messages for security reasons.
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
         organizationid:
           type: string
-          description: Id of Organization
+          description: 'Id of Organization'
         created:
           type: string
-          description: Timestamp of creation
+          description: 'Timestamp of creation'
         updated:
           type: string
-          description: Timestamp of update
+          description: 'Timestamp of update'
         deleted:
           type: string
-          description: Timestamp of deletion
+          description: 'Timestamp of deletion'
         isdeleted:
           type: boolean
-          description: Is record logically deleted
+          description: 'Is record logically deleted'
         crudsubjectid:
           type: string
-          description: ID of Subject that reads, creates, updates or deletes
+          description: 'ID of Subject that reads, creates, updates or deletes'
         actionname:
           type: string
-          description: Action Name
+          description: 'Action Name'
         description:
           type: string
-          description: Description of Action
+          description: 'Description of Action'
         subjectpermissionid:
           type: string
-          description: FK ID of Subject Permission
+          description: 'FK ID of Subject Permission'
   requestBodies:
     ResourceAction:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ResourceAction'
-      description: ResourceAction object that needs to be added or updated
+      description: 'ResourceAction object that needs to be added or updated'
       required: true
     ListOfResourceAction:
       content:
@@ -327,7 +332,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ResourceAction'
-      description: ResourceAction array that needs to be added
+      description: 'ResourceAction array that needs to be added'
       required: true
     ListOfResourceActionObject:
       content:
@@ -335,17 +340,17 @@ components:
           schema:
             type: object
             additionalProperties: true
-      description:  list of ResourceAction objects that needs to be updated, each additional property name should be the uuid of coresponding ResourceAction record
+      description:  'list of ResourceAction objects that needs to be updated, each additional property name should be the uuid of coresponding ResourceAction record'
       required: true
   responses:
     '200':
-      description: Successful operation
+      description: 'Successful operation'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ResourceAction'
     '200-ListOfResourceAction':
-      description: A ResourceAction array
+      description: 'A ResourceAction array'
       content:
         application/json:
           schema:
@@ -353,15 +358,15 @@ components:
             items:
               $ref: '#/components/schemas/ResourceAction'
     '201':
-      description: New ResourceAction resource has been created
+      description: 'New ResourceAction resource has been created'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ResourceAction'
     '204':
-      description: The ResourceAction resource was successfully deleted
+      description: 'The ResourceAction resource was successfully deleted'
     '207':
-      description: Multi Status for bulk operation
+      description: 'Multi Status for bulk operation'
       content:
         application/json:
           schema:
@@ -369,61 +374,61 @@ components:
             items:
               $ref: '#/components/schemas/MultiStatus'
     '304':
-      description: Not Modified – The client can use cached data
+      description: 'Not Modified – The client can use cached data'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ResourceAction'
     '400':
-      description: Invalid UUID supplied
+      description: 'Invalid UUID supplied'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '401':
-      description: Authorization information is missing or invalid
+      description: 'Authorization information is missing or invalid'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '403':
-      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '404':
-      description: Not found – There is no resource behind the URI
+      description: 'Not found – There is no resource behind the URI'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '405':
-      description: Method not allowed
+      description: 'Method not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '422':
-      description: Unprocessable Entity – server cannot process the request
+      description: 'Unprocessable Entity – server cannot process the request'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '429':
-      description: Too many request(rate limiting)
+      description: 'Too many request(rate limiting)'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '500':
-      description: Internal server error
+      description: 'Internal server error'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     default:
-      description: error
+      description: 'error'
       content:
         application/json:
           schema:
@@ -436,7 +441,7 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: The number of items to skip before starting to collect the result set
+      description: 'The number of items to skip before starting to collect the result set'
     limitParam:
       in: query
       name: limit
@@ -446,7 +451,7 @@ components:
         minimum: 1
         maximum: 50
         default: 20
-      description: The numbers of items to return
+      description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
@@ -456,6 +461,10 @@ components:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
@@ -463,3 +472,5 @@ security:
   - abyssHttpBasicAuth: []
   - abyssApiKeyAuth: []
   - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []

@@ -15,6 +15,7 @@ package com.verapi.portal.verticle;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.service.idam.ApiService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
@@ -25,10 +26,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.contract.RouterFactoryException;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.HttpLocation;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,7 +133,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                 )
                 .flatMap(o -> {
                     JsonObject apiSpec = new JsonObject(o.getString("openapidocument"));
-                    openAPIParser(apiSpec).subscribe();
+                    OpenAPIUtil.openAPIParser(apiSpec).subscribe();
                     return Observable.just(o);
                 })
                 .flatMap(o -> {

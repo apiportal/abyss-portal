@@ -5,29 +5,34 @@ servers:
   - url: 'http://192.168.10.46:38083/abyss/oapi'
   - url: '/abyss/oapi'
 info:
-  description: Abyss platform APIs
-  version: 1.0.0
-  title: Abyss
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
   termsOfService: 'https://apiportal.com/terms/'
   contact:
-    email: info@apiportal.com
-    name: Abyss
+    email: 'info@apiportal.com'
+    name: 'Abyss'
     url: 'https://apiportal.com'
   license:
-    name: Abyss 1.0
+    name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: TODO
+  - name: SubjectDirectories
     externalDocs:
       url: 'https://apiportal.com'
-      description: Find out more
-    description: Abyss ... [TODO]
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : SubjectDirectories crud operations'
+  - name: SubjectDirectory
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : SubjectDirectory crud operations'
 paths:
   /subject-directories:
     get:
       tags:
-        - TODO
-      summary: Get list of SubjectDirectories
+        - SubjectDirectories
+      summary: 'Get list of SubjectDirectories'
       description: 'Returns list of SubjectDirectories'
       operationId: getSubjectDirectories
       parameters:
@@ -36,13 +41,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search Subjects which names exact match
+          description: 'search SubjectDirectories which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search Subjects which names begin with
+          description: 'search SubjectDirectories which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -66,9 +71,9 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of SubjectDirectories
-      description: 'Provide a list of SubjectDirectory objects to be inserted'
+        - SubjectDirectories
+      summary: 'Add a bulk of SubjectDirectories'
+      description: 'Provide a list of SubjectDirectories to be inserted'
       operationId: addSubjectDirectories
       responses:
         '207':
@@ -93,9 +98,9 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectDirectory'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of SubjectDirectories
-      description: 'Provide a bulk list of  SubjectDirectory objects to be updated'
+        - SubjectDirectories
+      summary: 'Update a bulk of SubjectDirectories'
+      description: 'Provide a bulk list of  SubjectDirectories to be updated'
       operationId: updateSubjectDirectories
       responses:
         '207':
@@ -120,8 +125,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectDirectoryObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all SubjectDirectories
+        - SubjectDirectories
+      summary: 'Delete all SubjectDirectories'
       description: 'Deletes all SubjectDirectories'
       operationId: deleteSubjectDirectories
       responses:
@@ -142,14 +147,14 @@ paths:
   /subject-directories/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get an existing SubjectDirectory by uuid
+        - SubjectDirectory
+      summary: 'Get an existing SubjectDirectory by uuid'
       description: 'Provide an uuid of SubjectDirectory to be get'
       operationId: getSubjectDirectory
       parameters:
         - name: uuid
           in: path
-          description: uuid of SubjectDirectory that need to be get
+          description: 'uuid of SubjectDirectory that need to be get'
           required: true
           schema:
             type: string
@@ -174,14 +179,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - TODO
-      summary: Update an existing SubjectDirectory
+        - SubjectDirectory
+      summary: 'Update an existing SubjectDirectory'
       description: 'Provide an altered SubjectDirectory to be updated'
       operationId: updateSubjectDirectory
       parameters:
         - name: uuid
           in: path
-          description: uuid of SubjectDirectory that need to be updated
+          description: 'uuid of SubjectDirectory that need to be updated'
           required: true
           schema:
             type: string
@@ -208,14 +213,14 @@ paths:
         $ref: '#/components/requestBodies/SubjectDirectory'
     delete:
       tags:
-        - TODO
-      summary: Delete SubjectDirectory
+        - SubjectDirectory
+      summary: 'Delete SubjectDirectory'
       description: 'Provide an uuid parameter of SubjectDirectory to be updated'
       operationId: deleteSubjectDirectory
       parameters:
         - name: uuid
           in: path
-          description: The uuid of SubjectDirectory that needs to be deleted
+          description: 'The uuid of SubjectDirectory that needs to be deleted'
           required: true
           schema:
             type: string
@@ -237,7 +242,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
 externalDocs:
-  description: See Abyss example
+  description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
 components:
   schemas:
@@ -269,11 +274,11 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: uuid of the record
+          description: 'uuid of the record'
         status:
           type: integer
           readOnly: true
-          description: status -Http response code status (2XX, 3XX, 4XX, 5XX)
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
           $ref: '#/components/schemas/SubjectDirectory'
         error:
@@ -284,65 +289,65 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: Secondary primary key. Used in front end messages for security reasons.
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
         organizationid:
           type: string
-          description: Id of Organization
+          description: 'Id of Organization'
         created:
           type: string
           readOnly: true
-          description: Timestamp of creation #readOnly#
+          description: 'Timestamp of creation #readOnly#'
         updated:
           type: string
           readOnly: true
-          description: Timestamp of update #readOnly#
+          description: 'Timestamp of update #readOnly#'
         deleted:
           type: string
           readOnly: true
-          description: Timestamp of deletion #readOnly#
+          description: 'Timestamp of deletion #readOnly#'
         isdeleted:
           type: boolean
           readOnly: true
-          description: Is record logically deleted #readOnly#
+          description: 'Is record logically deleted #readOnly#'
         crudsubjectid:
           type: string
-          description: ID of Subject that reads, creates, updates or deletes
+          description: 'ID of Subject that reads, creates, updates or deletes'
         directoryname:
           type: string
-          description: Name of subject directory
+          description: 'Name of subject directory'
         description:
           type: string
-          description: Description of subject directory
+          description: 'Description of subject directory'
         isactive:
           type: boolean
-          description: Is the directory active or not
+          description: 'Is the directory active or not'
         istemplate:
           type: boolean
-          description: Is the directory template or not
+          description: 'Is the directory template or not'
         directorytypeid:
           type: string
-          description: FK ID of directory type to distinguish Internal, LDAP, AD, etc.
+          description: 'FK ID of directory type to distinguish Internal, LDAP, AD, etc.'
         directorypriorityorder:
           type: integer
           format: int32
-          description: Priority Order of Subject Directory Precedence
+          description: 'Priority Order of Subject Directory Precedence'
         directoryattributes:
           type: object
-          description: Detailed attributes of the directory in json format  #jsonb#
+          description: 'Detailed attributes of the directory in json format  #jsonb#'
         lastsyncronizedat:
           type: string
-          description: Last syncronization date time of directory
+          description: 'Last syncronization date time of directory'
         lastsyncronizationduration:
           type: integer
           format: int32
-          description: Last syncronization duration in milliseconds
+          description: 'Last syncronization duration in milliseconds'
   requestBodies:
     SubjectDirectory:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectDirectory'
-      description: SubjectDirectory object that needs to be added or updated
+      description: 'SubjectDirectory object that needs to be added or updated'
       required: true
     ListOfSubjectDirectory:
       content:
@@ -351,7 +356,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/SubjectDirectory'
-      description: SubjectDirectory array that needs to be added
+      description: 'SubjectDirectory array that needs to be added'
       required: true
     ListOfSubjectDirectoryObject:
       content:
@@ -359,17 +364,17 @@ components:
           schema:
             type: object
             additionalProperties: true
-      description:  list of SubjectDirectory objects that needs to be updated, each additional property name should be the uuid of coresponding SubjectDirectory record
+      description:  'list of SubjectDirectory objects that needs to be updated, each additional property name should be the uuid of coresponding SubjectDirectory record'
       required: true
   responses:
     '200':
-      description: Successful operation
+      description: 'Successful operation'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectDirectory'
     '200-ListOfSubjectDirectory':
-      description: A SubjectDirectory array
+      description: 'A SubjectDirectory array'
       content:
         application/json:
           schema:
@@ -377,15 +382,15 @@ components:
             items:
               $ref: '#/components/schemas/SubjectDirectory'
     '201':
-      description: New SubjectDirectory resource has been created
+      description: 'New SubjectDirectory resource has been created'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectDirectory'
     '204':
-      description: The SubjectDirectory resource was successfully deleted
+      description: 'The SubjectDirectory resource was successfully deleted'
     '207':
-      description: Multi Status for bulk operation
+      description: 'Multi Status for bulk operation'
       content:
         application/json:
           schema:
@@ -393,61 +398,61 @@ components:
             items:
               $ref: '#/components/schemas/MultiStatus'
     '304':
-      description: Not Modified – The client can use cached data
+      description: 'Not Modified – The client can use cached data'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectDirectory'
     '400':
-      description: Invalid UUID supplied
+      description: 'Invalid UUID supplied'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '401':
-      description: Authorization information is missing or invalid
+      description: 'Authorization information is missing or invalid'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '403':
-      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '404':
-      description: Not found – There is no resource behind the URI
+      description: 'Not found – There is no resource behind the URI'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '405':
-      description: Method not allowed
+      description: 'Method not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '422':
-      description: Unprocessable Entity – server cannot process the request
+      description: 'Unprocessable Entity – server cannot process the request'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '429':
-      description: Too many request(rate limiting)
+      description: 'Too many request(rate limiting)'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '500':
-      description: Internal server error
+      description: 'Internal server error'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     default:
-      description: error
+      description: 'error'
       content:
         application/json:
           schema:
@@ -460,7 +465,7 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: The number of items to skip before starting to collect the result set
+      description: 'The number of items to skip before starting to collect the result set'
     limitParam:
       in: query
       name: limit
@@ -470,7 +475,7 @@ components:
         minimum: 1
         maximum: 50
         default: 20
-      description: The numbers of items to return
+      description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
@@ -480,6 +485,10 @@ components:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
@@ -487,3 +496,5 @@ security:
   - abyssHttpBasicAuth: []
   - abyssApiKeyAuth: []
   - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []

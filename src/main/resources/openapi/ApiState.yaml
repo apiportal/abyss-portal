@@ -5,29 +5,34 @@ servers:
   - url: 'http://192.168.10.46:38083/abyss/oapi'
   - url: '/abyss/oapi'
 info:
-  description: Abyss platform APIs
-  version: 1.0.0
-  title: Abyss
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
   termsOfService: 'https://apiportal.com/terms/'
   contact:
-    email: info@apiportal.com
-    name: Abyss
+    email: 'info@apiportal.com'
+    name: 'Abyss'
     url: 'https://apiportal.com'
   license:
-    name: Abyss 1.0
+    name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: TODO
+  - name: ApiStates
     externalDocs:
       url: 'https://apiportal.com'
-      description: Find out more
-    description: Abyss ... [TODO]
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiStates crud operations'
+  - name: ApiState
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiState crud operations'
 paths:
   /api-states:
     get:
       tags:
-        - TODO
-      summary: Get list of ApiStates
+        - ApiStates
+      summary: 'Get list of ApiStates'
       description: 'Returns list of ApiStates'
       operationId: getApiStates
       parameters:
@@ -36,13 +41,13 @@ paths:
           required: false
           schema:
             type: string
-          description: search Subjects which names exact match
+          description: 'search ApiStates which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: search Subjects which names begin with
+          description: 'search ApiStates which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -66,9 +71,9 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - TODO
-      summary: Add a bulk of ApiStates
-      description: 'Provide a list of ApiState objects to be inserted'
+        - ApiStates
+      summary: 'Add a bulk of ApiStates'
+      description: 'Provide a list of ApiStates to be inserted'
       operationId: addApiStates
       responses:
         '207':
@@ -93,9 +98,9 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiState'
     put:
       tags:
-        - TODO
-      summary: Update a bulk of ApiStates
-      description: 'Provide a bulk list of  ApiState objects to be updated'
+        - ApiStates
+      summary: 'Update a bulk of ApiStates'
+      description: 'Provide a bulk list of  ApiStates to be updated'
       operationId: updateApiStates
       responses:
         '207':
@@ -120,8 +125,8 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiStateObject'
     delete:
       tags:
-        - TODO
-      summary: Delete all ApiStates
+        - ApiStates
+      summary: 'Delete all ApiStates'
       description: 'Deletes all ApiStates'
       operationId: deleteApiStates
       responses:
@@ -142,14 +147,14 @@ paths:
   /api-states/{uuid}:
     get:
       tags:
-        - TODO
-      summary: Get an existing ApiState by uuid
+        - ApiState
+      summary: 'Get an existing ApiState by uuid'
       description: 'Provide an uuid of ApiState to be get'
       operationId: getApiState
       parameters:
         - name: uuid
           in: path
-          description: uuid of ApiState that need to be get
+          description: 'uuid of ApiState that need to be get'
           required: true
           schema:
             type: string
@@ -174,14 +179,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - TODO
-      summary: Update an existing ApiState
+        - ApiState
+      summary: 'Update an existing ApiState'
       description: 'Provide an altered ApiState to be updated'
       operationId: updateApiState
       parameters:
         - name: uuid
           in: path
-          description: uuid of ApiState that need to be updated
+          description: 'uuid of ApiState that need to be updated'
           required: true
           schema:
             type: string
@@ -208,14 +213,14 @@ paths:
         $ref: '#/components/requestBodies/ApiState'
     delete:
       tags:
-        - TODO
-      summary: Delete ApiState
+        - ApiState
+      summary: 'Delete ApiState'
       description: 'Provide an uuid parameter of ApiState to be updated'
       operationId: deleteApiState
       parameters:
         - name: uuid
           in: path
-          description: The uuid of ApiState that needs to be deleted
+          description: 'The uuid of ApiState that needs to be deleted'
           required: true
           schema:
             type: string
@@ -237,7 +242,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
 externalDocs:
-  description: See Abyss example
+  description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
 components:
   schemas:
@@ -269,11 +274,11 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: uuid of the record
+          description: 'uuid of the record'
         status:
           type: integer
           readOnly: true
-          description: status -Http response code status (2XX, 3XX, 4XX, 5XX)
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
           $ref: '#/components/schemas/ApiState'
         error:
@@ -284,42 +289,42 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: Secondary primary key. Used in front end messages for security reasons.
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
         organizationid:
           type: string
-          description: Id of Organization
+          description: 'Id of Organization'
         created:
           type: string
           readOnly: true
-          description: Timestamp of creation #readOnly#
+          description: 'Timestamp of creation #readOnly#'
         updated:
           type: string
           readOnly: true
-          description: Timestamp of update #readOnly#
+          description: 'Timestamp of update #readOnly#'
         deleted:
           type: string
           readOnly: true
-          description: Timestamp of deletion #readOnly#
+          description: 'Timestamp of deletion #readOnly#'
         isdeleted:
           type: boolean
           readOnly: true
-          description: Is record logically deleted #readOnly#
+          description: 'Is record logically deleted #readOnly#'
         crudsubjectid:
           type: string
-          description: ID of Subject that reads, creates, updates or deletes
+          description: 'ID of Subject that reads, creates, updates or deletes'
         name:
           type: string
-          description: Name of API State
+          description: 'Name of API State'
         description:
           type: string
-          description: Description of API State
+          description: 'Description of API State'
   requestBodies:
     ApiState:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiState'
-      description: ApiState object that needs to be added or updated
+      description: 'ApiState object that needs to be added or updated'
       required: true
     ListOfApiState:
       content:
@@ -328,7 +333,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ApiState'
-      description: ApiState array that needs to be added
+      description: 'ApiState array that needs to be added'
       required: true
     ListOfApiStateObject:
       content:
@@ -336,17 +341,17 @@ components:
           schema:
             type: object
             additionalProperties: true
-      description:  list of ApiState objects that needs to be updated, each additional property name should be the uuid of coresponding ApiState record
+      description:  'list of ApiState objects that needs to be updated, each additional property name should be the uuid of coresponding ApiState record'
       required: true
   responses:
     '200':
-      description: Successful operation
+      description: 'Successful operation'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiState'
     '200-ListOfApiState':
-      description: A ApiState array
+      description: 'A ApiState array'
       content:
         application/json:
           schema:
@@ -354,15 +359,15 @@ components:
             items:
               $ref: '#/components/schemas/ApiState'
     '201':
-      description: New ApiState resource has been created
+      description: 'New ApiState resource has been created'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiState'
     '204':
-      description: The ApiState resource was successfully deleted
+      description: 'The ApiState resource was successfully deleted'
     '207':
-      description: Multi Status for bulk operation
+      description: 'Multi Status for bulk operation'
       content:
         application/json:
           schema:
@@ -370,61 +375,61 @@ components:
             items:
               $ref: '#/components/schemas/MultiStatus'
     '304':
-      description: Not Modified – The client can use cached data
+      description: 'Not Modified – The client can use cached data'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiState'
     '400':
-      description: Invalid UUID supplied
+      description: 'Invalid UUID supplied'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '401':
-      description: Authorization information is missing or invalid
+      description: 'Authorization information is missing or invalid'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '403':
-      description: Forbidden – The server understood the request, but is refusing it or the access is not allowed
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '404':
-      description: Not found – There is no resource behind the URI
+      description: 'Not found – There is no resource behind the URI'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '405':
-      description: Method not allowed
+      description: 'Method not allowed'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '422':
-      description: Unprocessable Entity – server cannot process the request
+      description: 'Unprocessable Entity – server cannot process the request'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '429':
-      description: Too many request(rate limiting)
+      description: 'Too many request(rate limiting)'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '500':
-      description: Internal server error
+      description: 'Internal server error'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     default:
-      description: error
+      description: 'error'
       content:
         application/json:
           schema:
@@ -437,7 +442,7 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: The number of items to skip before starting to collect the result set
+      description: 'The number of items to skip before starting to collect the result set'
     limitParam:
       in: query
       name: limit
@@ -447,7 +452,7 @@ components:
         minimum: 1
         maximum: 50
         default: 20
-      description: The numbers of items to return
+      description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
@@ -457,6 +462,10 @@ components:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
@@ -464,3 +473,5 @@ security:
   - abyssHttpBasicAuth: []
   - abyssApiKeyAuth: []
   - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []
