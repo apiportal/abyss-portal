@@ -7,7 +7,7 @@ servers:
 info:
   description: Abyss platform APIs
   version: 1.0.0
-  title: Abyss
+  title: Abyss Api APIs
   termsOfService: 'https://apiportal.com/terms/'
   contact:
     email: info@apiportal.com
@@ -1091,6 +1091,110 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  '/api/subject/{subject_uuid}/tags':
+    get:
+      tags:
+        - TODO
+      summary: Get Tags of APIs by Subject uuid
+      description: 'Provide an uuid of Subject to get his API Proxies'
+      operationId: getTagsOfApisOfSubject
+      parameters:
+        - name: subject_uuid
+          in: path
+          description: uuid of Subject that need to get his API Proxies
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search his API Proxies which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search his API Proxies which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiTags'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  '/api/subject/{subject_uuid}/tags/aggregate/{aggregation}':
+    get:
+      tags:
+        - TODO
+      summary: Get Aggregation of Tags of APIs by Subject uuid
+      description: 'Provide an uuid of Subject to get his API Proxies'
+      operationId: getAggregatedTagsOfApisOfSubject
+      parameters:
+        - name: subject_uuid
+          in: path
+          description: uuid of Subject that need to get his API Proxies
+          required: true
+          schema:
+            type: string
+        - name: aggregation
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - count
+              - sum
+              - avg
+            default: count
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search his API Proxies which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search his API Proxies which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiTagSummary'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'
@@ -1226,6 +1330,69 @@ components:
         islatestversion:
           type: boolean
           description: Is this API Version Latest
+    ApiTag:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        organizationid:
+          type: string
+          description: Id of Organization
+        created:
+          type: string
+          readOnly: true
+          description: Timestamp of creation #readOnly#
+        updated:
+          type: string
+          readOnly: true
+          description: Timestamp of update #readOnly#
+        deleted:
+          type: string
+          readOnly: true
+          description: Timestamp of deletion #readOnly#
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: Is record logically deleted #readOnly#
+        crudsubjectid:
+          type: string
+          description: ID of Subject that reads, creates, updates or deletes
+        name:
+          type: string
+          description: Name of tag
+        description:
+          type: string
+          description: Description of group
+        externaldescription:
+          type: string
+          description: Description of External Documentation
+        externalurl:
+          type: string
+          description: URL of External Documentation          
+    ApiTagSummary:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        name:
+          type: string
+          description: Name of tag
+        description:
+          type: string
+          description: Description of group
+        externaldescription:
+          type: string
+          description: Description of External Documentation
+        externalurl:
+          type: string
+          description: URL of External Documentation
+        aggregation:
+          type: number
+          description: Number of APIs having this tag
   requestBodies:
     Api:
       content:
@@ -1336,6 +1503,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    '200-ListOfApiTags':
+      description: List of ApiTags
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiTag'
+    '200-ListOfApiTagSummary':
+      description: List of ApiTagSummary
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiTagSummary'
     default:
       description: error
       content:
