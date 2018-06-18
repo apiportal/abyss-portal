@@ -111,12 +111,12 @@ public class ResetPasswordController extends PortalAbstractController {
 //                                    logger.info("Activate Account - Updating Subject with id:[" + row.getInteger("subjectId") + "] -> " + row.encodePrettily());
 //                                    return resConn.rxUpdateWithParams("UPDATE subject SET " +
 //                                                    "updated = now()," +
-//                                                    "crudSubjectId = ?," +
+//                                                    "crudSubjectId = CAST(? AS uuid)," +
 //                                                    "isActivated = true" +
 //                                                    " WHERE " +
 //                                                    "id = ?;",
 //                                            new JsonArray()
-//                                                    .add(Constants.SYSTEM_USER_ID)
+//                                                    .add(Constants.SYSTEM_USER_UUID)
 //                                                    .add(row.getInteger("subjectId")));
 //                                }
 //                        )
@@ -127,12 +127,12 @@ public class ResetPasswordController extends PortalAbstractController {
 //                            if (updateResult.getUpdated() == 1) {
 //                                return resConn.rxUpdateWithParams("UPDATE subject_activation SET " +
 //                                                "deleted = now()," +
-//                                                "crudSubjectId = ?," +
+//                                                "crudSubjectId = CAST(? AS uuid)," +
 //                                                "isDeleted = true" +
 //                                                " WHERE " +
 //                                                "id = ?;",
 //                                        new JsonArray()
-//                                                .add(Constants.SYSTEM_USER_ID)
+//                                                .add(Constants.SYSTEM_USER_UUID)
 //                                                .add(tokenId));
 //                            } else {
 //                                return Single.error(new Exception("Activation Update Error Occurred"));
@@ -262,7 +262,7 @@ public class ResetPasswordController extends PortalAbstractController {
 
                                     return resConn.rxUpdateWithParams("UPDATE subject SET " +
                                                     "updated = now()," +
-                                                    "crudSubjectId = ?," +
+                                                    "crudSubjectId = CAST(? AS uuid)," +
                                                     "isActivated = true," +
                                                     "password = ?," +
                                                     "passwordSalt = ?, " +
@@ -271,7 +271,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                                     " WHERE " +
                                                     "id = ?;",
                                             new JsonArray()
-                                                    .add(Constants.SYSTEM_USER_ID)
+                                                    .add(Constants.SYSTEM_USER_UUID)
                                                     .add(hash)
                                                     .add(salt)
                                                     .add(row.getInteger("subjectId")));
@@ -284,12 +284,12 @@ public class ResetPasswordController extends PortalAbstractController {
                             if (updateResult.getUpdated() == 1) {
                                 return resConn.rxUpdateWithParams("UPDATE subject_activation SET " +
                                                 "deleted = now()," +
-                                                "crudSubjectId = ?," +
+                                                "crudSubjectId = CAST(? AS uuid)," +
                                                 "isDeleted = true" +
                                                 " WHERE " +
                                                 "id = ?;",
                                         new JsonArray()
-                                                .add(Constants.SYSTEM_USER_ID)
+                                                .add(Constants.SYSTEM_USER_UUID)
                                                 .add(tokenId));
                             } else {
                                 logger.error("ResetPasswordController - Activation Update Error Occurred - update result in not 1: " + updateResult.getUpdated());

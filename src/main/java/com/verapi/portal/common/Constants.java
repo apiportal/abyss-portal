@@ -161,8 +161,10 @@ public class Constants {
     public static final int INTERNAL_SUBJECT_DIRECTORY_ID = 1;
 
     public static final int SYSTEM_USER_ID = 1;
+    public static final String SYSTEM_USER_UUID = "e20ca770-3c44-4a2d-b55d-2ebcaa0536bc";
 
     public static final int DEFAULT_ORGANIZATION_ID = 0;
+    public static final String DEFAULT_ORGANIZATION_UUID = "3c65fafc-8f3a-4243-9c4e-2821aa32d293";
 
     public static final String SUBJECT_TYPE_USER = "21371a15-04f8-445e-a899-006ee11c0e09";
     public static final int SUBJECT_TYPE_APP = 2;

@@ -92,13 +92,13 @@ public class ChangePasswordController extends PortalAbstractController {
 
                             return resConn.rxUpdateWithParams("UPDATE subject SET \n" +
                                             "  updated = now(), \n" +
-                                            "  crudSubjectId = ?, \n" +
+                                            "  crudSubjectId = CAST(? AS uuid), \n" +
                                             "  password = ?, \n" +
                                             "  passwordSalt = ? \n" +
                                             "WHERE\n" +
                                             "  subjectName = ?;",
                                     new JsonArray()
-                                            .add(Constants.SYSTEM_USER_ID)
+                                            .add(Constants.SYSTEM_USER_UUID)
                                             .add(hash)
                                             .add(salt)
                                             .add(username));
