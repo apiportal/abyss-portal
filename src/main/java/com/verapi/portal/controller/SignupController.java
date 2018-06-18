@@ -36,6 +36,7 @@ public class SignupController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(SignupController.class);
 
     private Integer subjectId;
+    private String subjectUUID;
     private String authToken;
 
     public SignupController(JDBCAuth authProvider, JDBCClient jdbcClient) {
@@ -83,6 +84,7 @@ public class SignupController extends PortalAbstractController {
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 subjectId = resultSet.getRows(true).get(0).getInteger("id");
+                                subjectUUID = resultSet.getRows(true).get(0).getString("uuid");
                                 logger.info("user found: " + resultSet.toJson().encodePrettily());
                                 if (resultSet.getRows(true).get(0).getBoolean("isActivated")) {
                                     return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
@@ -116,7 +118,7 @@ public class SignupController extends PortalAbstractController {
                                                 "isPasswordChangeRequired," +
                                                 "passwordExpiresAt," +
                                                 "subjectDirectoryId) " +
-                                                "VALUES (CAST(? AS uuid), CAST(? AS uuid), false, CAST(? AS uuid), ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', CAST(? AS uuid)) RETURNING id",
+                                                "VALUES (CAST(? AS uuid), CAST(? AS uuid), false, CAST(? AS uuid), ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', CAST(? AS uuid)) RETURNING id, uuid",
                                         new JsonArray()
                                                 .add(Constants.DEFAULT_ORGANIZATION_UUID)
                                                 .add(Constants.SYSTEM_USER_UUID)
@@ -135,9 +137,10 @@ public class SignupController extends PortalAbstractController {
                         .flatMap(updateResult -> {
                             if (updateResult instanceof UpdateResult) {
                                 subjectId = ((UpdateResult) updateResult).getKeys().getInteger(0);
-                                logger.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0:" + subjectId);
+                                subjectUUID = ((UpdateResult) updateResult).getKeys().getString(1);
+                                logger.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0 (subjectId):" + subjectId + " | String Key @pos=1 (subjectUUID):" + subjectUUID);
                             } else if (updateResult instanceof ResultSet) {
-                                logger.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | Integer Key @pos=0:" + ((ResultSet) updateResult).getRows(true).get(0).getInteger("id") + " subjectID:" + subjectId);
+                                logger.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | subjectID:" + subjectId + " | subjectUUID:" + subjectUUID);
                             }
 
 
@@ -162,11 +165,11 @@ public class SignupController extends PortalAbstractController {
                                             "email," +
                                             "nonce," +
                                             "userData) " +
-                                            "VALUES (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?, ?)",
+                                            "VALUES (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?)",
                                     new JsonArray()
                                             .add(Constants.DEFAULT_ORGANIZATION_UUID)
                                             .add(Constants.SYSTEM_USER_UUID)
-                                            .add(subjectId)
+                                            .add(subjectUUID)
                                             .add(authInfo.getExpireDate())
                                             .add(authInfo.getToken())
                                             .add(Constants.ACTIVATION_TOKEN)
@@ -195,9 +198,16 @@ public class SignupController extends PortalAbstractController {
                                     Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + authToken,
                                     Constants.ACTIVATION_TEXT));
 
+                            logger.info("User activation mail is rendered successfully");
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                logger.info(result.toString());
+                                if (result.succeeded()) {
+                                    logger.info("Activation Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
+                                } else {
+                                    logger.info("Activation Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
+                                }
+
                             });
+                            logger.info("User activation mail is sent to Mail Verticle over Event Bus");
 
                         })
 

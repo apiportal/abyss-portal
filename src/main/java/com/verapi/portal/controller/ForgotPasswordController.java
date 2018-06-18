@@ -33,6 +33,7 @@ public class ForgotPasswordController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(ForgotPasswordController.class);
 
     private Integer subjectId;
+    private String subjectUUID;
     private String email;
     private String displayName;
     private String authToken;
@@ -79,9 +80,10 @@ public class ForgotPasswordController extends PortalAbstractController {
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
                                     subjectId = row.getInteger("id");
+                                    subjectUUID = row.getString("uuid");
                                     email = row.getString("email");
                                     displayName = row.getString("display_name");
-                                    logger.info("Activated account found:[" + subjectId + "]. Email:[" + email + "]Reset password token is going to be created...");
+                                    logger.info("Activated account found:[" + subjectId + " ("+ subjectUUID + ")]. Email:[" + email + "]Reset password token is going to be created...");
 
                                     //Generate and Persist Reset Password Token
                                     Token tokenGenerator = new Token();
@@ -104,11 +106,11 @@ public class ForgotPasswordController extends PortalAbstractController {
                                                     "email," +
                                                     "nonce," +
                                                     "userData) " +
-                                                    "VALUES (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?, ?)",
+                                                    "VALUES (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?)",
                                             new JsonArray()
                                                     .add(Constants.DEFAULT_ORGANIZATION_UUID)
                                                     .add(Constants.SYSTEM_USER_UUID)
-                                                    .add(subjectId)
+                                                    .add(subjectUUID)
                                                     .add(authInfo.getExpireDate())
                                                     .add(authInfo.getToken())
                                                     .add(Constants.RESET_PASSWORD_TOKEN)
@@ -123,7 +125,7 @@ public class ForgotPasswordController extends PortalAbstractController {
                             }
                         })
                         .flatMap(updateResult -> {
-                            logger.info("ForgotPasswordController - Deactivating Subject with id:[" + subjectId + "] -> " + updateResult.getKeys().encodePrettily());
+                            logger.info("ForgotPasswordController - Deactivating Subject with id:[" + subjectId + " ("+ subjectUUID + ")] -> " + updateResult.getKeys().encodePrettily());
                             if (updateResult.getUpdated() == 1) {
 
                                 return resConn.rxUpdateWithParams("UPDATE subject SET " +
@@ -166,9 +168,16 @@ public class ForgotPasswordController extends PortalAbstractController {
                                     Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.RESET_PASSWORD_PATH + "/?v=" + authToken,
                                     Constants.RESET_PASSWORD_TEXT));
 
+                            logger.info("Forgot Password mail is rendered successfully");
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                logger.info(result.toString());
+                                if (result.succeeded()) {
+                                    logger.info("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
+                                } else {
+                                    logger.info("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
+                                }
+
                             });
+                            logger.info("Forgot Password mail is sent to Mail Verticle over Event Bus");
 
                         })
 

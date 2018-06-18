@@ -66,7 +66,7 @@ public class MailVerticle extends AbstractVerticle {
     private Handler<Message<JsonObject>>mailSender() {
         return msg -> {
 
-            logger.trace("MailVerticle - mailSender invoked...");
+            logger.info("MailVerticle - mailSender invoked...");
             logger.debug("Msg:" + msg.body().encodePrettily());
 
             String token = msg.body().getString(Constants.EB_MSG_TOKEN, "");
@@ -107,13 +107,13 @@ public class MailVerticle extends AbstractVerticle {
 
             if (token.isEmpty()) {
                 //TODO:give error
-                logger.error("Mail Client received both token and type empty");
+                logger.info("Mail Client received both token and type empty");
                 //throw
             }
 
             if (toEmail.isEmpty()) {
                 //TODO:give error
-                logger.error("Mail Client received both token and type empty");
+                logger.info("Mail Client received both token and type empty");
                 //throw
             }
 
@@ -133,12 +133,14 @@ public class MailVerticle extends AbstractVerticle {
             mailClient.sendMail(email, result -> {
                 if (result.succeeded()) {
                     logger.debug(result.result().toString());
-                    logger.trace("Mail successfully sent");
+                    logger.info("Mail successfully sent");
                 } else {
                     logger.error("Mail client got exception:"+result.cause());
                     //result.cause().printStackTrace();
                 }
             });
+
+            msg.reply(new JsonObject().put("mailClient","mail processed"));
 
         };
     }
