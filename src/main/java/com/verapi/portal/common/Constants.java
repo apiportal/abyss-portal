@@ -159,6 +159,7 @@ public class Constants {
     public static final int PASSWORD_EXPIRATION_DAYS = 90;
 
     public static final int INTERNAL_SUBJECT_DIRECTORY_ID = 1;
+    public static final String INTERNAL_SUBJECT_DIRECTORY_UUID = "ac504ae6-2bc9-40fa-8dfb-0ce501089573";
 
     public static final int SYSTEM_USER_ID = 1;
     public static final String SYSTEM_USER_UUID = "e20ca770-3c44-4a2d-b55d-2ebcaa0536bc";

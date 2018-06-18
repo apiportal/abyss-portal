@@ -116,7 +116,7 @@ public class SignupController extends PortalAbstractController {
                                                 "isPasswordChangeRequired," +
                                                 "passwordExpiresAt," +
                                                 "subjectDirectoryId) " +
-                                                "VALUES (CAST(? AS uuid), CAST(? AS uuid), false, ?, ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', ?) RETURNING id",
+                                                "VALUES (CAST(? AS uuid), CAST(? AS uuid), false, CAST(? AS uuid), ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', CAST(? AS uuid)) RETURNING id",
                                         new JsonArray()
                                                 .add(Constants.DEFAULT_ORGANIZATION_UUID)
                                                 .add(Constants.SYSTEM_USER_UUID)
@@ -129,7 +129,7 @@ public class SignupController extends PortalAbstractController {
                                                 .add(hash)
                                                 .add(salt)
                                                 .add(Constants.PASSWORD_EXPIRATION_DAYS)
-                                                .add(Constants.INTERNAL_SUBJECT_DIRECTORY_ID));
+                                                .add(Constants.INTERNAL_SUBJECT_DIRECTORY_UUID));
                             }
                         })
                         .flatMap(updateResult -> {
