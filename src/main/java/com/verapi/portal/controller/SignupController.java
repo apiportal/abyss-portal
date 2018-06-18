@@ -116,10 +116,10 @@ public class SignupController extends PortalAbstractController {
                                                 "isPasswordChangeRequired," +
                                                 "passwordExpiresAt," +
                                                 "subjectDirectoryId) " +
-                                                "VALUES (?, ?, false, ?, ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', ?) RETURNING id",
+                                                "VALUES (CAST(? AS uuid), CAST(? AS uuid), false, ?, ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', ?) RETURNING id",
                                         new JsonArray()
-                                                .add(Constants.DEFAULT_ORGANIZATION_ID)
-                                                .add(Constants.SYSTEM_USER_ID)
+                                                .add(Constants.DEFAULT_ORGANIZATION_UUID)
+                                                .add(Constants.SYSTEM_USER_UUID)
                                                 .add(Constants.SUBJECT_TYPE_USER)
                                                 .add(username)
                                                 .add(firstname)
@@ -162,10 +162,10 @@ public class SignupController extends PortalAbstractController {
                                             "email," +
                                             "nonce," +
                                             "userData) " +
-                                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                            "VALUES (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?, ?)",
                                     new JsonArray()
-                                            .add(Constants.DEFAULT_ORGANIZATION_ID)
-                                            .add(Constants.SYSTEM_USER_ID)
+                                            .add(Constants.DEFAULT_ORGANIZATION_UUID)
+                                            .add(Constants.SYSTEM_USER_UUID)
                                             .add(subjectId)
                                             .add(authInfo.getExpireDate())
                                             .add(authInfo.getToken())

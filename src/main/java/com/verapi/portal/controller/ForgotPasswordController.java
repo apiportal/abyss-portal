@@ -104,10 +104,10 @@ public class ForgotPasswordController extends PortalAbstractController {
                                                     "email," +
                                                     "nonce," +
                                                     "userData) " +
-                                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                                    "VALUES (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?, ?, ?)",
                                             new JsonArray()
-                                                    .add(Constants.DEFAULT_ORGANIZATION_ID)
-                                                    .add(Constants.SYSTEM_USER_ID)
+                                                    .add(Constants.DEFAULT_ORGANIZATION_UUID)
+                                                    .add(Constants.SYSTEM_USER_UUID)
                                                     .add(subjectId)
                                                     .add(authInfo.getExpireDate())
                                                     .add(authInfo.getToken())
@@ -128,12 +128,12 @@ public class ForgotPasswordController extends PortalAbstractController {
 
                                 return resConn.rxUpdateWithParams("UPDATE subject SET " +
                                                 "updated = now()," +
-                                                "crudSubjectId = ?," +
+                                                "crudSubjectId = CAST(? AS uuid)," +
                                                 "isActivated = false" +
                                                 " WHERE " +
                                                 "id = ?;",
                                         new JsonArray()
-                                                .add(Constants.SYSTEM_USER_ID)
+                                                .add(Constants.SYSTEM_USER_UUID)
                                                 .add(subjectId));
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
