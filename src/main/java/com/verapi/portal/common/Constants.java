@@ -50,11 +50,19 @@ public class Constants {
     public static final String HTTP_GATEWAY_SERVER_PORT = "http.gateway.server.port";
     public static final String HTTP_PROXY_GATEWAY_SERVER_PORT = "http.proxy.gateway.server.port";
     public static final String HTTP_GATEWAY_SERVER_TIMEOUT = "http.gateway.server.timeout";
+    public static final String HTTP_GATEWAY_SERVER_LOG_HTTP_ACTIVITY = "http.gateway.server.log.http.activity";
+    public static final String HTTP_GATEWAY_SERVER_ACCEPT_BACKLOG = "http.gateway.server.accept.backlog";
+    public static final String HTTP_GATEWAY_SERVER_ENABLE_COMPRESSION_SUPPORT = "http.gateway.server.enable.compression.support";
+    public static final String HTTP_GATEWAY_SERVER_IDLE_TIMEOUT = "http.gateway.server.idle.timeout";
 
     public static final String HTTPS_GATEWAY_SERVER_HOST = "https.gateway.server.host";
     public static final String HTTPS_GATEWAY_SERVER_PORT = "https.gateway.server.port";
     public static final String HTTPS_GATEWAY_OPENAPI_SERVER_PORT = "https.proxy.gateway.server.port";
     public static final String HTTPS_GATEWAY_SERVER_TIMEOUT = "https.gateway.server.timeout";
+    public static final String HTTPS_GATEWAY_SERVER_LOG_HTTP_ACTIVITY = "https.gateway.server.log.http.activity";
+    public static final String HTTPS_GATEWAY_SERVER_ACCEPT_BACKLOG = "https.gateway.server.accept.backlog";
+    public static final String HTTPS_GATEWAY_SERVER_ENABLE_COMPRESSION_SUPPORT = "https.gateway.server.enable.compression.support";
+    public static final String HTTPS_GATEWAY_SERVER_IDLE_TIMEOUT = "https.gateway.server.idle.timeout";
 
     public static final String HTTPS_GATEWAY_SSL_KEYSTORE_PATH = "";
     public static final String HTTPS_GATEWAY_SSL_KEYSTORE_PASSWORD = "";

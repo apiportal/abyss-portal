@@ -155,8 +155,14 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     private Single<HttpServer> createHttpServer(Router router, String serverHost, int serverPort, Boolean isSSL) {
         logger.trace("---createHttpServer invoked");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
-                .setCompressionSupported(true)
-                .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
+                .setLogActivity(Config.getInstance().getConfigJsonObject()
+                        .getBoolean((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_LOG_HTTP_ACTIVITY : Constants.HTTP_GATEWAY_SERVER_LOG_HTTP_ACTIVITY))
+                .setAcceptBacklog(Config.getInstance().getConfigJsonObject()
+                        .getInteger((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_ACCEPT_BACKLOG : Constants.HTTP_GATEWAY_SERVER_ACCEPT_BACKLOG))
+                .setCompressionSupported(Config.getInstance().getConfigJsonObject()
+                        .getBoolean((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_ENABLE_COMPRESSION_SUPPORT : Constants.HTTP_GATEWAY_SERVER_ENABLE_COMPRESSION_SUPPORT))
+                .setIdleTimeout(Config.getInstance().getConfigJsonObject()
+                        .getInteger((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_IDLE_TIMEOUT : Constants.HTTP_GATEWAY_SERVER_IDLE_TIMEOUT));
         if (isSSL) {
             httpServerOptions.setSsl(true)
                     .setKeyStoreOptions(
