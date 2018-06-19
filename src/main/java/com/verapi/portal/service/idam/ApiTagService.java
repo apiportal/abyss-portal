@@ -212,8 +212,8 @@ public class ApiTagService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into api_tag (organizationid, crudsubjectid, name, description)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
+    private static final String SQL_INSERT = "insert into api_tag (organizationid, crudsubjectid, name, description, externaldescription, externalurl)\n" +
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?, ?, ?)";
 
     private static final String SQL_DELETE = "update api_tag\n" +
             "set\n" +
@@ -229,7 +229,9 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
             "  name,\n" +
-            "  description\n" +
+            "  description,\n" +
+            "  externaldescription,\n" +
+            "  externalurl\n" +
             "from api_tag\n";
 
     private static final String SQL_UPDATE = "UPDATE api_tag\n" +
@@ -238,7 +240,9 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
-            "  , description      = ?\n";
+            "  , description      = ?\n"+
+            "  , externaldescription      = ?\n"+
+            "  , externalurl      = ?\n";
 
     private static final String SQL_AND = "and\n";
 
