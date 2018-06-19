@@ -209,6 +209,10 @@ public class ApiTagService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
+    public Single<ResultSet> findAll(AbstractService.ServiceFilter serviceFilter) {
+        return filter(serviceFilter);
+    }
+
     private static final String SQL_INSERT = "insert into api_tag (organizationid, crudsubjectid, name, description)\n" +
             "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
 
@@ -227,6 +231,8 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  name,\n" +
             "  description\n" +
+            //"  externaldescription\n" +
+            //"  externalurl\n" +
             "from api_tag\n";
 
     private static final String SQL_UPDATE = "UPDATE api_tag\n" +
@@ -266,5 +272,35 @@ public class ApiTagService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+
+
+
+    private static final String SQL_AGGREGATE_COLUMNS =
+            "  t.uuid,\n" +
+            "  t.name\n"
+/*
+            "  description\n" +
+            "  externaldescription\n" +
+            "  externalurl\n" +
+*/
+            ;
+
+    private static final String SELECT = "select\n";
+
+    private static final String SQL_COUNT = ",count(*) as count\n";
+    //private static final String SQL_SUM = ",sum(*) as sum\n";
+    //private static final String SQL_AVG = ",avg(*) as avg\n";
+
+    private static final String SQL_GROUP_BY = "group by\n";
+
+    private static final String SQL_JOIN_API = "from api_tag t, api a, api__api_tag axt\n" +
+            "where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = CAST(? AS uuid)\n" +
+            "and a.isproxyapi = false and openapidocument ?? 'servers'\n";
+
+    private static final String sx = SELECT + SQL_AGGREGATE_COLUMNS + SQL_COUNT + SQL_JOIN_API + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS + ";";
+
+    static {
+        FILTER_BY_SUBJECT.setFilterQuery(sx);
+    }
 
 }

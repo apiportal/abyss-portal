@@ -14,6 +14,7 @@ package com.verapi.portal.oapi;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.ApiService;
+import com.verapi.portal.service.idam.ApiTagService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -175,6 +176,24 @@ public class ApiApiController extends AbstractApiController {
 
         try {
             getEntities(routingContext, ApiService.class, jsonbColumnsList, ApiService.FILTER_BY_SUBJECT.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void getAggregatedTagsOfApisOfSubject(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext, ApiTagService.class, jsonbColumnsList,
+                        ApiTagService.FILTER_BY_SUBJECT
+                                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("subject_uuid")))
+                                .setAggregationType(routingContext.pathParam("aggregation"))
+            );
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

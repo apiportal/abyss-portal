@@ -301,9 +301,47 @@ public abstract class AbstractService<T> implements IService<T> {
                 });
     }
 
+    public enum Aggregation {
+        COUNT("count"),
+        SUM("sum"),
+        AVG("avg");
+
+        private String aggregation;
+
+        Aggregation(String aggregation) {
+            this.aggregation = aggregation;
+        }
+
+        public String getAggregation() {
+            return aggregation;
+        }
+
+        public String getAggregationSQL(String aggregationColumn) {
+            String aggregationCol = "*";
+
+            if (aggregationColumn!=null && !aggregationColumn.isEmpty()) {
+                aggregationCol = aggregationColumn;
+            }
+
+            switch (this) {
+                case COUNT:
+                    return ",count(" + aggregationCol + ") as count\n";
+                case SUM:
+                    return ",sum("+ aggregationCol +") as sum\n";
+                case AVG:
+                    return ",avg("+ aggregationCol +") as avg\n";
+                default:
+                    return ",count(" + aggregationCol + ") as count\n";
+                    //throw new Exception("Unknown Aggregation " + this);
+            }
+        }
+    }
+
     public static final class ServiceFilter {
         private String filterQuery = "";
         private JsonArray filterQueryParams;
+        private Aggregation aggregationType;
+        private boolean isAggregate = false;
 
         public ServiceFilter() {
         }
@@ -328,6 +366,18 @@ public abstract class AbstractService<T> implements IService<T> {
         public ServiceFilter setFilterQueryParams(JsonArray filterQueryParams) {
             this.filterQueryParams = filterQueryParams;
             return this;
+        }
+
+        public Aggregation getAggregationType() {return aggregationType;};
+
+        public ServiceFilter setAggregationType(String aggregationType) {
+            this.aggregationType = Aggregation.valueOf(aggregationType.toUpperCase());
+            this.isAggregate = true;
+            return this;
+        }
+
+        public boolean isAggregate() {
+            return isAggregate;
         }
     }
 

@@ -1385,15 +1385,15 @@ components:
         name:
           type: string
           description: Name of tag
-        description:
-          type: string
-          description: Description of group
-        externaldescription:
-          type: string
-          description: Description of External Documentation
-        externalurl:
-          type: string
-          description: URL of External Documentation
+#        description:
+#          type: string
+#          description: Description of group
+#        externaldescription:
+#          type: string
+#          description: Description of External Documentation
+#        externalurl:
+#          type: string
+#          description: URL of External Documentation
         aggregation:
           type: number
           description: Number of APIs having this tag
