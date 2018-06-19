@@ -6,7 +6,7 @@
         <sourceOutputDir name="src/main/generated" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <option name="outputDirectory" value="C:\dev\verapiworkspace\abyss-portal/src/main" />
+        <option name="codegen.output" value="C:\dev\workspace\WS_VERAPI\abyss\abyss-portal/src/main" />
         <processor name="io.vertx.codegen.CodeGenProcessor" />
         <module name="abyss-portal" />
       </profile>

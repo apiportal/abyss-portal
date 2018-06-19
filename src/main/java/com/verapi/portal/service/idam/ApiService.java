@@ -15,6 +15,7 @@ import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -255,8 +256,12 @@ public class ApiService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
-    public Single<ResultSet> findAll(AbstractService.ServiceFilter serviceFilter) {
-        return filter(serviceFilter);
+    public Single<ResultSet> findAll(ApiFilterQuery apiFilterQuery) {
+        return filter(apiFilterQuery);
+    }
+
+    public ApiFilterQuery.APIFilter getAPIFilter() {
+        return apiFilter;
     }
 
     public Single<ResultSet> findAllProxies() {
@@ -342,13 +347,15 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
-    private static final String SQL_CONDITION_NAME_IS = "openapidocument -> 'info' ->> 'title' = ?\n";
+    public static final String SQL_CONDITION_NAME_IS = "openapidocument -> 'info' ->> 'title' = ?\n";
 
-    private static final String SQL_CONDITION_NAME_LIKE = "openapidocument -> 'info' ->> 'title' like ?\n";
+    public static final String SQL_CONDITION_NAME_LIKE = "openapidocument -> 'info' ->> 'title' like ?\n";
 
     private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
 
     private static final String SQL_ISPROXYAPI_IS = "isproxyapi = true\n";
+
+    private static final String SQL_CONDITION_IS_BUSINESSAPI = "isproxyapi = false\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 
@@ -362,7 +369,7 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_ISPROXYAPI_IS;
+    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_ISPROXYAPI_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE + SQL_WHERE + SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
@@ -370,8 +377,17 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
-    static {
-        FILTER_BY_SUBJECT.setFilterQuery(SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS);
-    }
+    //public static ApiFilterQuery FILTER_BY_SUBJECT = new ApiFilterQuery().setFilterQuery(SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS);
+    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
 
+    //public static ApiFilterQuery FILTER_BY_BUSINESS_API = new ApiFilterQuery().setFilterQuery(SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI);
+    public static final String FILTER_BY_BUSINESS_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI;
+
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
+
+    /*static {
+        FILTER_BY_SUBJECT.setFilterQuery(SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS);
+        FILTER_BY_BUSINESS_API.setFilterQuery(SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI);
+    }
+*/
 }

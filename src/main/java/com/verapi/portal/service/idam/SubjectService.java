@@ -16,6 +16,7 @@ import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -280,6 +281,14 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
+    public Single<ResultSet> findAll(ApiFilterQuery apiFilterQuery) {
+        return filter(apiFilterQuery);
+    }
+
+    public ApiFilterQuery.APIFilter getAPIFilter() {
+        return apiFilter;
+    }
+
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
             "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
             "                     subjectdirectoryid, islocked, issandbox)\n" +
@@ -375,5 +384,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_DELETE_ALL_USERS = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_USERS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

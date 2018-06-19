@@ -243,8 +243,8 @@ public abstract class AbstractService<T> implements IService<T> {
         return rxQueryWithParams(findAllQuery);
     }
 
-    protected Single<ResultSet> filter(ServiceFilter serviceFilter) {
-        return rxQueryWithParams(serviceFilter.getFilterQuery(), serviceFilter.getFilterQueryParams());
+    protected Single<ResultSet> filter(ApiFilterQuery apiFilterQuery) {
+        return rxQueryWithParams(apiFilterQuery.getFilterQuery(), apiFilterQuery.getFilterQueryParams());
     }
 
     protected void subscribeAndProcess(JsonArray result, Single<ResultSet> resultSetSingle, int httpResponseStatus) {
@@ -301,6 +301,7 @@ public abstract class AbstractService<T> implements IService<T> {
                 });
     }
 
+
     public enum Aggregation {
         COUNT("count"),
         SUM("sum"),
@@ -337,16 +338,20 @@ public abstract class AbstractService<T> implements IService<T> {
         }
     }
 
-    public static final class ServiceFilter {
+
+
+/*
+    public static class ApiFilterQuery {
+
         private String filterQuery = "";
         private JsonArray filterQueryParams;
         private Aggregation aggregationType;
         private boolean isAggregate = false;
 
-        public ServiceFilter() {
+        public ApiFilterQuery() {
         }
 
-        public ServiceFilter(String filterQuery) {
+        public ApiFilterQuery(String filterQuery) {
             this.filterQuery = filterQuery;
         }
 
@@ -354,8 +359,21 @@ public abstract class AbstractService<T> implements IService<T> {
             return filterQuery;
         }
 
-        public ServiceFilter setFilterQuery(String filterQuery) {
+        public ApiFilterQuery setFilterQuery(String filterQuery) {
             this.filterQuery = filterQuery;
+            return this;
+        }
+
+        public ApiFilterQuery addFilterQuery(String filterQuery) {
+            if (!this.filterQuery.toLowerCase().endsWith("\n"))
+                this.filterQuery = this.filterQuery + "\n";
+            if (!this.filterQuery.toLowerCase().contains("where"))
+                filterQuery = "where\n" + filterQuery;
+            else
+                filterQuery = "and\n" + filterQuery;
+            if (!filterQuery.toLowerCase().endsWith("\n"))
+                filterQuery = filterQuery + "\n";
+            this.filterQuery = this.filterQuery + filterQuery;
             return this;
         }
 
@@ -363,10 +381,11 @@ public abstract class AbstractService<T> implements IService<T> {
             return filterQueryParams;
         }
 
-        public ServiceFilter setFilterQueryParams(JsonArray filterQueryParams) {
+        public ApiFilterQuery setFilterQueryParams(JsonArray filterQueryParams) {
             this.filterQueryParams = filterQueryParams;
             return this;
         }
+
 
         public Aggregation getAggregationType() {return aggregationType;};
 
@@ -379,8 +398,20 @@ public abstract class AbstractService<T> implements IService<T> {
         public boolean isAggregate() {
             return isAggregate;
         }
-    }
 
-    public static final ServiceFilter FILTER_BY_SUBJECT = new ServiceFilter();
+        public ApiFilterQuery addFilterQueryParams(JsonArray filterQueryParams) {
+            if (this.filterQueryParams == null)
+                this.filterQueryParams = new JsonArray();
+            filterQueryParams.forEach(o -> this.filterQueryParams.add(o));
+            return this;
+        }
+
+
+    }
+*/
+
+
+
+    //public static final ApiFilterQuery FILTER_BY_SUBJECT = new ApiFilterQuery();
 
 }

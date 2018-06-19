@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
+@Deprecated
 public class ApiService extends AbstractServiceOld<JsonObject> {
 
     private static Logger logger = LoggerFactory.getLogger(ApiService.class);

@@ -3,7 +3,6 @@ package com.verapi.portal.service.idam;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.AbstractServiceOld;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;

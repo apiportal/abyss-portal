@@ -424,7 +424,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/businesses:
+  /apis/businesses/:
     get:
       tags:
         - Business-APIs
@@ -637,7 +637,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/proxies:
+  /apis/proxies/:
     get:
       tags:
         - API-Proxies
@@ -1136,7 +1136,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /api/subject/{subject_uuid}/tags:
+  /api/subject/{subject_uuid}/tags/:
     get:
       tags:
         - Subject-API-Tags

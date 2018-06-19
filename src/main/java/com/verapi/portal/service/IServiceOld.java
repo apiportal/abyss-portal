@@ -17,7 +17,6 @@ import io.reactivex.Single;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 
-import java.util.List;
 import java.util.UUID;
 
 @Deprecated

@@ -12,10 +12,10 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -27,14 +27,9 @@ import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
-
-import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
 public class ApiTagService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(ApiTagService.class);
@@ -209,12 +204,16 @@ public class ApiTagService extends AbstractService<UpdateResult> {
         return findAll(SQL_SELECT);
     }
 
-    public Single<ResultSet> findAll(AbstractService.ServiceFilter serviceFilter) {
-        return filter(serviceFilter);
+    public Single<ResultSet> findAll(ApiFilterQuery apiFilterQuery) {
+        return filter(apiFilterQuery);
     }
 
-    private static final String SQL_INSERT = "insert into api_tag (organizationid, crudsubjectid, name, description)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
+    public ApiFilterQuery.APIFilter getAPIFilter() {
+        return apiFilter;
+    }
+
+    private static final String SQL_INSERT = "insert into api_tag (organizationid, crudsubjectid, name, description, externaldescription, externalurl)\n" +
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?, ?, ?)";
 
     private static final String SQL_DELETE = "update api_tag\n" +
             "set\n" +
@@ -230,9 +229,9 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
             "  name,\n" +
-            "  description\n" +
-            //"  externaldescription\n" +
-            //"  externalurl\n" +
+            "  description,\n" +
+            "  externaldescription,\n" +
+            "  externalurl\n" +
             "from api_tag\n";
 
     private static final String SQL_UPDATE = "UPDATE api_tag\n" +
@@ -241,7 +240,9 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
-            "  , description      = ?\n";
+            "  , description      = ?\n"+
+            "  , externaldescription      = ?\n"+
+            "  , externalurl      = ?\n";
 
     private static final String SQL_AND = "and\n";
 
@@ -274,16 +275,13 @@ public class ApiTagService extends AbstractService<UpdateResult> {
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
 
-
+    //Aggregation
     private static final String SQL_AGGREGATE_COLUMNS =
             "  t.uuid,\n" +
-            "  t.name\n"
-/*
-            "  description\n" +
-            "  externaldescription\n" +
-            "  externalurl\n" +
-*/
-            ;
+            "  t.name,\n" +
+            "  t.description,\n" +
+            "  t.externaldescription,\n" +
+            "  t.externalurl\n";
 
     private static final String SELECT = "select\n";
 
@@ -297,10 +295,9 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = CAST(? AS uuid)\n" +
             "and a.isproxyapi = false and openapidocument ?? 'servers'\n";
 
-    private static final String sx = SELECT + SQL_AGGREGATE_COLUMNS + SQL_COUNT + SQL_JOIN_API + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS + ";";
+    private static final String AGGREGATE_COUNT = SELECT + SQL_AGGREGATE_COLUMNS + SQL_COUNT + SQL_JOIN_API + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS;
 
-    static {
-        FILTER_BY_SUBJECT.setFilterQuery(sx);
-    }
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
+
 
 }
