@@ -31,7 +31,7 @@ public class ResetPasswordController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(ResetPasswordController.class);
 
     private Integer tokenId;
-    private Integer subjectId;
+    private String subjectId;
     private String email;
     private String displayName;
 
@@ -58,7 +58,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                 // Switch from Completable to default Single value
                                 .toSingleDefault(false)
                                 //Check if user already exists
-                                .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE TOKEN = ? and A.subjectId = S.id", new JsonArray().add(token)))
+                                .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE TOKEN = ? and A.subjectId = S.uuid", new JsonArray().add(token)))
                                 .flatMap(resultSet -> {
                                     int numOfRows = resultSet.getNumRows();
                                     if (numOfRows == 0) {
@@ -107,54 +107,6 @@ public class ResetPasswordController extends PortalAbstractController {
                                         return Single.error(new Exception("Valid token is not found in our records"));
                                     }
                                 })
-//                        .flatMap(row -> {
-//                                    logger.info("Activate Account - Updating Subject with id:[" + row.getInteger("subjectId") + "] -> " + row.encodePrettily());
-//                                    return resConn.rxUpdateWithParams("UPDATE subject SET " +
-//                                                    "updated = now()," +
-//                                                    "crudSubjectId = CAST(? AS uuid)," +
-//                                                    "isActivated = true" +
-//                                                    " WHERE " +
-//                                                    "id = ?;",
-//                                            new JsonArray()
-//                                                    .add(Constants.SYSTEM_USER_UUID)
-//                                                    .add(row.getInteger("subjectId")));
-//                                }
-//                        )
-//                        .flatMap(updateResult -> {
-//                            logger.info("Activate Account - Updating Subject... Number of rows updated:" + updateResult.getUpdated());
-//                            //logger.info("Activate Account - Subject Update Result information:" + updateResult.getKeys().encodePrettily());
-//                            logger.info("Activate Account - Updating Subject Activation...");
-//                            if (updateResult.getUpdated() == 1) {
-//                                return resConn.rxUpdateWithParams("UPDATE subject_activation SET " +
-//                                                "deleted = now()," +
-//                                                "crudSubjectId = CAST(? AS uuid)," +
-//                                                "isDeleted = true" +
-//                                                " WHERE " +
-//                                                "id = ?;",
-//                                        new JsonArray()
-//                                                .add(Constants.SYSTEM_USER_UUID)
-//                                                .add(tokenId));
-//                            } else {
-//                                return Single.error(new Exception("Activation Update Error Occurred"));
-//                            }
-//                        })
-//                        // commit if all succeeded
-//                        .flatMap(updateResult -> {
-//                            if (updateResult.getUpdated() == 1) {
-//                                logger.info("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
-//                                return resConn.rxCommit().toSingleDefault(true);
-//                            } else {
-//                                return Single.error(new Exception("Activation Update Error Occurred"));
-//                            }
-//
-//                        })
-//
-//                        // Rollback if any failed with exception propagation
-//                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
-//                                .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-//                                .flatMap(ignore -> Single.error(ex))
-//                        )
-
                                 .doAfterSuccess(succ -> {
                                     logger.info("ResetPasswordController Get: Reset Password Token is validated.");
                                 })
@@ -204,7 +156,7 @@ public class ResetPasswordController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.id", new JsonArray().add(token)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.uuid", new JsonArray().add(token)))
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
@@ -225,7 +177,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                 }
 
                                 tokenId = row.getInteger("id");
-                                subjectId = row.getInteger("subjectId");
+                                subjectId = row.getString("subjectId");
 
                                 AuthenticationInfo authInfo = new AuthenticationInfo(
                                         row.getString("token"),
@@ -255,7 +207,7 @@ public class ResetPasswordController extends PortalAbstractController {
                             }
                         })
                         .flatMap(row -> {
-                                    logger.info("ResetPasswordController - Updating Subject with id:[" + row.getInteger("subjectId") + "] -> " + row.encodePrettily());
+                                    logger.info("ResetPasswordController - Updating Subject with uuid:[" + subjectId + "] -> " + row.encodePrettily());
 
                                     String salt = authProvider.generateSalt();
                                     String hash = authProvider.computeHash(newPassword, salt);
@@ -266,15 +218,15 @@ public class ResetPasswordController extends PortalAbstractController {
                                                     "isActivated = true," +
                                                     "password = ?," +
                                                     "passwordSalt = ?, " +
-                                                    "isPasswordChangeRequired = false" +
+                                                    "isPasswordChangeRequired = false," +
                                                     "passwordExpiresAt = NOW() + "+ String.valueOf(Constants.PASSWORD_EXPIRATION_DAYS) +" * INTERVAL '1 DAY' " +
                                                     " WHERE " +
-                                                    "id = ?;",
+                                                    "uuid = CAST(? AS uuid);",
                                             new JsonArray()
                                                     .add(Constants.SYSTEM_USER_UUID)
                                                     .add(hash)
                                                     .add(salt)
-                                                    .add(row.getInteger("subjectId")));
+                                                    .add(subjectId));
                                 }
                         )
                         .flatMap(updateResult -> {
@@ -322,9 +274,17 @@ public class ResetPasswordController extends PortalAbstractController {
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.PASSWORD_RESET_TOKEN);
                             json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderPasswordResetMailBody(routingContext, displayName));
 
+                            logger.info("Password Reset mail is rendered successfully");
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                logger.info(result.toString());
+                                if (result.succeeded()) {
+                                    logger.info("Password Reset Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
+                                } else {
+                                    logger.info("Password Reset Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
+                                }
+
                             });
+                            logger.info("Password Reset mail is sent to Mail Verticle over Event Bus");
+
                         })
 
                         // close the connection regardless succeeded or failed

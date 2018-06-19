@@ -29,10 +29,10 @@
   </properties>
 
   <group>
-    <name>abyss-api-portal</name>
-    <password>live-pass</password>
+    <name>abyss-api-portal-dev</name>
+    <password>dev-pass</password>
   </group>
-  <management-center enabled="true">http://192.168.100.33:8088/hazelcast-mancenter</management-center>
+  <management-center enabled="true">http://192.168.10.38:8088/hazelcast-mancenter</management-center>
   <network>
     <port auto-increment="true" port-count="10000">5701</port>
     <outbound-ports>
@@ -48,7 +48,7 @@
         <multicast-port>54327</multicast-port>
       </multicast>
       <tcp-ip enabled="false">
-        <interface>192.168.100.*</interface>
+        <interface>192.168.10.*</interface>
       </tcp-ip>
       <aws enabled="false">
         <access-key>my-access-key</access-key>
@@ -64,7 +64,7 @@
       </aws>
     </join>
     <interfaces enabled="true">
-      <interface>192.168.100.33</interface>
+      <interface>192.168.10.46</interface>
     </interfaces>
     <ssl enabled="false"/>
     <socket-interceptor enabled="false"/>

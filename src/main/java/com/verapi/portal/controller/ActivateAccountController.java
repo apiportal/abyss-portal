@@ -63,7 +63,7 @@ public class ActivateAccountController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.id", new JsonArray().add(token)))
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.uuid", new JsonArray().add(token)))
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
@@ -113,16 +113,16 @@ public class ActivateAccountController extends PortalAbstractController {
                             }
                         })
                         .flatMap(row -> {
-                                    logger.info("Activate Account - Updating Subject with id:[" + row.getInteger("subjectId") + "] -> " + row.encodePrettily());
+                                    logger.info("Activate Account - Updating Subject with uuid:[" + row.getString("subjectId") + "] -> " + row.encodePrettily());
                                     return resConn.rxUpdateWithParams("UPDATE subject SET " +
                                                     "updated = now()," +
                                                     "crudSubjectId = CAST(? AS uuid)," +
                                                     "isActivated = true" +
                                                     " WHERE " +
-                                                    "id = ?;",
+                                                    "uuid = CAST(? AS uuid);",
                                             new JsonArray()
                                                     .add(Constants.SYSTEM_USER_UUID)
-                                                    .add(row.getInteger("subjectId")));
+                                                    .add(row.getString("subjectId")));
                                 }
                         )
                         .flatMap(updateResult -> {
@@ -169,9 +169,18 @@ public class ActivateAccountController extends PortalAbstractController {
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.WELCOME_TOKEN);
                             json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderWelcomeMailBody(routingContext, displayName));
 
+                            logger.info("Welcome mail is rendered successfully");
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                logger.info(result.toString());
+                                if (result.succeeded()) {
+                                    logger.info("Welcome Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
+                                } else {
+                                    logger.info("Welcome Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
+                                }
+
+
                             });
+                            logger.info("Welcome mail is sent to Mail Verticle over Event Bus");
+
                         })
 
                         // close the connection regardless succeeded or failed
