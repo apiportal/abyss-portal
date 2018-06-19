@@ -19,9 +19,13 @@ import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.oapi.exception.NoDataFoundException;
+import com.verapi.portal.oapi.exception.NotFound404Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
+import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -30,8 +34,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
-import io.vertx.ext.web.api.RequestParameter;
-import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.ext.web.api.contract.RouterFactoryOptions;
 import io.vertx.ext.web.api.validation.ValidationException;
 import io.vertx.reactivex.core.Vertx;
@@ -393,7 +395,10 @@ public abstract class AbstractApiController implements IApiController {
                 throwable -> {
                     logger.error("exception occured " + throwable.getLocalizedMessage());
                     logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    if (throwable instanceof NoDataFoundException)
+                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
+                    else
+                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 });
     }
 
@@ -408,7 +413,10 @@ public abstract class AbstractApiController implements IApiController {
                 throwable -> {
                     logger.error("exception occured " + throwable.getLocalizedMessage());
                     logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    if (throwable instanceof NoDataFoundException)
+                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
+                    else
+                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 });
     }
 
@@ -463,7 +471,10 @@ public abstract class AbstractApiController implements IApiController {
                 throwable -> {
                     logger.error("exception occured " + throwable.getLocalizedMessage());
                     logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    if (throwable instanceof NoDataFoundException)
+                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
+                    else
+                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 });
     }
 
@@ -478,7 +489,10 @@ public abstract class AbstractApiController implements IApiController {
                 throwable -> {
                     logger.error("exception occured " + throwable.getLocalizedMessage());
                     logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    if (throwable instanceof NoDataFoundException)
+                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
+                    else
+                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 });
     }
 
@@ -531,42 +545,75 @@ public abstract class AbstractApiController implements IApiController {
                         throwable -> {
                             logger.error("exception occured " + throwable.getLocalizedMessage());
                             logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                            throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                            if (throwable instanceof NoDataFoundException)
+                                throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
+                            else
+                                throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                         });
     }
 
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        getEntities(routingContext, clazz, new ArrayList<String>(), new AbstractService.ServiceFilter());
+        getEntities(routingContext, clazz, new ArrayList<String>(), new ApiFilterQuery());
     }
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        getEntities(routingContext, clazz, jsonColumns, new AbstractService.ServiceFilter());
+        getEntities(routingContext, clazz, jsonColumns, new ApiFilterQuery());
     }
 
-    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, AbstractService.ServiceFilter serviceFilter) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         String filterByNameParameter = null;
         String filterLikeNameParameter = null;
         if (!routingContext.queryParams().isEmpty()) {
             if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).isEmpty()) {
                 filterByNameParameter = routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0);
-            } else if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).isEmpty()) {
+            }
+            if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).isEmpty()) {
+                if (filterByNameParameter != null && !filterByNameParameter.isEmpty())
+                    throwApiException(routingContext, UnProcessableEntity422Exception.class, "Both Filter By Name AND Filter Like Name CANNOT BE used at the same time, choose only one");
                 filterLikeNameParameter = routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).get(0);
             }
         }
+
         String finalFilterByNameParameter = filterByNameParameter;
         String finalFilterLikeNameParameter = filterLikeNameParameter;
         Single<ResultSet> findAllResult = service.initJDBCClient()
+                .flatMap(jdbcClient -> {
+                    if (apiFilterQuery == null || apiFilterQuery.getFilterQuery().isEmpty()) {
+                        if ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) {
+                            return service.findAll();
+                        } else {
+                            if (finalFilterLikeNameParameter == null)
+                                return service.findByName(finalFilterByNameParameter);
+                            else
+                                return service.findLikeName(finalFilterLikeNameParameter);
+                        }
+                    } else {
+                        if ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) {
+                            return service.findAll(apiFilterQuery);
+                        } else {
+                            if (finalFilterByNameParameter != null) {
+                                apiFilterQuery.addFilterQuery(service.getAPIFilter().getApiFilterByNameQuery()).addFilterQueryParams(new JsonArray().add(finalFilterByNameParameter));
+                                return service.findAll(apiFilterQuery);
+                            } else {
+                                apiFilterQuery.addFilterQuery(service.getAPIFilter().getApiFilterLikeNameQuery()).addFilterQueryParams(new JsonArray().add(finalFilterLikeNameParameter + "%"));
+                                return service.findAll(apiFilterQuery);
+                            }
+                        }
+                    }
+                })
+/*
                 .flatMap(jdbcClient -> ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) ?
-                        ((serviceFilter.getFilterQuery().isEmpty()) ? service.findAll() : service.findAll(serviceFilter)) :
+                        ((apiFilterQuery.getFilterQuery().isEmpty()) ? service.findAll() : service.findAll(apiFilterQuery)) :
                         (finalFilterLikeNameParameter == null) ?
                                 service.findByName(finalFilterByNameParameter) :
                                 service.findLikeName(finalFilterLikeNameParameter))
+*/
                 .flatMap(resultSet -> {
-                    if (resultSet.getNumRows() == 0)
-                        return Single.error(new Exception("no_data_found"));
-                    else
+                    if (resultSet.getNumRows() == 0) {
+                        return Single.error(new NoDataFoundException("no_data_found"));
+                    } else
                         return Single.just(resultSet);
                 });
         subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
@@ -616,9 +663,9 @@ public abstract class AbstractApiController implements IApiController {
                 .flatMap(jdbcClient -> service.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
                 .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
                 .flatMap(resultSet -> {
-                    if (resultSet.getNumRows() == 0)
-                        return Single.error(new Exception("no_data_found"));
-                    else
+                    if (resultSet.getNumRows() == 0) {
+                        return Single.error(new NoDataFoundException("no_data_found"));
+                    } else
                         return Single.just(resultSet);
                 });
         subscribeAndResponse(routingContext, updateAllResult, jsonColumns, HttpResponseStatus.OK.code());
@@ -637,5 +684,9 @@ public abstract class AbstractApiController implements IApiController {
                 .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))));
         subscribeAndResponseStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
     }
+
+//    public static final String SQL_CONDITION_NAME_IS = null;
+//
+//    public static final String SQL_CONDITION_NAME_LIKE = null;
 
 }

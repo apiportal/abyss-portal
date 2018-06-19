@@ -13,6 +13,7 @@ package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ApiService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -174,7 +175,22 @@ public class ApiApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntities(routingContext, ApiService.class, jsonbColumnsList, ApiService.FILTER_BY_SUBJECT.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+            //getEntities(routingContext, ApiService.class, jsonbColumnsList, ApiService.FILTER_BY_SUBJECT.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+            getEntities(routingContext, ApiService.class, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_SUBJECT).setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void getBusinessApis(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext, ApiService.class, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_BUSINESS_API));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

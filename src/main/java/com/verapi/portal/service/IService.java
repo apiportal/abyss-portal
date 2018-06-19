@@ -45,8 +45,8 @@ public interface IService<T> {
 
     Single<ResultSet> findAll();
 
-    default Single<ResultSet> findAll(AbstractService.ServiceFilter serviceFilter) {
-        return null;
-    }
+    Single<ResultSet> findAll(ApiFilterQuery apiFilterQuery);
+
+    ApiFilterQuery.APIFilter getAPIFilter();
 
 }

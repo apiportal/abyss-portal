@@ -71,8 +71,7 @@ public class Util {
         Yaml yaml = new Yaml();
         Map<String, Object> map = (Map<String, Object>) yaml.load(yamlString);
 
-        JsonObject jsonObject = new JsonObject(map);
-        return jsonObject;
+        return new JsonObject(map);
     }
 
     public static JsonObject loadYamlFile(File yamlFileName) throws FileNotFoundException {
