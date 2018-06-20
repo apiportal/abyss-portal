@@ -236,6 +236,11 @@ public class ApiService extends AbstractService<UpdateResult> {
         return deleteAll(SQL_DELETE_ALL);
     }
 
+    public Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery) {
+        ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
+        return deleteAll(sqlDeleteAllQuery.getFilterQuery());
+    }
+
     public Single<ResultSet> findById(long id) {
         return findById(id, SQL_FIND_BY_ID);
     }
@@ -355,7 +360,7 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_ISPROXYAPI_IS = "isproxyapi = true\n";
 
-    private static final String SQL_CONDITION_IS_BUSINESSAPI = "isproxyapi = false\n";
+    public static final String SQL_CONDITION_IS_BUSINESSAPI = "isproxyapi = false\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 

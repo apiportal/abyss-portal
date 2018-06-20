@@ -672,9 +672,13 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        deleteEntities(routingContext, clazz, new ApiFilterQuery());
+    }
+
+    <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<CompositeResult> deleteAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.deleteAll());
+                .flatMap(jdbcClient -> service.deleteAll(apiFilterQuery));
         subscribeAndResponseStatusOnly(routingContext, deleteAllResult, HttpResponseStatus.NO_CONTENT.code());
     }
 

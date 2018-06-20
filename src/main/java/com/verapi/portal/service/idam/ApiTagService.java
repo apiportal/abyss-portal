@@ -184,6 +184,11 @@ public class ApiTagService extends AbstractService<UpdateResult> {
         return deleteAll(SQL_DELETE_ALL);
     }
 
+    public Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery) {
+        ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
+        return deleteAll(sqlDeleteAllQuery.getFilterQuery());
+    }
+
     public Single<ResultSet> findById(long id) {
         return findById(id, SQL_FIND_BY_ID);
     }
@@ -240,8 +245,8 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
-            "  , description      = ?\n"+
-            "  , externaldescription      = ?\n"+
+            "  , description      = ?\n" +
+            "  , externaldescription      = ?\n" +
             "  , externalurl      = ?\n";
 
     private static final String SQL_AND = "and\n";

@@ -258,7 +258,12 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> deleteAll() {
-        return deleteAll(SQL_DELETE_ALL_USERS);
+        return deleteAll(SQL_DELETE_ALL);
+    }
+
+    public Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery) {
+        ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
+        return deleteAll(sqlDeleteAllQuery.getFilterQuery());
     }
 
     public Single<ResultSet> findById(long id) {
@@ -383,7 +388,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    private static final String SQL_DELETE_ALL_USERS = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_USERS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_USERS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

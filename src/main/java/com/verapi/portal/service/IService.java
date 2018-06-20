@@ -35,6 +35,8 @@ public interface IService<T> {
 
     Single<CompositeResult> deleteAll();
 
+    Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery);
+
     Single<ResultSet> findById(long id);
 
     Single<ResultSet> findById(UUID uuid);
