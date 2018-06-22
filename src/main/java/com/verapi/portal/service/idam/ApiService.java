@@ -150,10 +150,7 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
-        updateRecords.forEach(updateRow -> {
-            jsonArray.add(new JsonObject(updateRow.getValue().toString())
-                    .put("uuid", updateRow.getKey()));
-        });
+        updateRecords.forEach(updateRow -> jsonArray.add(new JsonObject(updateRow.getValue().toString()).put("uuid", updateRow.getKey())));
         Observable<Object> updateParamsObservable = Observable.fromIterable(jsonArray);
         return updateParamsObservable
                 .flatMap(o -> {
@@ -344,13 +341,13 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , isdefaultversion      = ?\n" +
             "  , islatestversion      = ?\n";
 
-    private static final String SQL_AND = "and\n";
+    public static final String SQL_AND = "and\n";
 
     private static final String SQL_WHERE = "where\n";
 
     private static final String SQL_CONDITION_ID_IS = "id = ?\n";
 
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
+    public static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     public static final String SQL_CONDITION_NAME_IS = "openapidocument -> 'info' ->> 'title' = ?\n";
 
@@ -368,7 +365,7 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    public static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
 

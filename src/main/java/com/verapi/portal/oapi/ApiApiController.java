@@ -128,6 +128,48 @@ public class ApiApiController extends AbstractApiController {
         }
     }
 
+    void getEntity(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntity(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    void updateEntity(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        try {
+            updateEntity(routingContext, ApiService.class, requestBody, jsonbColumnsList, apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    void deleteEntity(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        try {
+            deleteEntity(routingContext, ApiService.class);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
     @AbyssApiOperationHandler
     public void getApis(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery());
@@ -150,21 +192,13 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApi(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
-        try {
-            getEntity(routingContext, ApiService.class, jsonbColumnsList);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
+        getEntity(routingContext, (ApiFilterQuery) null);
     }
 
     @AbyssApiOperationHandler
     public void updateApi(RoutingContext routingContext) {
-
+        updateEntity(routingContext, null);
+/*
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -178,11 +212,13 @@ public class ApiApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+*/
     }
 
     @AbyssApiOperationHandler
     public void deleteApi(RoutingContext routingContext) {
-
+        deleteEntity(routingContext, (ApiFilterQuery) null);
+/*
         try {
             deleteEntity(routingContext, ApiService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -190,6 +226,7 @@ public class ApiApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+*/
     }
 
     @AbyssApiOperationHandler
@@ -228,6 +265,23 @@ public class ApiApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
+    public void getBusinessApi(RoutingContext routingContext) {
+        getEntity(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.SQL_FIND_BY_UUID + ApiService.SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI)
+                .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateBusinessApi(RoutingContext routingContext) {
+        updateEntity(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteBusinessApi(RoutingContext routingContext) {
+        deleteEntity(routingContext, (ApiFilterQuery) null);
+    }
+
+    @AbyssApiOperationHandler
     public void getApiProxies(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_PROXY_API));
     }
@@ -245,6 +299,23 @@ public class ApiApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void deleteApiProxies(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI));
+    }
+
+    @AbyssApiOperationHandler
+    public void getApiProxy(RoutingContext routingContext) {
+        getEntity(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.SQL_FIND_BY_UUID + ApiService.SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI)
+                .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateApiProxy(RoutingContext routingContext) {
+        updateEntity(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteApiProxy(RoutingContext routingContext) {
+        deleteEntity(routingContext, (ApiFilterQuery) null);
     }
 
 }

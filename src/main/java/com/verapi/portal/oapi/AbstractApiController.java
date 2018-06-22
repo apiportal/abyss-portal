@@ -622,13 +622,17 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        getEntity(routingContext, clazz, null);
+        getEntity(routingContext, clazz, null, null);
     }
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        getEntity(routingContext, clazz, jsonColumns, null);
+    }
+
+    <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> findAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))));
+                .flatMap(jdbcClient -> (apiFilterQuery == null) ? service.findById(UUID.fromString(routingContext.pathParam("uuid"))) : service.findAll(apiFilterQuery));
         subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }
 
@@ -655,18 +659,22 @@ public abstract class AbstractApiController implements IApiController {
     <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<List<JsonObject>> updateAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.updateAll(requestBody)); //TODO: an overloaded version of updateAll using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
+                .flatMap(jdbcClient -> service.updateAll(requestBody)); //TODO: an overloaded version of updateAll() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
         subscribeAndResponseBulkList(routingContext, updateAllResult, jsonColumns, HttpResponseStatus.MULTI_STATUS.code());
     }
 
     <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        updateEntity(routingContext, clazz, requestBody, null);
+        updateEntity(routingContext, clazz, requestBody, null, null);
     }
 
     <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        updateEntity(routingContext, clazz, requestBody, jsonColumns, null);
+    }
+
+    <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> updateAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
+                .flatMap(jdbcClient -> service.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody)) //TODO:  an overloaded version of update() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
                 .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0) {
