@@ -421,7 +421,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, int httpResponseStatus) {
-        subscribeAndResponse(routingContext, resultSetSingle, new ArrayList<String>(), httpResponseStatus);
+        subscribeAndResponse(routingContext, resultSetSingle, null, httpResponseStatus);
         /*
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
@@ -443,7 +443,8 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
-                    if (jsonColumns.isEmpty()) {
+                    //if (jsonColumns.isEmpty()) {
+                    if (jsonColumns == null) {
                         resp.getRows().forEach(arr::add);
                     } else {
                         resp.getResults().forEach(eachRow -> {
@@ -497,7 +498,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, int httpResponseStatus) {
-        subscribeAndResponseBulkList(routingContext, jsonListSingle, new ArrayList<String>(), httpResponseStatus);
+        subscribeAndResponseBulkList(routingContext, jsonListSingle, null, httpResponseStatus);
     }
 
     private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, List<String> jsonColumns, int httpResponseStatus) {
@@ -510,7 +511,8 @@ public abstract class AbstractApiController implements IApiController {
                     throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                 })
                 .subscribe(resp -> {
-                            if (jsonColumns.isEmpty()) {
+                            //if (jsonColumns.isEmpty()) {
+                            if (jsonColumns == null) {
                                 resp.forEach(arr::add);
                             } else {
                                 resp.forEach(eachJO -> {
@@ -554,7 +556,7 @@ public abstract class AbstractApiController implements IApiController {
 
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        getEntities(routingContext, clazz, new ArrayList<String>(), new ApiFilterQuery());
+        getEntities(routingContext, clazz, null, new ApiFilterQuery());
     }
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -620,7 +622,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        getEntity(routingContext, clazz, new ArrayList<String>());
+        getEntity(routingContext, clazz, null);
     }
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -631,7 +633,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        addEntities(routingContext, clazz, requestBody, new ArrayList<String>());
+        addEntities(routingContext, clazz, requestBody, null);
     }
 
     <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -643,18 +645,22 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        updateEntities(routingContext, clazz, requestBody, new ArrayList<String>());
+        updateEntities(routingContext, clazz, requestBody, null, null);
     }
 
     <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        updateEntities(routingContext, clazz, requestBody, jsonColumns, null);
+    }
+
+    <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<List<JsonObject>> updateAllResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.updateAll(requestBody));
+                .flatMap(jdbcClient -> service.updateAll(requestBody)); //TODO: an overloaded version of updateAll using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
         subscribeAndResponseBulkList(routingContext, updateAllResult, jsonColumns, HttpResponseStatus.MULTI_STATUS.code());
     }
 
     <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        updateEntity(routingContext, clazz, requestBody, new ArrayList<String>());
+        updateEntity(routingContext, clazz, requestBody, null);
     }
 
     <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

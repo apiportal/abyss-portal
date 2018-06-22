@@ -45,8 +45,9 @@ public class SubjectDirectoryApiController extends AbstractApiController {
 
     /**
      * API verticle creates new API Controller instance via this constructor
-     * @param vertx Vertx content
-     * @param router Vertx router
+     *
+     * @param vertx        Vertx content
+     * @param router       Vertx router
      * @param authProvider JDBC Auth provider
      */
     public SubjectDirectoryApiController(Vertx vertx, Router router, JDBCAuth authProvider) {

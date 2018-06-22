@@ -55,10 +55,9 @@ public class ApiApiController extends AbstractApiController {
         super(vertx, router, authProvider);
     }
 
-    @AbyssApiOperationHandler
-    public void getApis(RoutingContext routingContext) {
+    void getEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         try {
-            getEntities(routingContext, ApiService.class, jsonbColumnsList);
+            getEntities(routingContext, ApiService.class, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -66,8 +65,7 @@ public class ApiApiController extends AbstractApiController {
         }
     }
 
-    @AbyssApiOperationHandler
-    public void addApis(RoutingContext routingContext) {
+    void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -85,6 +83,13 @@ public class ApiApiController extends AbstractApiController {
                     logger.error(e.getLocalizedMessage());
                     logger.error(Arrays.toString(e.getStackTrace()));
                 }
+            if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
+                //enforce this request JsonObject as an business API
+                appendRequestBody.forEach(entry -> {
+                    //((JsonObject) requestItem).put("isproxyapi", false);
+                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
+                });
+            }
         });
 
         try {
@@ -96,8 +101,7 @@ public class ApiApiController extends AbstractApiController {
         }
     }
 
-    @AbyssApiOperationHandler
-    public void updateApis(RoutingContext routingContext) {
+    void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -106,7 +110,17 @@ public class ApiApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, ApiService.class, requestBody, jsonbColumnsList);
+            updateEntities(routingContext, ApiService.class, requestBody, jsonbColumnsList, apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    void deleteEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        try {
+            deleteEntities(routingContext, ApiService.class, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -115,14 +129,23 @@ public class ApiApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
+    public void getApis(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery());
+    }
+
+    @AbyssApiOperationHandler
+    public void addApis(RoutingContext routingContext) {
+        addEntities(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
+    public void updateApis(RoutingContext routingContext) {
+        updateEntities(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
     public void deleteApis(RoutingContext routingContext) {
-        try {
-            deleteEntities(routingContext, ApiService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
+        deleteEntities(routingContext, new ApiFilterQuery());
     }
 
     @AbyssApiOperationHandler
@@ -186,16 +209,42 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getBusinessApis(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_BUSINESS_API));
+    }
 
-        try {
-            getEntities(routingContext, ApiService.class, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_BUSINESS_API));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
+    @AbyssApiOperationHandler
+    public void addBusinessApis(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("isproxyapi", false));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateBusinessApis(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteBusinessApis(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI));
+    }
+
+    @AbyssApiOperationHandler
+    public void getApiProxies(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_PROXY_API));
+    }
+
+    @AbyssApiOperationHandler
+    public void addApiProxies(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("isproxyapi", true));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateApiProxies(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteApiProxies(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI));
     }
 
 }

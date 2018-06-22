@@ -171,6 +171,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     gatewayRouter.mountSubRouter(mountPoint, subRouter);
                     logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
                     logger.trace("subRouter route list: {}", subRouter.getRoutes());
+                    logger.info("loadAllProxyApis() completed");
                 });
     }
 
