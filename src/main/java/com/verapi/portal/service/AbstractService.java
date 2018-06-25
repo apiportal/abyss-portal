@@ -223,6 +223,10 @@ public abstract class AbstractService<T> implements IService<T> {
         return rxUpdateWithParams(deleteAllQuery);
     }
 
+    protected Single<CompositeResult> deleteAll(String sql, JsonArray params) {
+        return rxUpdateWithParams(sql, params);
+    }
+
     protected Single<ResultSet> findById(final long id, final String findByIdQuery) {
         return rxQueryWithParams(findByIdQuery, new JsonArray().add(id));
     }

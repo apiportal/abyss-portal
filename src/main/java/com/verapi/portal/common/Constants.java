@@ -16,8 +16,8 @@ public class Constants {
 
     private static final String ABYSS = "abyss";
     public static final String ABYSS_GW = "abyss-gw";
-    public static final String ABYSS_ROOT = "/"+ABYSS;
-    public static final String ABYSS_GATEWAY_ROOT = "/"+ABYSS_GW;
+    public static final String ABYSS_ROOT = "/" + ABYSS;
+    public static final String ABYSS_GATEWAY_ROOT = "/" + ABYSS_GW;
     public static final String ABYSS_PORTAL = "abyss-portal";
     public static final String HOST_PROTOCOL = "hostProtocol";
     public static final String HOST = "host";
@@ -94,7 +94,7 @@ public class Constants {
     public static final String ECHO_HTTP_SERVICE = "echo-http-service";
 
     public static final String TEMPLATE_DIR_ROOT = "webroot/";
-    static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT +"email/";
+    static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT + "email/";
     public static final String TEMPLATE_SUFFIX = ".html";
 
 
@@ -152,8 +152,8 @@ public class Constants {
     public static final String MAIL_FROM_EMAIL_WELCOME = "welcome@apiportal.com (ABYSS API PORTAL)";
     public static final String MAIL_FROM_EMAIL_NOTIFICATION = "notification@apiportal.com (ABYSS API PORTAL)";
 
-    public static final String  ES_SERVER_URL = "es.server.url";
-    public static final String  ES_SERVER_API_BULK_URL = "es.server.api.bulk.url";
+    public static final String ES_SERVER_URL = "es.server.url";
+    public static final String ES_SERVER_API_BULK_URL = "es.server.api.bulk.url";
 
     public static final String VERTICLE_TYPE_PORTAL = "verticle.type.portal";
     public static final String VERTICLE_TYPE_API = "verticle.type.api";
@@ -171,8 +171,8 @@ public class Constants {
     public static final String DEFAULT_ORGANIZATION_UUID = "3c65fafc-8f3a-4243-9c4e-2821aa32d293";
 
     public static final String SUBJECT_TYPE_USER = "21371a15-04f8-445e-a899-006ee11c0e09";
-    public static final int SUBJECT_TYPE_APP = 2;
-    public static final int SUBJECT_TYPE_SYSTEM = 3;
+    public static final String SUBJECT_TYPE_APP = "ca80dd37-7484-46d3-b4a1-a8af93b2d3c6";
+    public static final String SUBJECT_TYPE_SYSTEM = "80fc37d5-0594-456c-851b-a7e68fe55e9e";
 
     public static final String RESOURCE_DEFAULT_SUBJECT_AVATAR = "webroot/dist/img/avatar.jpg";
     public static final String RESOURCE_DEFAULT_API_AVATAR = "webroot/dist/img/thumb.png";

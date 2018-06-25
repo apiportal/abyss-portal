@@ -13,6 +13,7 @@ package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.SubjectService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -53,15 +54,88 @@ public class SubjectApiController extends AbstractApiController {
         super(vertx, router, authProvider);
     }
 
-    @AbyssApiOperationHandler
-    public void getSubjects(RoutingContext routingContext) {
+    void getEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         try {
-            getEntities(routingContext, SubjectService.class);
+            getEntities(routingContext, SubjectService.class, null, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+    }
+
+    void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON array validated by Vert.x Open API validator
+        JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        // 1- generate password salt and password
+        // 2-check subject request contains picture, if not then load default avatar picture
+        requestBody.forEach(requestItem -> {
+            String salt = authProvider.generateSalt();
+            String hash = authProvider.computeHash(((JsonObject) requestItem).getString("password"), salt);
+            ((JsonObject) requestItem).put("password", hash);
+            ((JsonObject) requestItem).put("passwordsalt", salt);
+            if ((!((JsonObject) requestItem).containsKey("picture")) || (((JsonObject) requestItem).getValue("picture") == null))
+                try {
+                    //insert default avatar image TODO: later use request base
+                    ClassLoader classLoader = getClass().getClassLoader();
+                    File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
+                    ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + encodeFileToBase64Binary(file));
+                } catch (IOException e) {
+                    logger.error(e.getLocalizedMessage());
+                    logger.error(Arrays.toString(e.getStackTrace()));
+                }
+            if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
+                appendRequestBody.forEach(entry -> {
+                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
+                });
+            }
+
+        });
+
+        //now it is time to add entities
+        try {
+            addEntities(routingContext, SubjectService.class, requestBody);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        //now it is time to update entities
+        try {
+            updateEntities(routingContext, SubjectService.class, requestBody, null, apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    void deleteEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        try {
+            deleteEntities(routingContext, SubjectService.class, apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void getSubjects(RoutingContext routingContext) {
+        getEntities(routingContext, (ApiFilterQuery) null);
     }
 
     @AbyssApiOperationHandler
@@ -85,6 +159,9 @@ public class SubjectApiController extends AbstractApiController {
         // ### END - request swagger validation using Atlassian SwaggerRequestResponseValidator ###
 */
 
+        addEntities(routingContext, null);
+
+/*
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -118,10 +195,13 @@ public class SubjectApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+*/
     }
 
     @AbyssApiOperationHandler
     public void updateSubjects(RoutingContext routingContext) {
+        updateEntities(routingContext, null);
+/*
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -136,10 +216,13 @@ public class SubjectApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+*/
     }
 
     @AbyssApiOperationHandler
     public void deleteSubjects(RoutingContext routingContext) {
+        deleteEntities(routingContext, (ApiFilterQuery) null);
+/*
         try {
             deleteEntities(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -147,6 +230,7 @@ public class SubjectApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+*/
     }
 
     @AbyssApiOperationHandler
@@ -191,6 +275,26 @@ public class SubjectApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+    }
+
+    @AbyssApiOperationHandler
+    public void getApps(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_APPS));
+    }
+
+    @AbyssApiOperationHandler
+    public void addApps(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_APP));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateApps(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_APP));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteApps(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_APP));
     }
 
 }

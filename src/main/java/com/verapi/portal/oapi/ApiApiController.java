@@ -84,9 +84,7 @@ public class ApiApiController extends AbstractApiController {
                     logger.error(Arrays.toString(e.getStackTrace()));
                 }
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
-                //enforce this request JsonObject as an business API
                 appendRequestBody.forEach(entry -> {
-                    //((JsonObject) requestItem).put("isproxyapi", false);
                     ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
                 });
             }
@@ -236,12 +234,36 @@ public class ApiApiController extends AbstractApiController {
 
         try {
             //getEntities(routingContext, ApiService.class, jsonbColumnsList, ApiService.FILTER_BY_SUBJECT.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-            getEntities(routingContext, ApiService.class, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_SUBJECT).setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+    }
+
+    @AbyssApiOperationHandler
+    public void addApisOfSubject(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateApisOfSubject(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteApisOfSubject(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.SQL_DELETE_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
     @AbyssApiOperationHandler
@@ -316,6 +338,107 @@ public class ApiApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void deleteApiProxy(RoutingContext routingContext) {
         deleteEntity(routingContext, (ApiFilterQuery) null);
+    }
+
+    @AbyssApiOperationHandler
+    public void getBusinessApisOfSubject(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
+                            .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void addBusinessApisOfSubject(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", false));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateBusinessApisOfSubject(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
+                .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteBusinessApisOfSubject(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.SQL_DELETE_BY_SUBJECT)
+                .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void getApiProxiesOfSubject(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
+                            .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void addApiProxiesOfSubject(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", true));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateApiProxiesOfSubject(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
+                .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteApiProxiesOfSubject(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(ApiService.SQL_DELETE_BY_SUBJECT)
+                .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void getTagsOfApisOfSubject(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
 
 }

@@ -370,11 +370,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_NAME_LIKE = "lower(subjectname) like lower(?)\n";
 
-    private static final String SQL_CONDITION_ONLY_USERS = "subjecttypeid=CAST(" + Constants.SUBJECT_TYPE_USER + " AS uuid)\n";
+    private static final String SQL_CONDITION_IS_USER = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+
+    public static final String SQL_CONDITION_IS_APP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_APP + "' AS uuid)\n";
 
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
@@ -384,11 +386,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE + SQL_WHERE + SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_IS_USER + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_USERS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    public static String FILTER_APPS= SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_APP;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

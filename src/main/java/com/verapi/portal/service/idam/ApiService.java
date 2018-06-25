@@ -234,8 +234,13 @@ public class ApiService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery) {
-        ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
-        return deleteAll(sqlDeleteAllQuery.getFilterQuery());
+
+        if (apiFilterQuery.getFilterQueryParams().isEmpty()) {
+            ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
+            return deleteAll(sqlDeleteAllQuery.getFilterQuery());
+        } else {
+            return deleteAll(apiFilterQuery.getFilterQuery(), apiFilterQuery.getFilterQueryParams());
+        }
     }
 
     public Single<ResultSet> findById(long id) {
@@ -373,11 +378,13 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
 
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE + SQL_WHERE + SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+
+    public static final String SQL_DELETE_BY_SUBJECT = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_SUBJECT_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     public static String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
 

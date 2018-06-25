@@ -82,7 +82,7 @@ public class ApiService extends AbstractServiceOld<JsonObject> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName+"%")))
+                        .flatMap(conn1 -> conn.rxQueryWithParams(SQL_FILTER_BY_SUBJECTNAME, new JsonArray().add(subjectName + "%")))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 logger.trace("ApiService filterBySubjectName() # of records :[" + resultSet.getNumRows() + "]");
