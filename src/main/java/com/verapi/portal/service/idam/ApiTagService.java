@@ -295,7 +295,7 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = CAST(? AS uuid)\n" +
             "and a.isproxyapi = false and openapidocument ?? 'servers'\n";
 
-    private static final String AGGREGATE_COUNT = SELECT + SQL_AGGREGATE_COLUMNS + SQL_COUNT + SQL_JOIN_API + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS;
+    public static final String AGGREGATE_COUNT = SELECT + SQL_AGGREGATE_COLUMNS + SQL_COUNT + SQL_JOIN_API + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

@@ -188,7 +188,7 @@ public class ApiApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getBusinessApis(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext, ApiService.class, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_BUSINESS_API));
@@ -205,11 +205,13 @@ public class ApiApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 
         try {
-            getEntities(routingContext, ApiTagService.class, jsonbColumnsList,
+            /*getEntities(routingContext, ApiTagService.class, jsonbColumnsList,
                         ApiTagService.FILTER_BY_SUBJECT
                                 .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("subject_uuid")))
                                 .setAggregationType(routingContext.pathParam("aggregation"))
-            );
+            );*/
+            getEntities(routingContext, ApiService.class, jsonbColumnsList,
+                        new ApiFilterQuery().setFilterQuery(ApiTagService.AGGREGATE_COUNT).setFilterQueryParams(new JsonArray().add(routingContext.pathParam("subject_uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

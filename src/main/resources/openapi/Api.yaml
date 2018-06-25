@@ -1385,18 +1385,82 @@ components:
         name:
           type: string
           description: Name of tag
-#        description:
-#          type: string
-#          description: Description of group
-#        externaldescription:
-#          type: string
-#          description: Description of External Documentation
-#        externalurl:
-#          type: string
-#          description: URL of External Documentation
+        description:
+          type: string
+          description: Description of tag
+        externaldescription:
+          type: string
+          description: Description of External Documentation
+        externalurl:
+          type: string
+          description: URL of External Documentation
         aggregation:
           type: number
           description: Number of APIs having this tag
+    ApiCategorySummary:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        name:
+          type: string
+          description: Name of category
+        description:
+          type: string
+          description: Description of category
+        aggregation:
+          type: number
+          description: Number of APIs having this category
+    ApiGroupSummary:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        name:
+          type: string
+          description: Name of group
+        description:
+          type: string
+          description: Description of group
+        aggregation:
+          type: number
+          description: Number of APIs having this group
+    ApiStateSummary:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        name:
+          type: string
+          description: Name of state
+        description:
+          type: string
+          description: Description of state
+        aggregation:
+          type: number
+          description: Number of APIs having this state
+    ApiVisibilityTypeSummary:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: Secondary primary key. Used in front end messages for security reasons.
+        name:
+          type: string
+          description: Name of visibility type
+        description:
+          type: string
+          description: Description of visibility type
+        aggregation:
+          type: number
+          description: Number of APIs having this visibility type
   requestBodies:
     Api:
       content:
@@ -1523,6 +1587,70 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ApiTagSummary'
+    '200-ListOfApiCategories':
+      description: 'List of ApiCategories'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: 'ApiCategory.yaml#/components/schemas/ApiCategory'
+    '200-ListOfApiGroupSummary':
+      description: 'List of ApiCategorySummary'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiCategorySummary'
+    '200-ListOfApiGroups':
+      description: 'List of ApiGroups'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: 'ApiGroup.yaml#/components/schemas/ApiGroup'
+    '200-ListOfApiGroupSummary':
+      description: 'List of ApiGroupSummary'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiGroupSummary'
+    '200-ListOfApiStates':
+      description: 'List of ApiStates'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: 'ApiState.yaml#/components/schemas/ApiState'
+    '200-ListOfApiStateSummary':
+      description: 'List of ApiStateSummary'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiStateSummary'
+    '200-ListOfApiVisibilityTypes':
+      description: 'List of ApiVisibilityTypes'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: 'ApiVisibilityType.yaml#/components/schemas/ApiVisibilityType'
+    '200-ListOfApiVisibilityTypeSummary':
+      description: 'List of ApiVisibilityTypeSummary'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiVisibilityTypeSummary'
     default:
       description: 'error'
       content:
