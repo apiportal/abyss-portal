@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
+@Deprecated
 public class SubjectIndexService extends AbstractServiceOld<JsonObject> {
 
     private static Logger logger = LoggerFactory.getLogger(SubjectIndexService.class);

@@ -411,7 +411,6 @@ public abstract class AbstractService<T> implements IService<T> {
 */
 
 
-
     //public static final ApiFilterQuery FILTER_BY_SUBJECT = new ApiFilterQuery();
 
 }

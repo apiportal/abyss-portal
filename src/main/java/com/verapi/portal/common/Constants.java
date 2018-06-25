@@ -34,17 +34,20 @@ public class Constants {
     public static final String HTTP_SERVER_PORT = "http.server.port";
     public static final String HTTP_PROXY_SERVER_PORT = "http.proxy.server.port";
     public static final String HTTP_SERVER_TIMEOUT = "http.server.timeout";
+    public static final String HTTP_SERVER_ENABLE_COMPRESSION_SUPPORT = "http.server.enable.compression.support";
 
     public static final String HTTP_API_SERVER_HOST = "http.api.server.host";
     public static final String HTTP_API_SERVER_PORT = "http.api.server.port";
     public static final String HTTP_PROXY_API_SERVER_PORT = "http.proxy.api.server.port";
     public static final String HTTP_API_SERVER_TIMEOUT = "http.api.server.timeout";
     public static final String EB_API_SERVER_ADDRESS = "eb.api.server.address";
+    public static final String HTTP_API_SERVER_ENABLE_COMPRESSION_SUPPORT = "http.api.server.enable.compression.support";
 
     public static final String HTTP_OPENAPI_SERVER_HOST = "http.openapi.server.host";
     public static final String HTTP_OPENAPI_SERVER_PORT = "http.openapi.server.port";
     public static final String HTTP_PROXY_OPENAPI_SERVER_PORT = "http.proxy.openapi.server.port";
     public static final String HTTP_OPENAPI_SERVER_TIMEOUT = "http.openapi.server.timeout";
+    public static final String HTTP_OPENAPI_SERVER_ENABLE_COMPRESSION_SUPPORT = "http.openapi.server.enable.compression.support";
 
     public static final String HTTP_GATEWAY_SERVER_HOST = "http.gateway.server.host";
     public static final String HTTP_GATEWAY_SERVER_PORT = "http.gateway.server.port";

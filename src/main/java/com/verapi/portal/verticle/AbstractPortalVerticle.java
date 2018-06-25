@@ -24,6 +24,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
@@ -131,7 +132,13 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
     protected Single<HttpServer> createHttpServer() {
         logger.trace("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
-                .setCompressionSupported(true)
+/*
+                // to enable http/2 support; setSSL true, set pem key cert, set use alpn true
+                .setSsl(true)
+                .setPemKeyCertOptions(new PemKeyCertOptions().setCertPath("tls/server-cert.pem").setKeyPath("tls/server-key.pem"))
+                .setUseAlpn(true)
+*/
+                .setCompressionSupported(Config.getInstance().getConfigJsonObject().getBoolean(Constants.HTTP_SERVER_ENABLE_COMPRESSION_SUPPORT))
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))

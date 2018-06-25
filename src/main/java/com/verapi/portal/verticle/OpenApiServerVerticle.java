@@ -42,7 +42,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
     protected Single<HttpServer> createHttpServer() {
         logger.trace("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
-                .setCompressionSupported(true)
+                .setCompressionSupported(Config.getInstance().getConfigJsonObject().getBoolean(Constants.HTTP_OPENAPI_SERVER_ENABLE_COMPRESSION_SUPPORT))
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))

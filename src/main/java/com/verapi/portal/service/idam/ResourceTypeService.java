@@ -175,6 +175,11 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
         return deleteAll(SQL_DELETE_ALL);
     }
 
+    public Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery) {
+        ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
+        return deleteAll(sqlDeleteAllQuery.getFilterQuery());
+    }
+
     public Single<ResultSet> findById(long id) {
         return findById(id, SQL_FIND_BY_ID);
     }

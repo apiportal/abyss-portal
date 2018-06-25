@@ -63,6 +63,7 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.25" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-codec-http:4.1.22.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-codec:4.1.22.Final" level="project" />
+    <orderEntry type="library" name="Maven: io.netty:netty-tcnative-boringssl-static:2.0.10.Final" level="project" />
     <orderEntry type="library" name="Maven: io.vertx:vertx-service-discovery:3.5.2" level="project" />
     <orderEntry type="library" name="Maven: io.vertx:vertx-web-api-contract:3.5.2" level="project" />
     <orderEntry type="library" name="Maven: io.swagger.parser.v3:swagger-parser:2.0.0-rc3" level="project" />

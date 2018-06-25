@@ -150,10 +150,7 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
-        updateRecords.forEach(updateRow -> {
-            jsonArray.add(new JsonObject(updateRow.getValue().toString())
-                    .put("uuid", updateRow.getKey()));
-        });
+        updateRecords.forEach(updateRow -> jsonArray.add(new JsonObject(updateRow.getValue().toString()).put("uuid", updateRow.getKey())));
         Observable<Object> updateParamsObservable = Observable.fromIterable(jsonArray);
         return updateParamsObservable
                 .flatMap(o -> {
@@ -234,6 +231,11 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public Single<CompositeResult> deleteAll() {
         return deleteAll(SQL_DELETE_ALL);
+    }
+
+    public Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery) {
+        ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
+        return deleteAll(sqlDeleteAllQuery.getFilterQuery());
     }
 
     public Single<ResultSet> findById(long id) {
@@ -339,13 +341,13 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , isdefaultversion      = ?\n" +
             "  , islatestversion      = ?\n";
 
-    private static final String SQL_AND = "and\n";
+    public static final String SQL_AND = "and\n";
 
     private static final String SQL_WHERE = "where\n";
 
     private static final String SQL_CONDITION_ID_IS = "id = ?\n";
 
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
+    public static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     public static final String SQL_CONDITION_NAME_IS = "openapidocument -> 'info' ->> 'title' = ?\n";
 
@@ -353,9 +355,9 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
 
-    private static final String SQL_ISPROXYAPI_IS = "isproxyapi = true\n";
+    public static final String SQL_CONDITION_IS_PROXYAPI = "isproxyapi = true\n";
 
-    private static final String SQL_CONDITION_IS_BUSINESSAPI = "isproxyapi = false\n";
+    public static final String SQL_CONDITION_IS_BUSINESSAPI = "isproxyapi = false\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 
@@ -363,13 +365,13 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    public static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
 
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_ISPROXYAPI_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
 
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE + SQL_WHERE + SQL_CONDITION_UUID_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
@@ -382,6 +384,8 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     //public static ApiFilterQuery FILTER_BY_BUSINESS_API = new ApiFilterQuery().setFilterQuery(SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI);
     public static final String FILTER_BY_BUSINESS_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI;
+
+    public static String FILTER_BY_PROXY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
