@@ -427,7 +427,7 @@ public class ApiApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void getTagsOfApisOfSubject(RoutingContext routingContext) {
+    public void getTagsOfBusinessApisOfSubject(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -445,16 +445,17 @@ public class ApiApiController extends AbstractApiController {
         }
     }
 
-    public void getAggregatedTagsOfApisOfSubject(RoutingContext routingContext) {
+    @AbyssApiOperationHandler
+    public void getAggregatedTagsOfBusinessApisOfSubject(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
-                    ApiService.class,
+                    ApiTagService.class,
                     jsonbColumnsList,
                     new ApiFilterQuery()
-                            .setFilterQuery(ApiTagService.SQL_AGGREGATE_COUNT)
+                            .setFilterQuery(ApiTagService.SQL_BUSINESS_API_AGGREGATE_COUNT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());

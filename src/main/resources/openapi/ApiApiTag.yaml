@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : ApiApiTag crud operations'
+  - name: ApiTag
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : list tags of specified API'
 paths:
   /api-api-tags:
     get:
@@ -241,6 +246,53 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /api-api-tags/api/{uuid}:
+    get:
+      tags:
+        - ApiTag
+      summary: 'Get tag list of an API by uuid '
+      description: 'Returns tag list of an API'
+      operationId: getApiTags
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of API that needs to be listed for its tags'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search API tags which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search API tags which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiTag'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -318,6 +370,16 @@ components:
         apitagid:
           type: string
           description: 'FK UUID of API tags for many to many relationship of API tags'
+    ApiTag:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'uuid of api tag'
+        name:
+          type: string
+          description: 'name of api tag'
   requestBodies:
     ApiApiTag:
       content:
@@ -358,6 +420,14 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/ApiApiTag'
+    '200-ListOfApiTag':
+      description: 'A ApiTag array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiTag'
     '201':
       description: 'New ApiApiTag resource has been created'
       content:

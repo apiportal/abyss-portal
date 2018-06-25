@@ -62,11 +62,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Subject''s API Proxies crud operations'
-  - name: Subject-API-Tags
+  - name: Subject-Business API-Tags
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s API tags'
+    description: 'Abyss plaftorm APIs : Subject''s Business API tags'
 paths:
   /apis:
     get:
@@ -1136,17 +1136,17 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /api/subject/{subject_uuid}/tags/:
+  /apis/businesses/subject/{uuid}/tags/:
     get:
       tags:
-        - Subject-API-Tags
-      summary: Get Tags of APIs by Subject uuid
-      description: 'Provide an uuid of Subject to get his APIs'
-      operationId: getTagsOfApisOfSubject
+        - Subject-Business API-Tags
+      summary: Get Tags of Business APIs by Subject uuid
+      description: 'Provide an uuid of Subject to get his Business APIs tags'
+      operationId: getTagsOfBusinessApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of Subject that need to get his API tags'
+          description: 'uuid of Subject that need to get his Business APIs tags'
           required: true
           schema:
             type: string
@@ -1155,13 +1155,13 @@ paths:
           required: false
           schema:
             type: string
-          description: 'search his APIs which names exact match'
+          description: 'search his Business API tags which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: 'search his APIs which names begin with'
+          description: 'search his Business API tag which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -1183,17 +1183,17 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /api/subject/{subject_uuid}/tags/aggregate/{aggregation}:
+  /apis/businesses/subject/{uuid}/tags/aggregate/{aggregation}:
     get:
       tags:
-        - Subject-API-Tags
-      summary: 'Get Aggregation of Tags of APIs by Subject uuid'
-      description: 'Provide an uuid of Subject to get his API'
-      operationId: getAggregatedTagsOfApisOfSubject
+        - Subject-Business API-Tags
+      summary: 'Get Aggregation of Tags of Business APIs by Subject uuid'
+      description: 'Provide an uuid of Subject to get his Business APIs tags'
+      operationId: getAggregatedTagsOfBusinessApisOfSubject
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of Subject that need to get his API tags'
+          description: 'uuid of Subject that need to get his Business API tags'
           required: true
           schema:
             type: string
@@ -1212,13 +1212,13 @@ paths:
           required: false
           schema:
             type: string
-          description: 'search his APIs which names exact match'
+          description: 'search his Business API tags which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: 'search his APIs which names begin with'
+          description: 'search his Business API tags which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -1595,7 +1595,7 @@ components:
             type: array
             items:
               $ref: 'ApiCategory.yaml#/components/schemas/ApiCategory'
-    '200-ListOfApiGroupSummary':
+    '200-ListOfApiCategorySummary':
       description: 'List of ApiCategorySummary'
       content:
         application/json:

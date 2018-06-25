@@ -271,4 +271,10 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
+    public static final String SQL_LIST_API_TAGS = "select\n" +
+            "  api_tag.uuid,\n" +
+            "  api_tag.name\n" +
+            "from api__api_tag, api_tag\n" +
+            "where apiid = CAST(? AS uuid) and apitagid = api_tag.uuid\n";
+
 }

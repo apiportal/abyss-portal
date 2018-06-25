@@ -297,9 +297,17 @@ public class ApiTagService extends AbstractService<UpdateResult> {
 
     private static final String SQL_JOIN_API = "from api_tag t, api a, api__api_tag axt\n" +
             "where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = CAST(? AS uuid)\n" +
-            "and a.isproxyapi = false and openapidocument ?? 'servers'\n";
+            "and openapidocument ?? 'servers'\n";
 
-    public static final String SQL_AGGREGATE_COUNT = SQL_SELECT_KEYWORD + SQL_AGGREGATE_COLUMNS + SQL_COUNT + SQL_JOIN_API + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS;
+    public static final String SQL_CONDITION_IS_BUSINESSAPI = "a.isproxyapi = false\n";
+
+    public static final String SQL_CONDITION_IS_PROXYAPI = "a.isproxyapi = true\n";
+
+    public static final String SQL_BUSINESS_API_AGGREGATE_COUNT = SQL_SELECT_KEYWORD + SQL_AGGREGATE_COLUMNS + SQL_COUNT +
+            SQL_JOIN_API + SQL_AND + SQL_CONDITION_IS_BUSINESSAPI + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS;
+
+    public static final String SQL_PROXY_API_AGGREGATE_COUNT = SQL_SELECT_KEYWORD + SQL_AGGREGATE_COLUMNS + SQL_COUNT +
+            SQL_JOIN_API + SQL_AND + SQL_CONDITION_IS_PROXYAPI + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
