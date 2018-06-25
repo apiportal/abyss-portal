@@ -23,12 +23,16 @@ import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class AbstractService<T> implements IService<T> {
@@ -305,60 +309,40 @@ public abstract class AbstractService<T> implements IService<T> {
                 });
     }
 
-/*
-    public static class ApiFilterQuery {
-        private String filterQuery = "";
-        private JsonArray filterQueryParams;
 
-        public ApiFilterQuery() {
+    public enum Aggregation {
+        COUNT("count"),
+        SUM("sum"),
+        AVG("avg");
+
+        private String aggregation;
+
+        Aggregation(String aggregation) {
+            this.aggregation = aggregation;
         }
 
-        public ApiFilterQuery(String filterQuery) {
-            this.filterQuery = filterQuery;
+        public String getAggregation() {
+            return aggregation;
         }
 
-        public String getFilterQuery() {
-            return filterQuery;
-        }
+        public String getAggregationSQL(String aggregationColumn) {
+            String aggregationCol = "*";
 
-        public ApiFilterQuery setFilterQuery(String filterQuery) {
-            this.filterQuery = filterQuery;
-            return this;
-        }
+            if (aggregationColumn != null && !aggregationColumn.isEmpty()) {
+                aggregationCol = aggregationColumn;
+            }
 
-        public ApiFilterQuery addFilterQuery(String filterQuery) {
-            if (!this.filterQuery.toLowerCase().endsWith("\n"))
-                this.filterQuery = this.filterQuery + "\n";
-            if (!this.filterQuery.toLowerCase().contains("where"))
-                filterQuery = "where\n" + filterQuery;
-            else
-                filterQuery = "and\n" + filterQuery;
-            if (!filterQuery.toLowerCase().endsWith("\n"))
-                filterQuery = filterQuery + "\n";
-            this.filterQuery = this.filterQuery + filterQuery;
-            return this;
+            switch (this) {
+                case COUNT:
+                    return ",count(" + aggregationCol + ") as count\n";
+                case SUM:
+                    return ",sum(" + aggregationCol + ") as sum\n";
+                case AVG:
+                    return ",avg(" + aggregationCol + ") as avg\n";
+                default:
+                    return ",count(" + aggregationCol + ") as count\n";
+                //throw new Exception("Unknown Aggregation " + this);
+            }
         }
-
-        public JsonArray getFilterQueryParams() {
-            return filterQueryParams;
-        }
-
-        public ApiFilterQuery setFilterQueryParams(JsonArray filterQueryParams) {
-            this.filterQueryParams = filterQueryParams;
-            return this;
-        }
-
-        public ApiFilterQuery addFilterQueryParams(JsonArray filterQueryParams) {
-            if (this.filterQueryParams == null)
-                this.filterQueryParams = new JsonArray();
-            filterQueryParams.forEach(o -> this.filterQueryParams.add(o));
-            return this;
-        }
-
     }
-*/
-
-
-    //public static final ApiFilterQuery FILTER_BY_SUBJECT = new ApiFilterQuery();
-
 }

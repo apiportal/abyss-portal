@@ -279,6 +279,29 @@ public class ApiTagService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
+    //Aggregation
+    private static final String SQL_AGGREGATE_COLUMNS =
+            "  t.uuid,\n" +
+                    "  t.name,\n" +
+                    "  t.description,\n" +
+                    "  t.externaldescription,\n" +
+                    "  t.externalurl\n";
+
+    private static final String SQL_SELECT_KEYWORD = "select\n";
+
+    private static final String SQL_COUNT = ",count(*) as count\n";
+    //private static final String SQL_SUM = ",sum(*) as sum\n";
+    //private static final String SQL_AVG = ",avg(*) as avg\n";
+
+    private static final String SQL_GROUP_BY = "group by\n";
+
+    private static final String SQL_JOIN_API = "from api_tag t, api a, api__api_tag axt\n" +
+            "where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = CAST(? AS uuid)\n" +
+            "and a.isproxyapi = false and openapidocument ?? 'servers'\n";
+
+    public static final String SQL_AGGREGATE_COUNT = SQL_SELECT_KEYWORD + SQL_AGGREGATE_COLUMNS + SQL_COUNT + SQL_JOIN_API + SQL_GROUP_BY + SQL_AGGREGATE_COLUMNS;
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
+
 
 }

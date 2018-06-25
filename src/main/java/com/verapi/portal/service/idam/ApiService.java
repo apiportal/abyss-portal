@@ -386,9 +386,9 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    public static String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
 
-    public static String FILTER_BY_BUSINESS_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI;
+    public static final String FILTER_BY_BUSINESS_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI;
 
     public static String FILTER_BY_PROXY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
 
