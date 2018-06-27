@@ -5,7 +5,7 @@
  *  *  Unauthorized copying of this file, via any medium is strictly prohibited
  *  *  Proprietary and confidential
  *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 5 2018
+ *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 6 2018
  *
  */
 
@@ -31,14 +31,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class ResourceService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(ResourceService.class);
+public class LicenseService extends AbstractService<UpdateResult> {
+    private static final Logger logger = LoggerFactory.getLogger(LicenseService.class);
 
-    public ResourceService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
+    public LicenseService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
 
-    public ResourceService(Vertx vertx) {
+    public LicenseService(Vertx vertx) {
         super(vertx);
     }
 
@@ -52,10 +52,10 @@ public class ResourceService extends AbstractService<UpdateResult> {
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("resourcetypeid"))
-                            .add(jsonObj.getString("resourcename"))
-                            .add(jsonObj.getString("description"))
-                            .add(jsonObj.getString("resourceid"));
+                            .add(jsonObj.getString("name"))
+                            .add(jsonObj.getString("version"))
+                            .add(jsonObj.getString("subjectid"))
+                            .add(jsonObj.getJsonObject("licensedocument").encode());
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -105,10 +105,10 @@ public class ResourceService extends AbstractService<UpdateResult> {
         JsonArray updateParams = new JsonArray()
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.getString("resourcetypeid"))
-                .add(updateRecord.getString("resourcename"))
-                .add(updateRecord.getString("description"))
-                .add(updateRecord.getString("resourceid"))
+                .add(updateRecord.getString("name"))
+                .add(updateRecord.getString("version"))
+                .add(updateRecord.getString("subjectid"))
+                .add(updateRecord.getJsonObject("licensedocument").encode())
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -126,11 +126,10 @@ public class ResourceService extends AbstractService<UpdateResult> {
                     JsonArray updateParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("resourcetypeid"))
-                            .add(jsonObj.getString("resourcename"))
-                            .add(jsonObj.getString("description"))
-                            .add(jsonObj.getString("resourceid"))
-                            .add(jsonObj.getString("uuid"));
+                            .add(jsonObj.getString("name"))
+                            .add(jsonObj.getString("version"))
+                            .add(jsonObj.getString("subjectid"))
+                            .add(jsonObj.getJsonObject("licensedocument").encode());
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
                 .flatMap(updateResult -> {
@@ -217,10 +216,10 @@ public class ResourceService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into resource (organizationid, crudsubjectid, resourcetypeid, resourcename, description, resourceid)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,? ,? ,CAST(? AS uuid))";
+    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON)";
 
-    private static final String SQL_DELETE = "update resource\n" +
+    private static final String SQL_DELETE = "update license\n" +
             "set\n" +
             "  deleted     = now()\n" +
             "  , isdeleted = true\n";
@@ -233,21 +232,21 @@ public class ResourceService extends AbstractService<UpdateResult> {
             "  deleted,\n" +
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
-            "  resourcetypeid,\n" +
-            "  resourcename,\n" +
-            "  description,\n" +
-            "  resourceid\n" +
-            "from resource\n";
+            "  name,\n" +
+            "  version,\n" +
+            "  subjectid,\n" +
+            "  licensedocument::JSON\n" +
+            "from license\n";
 
-    private static final String SQL_UPDATE = "UPDATE resource\n" +
+    private static final String SQL_UPDATE = "UPDATE license\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , resourcetypeid      = CAST(? AS uuid)\n" +
-            "  , resourcename      = ?\n" +
-            "  , description      = ?\n" +
-            "  , resourceid       = CAST(? AS uuid)\n";
+            "  , name      = ?\n" +
+            "  , version      = ?\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
+            "  , licensedocument      = ?::JSON\n";
 
     private static final String SQL_AND = "and\n";
 
@@ -257,11 +256,11 @@ public class ResourceService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
-    private static final String SQL_CONDITION_NAME_IS = "lower(resourcename) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(resourcename) like lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
 
-    private static final String SQL_ORDERBY_NAME = "order by resourcename\n";
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 

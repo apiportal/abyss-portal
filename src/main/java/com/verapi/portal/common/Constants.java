@@ -191,5 +191,6 @@ public class Constants {
     public static final String JSONB_COLUMN_API_EXTENDEDDOCUMENT = "extendeddocument";
     public static final String JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES = "directoryattributes";
     public static final String JSONB_COLUMN_POLICY_POLICYCONFIGURATION = "policyconfiguration";
+    public static final String JSONB_COLUMN_LICENSE_LICENSEDOCUMENT = "licensedocument";
 
 }
