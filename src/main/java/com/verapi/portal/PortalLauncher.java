@@ -13,6 +13,7 @@ package com.verapi.portal;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.shell.PortalMetricsListCommand;
@@ -96,6 +97,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         //MetricsService service = MetricsService.create(vertx);
         logger.trace(String.format("vertx is metric enabled : %s", vertx.isMetricsEnabled()));
 
+        //load abyss-portal-config.properties
         ConfigStoreOptions file = new ConfigStoreOptions()
                 .setType("file")
                 .setFormat("properties")
@@ -135,6 +137,25 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 throw event;
             } catch (Throwable throwable) {
                 logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + Arrays.toString(throwable.getStackTrace()));
+            }
+        });
+
+        //load abyss-version.properties
+        ConfigStoreOptions abyssVersionConfigStoreOptions = new ConfigStoreOptions()
+                .setType("file")
+                .setFormat("properties")
+                .setConfig(new JsonObject().put("path", "abyss-version.properties"));
+        ConfigRetrieverOptions abyssVersionConfigRetrieverOptions = new ConfigRetrieverOptions()
+                .addStore(abyssVersionConfigStoreOptions);
+        ConfigRetriever abyssVersionConfigRetriever = ConfigRetriever.create(vertx, abyssVersionConfigRetrieverOptions);
+        abyssVersionConfigRetriever.getConfig(ar -> {
+            if (ar.failed()) {
+                future.completeExceptionally(ar.cause());
+                logger.error("afterStartingVertx abyssConfigRetriever getConfig failed " + ar.cause());
+            } else {
+                BuildProperties buildProperties = BuildProperties.getInstance().setConfig(ar.result());
+                logger.info("afterStartingVertx abyssConfigRetriever getConfig OK..");
+                logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
 

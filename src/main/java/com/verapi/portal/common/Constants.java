@@ -14,6 +14,7 @@ package com.verapi.portal.common;
  */
 public class Constants {
 
+    public static final String ABYSS_BUILD_TIMESTAMP = "abyss.build.timestamp";
     private static final String ABYSS = "abyss";
     public static final String ABYSS_GW = "abyss-gw";
     public static final String ABYSS_ROOT = "/" + ABYSS;

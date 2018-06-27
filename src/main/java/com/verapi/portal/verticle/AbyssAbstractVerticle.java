@@ -12,6 +12,7 @@
 package com.verapi.portal.verticle;
 
 import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.controller.FailureController;
@@ -250,7 +251,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                         "var hostPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_OPENAPI_SERVER_PORT) + "';" +
                         "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_SERVER_PORT) + "';" +
                         "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";" +
-                        "var version='" + "1.0.0" + "';";
+                        "var version='" + BuildProperties.getInstance().getConfigJsonObject().getString(Constants.ABYSS_BUILD_TIMESTAMP) + "';";
         context.response().putHeader("Content-Type", "application/javascript");
         context.response().setStatusCode(200);
         context.response().end(filecontent);
