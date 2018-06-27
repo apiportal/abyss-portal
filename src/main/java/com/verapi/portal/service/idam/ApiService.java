@@ -390,7 +390,12 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public static final String FILTER_BY_BUSINESS_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI;
 
-    public static String FILTER_BY_PROXY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
+    public static final String FILTER_BY_PROXY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
+
+    public static final String FILTER_BY_SUBJECT_TAG = "select api.*\n" +
+            "from api, api__api_tag\n" +
+            "where api.uuid = apiid and subjectid = CAST(? AS uuid) and\n" +
+            "      apitagid = CAST(? AS uuid)\n";
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

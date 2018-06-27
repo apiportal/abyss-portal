@@ -67,6 +67,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Subject''s Business API tags'
+  - name: Subject-Business APIs-By-Tag
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s Business APIs by tag'
 paths:
   /apis:
     get:
@@ -1224,6 +1229,59 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTagSummary'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /apis/businesses/tag/{tag}/subject/{uuid}/:
+    get:
+      tags:
+        - Subject-Business APIs-By-Tag
+      summary: Get Business APIs by both Subject and tag
+      description: 'Provide an uuid of Subject and uuid of Tag to get his Business APIs'
+      operationId: getBusinessApisOfSubjectByTag
+      parameters:
+        - name: tag
+          in: path
+          description: 'uuid of Tag'
+          required: true
+          schema:
+            type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his Business APIs which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his Business APIs which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
