@@ -72,6 +72,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Subject''s Business APIs by tag'
+  - name: Subject API Proxies By Tag-Category-Group
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s API Proxies by tag'
 paths:
   /apis:
     get:
@@ -1404,6 +1409,166 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /apis/proxies/tag/{tag}/subject/{uuid}/:
+    get:
+      tags:
+        - Subject API Proxies By Tag-Category-Group
+      summary: Get API Proxies by both Subject and Tag
+      description: 'Provide an uuid of Subject and uuid of Tag to get his API Proxies'
+      operationId: getApiProxiesOfSubjectByTag
+      parameters:
+        - name: tag
+          in: path
+          description: 'uuid of Tag'
+          required: true
+          schema:
+            type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his API Proxies which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his API Proxies which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /apis/proxies/category/{category}/subject/{uuid}/:
+    get:
+      tags:
+        - Subject API Proxies By Tag-Category-Group
+      summary: Get API Proxies by both Subject and Category
+      description: 'Provide an uuid of Subject and uuid of Category to get his API Proxies'
+      operationId: getApiProxiesOfSubjectByCategory
+      parameters:
+        - name: category
+          in: path
+          description: 'uuid of Category'
+          required: true
+          schema:
+            type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his API Proxies which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his API Proxies which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /apis/proxies/group/{group}/subject/{uuid}/:
+    get:
+      tags:
+        - Subject API Proxies By Tag-Category-Group
+      summary: Get API Proxies by both Subject and API Group
+      description: 'Provide an uuid of Subject and uuid of API Group to get his API Proxies'
+      operationId: getApiProxiesOfSubjectByGroup
+      parameters:
+        - name: group
+          in: path
+          description: 'uuid of API Group'
+          required: true
+          schema:
+            type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his API Proxies which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his API Proxies which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
