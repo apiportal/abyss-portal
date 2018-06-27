@@ -474,11 +474,33 @@ public class ApiApiController extends AbstractApiController {
                     ApiService.class,
                     jsonbColumnsList,
                     new ApiFilterQuery()
-                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT_TAG)
+                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_TAG)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("tag"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void getBusinessApisOfSubjectByCategory(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_CATEGORY)
+                            .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
+                            .setFilterQueryParams(new JsonArray()
+                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam("category"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

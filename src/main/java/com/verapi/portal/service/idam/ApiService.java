@@ -290,13 +290,13 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , isdeleted = true\n";
 
     private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
+            "  api.uuid,\n" +
+            "  api.organizationid,\n" +
+            "  api.created,\n" +
+            "  api.updated,\n" +
+            "  api.deleted,\n" +
+            "  api.isdeleted,\n" +
+            "  api.crudsubjectid,\n" +
             "  isproxyapi,\n" +
             "  subjectid,\n" +
             "  apistateid,\n" +
@@ -368,6 +368,10 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
+    private static final String SQL_CONDITION_TAG_IS = "apitagid = CAST(? AS uuid)\n";
+
+    private static final String SQL_CONDITION_CATEGORY_IS = "apicategoryid = CAST(? AS uuid)\n";
+
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     public static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -392,10 +396,14 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public static final String FILTER_BY_PROXY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
 
-    public static final String FILTER_BY_SUBJECT_TAG = "select api.*\n" +
-            "from api, api__api_tag\n" +
-            "where api.uuid = apiid and subjectid = CAST(? AS uuid) and\n" +
-            "      apitagid = CAST(? AS uuid)\n";
+    public static final String FILTER_BY_SUBJECT_AND_TAG = SQL_SELECT + ", api__api_tag\n" +
+            SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
+            SQL_AND + SQL_CONDITION_TAG_IS;
+
+    public static final String FILTER_BY_SUBJECT_AND_CATEGORY = SQL_SELECT + ", api__api_category\n" +
+            SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
+            SQL_AND + SQL_CONDITION_CATEGORY_IS;
+
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
