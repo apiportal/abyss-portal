@@ -372,6 +372,8 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_CATEGORY_IS = "apicategoryid = CAST(? AS uuid)\n";
 
+    private static final String SQL_CONDITION_GROUP_IS = "apigroupid = CAST(? AS uuid)\n";
+
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     public static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -404,6 +406,9 @@ public class ApiService extends AbstractService<UpdateResult> {
             SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
             SQL_AND + SQL_CONDITION_CATEGORY_IS;
 
+    public static final String FILTER_BY_SUBJECT_AND_GROUP = SQL_SELECT + ", api__api_group\n" +
+            SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
+            SQL_AND + SQL_CONDITION_GROUP_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

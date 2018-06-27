@@ -508,4 +508,26 @@ public class ApiApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getBusinessApisOfSubjectByGroup(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_GROUP)
+                            .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
+                            .setFilterQueryParams(new JsonArray()
+                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam("group"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 }
