@@ -31,14 +31,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class LicenseService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(LicenseService.class);
+public class PolicyTypeService extends AbstractService<UpdateResult> {
+    private static final Logger logger = LoggerFactory.getLogger(PolicyTypeService.class);
 
-    public LicenseService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
+    public PolicyTypeService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
 
-    public LicenseService(Vertx vertx) {
+    public PolicyTypeService(Vertx vertx) {
         super(vertx);
     }
 
@@ -53,9 +53,10 @@ public class LicenseService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getJsonObject("licensedocument").encode());
+                            .add(jsonObj.getString("description"))
+                            .add(jsonObj.getString("type"))
+                            .add(jsonObj.getString("subtype"))
+                            .add(jsonObj.getJsonObject("template").encode());
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -106,9 +107,10 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("name"))
-                .add(updateRecord.getString("version"))
-                .add(updateRecord.getString("subjectid"))
-                .add(updateRecord.getJsonObject("licensedocument").encode())
+                .add(updateRecord.getString("description"))
+                .add(updateRecord.getString("type"))
+                .add(updateRecord.getString("subtype"))
+                .add(updateRecord.getJsonObject("template").encode())
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -127,9 +129,10 @@ public class LicenseService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getJsonObject("licensedocument").encode())
+                            .add(jsonObj.getString("description"))
+                            .add(jsonObj.getString("type"))
+                            .add(jsonObj.getString("subtype"))
+                            .add(jsonObj.getJsonObject("template").encode())
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -217,10 +220,10 @@ public class LicenseService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON)";
+    private static final String SQL_INSERT = "insert into policy_type (organizationid, crudsubjectid, name, description, type, subtype, template)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ? :: JSON)";
 
-    private static final String SQL_DELETE = "update license\n" +
+    private static final String SQL_DELETE = "update policy_type\n" +
             "set\n" +
             "  deleted     = now()\n" +
             "  , isdeleted = true\n";
@@ -234,20 +237,22 @@ public class LicenseService extends AbstractService<UpdateResult> {
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
             "  name,\n" +
-            "  version,\n" +
-            "  subjectid,\n" +
-            "  licensedocument::JSON\n" +
-            "from license\n";
+            "  description,\n" +
+            "  type,\n" +
+            "  subtype,\n" +
+            "  template::JSON\n" +
+            "from policy_type\n";
 
-    private static final String SQL_UPDATE = "UPDATE license\n" +
+    private static final String SQL_UPDATE = "UPDATE policy_type\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
-            "  , version      = ?\n" +
-            "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , licensedocument      = ?::JSON\n";
+            "  , description      = ?\n" +
+            "  , type      = ?\n" +
+            "  , subtype      = ?\n" +
+            "  , template      = ?::JSON\n";
 
     private static final String SQL_AND = "and\n";
 

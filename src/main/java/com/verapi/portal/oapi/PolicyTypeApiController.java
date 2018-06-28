@@ -13,7 +13,7 @@ package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
-import com.verapi.portal.service.idam.PolicyService;
+import com.verapi.portal.service.idam.PolicyTypeService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -29,12 +29,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@AbyssApiController(apiSpec = "/openapi/Policy.yaml")
-public class PolicyApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(PolicyApiController.class);
+@AbyssApiController(apiSpec = "/openapi/PolicyType.yaml")
+public class PolicyTypeApiController extends AbstractApiController {
+    private static final Logger logger = LoggerFactory.getLogger(PolicyTypeApiController.class);
 
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_POLICY_POLICYINSTANCE);
+        add(Constants.JSONB_COLUMN_POLICY_TYPE_TEMPLATE);
     }};
 
     /**
@@ -44,14 +44,14 @@ public class PolicyApiController extends AbstractApiController {
      * @param router       Vertx router
      * @param authProvider JDBC Auth provider
      */
-    public PolicyApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
+    public PolicyTypeApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
         super(vertx, router, authProvider);
     }
 
     @AbyssApiOperationHandler
-    public void getPolicies(RoutingContext routingContext) {
+    public void getPolicyTypes(RoutingContext routingContext) {
         try {
-            getEntities(routingContext, PolicyService.class, jsonbColumnsList);
+            getEntities(routingContext, PolicyTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -60,7 +60,7 @@ public class PolicyApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void addPolicies(RoutingContext routingContext) {
+    public void addPolicyTypes(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -68,7 +68,7 @@ public class PolicyApiController extends AbstractApiController {
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
         try {
-            addEntities(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
+            addEntities(routingContext, PolicyTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -77,7 +77,7 @@ public class PolicyApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void updatePolicies(RoutingContext routingContext) {
+    public void updatePolicyTypes(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -86,7 +86,7 @@ public class PolicyApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
+            updateEntities(routingContext, PolicyTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -95,9 +95,9 @@ public class PolicyApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void deletePolicies(RoutingContext routingContext) {
+    public void deletePolicyTypes(RoutingContext routingContext) {
         try {
-            deleteEntities(routingContext, PolicyService.class);
+            deleteEntities(routingContext, PolicyTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -106,12 +106,12 @@ public class PolicyApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void getPolicy(RoutingContext routingContext) {
+    public void getPolicyType(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntity(routingContext, PolicyService.class, jsonbColumnsList);
+            getEntity(routingContext, PolicyTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -120,7 +120,7 @@ public class PolicyApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void updatePolicy(RoutingContext routingContext) {
+    public void updatePolicyType(RoutingContext routingContext) {
 
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
@@ -129,7 +129,7 @@ public class PolicyApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
+            updateEntity(routingContext, PolicyTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -138,10 +138,10 @@ public class PolicyApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void deletePolicy(RoutingContext routingContext) {
+    public void deletePolicyType(RoutingContext routingContext) {
 
         try {
-            deleteEntity(routingContext, PolicyService.class);
+            deleteEntity(routingContext, PolicyTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

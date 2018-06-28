@@ -341,10 +341,6 @@ rejected
 resubmitted
 suspended
 cancelled'
-        targetresources:
-          type: integer
-          format: int32
-          description: 'Contains information about one or more resources associated with the current resource. Used only in response messages.'
         status:
           type: string
           description: 'The status of the contract.
@@ -353,12 +349,10 @@ inforce - Indicates that the contract is either Active or Suspended.
 archived - Indicates that the active life of the contract is over. The workflow status of Cancelled, adn any other action that results in the cancellation of the contract (such as deletion of the app or API) will have this status value'
         isrestrictedtosubsetofapi:
           type: boolean
-          description: 'Is app's access to the API is restricted to a subset of the API'
-        license:
-          type: object
-          description: 'License of contract. A license is a tailored API access package designed by the Business Admin/API Admin and offered to the app developer. A license includes one or more license terms, each of which can include multiple scopes, giving access to specifically designated operations, and multiple quality of service (QoS) policies, and also one or more legal agreements applicable to the license.
-Terms of Service - QoS, SLA
-Legal'
+          description: 'Is app''s access to the API is restricted to a subset of the API'
+        licenseid:
+          type: string
+          description: 'FK ID of license'
   requestBodies:
     Contract:
       content:
