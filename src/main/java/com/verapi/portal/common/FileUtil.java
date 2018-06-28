@@ -21,18 +21,24 @@ import java.net.URL;
 public class FileUtil {
     public JsonArray getYamlFileList() {
         JsonArray yamlFileList = new JsonArray();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        URL url = loader.getResource("openapi");
-        String path = url.getPath();
-        File[] listOfFiles = new File(path).listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.getName().toLowerCase().endsWith(".yaml")
-                        || pathname.isFile();
+        //ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL url = classLoader.getResource("openapi");
+        String path = null;
+        if (url != null) {
+            path = url.getPath();
+            File[] listOfFiles = new File(path).listFiles(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    return pathname.getName().toLowerCase().endsWith(".yaml")
+                            || pathname.isFile();
+                }
+            });
+            if (listOfFiles != null) {
+                for (File f : listOfFiles)
+                    yamlFileList.add(f.getName());
             }
-        });
-        for (File f : listOfFiles)
-            yamlFileList.add(f.getName());
+        }
         return yamlFileList;
     }
 }
