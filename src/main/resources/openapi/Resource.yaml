@@ -324,7 +324,7 @@ components:
         subjectpermissionid:
           type: string
           description: 'FK ID of Subject Permission'
-        resourceid:
+        resourcerefid:
           type: string
           description: 'FK ID of Resource for Subscription'
   requestBodies:
