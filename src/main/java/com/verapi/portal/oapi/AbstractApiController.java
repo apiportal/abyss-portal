@@ -60,12 +60,12 @@ import static com.verapi.portal.common.Util.nnvl;
 public abstract class AbstractApiController implements IApiController {
     private static final Logger logger = LoggerFactory.getLogger(AbstractApiController.class);
 
-    Vertx vertx;
+    protected Vertx vertx;
     private Router abyssRouter;
     protected JDBCAuth authProvider;
     private String apiSpec;
 
-    AbstractApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
+    protected AbstractApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
         this.vertx = vertx;
         this.abyssRouter = router;
         this.authProvider = authProvider;
@@ -552,6 +552,15 @@ public abstract class AbstractApiController implements IApiController {
                             else
                                 throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                         });
+    }
+
+    protected void subscribeAndResponse(RoutingContext routingContext, JsonArray response, int httpResponseStatus) {
+        routingContext.response()
+                .putHeader("content-type", "application/json; charset=utf-8")
+                .setStatusCode(httpResponseStatus)
+                .end(response.encode());
+        logger.trace("replied successfully");
+
     }
 
 

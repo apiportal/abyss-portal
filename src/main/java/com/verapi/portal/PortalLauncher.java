@@ -16,6 +16,8 @@ import ch.qos.logback.classic.LoggerContext;
 import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.common.FileUtil;
+import com.verapi.portal.common.PlatformAPIList;
 import com.verapi.shell.PortalMetricsListCommand;
 import com.verapi.shell.PortalVersionCommand;
 import io.vertx.config.ConfigRetriever;
@@ -33,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -153,11 +154,16 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 future.completeExceptionally(ar.cause());
                 logger.error("afterStartingVertx abyssConfigRetriever getConfig failed " + ar.cause());
             } else {
-                BuildProperties buildProperties = BuildProperties.getInstance().setConfig(ar.result());
-                logger.info("afterStartingVertx abyssConfigRetriever getConfig OK..");
-                logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+                BuildProperties buildProperties = BuildProperties.getInstance().setBuildProperties(ar.result());
+                logger.info("Build properties loaded");
+                logger.debug("Build properties loaded\n{}", BuildProperties.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
+
+        //load platform API list
+        PlatformAPIList platformAPIList = PlatformAPIList.getInstance().setPlatformAPIList(new FileUtil().getYamlFileList());
+        logger.info("Platform API list loaded");
+        logger.debug("PlatformAPIList loaded\n{}", PlatformAPIList.getInstance().getPlatformAPIList().encodePrettily());
 
         //set all loggers' level
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
