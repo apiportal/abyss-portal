@@ -160,11 +160,6 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             }
         });
 
-        //load platform API list
-        PlatformAPIList platformAPIList = PlatformAPIList.getInstance().setPlatformAPIList(new FileUtil().getYamlFileList());
-        logger.info("Platform API list loaded");
-        logger.debug("PlatformAPIList loaded\n{}", PlatformAPIList.getInstance().getPlatformAPIList().encodePrettily());
-
         //set all loggers' level
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
@@ -193,7 +188,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void afterStoppingVertx() {
-        logger.info("shutdown in progres...");
+        logger.info("shutdown");
     }
 
     @Override
@@ -205,10 +200,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                System.out.println("Inside Add Shutdown Hook");
+                System.out.println("Shutdown hook routine started now");
+                System.out.println("active thread count: " + Thread.activeCount());
             }
         });
-        System.out.println("Shut Down Hook Attached");
+        System.out.println("Shutdown hook attached");
     }
 
     private static String getProperty(String propertyName) {

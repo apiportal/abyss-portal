@@ -44,7 +44,7 @@ public class UtilApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getYamlFileList(RoutingContext routingContext) {
         try {
-            logger.info("getYamlFileList invoked");
+            logger.trace("getYamlFileList invoked");
             subscribeAndResponse(routingContext, PlatformAPIList.getInstance().getPlatformAPIList(), HttpResponseStatus.OK.code());
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());

@@ -13,11 +13,14 @@ package com.verapi.portal.common;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlatformAPIList {
+    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     public static PlatformAPIList instance = null;
-    private JsonArray platformApiList;
+    private JsonArray platformApiList = null;
 
     private PlatformAPIList() {
     }
@@ -30,7 +33,7 @@ public class PlatformAPIList {
 
     public JsonArray getPlatformAPIList() {
         if (platformApiList == null)
-            setPlatformAPIList(new JsonArray());
+            setPlatformAPIList(new FileUtil().getYamlFileList());
         return platformApiList;
     }
 
