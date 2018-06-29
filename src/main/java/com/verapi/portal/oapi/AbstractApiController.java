@@ -24,7 +24,6 @@ import com.verapi.portal.oapi.exception.NotFound404Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
 import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
-import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.SubjectService;
@@ -50,7 +49,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -60,12 +58,12 @@ import static com.verapi.portal.common.Util.nnvl;
 public abstract class AbstractApiController implements IApiController {
     private static final Logger logger = LoggerFactory.getLogger(AbstractApiController.class);
 
-    Vertx vertx;
+    protected Vertx vertx;
     private Router abyssRouter;
     protected JDBCAuth authProvider;
     private String apiSpec;
 
-    AbstractApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
+    protected AbstractApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
         this.vertx = vertx;
         this.abyssRouter = router;
         this.authProvider = authProvider;
@@ -552,6 +550,15 @@ public abstract class AbstractApiController implements IApiController {
                             else
                                 throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
                         });
+    }
+
+    protected void subscribeAndResponse(RoutingContext routingContext, JsonArray response, int httpResponseStatus) {
+        routingContext.response()
+                .putHeader("content-type", "application/json; charset=utf-8")
+                .setStatusCode(httpResponseStatus)
+                .end(response.encode());
+        logger.trace("replied successfully");
+
     }
 
 

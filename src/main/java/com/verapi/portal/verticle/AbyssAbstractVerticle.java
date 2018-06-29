@@ -48,6 +48,12 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     AuthHandler authHandler;
     JDBCAuth jdbcAuth;
     String verticleHost;
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+    }
+
     int serverPort;
     Router verticleRouter;
     private String verticleType = "";

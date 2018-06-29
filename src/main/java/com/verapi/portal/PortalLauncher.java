@@ -16,6 +16,8 @@ import ch.qos.logback.classic.LoggerContext;
 import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.common.FileUtil;
+import com.verapi.portal.common.PlatformAPIList;
 import com.verapi.shell.PortalMetricsListCommand;
 import com.verapi.shell.PortalVersionCommand;
 import io.vertx.config.ConfigRetriever;
@@ -33,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -153,12 +154,13 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 future.completeExceptionally(ar.cause());
                 logger.error("afterStartingVertx abyssVersionConfigRetriever getConfig failed " + ar.cause());
             } else {
-                BuildProperties buildProperties = BuildProperties.getInstance().setConfig(ar.result());
-                logger.info("afterStartingVertx abyssVersionConfigRetriever getConfig OK..");
-                logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+                BuildProperties buildProperties = BuildProperties.getInstance().setBuildProperties(ar.result());
+                logger.info("Build properties loaded");
+                logger.debug("Build properties loaded\n{}", BuildProperties.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
 
+        /* TODO: Complete Vault Configuration
         //load vault store
         JsonObject vaultConfig = new JsonObject()
                 .put("host", "127.0.0.1") // The host name
@@ -176,12 +178,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 future.completeExceptionally(ar.cause());
                 logger.error("afterStartingVertx abyssVaultConfigRetriever getConfig failed " + ar.cause());
             } else {
-                BuildProperties buildProperties = BuildProperties.getInstance().setConfig(ar.result());
+                BuildProperties buildProperties = BuildProperties.getInstance().setBuildProperties(ar.result());
                 logger.info("afterStartingVertx abyssVaultConfigRetriever getConfig OK..");
                 logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
-
+        */
 
         //set all loggers' level
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -211,7 +213,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void afterStoppingVertx() {
-        logger.info("shutdown in progres...");
+        logger.info("shutdown");
     }
 
     @Override
@@ -223,10 +225,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                System.out.println("Inside Add Shutdown Hook");
+                System.out.println("Shutdown hook routine started now");
+                System.out.println("active thread count: " + Thread.activeCount());
             }
         });
-        System.out.println("Shut Down Hook Attached");
+        System.out.println("Shutdown hook attached");
     }
 
     private static String getProperty(String propertyName) {

@@ -17,47 +17,42 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: Policies
+  - name: ApiLicenses
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Policies crud operations'
-  - name: Policy
+    description: 'Abyss plaftorm APIs : ApiLicenses crud operations'
+  - name: ApiLicense
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Policy crud operations'
-  - name: Subject Policies
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s Policies crud operations'
+    description: 'Abyss plaftorm APIs : ApiLicense crud operations'
 paths:
-  /policies:
+  /api-licenses:
     get:
       tags:
-        - Policies
-      summary: 'Get list of Policies'
-      description: 'Returns list of Policies'
-      operationId: getPolicies
+        - ApiLicenses
+      summary: 'Get list of ApiLicenses'
+      description: 'Returns list of ApiLicenses'
+      operationId: getApiLicenses
       parameters:
         - name: byname
           in: query
           required: false
           schema:
             type: string
-          description: 'search Policies which names exact match'
+          description: 'search ApiLicenses which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: 'search Policies which names begin with'
+          description: 'search ApiLicenses which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfPolicy'
+          $ref: '#/components/responses/200-ListOfApiLicense'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -76,10 +71,10 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Policies
-      summary: 'Add a bulk of Policies'
-      description: 'Provide a list of Policies to be inserted'
-      operationId: addPolicies
+        - ApiLicenses
+      summary: 'Add a bulk of ApiLicenses'
+      description: 'Provide a list of ApiLicenses to be inserted'
+      operationId: addApiLicenses
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -100,13 +95,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfPolicy'
+        $ref: '#/components/requestBodies/ListOfApiLicense'
     put:
       tags:
-        - Policies
-      summary: 'Update a bulk of Policies'
-      description: 'Provide a bulk list of  Policies to be updated'
-      operationId: updatePolicies
+        - ApiLicenses
+      summary: 'Update a bulk of ApiLicenses'
+      description: 'Provide a bulk list of  ApiLicenses to be updated'
+      operationId: updateApiLicenses
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -127,13 +122,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfPolicyObject'
+        $ref: '#/components/requestBodies/ListOfApiLicenseObject'
     delete:
       tags:
-        - Policies
-      summary: 'Delete all Policies'
-      description: 'Deletes all Policies'
-      operationId: deletePolicies
+        - ApiLicenses
+      summary: 'Delete all ApiLicenses'
+      description: 'Deletes all ApiLicenses'
+      operationId: deleteApiLicenses
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -149,17 +144,17 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /policies/{uuid}:
+  /api-licenses/{uuid}:
     get:
       tags:
-        - Policy
-      summary: 'Get an existing Policy by uuid'
-      description: 'Provide an uuid of Policy to be get'
-      operationId: getPolicy
+        - ApiLicense
+      summary: 'Get an existing ApiLicense by uuid'
+      description: 'Provide an uuid of ApiLicense to be get'
+      operationId: getApiLicense
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of Policy that need to be get'
+          description: 'uuid of ApiLicense that need to be get'
           required: true
           schema:
             type: string
@@ -184,14 +179,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - Policy
-      summary: 'Update an existing Policy'
-      description: 'Provide an altered Policy to be updated'
-      operationId: updatePolicy
+        - ApiLicense
+      summary: 'Update an existing ApiLicense'
+      description: 'Provide an altered ApiLicense to be updated'
+      operationId: updateApiLicense
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of Policy that need to be updated'
+          description: 'uuid of ApiLicense that need to be updated'
           required: true
           schema:
             type: string
@@ -215,17 +210,17 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/Policy'
+        $ref: '#/components/requestBodies/ApiLicense'
     delete:
       tags:
-        - Policy
-      summary: 'Delete Policy'
-      description: 'Provide an uuid parameter of Policy to be updated'
-      operationId: deletePolicy
+        - ApiLicense
+      summary: 'Delete ApiLicense'
+      description: 'Provide an uuid parameter of ApiLicense to be updated'
+      operationId: deleteApiLicense
       parameters:
         - name: uuid
           in: path
-          description: 'The uuid of Policy that needs to be deleted'
+          description: 'The uuid of ApiLicense that needs to be deleted'
           required: true
           schema:
             type: string
@@ -234,129 +229,6 @@ paths:
           $ref: '#/components/responses/204'
         '400':
           $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        default:
-          $ref: '#/components/responses/default'
-  /policies/subject/{uuid}:
-    parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Subject'
-        required: true
-        schema:
-          type: string
-    get:
-      tags:
-        - Subject Policies
-      summary: 'Get list of Subject''s Policies'
-      description: 'Returns list of Subject''s Policies'
-      operationId: getPoliciesOfSubject
-      parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Subject''s Policies which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Subject''s Policies which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-      responses:
-        '200':
-          $ref: '#/components/responses/200-ListOfPolicy'
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        default:
-          $ref: '#/components/responses/default'
-    post:
-      tags:
-        - Subject Policies
-      summary: 'Add a bulk of Subject''s Policies'
-      description: 'Provide a list of Subject''s Policies to be inserted'
-      operationId: addPoliciesOfSubject
-      responses:
-        '207':
-          $ref: '#/components/responses/207'
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        default:
-          $ref: '#/components/responses/default'
-      requestBody:
-        $ref: '#/components/requestBodies/ListOfPolicy'
-    put:
-      tags:
-        - Subject Policies
-      summary: 'Update a bulk of Subject''s Policies'
-      description: 'Provide a bulk list of Subject''s Policies to be updated'
-      operationId: updatePoliciesOfSubject
-      responses:
-        '207':
-          $ref: '#/components/responses/207'
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        default:
-          $ref: '#/components/responses/default'
-      requestBody:
-        $ref: '#/components/requestBodies/ListOfPolicyObject'
-    delete:
-      tags:
-        - Subject Policies
-      summary: 'Delete all Subject''s Policies'
-      description: 'Deletes all Subject''s Policies'
-      operationId: deletePoliciesOfSubject
-      responses:
-        '204':
-          $ref: '#/components/responses/204'
         '401':
           $ref: '#/components/responses/401'
         '403':
@@ -408,10 +280,10 @@ components:
           readOnly: true
           description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
-          $ref: '#/components/schemas/Policy'
+          $ref: '#/components/schemas/ApiLicense'
         error:
           $ref: '#/components/schemas/Error'
-    Policy:
+    ApiLicense:
       type: object
       properties:
         uuid:
@@ -440,45 +312,36 @@ components:
         crudsubjectid:
           type: string
           description: 'ID of Subject that reads, creates, updates or deletes'
-        subjectid:
+        apiid:
           type: string
-          description: 'FK ID of Subject / App that this contract binds'
-        name:
+          description: 'FK ID of owning api'
+        licenseid:
           type: string
-          description: 'Name of policy'
-        description:
-          type: string
-          description: 'Description of policy'
-        policyinstance:
-          type: object
-          description: 'Instance of Policy in Json Format #jsonb#'
-        typeid:
-          type: string
-          description: 'FK ID of Policy Type'
+          description: 'FK ID of license'
   requestBodies:
-    Policy:
+    ApiLicense:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Policy'
-      description: 'Policy object that needs to be added or updated'
+            $ref: '#/components/schemas/ApiLicense'
+      description: 'ApiLicense object that needs to be added or updated'
       required: true
-    ListOfPolicy:
+    ListOfApiLicense:
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Policy'
-      description: 'Policy array that needs to be added'
+              $ref: '#/components/schemas/ApiLicense'
+      description: 'ApiLicense array that needs to be added'
       required: true
-    ListOfPolicyObject:
+    ListOfApiLicenseObject:
       content:
         application/json:
           schema:
             type: object
             additionalProperties: true
-      description:  'list of Policy objects that needs to be updated, each additional property name should be the uuid of coresponding Policy record'
+      description:  'list of ApiLicense objects that needs to be updated, each additional property name should be the uuid of coresponding ApiLicense record'
       required: true
   responses:
     '200':
@@ -486,23 +349,23 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Policy'
-    '200-ListOfPolicy':
-      description: 'A Policy array'
+            $ref: '#/components/schemas/ApiLicense'
+    '200-ListOfApiLicense':
+      description: 'A ApiLicense array'
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/Policy'
+              $ref: '#/components/schemas/ApiLicense'
     '201':
-      description: 'New Policy resource has been created'
+      description: 'New ApiLicense resource has been created'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Policy'
+            $ref: '#/components/schemas/ApiLicense'
     '204':
-      description: 'The Policy resource was successfully deleted'
+      description: 'The ApiLicense resource was successfully deleted'
     '207':
       description: 'Multi Status for bulk operation'
       content:
@@ -516,7 +379,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Policy'
+            $ref: '#/components/schemas/ApiLicense'
     '400':
       description: 'Invalid UUID supplied'
       content:

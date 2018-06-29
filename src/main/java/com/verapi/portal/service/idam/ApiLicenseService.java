@@ -31,14 +31,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class LicenseService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(LicenseService.class);
+public class ApiLicenseService extends AbstractService<UpdateResult> {
+    private static final Logger logger = LoggerFactory.getLogger(ApiLicenseService.class);
 
-    public LicenseService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
+    public ApiLicenseService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
 
-    public LicenseService(Vertx vertx) {
+    public ApiLicenseService(Vertx vertx) {
         super(vertx);
     }
 
@@ -52,10 +52,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getJsonObject("licensedocument").encode());
+                            .add(jsonObj.getString("apiid"))
+                            .add(jsonObj.getString("licenseid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -105,10 +103,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
         JsonArray updateParams = new JsonArray()
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.getString("name"))
-                .add(updateRecord.getString("version"))
-                .add(updateRecord.getString("subjectid"))
-                .add(updateRecord.getJsonObject("licensedocument").encode())
+                .add(updateRecord.getString("apiid"))
+                .add(updateRecord.getString("licenseid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -126,10 +122,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
                     JsonArray updateParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getJsonObject("licensedocument").encode())
+                            .add(jsonObj.getString("apiid"))
+                            .add(jsonObj.getString("licenseid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -217,10 +211,10 @@ public class LicenseService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON)";
+    private static final String SQL_INSERT = "insert into api_license (organizationid, crudsubjectid, apiid, licenseid)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid))";
 
-    private static final String SQL_DELETE = "update license\n" +
+    private static final String SQL_DELETE = "update api_license\n" +
             "set\n" +
             "  deleted     = now()\n" +
             "  , isdeleted = true\n";
@@ -233,21 +227,17 @@ public class LicenseService extends AbstractService<UpdateResult> {
             "  deleted,\n" +
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
-            "  name,\n" +
-            "  version,\n" +
-            "  subjectid,\n" +
-            "  licensedocument::JSON\n" +
-            "from license\n";
+            "  apiid,\n" +
+            "  licenseid\n" +
+            "from api_license\n";
 
-    private static final String SQL_UPDATE = "UPDATE license\n" +
+    private static final String SQL_UPDATE = "UPDATE api_license\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , name      = ?\n" +
-            "  , version      = ?\n" +
-            "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , licensedocument      = ?::JSON\n";
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , licenseid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 
@@ -265,8 +255,6 @@ public class LicenseService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
-    private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
-
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -279,11 +267,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
 
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 
-    public static final String SQL_DELETE_BY_SUBJECT = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_SUBJECT_IS;
-
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

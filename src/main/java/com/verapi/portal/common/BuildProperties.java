@@ -29,11 +29,11 @@ public class BuildProperties {
 
     public JsonObject getConfigJsonObject() {
         if (config == null)
-            setConfig(new JsonObject());
+            setBuildProperties(new JsonObject());
         return config;
     }
 
-    public BuildProperties setConfig(JsonObject config) {
+    public BuildProperties setBuildProperties(JsonObject config) {
         this.config = config;
         return this;
     }
