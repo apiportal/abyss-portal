@@ -277,4 +277,11 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
             "from api__api_tag, api_tag\n" +
             "where apiid = CAST(? AS uuid) and apitagid = api_tag.uuid\n";
 
+    public static final String SQL_LIST_SUBJECT_API_TAGS = "select distinct\n" +
+            "  api_tag.uuid,\n" +
+            "  api_tag.name\n" +
+            "from api__api_tag, api_tag, api\n" +
+            "where subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
+            "      apitagid = api_tag.uuid";
+
 }

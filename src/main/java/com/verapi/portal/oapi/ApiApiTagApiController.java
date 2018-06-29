@@ -169,4 +169,23 @@ public class ApiApiTagApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getApiTagsOfSubject(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    ApiApiTagService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiApiTagService.SQL_LIST_SUBJECT_API_TAGS)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 }
