@@ -13,6 +13,7 @@ package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.LicenseService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -48,10 +49,9 @@ public class LicenseApiController extends AbstractApiController {
         super(vertx, router, authProvider);
     }
 
-    @AbyssApiOperationHandler
-    public void getLicenses(RoutingContext routingContext) {
+    void getEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         try {
-            getEntities(routingContext, LicenseService.class, jsonbColumnsList);
+            getEntities(routingContext, LicenseService.class, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -59,13 +59,20 @@ public class LicenseApiController extends AbstractApiController {
         }
     }
 
-    @AbyssApiOperationHandler
-    public void addLicenses(RoutingContext routingContext) {
+    void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        requestBody.forEach(requestItem -> {
+            if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
+                appendRequestBody.forEach(entry -> {
+                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
+                });
+            }
+        });
 
         try {
             addEntities(routingContext, LicenseService.class, requestBody, jsonbColumnsList);
@@ -76,8 +83,7 @@ public class LicenseApiController extends AbstractApiController {
         }
     }
 
-    @AbyssApiOperationHandler
-    public void updateLicenses(RoutingContext routingContext) {
+    void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -86,7 +92,17 @@ public class LicenseApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, LicenseService.class, requestBody, jsonbColumnsList);
+            updateEntities(routingContext, LicenseService.class, requestBody, jsonbColumnsList, apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    void deleteEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        try {
+            deleteEntities(routingContext, LicenseService.class, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -95,14 +111,23 @@ public class LicenseApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
+    public void getLicenses(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery());
+    }
+
+    @AbyssApiOperationHandler
+    public void addLicenses(RoutingContext routingContext) {
+        addEntities(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
+    public void updateLicenses(RoutingContext routingContext) {
+        updateEntities(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
     public void deleteLicenses(RoutingContext routingContext) {
-        try {
-            deleteEntities(routingContext, LicenseService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
+        deleteEntities(routingContext, new ApiFilterQuery());
     }
 
     @AbyssApiOperationHandler
@@ -147,6 +172,32 @@ public class LicenseApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+    }
+
+    @AbyssApiOperationHandler
+    public void getLicensesOfSubject(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(LicenseService.FILTER_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void addLicensesOfSubject(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateLicensesOfSubject(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(LicenseService.FILTER_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteLicensesOfSubject(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(LicenseService.SQL_DELETE_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
 }

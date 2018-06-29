@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : License crud operations'
+  - name: Subject Licenses
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s Licenses crud operations'
 paths:
   /licenses:
     get:
@@ -229,6 +234,129 @@ paths:
           $ref: '#/components/responses/204'
         '400':
           $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /licenses/subject/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Subject Licenses
+      summary: 'Get list of Subject''s Licenses'
+      description: 'Returns list of Subject''s Licenses'
+      operationId: getLicensesOfSubject
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfLicense'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - Subject Licenses
+      summary: 'Add a bulk of Subject''s Licenses'
+      description: 'Provide a list of Subject''s Licenses to be inserted'
+      operationId: addLicensesOfSubject
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfLicense'
+    put:
+      tags:
+        - Subject Licenses
+      summary: 'Update a bulk of Subject''s Licenses'
+      description: 'Provide a bulk list of Subject''s Licenses to be updated'
+      operationId: updateLicensesOfSubject
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfLicenseObject'
+    delete:
+      tags:
+        - Subject Licenses
+      summary: 'Delete all Subject''s Licenses'
+      description: 'Deletes all Subject''s Licenses'
+      operationId: deleteLicensesOfSubject
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
         '401':
           $ref: '#/components/responses/401'
         '403':
