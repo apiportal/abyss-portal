@@ -252,7 +252,7 @@ public class PolicyService extends AbstractService<UpdateResult> {
             "  , name      = ?\n" +
             "  , description      = ?\n" +
             "  , policyinstance      = ?::JSON\n" +
-            "  , typeid      = ?\n";
+            "  , typeid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 
