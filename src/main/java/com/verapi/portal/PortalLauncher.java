@@ -151,13 +151,37 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         abyssVersionConfigRetriever.getConfig(ar -> {
             if (ar.failed()) {
                 future.completeExceptionally(ar.cause());
-                logger.error("afterStartingVertx abyssConfigRetriever getConfig failed " + ar.cause());
+                logger.error("afterStartingVertx abyssVersionConfigRetriever getConfig failed " + ar.cause());
             } else {
                 BuildProperties buildProperties = BuildProperties.getInstance().setConfig(ar.result());
-                logger.info("afterStartingVertx abyssConfigRetriever getConfig OK..");
+                logger.info("afterStartingVertx abyssVersionConfigRetriever getConfig OK..");
                 logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
+
+        //load vault store
+        JsonObject vaultConfig = new JsonObject()
+                .put("host", "127.0.0.1") // The host name
+                .put("port", 8200) // The port
+                .put("ssl", true); // Whether or not SSL is used (disabled by default)
+
+        ConfigStoreOptions abyssVaultConfigStoreOptions = new ConfigStoreOptions()
+                .setType("vault")
+                .setConfig(vaultConfig);
+        ConfigRetrieverOptions abyssVaultConfigRetrieverOptions = new ConfigRetrieverOptions()
+                .addStore(abyssVaultConfigStoreOptions);
+        ConfigRetriever abyssVaultConfigRetriever = ConfigRetriever.create(vertx, abyssVaultConfigRetrieverOptions);
+        abyssVaultConfigRetriever.getConfig(ar -> {
+            if (ar.failed()) {
+                future.completeExceptionally(ar.cause());
+                logger.error("afterStartingVertx abyssVaultConfigRetriever getConfig failed " + ar.cause());
+            } else {
+                BuildProperties buildProperties = BuildProperties.getInstance().setConfig(ar.result());
+                logger.info("afterStartingVertx abyssVaultConfigRetriever getConfig OK..");
+                logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+            }
+        });
+
 
         //set all loggers' level
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
