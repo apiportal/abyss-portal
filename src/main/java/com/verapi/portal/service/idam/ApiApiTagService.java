@@ -282,7 +282,7 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
             "  api_tag.name\n" +
             "from api__api_tag, api_tag, api\n" +
             "where subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
-            "      apitagid = api_tag.uuid";
+            "      apitagid = api_tag.uuid\n";
 
     public static final String SQL_LIST_SUBJECT_BUSINESS_API_TAGS = SQL_LIST_SUBJECT_API_TAGS + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
 

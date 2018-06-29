@@ -45,6 +45,7 @@
     <orderEntry type="library" name="Maven: org.fusesource.jansi:jansi:1.17.1" level="project" />
     <orderEntry type="library" name="Maven: com.hazelcast:hazelcast:3.10.2" level="project" />
     <orderEntry type="library" name="Maven: io.vertx:vertx-hazelcast:3.5.2" level="project" />
+    <orderEntry type="library" name="Maven: io.vertx:vertx-config-vault:3.5.2" level="project" />
     <orderEntry type="library" name="Maven: io.vertx:vertx-config:3.5.2" level="project" />
     <orderEntry type="library" name="Maven: io.vertx:vertx-auth-common:3.5.2" level="project" />
     <orderEntry type="library" name="Maven: io.vertx:vertx-jdbc-client:3.5.2" level="project" />
