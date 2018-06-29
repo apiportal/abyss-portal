@@ -284,4 +284,8 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
             "where subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
             "      apitagid = api_tag.uuid";
 
+    public static final String SQL_LIST_SUBJECT_BUSINESS_API_TAGS = SQL_LIST_SUBJECT_API_TAGS + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
+
+    public static final String SQL_LIST_SUBJECT_PROXY_API_TAGS = SQL_LIST_SUBJECT_API_TAGS + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;
+
 }
