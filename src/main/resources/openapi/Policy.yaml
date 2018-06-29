@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Policy crud operations'
+  - name: Subject Policies
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s Policies crud operations'
 paths:
   /policies:
     get:
@@ -229,6 +234,129 @@ paths:
           $ref: '#/components/responses/204'
         '400':
           $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /policies/subject/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Subject Policies
+      summary: 'Get list of Subject''s Policies'
+      description: 'Returns list of Subject''s Policies'
+      operationId: getPoliciesOfSubject
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Policies which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Policies which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfPolicy'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - Subject Policies
+      summary: 'Add a bulk of Subject''s Policies'
+      description: 'Provide a list of Subject''s Policies to be inserted'
+      operationId: addPoliciesOfSubject
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfPolicy'
+    put:
+      tags:
+        - Subject Policies
+      summary: 'Update a bulk of Subject''s Policies'
+      description: 'Provide a bulk list of Subject''s Policies to be updated'
+      operationId: updatePoliciesOfSubject
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfPolicyObject'
+    delete:
+      tags:
+        - Subject Policies
+      summary: 'Delete all Subject''s Policies'
+      description: 'Deletes all Subject''s Policies'
+      operationId: deletePoliciesOfSubject
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
         '401':
           $ref: '#/components/responses/401'
         '403':

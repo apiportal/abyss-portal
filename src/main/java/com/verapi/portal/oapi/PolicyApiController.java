@@ -13,6 +13,7 @@ package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.PolicyService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -48,10 +49,9 @@ public class PolicyApiController extends AbstractApiController {
         super(vertx, router, authProvider);
     }
 
-    @AbyssApiOperationHandler
-    public void getPolicies(RoutingContext routingContext) {
+    void getEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         try {
-            getEntities(routingContext, PolicyService.class, jsonbColumnsList);
+            getEntities(routingContext, PolicyService.class, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -59,13 +59,20 @@ public class PolicyApiController extends AbstractApiController {
         }
     }
 
-    @AbyssApiOperationHandler
-    public void addPolicies(RoutingContext routingContext) {
+    void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        requestBody.forEach(requestItem -> {
+            if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
+                appendRequestBody.forEach(entry -> {
+                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
+                });
+            }
+        });
 
         try {
             addEntities(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
@@ -76,8 +83,7 @@ public class PolicyApiController extends AbstractApiController {
         }
     }
 
-    @AbyssApiOperationHandler
-    public void updatePolicies(RoutingContext routingContext) {
+    void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -86,7 +92,17 @@ public class PolicyApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, PolicyService.class, requestBody, jsonbColumnsList);
+            updateEntities(routingContext, PolicyService.class, requestBody, jsonbColumnsList, apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    void deleteEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        try {
+            deleteEntities(routingContext, PolicyService.class, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -95,14 +111,23 @@ public class PolicyApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
+    public void getPolicies(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery());
+    }
+
+    @AbyssApiOperationHandler
+    public void addPolicies(RoutingContext routingContext) {
+        addEntities(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
+    public void updatePolicies(RoutingContext routingContext) {
+        updateEntities(routingContext, null);
+    }
+
+    @AbyssApiOperationHandler
     public void deletePolicies(RoutingContext routingContext) {
-        try {
-            deleteEntities(routingContext, PolicyService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
+        deleteEntities(routingContext, new ApiFilterQuery());
     }
 
     @AbyssApiOperationHandler
@@ -147,6 +172,32 @@ public class PolicyApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+    }
+
+    @AbyssApiOperationHandler
+    public void getPoliciesOfSubject(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(PolicyService.FILTER_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void addPoliciesOfSubject(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+    }
+
+    @AbyssApiOperationHandler
+    public void updatePoliciesOfSubject(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(PolicyService.FILTER_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void deletePoliciesOfSubject(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(PolicyService.SQL_DELETE_BY_SUBJECT)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
 }
