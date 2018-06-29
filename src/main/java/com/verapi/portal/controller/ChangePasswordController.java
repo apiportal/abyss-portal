@@ -33,40 +33,40 @@ public class ChangePasswordController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("ChangePasswordController.defaultGetHandler invoked...");
+        logger.trace("ChangePasswordController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("ChangePasswordController.handle invoked...");
+        logger.trace("ChangePasswordController.handle invoked...");
         String username = routingContext.user().principal().getString("username");
         String oldPassword = routingContext.request().getFormAttribute("oldPassword");
         String newPassword = routingContext.request().getFormAttribute("newPassword");
         //TODO: should password consistency check be performed @FE or @BE or BOTH?
         String confirmPassword = routingContext.request().getFormAttribute("confirmPassword");
 
-        logger.info("Context user:" + username);
-        logger.info("Received old Password:" + oldPassword);
-        logger.info("Received new Password:" + newPassword);
-        logger.info("Received confirm Password:" + confirmPassword);
+        logger.trace("Context user:" + username);
+        logger.trace("Received old Password:" + oldPassword);
+        logger.trace("Received new Password:" + newPassword);
+        logger.trace("Received confirm Password:" + confirmPassword);
 
         //TODO: OWASP Validate
 
         if (oldPassword == null || oldPassword.isEmpty()) {
-            logger.info("oldPassword is null or empty");
+            logger.warn("oldPassword is null or empty");
             showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter Old Password field", "");
         }
         if (newPassword == null || newPassword.isEmpty()) {
-            logger.info("newPassword is null or empty");
+            logger.warn("newPassword is null or empty");
             showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter New Password field", "");
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
-            logger.info("newPassword is null or empty");
+            logger.warn("newPassword is null or empty");
             showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter Confirm Password field", "");
         }
         if (!(newPassword.equals(confirmPassword))) {
-            logger.info("newPassword and confirmPassword does not match");
+            logger.warn("newPassword and confirmPassword does not match");
             showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "New Password and Confirm Password does not match", "Please check and enter again");
         }
 
@@ -84,9 +84,9 @@ public class ChangePasswordController extends PortalAbstractController {
                         .toSingleDefault(false)
                         .flatMap(checkAuth -> authProvider.rxAuthenticate(creds))
                         .flatMap(user -> {
-                            logger.info("Authenticated User with Old Password: " + user.principal().encodePrettily());
+                            logger.trace("Authenticated User with Old Password: " + user.principal().encodePrettily());
 
-                            logger.info("Updating user records...");
+                            logger.trace("Updating user records...");
                             String salt = authProvider.generateSalt();
                             String hash = authProvider.computeHash(newPassword, salt);
 
@@ -113,7 +113,7 @@ public class ChangePasswordController extends PortalAbstractController {
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.info("Change Password: User record is updated and persisted successfully");
+                            logger.trace("Change Password: User record is updated and persisted successfully");
                         })
 
                         // close the connection regardless succeeded or failed

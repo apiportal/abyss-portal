@@ -29,7 +29,7 @@ public class FailureController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("FailureController.defaultGetHandler invoked...");
+        logger.trace("FailureController.defaultGetHandler invoked...");
     }
 
     @Override
@@ -38,7 +38,7 @@ public class FailureController extends PortalAbstractController {
         statusCode = statusCode > 0 ? statusCode : 200;
 
 
-        logger.info("FailureController.handle invoked - status code: " + statusCode);
+        logger.trace("FailureController.handle invoked - status code: " + statusCode);
 
         routingContext.put(Constants.HTTP_STATUSCODE, statusCode);
         routingContext.put(Constants.HTTP_URL, routingContext.session().get(Constants.HTTP_URL));
