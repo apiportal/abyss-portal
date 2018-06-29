@@ -221,7 +221,7 @@ public class PolicyService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into policy (organizationid, crudsubjectid, subjectid, name, description, policyinstance, typeid)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ? :: JSON, ?)";
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ? :: JSON, CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update policy\n" +
             "set\n" +
