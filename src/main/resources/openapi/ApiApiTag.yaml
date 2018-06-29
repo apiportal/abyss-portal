@@ -250,13 +250,60 @@ paths:
     get:
       tags:
         - ApiTag
-      summary: 'Get tag list of an API by uuid '
-      description: 'Returns tag list of an API'
+      summary: 'Get api tag list of an API by uuid '
+      description: 'Returns api tag list of an API'
       operationId: getApiTags
       parameters:
         - name: uuid
           in: path
-          description: 'The uuid of API that needs to be listed for its tags'
+          description: 'The uuid of API that needs to be listed for its api tags'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search API tags which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search API tags which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiTag'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-api-tags/subject/{uuid}:
+    get:
+      tags:
+        - ApiTag
+      summary: 'Get api tag list of a subject by uuid'
+      description: 'Returns api tag list of a subject'
+      operationId: getApiTagsOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of Subject that needs to be listed for its API tags'
           required: true
           schema:
             type: string
