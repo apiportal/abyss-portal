@@ -44,16 +44,16 @@ public class ForgotPasswordController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("ForgotPasswordController.defaultGetHandler invoked...");
+        logger.trace("ForgotPasswordController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("ForgotPasswordController.handle invoked..");
+        logger.trace("ForgotPasswordController.handle invoked..");
 
         String username = routingContext.request().getFormAttribute("username");
-        logger.info("Received username:" + username);
+        logger.trace("Received username:" + username);
 
 
         //TODO: OWASP Email Validate
@@ -71,26 +71,26 @@ public class ForgotPasswordController extends PortalAbstractController {
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
-                                logger.info("username NOT found...");
+                                logger.error("username NOT found...");
                                 return Single.error(new Exception("Username not found in our records"));
                             } else if (numOfRows == 1) {
                                 JsonObject row = resultSet.getRows(true).get(0);
                                 if (!row.getBoolean("isActivated")) {
-                                    logger.info("account connected to username is NOT activated");
+                                    logger.error("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
                                     subjectId = row.getInteger("id");
                                     subjectUUID = row.getString("uuid");
                                     email = row.getString("email");
                                     displayName = row.getString("display_name");
-                                    logger.info("Activated account found:[" + subjectId + " ("+ subjectUUID + ")]. Email:[" + email + "]Reset password token is going to be created...");
+                                    logger.info("Activated account found:[" + subjectId + " (" + subjectUUID + ")]. Email:[" + email + "]Reset password token is going to be created...");
 
                                     //Generate and Persist Reset Password Token
                                     Token tokenGenerator = new Token();
                                     AuthenticationInfo authInfo;
                                     try {
                                         authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("quarter.hour.in.seconds"), username, routingContext.vertx().getDelegate());
-                                        logger.info("Reset Password: token is created successfully: " + authInfo.getToken());
+                                        logger.trace("Reset Password: token is created successfully: " + authInfo.getToken());
                                         authToken = authInfo.getToken();
                                     } catch (UnsupportedEncodingException e) {
                                         logger.error("Reset Password: tokenGenerator.generateToken :" + e.getLocalizedMessage());
@@ -120,12 +120,12 @@ public class ForgotPasswordController extends PortalAbstractController {
                                     );
                                 }
                             } else {
-                                logger.info("email is connected to multiple accounts [" + numOfRows + "]");
+                                logger.error("email is connected to multiple accounts [" + numOfRows + "]");
                                 return Single.error(new Exception("This email is connected to multiple accounts. Please correct the other accounts by getting help from administration of your organization and try again."));
                             }
                         })
                         .flatMap(updateResult -> {
-                            logger.info("ForgotPasswordController - Deactivating Subject with id:[" + subjectId + " ("+ subjectUUID + ")] -> " + updateResult.getKeys().encodePrettily());
+                            logger.trace("ForgotPasswordController - Deactivating Subject with id:[" + subjectId + " (" + subjectUUID + ")] -> " + updateResult.getKeys().encodePrettily());
                             if (updateResult.getUpdated() == 1) {
 
                                 return resConn.rxUpdateWithParams("UPDATE subject SET " +
@@ -145,7 +145,7 @@ public class ForgotPasswordController extends PortalAbstractController {
                         // commit if all succeeded
                         .flatMap(updateResult -> {
                             if (updateResult.getUpdated() == 1) {
-                                logger.info("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
+                                logger.trace("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
                                 return resConn.rxCommit().toSingleDefault(true);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
@@ -158,7 +158,7 @@ public class ForgotPasswordController extends PortalAbstractController {
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.info("Reset password token is created and persisted successfully");
+                            logger.trace("Reset password token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
                             json.put(Constants.EB_MSG_TOKEN, authToken);
@@ -168,16 +168,16 @@ public class ForgotPasswordController extends PortalAbstractController {
                                     Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.RESET_PASSWORD_PATH + "/?v=" + authToken,
                                     Constants.RESET_PASSWORD_TEXT));
 
-                            logger.info("Forgot Password mail is rendered successfully");
+                            logger.trace("Forgot Password mail is rendered successfully");
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
                                 if (result.succeeded()) {
-                                    logger.info("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
+                                    logger.trace("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
                                 } else {
-                                    logger.info("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
+                                    logger.error("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
                                 }
 
                             });
-                            logger.info("Forgot Password mail is sent to Mail Verticle over Event Bus");
+                            logger.trace("Forgot Password mail is sent to Mail Verticle over Event Bus");
 
                         })
 

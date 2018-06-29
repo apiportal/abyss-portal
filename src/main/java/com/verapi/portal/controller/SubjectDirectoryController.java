@@ -27,13 +27,13 @@ public class SubjectDirectoryController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("SubjectDirectoryController.defaultGetHandler invoked...");
+        logger.trace("SubjectDirectoryController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("SubjectDirectoryController.handle invoked...");
+        logger.trace("SubjectDirectoryController.handle invoked...");
     }
 
 }

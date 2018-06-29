@@ -5,7 +5,7 @@
  *  *  Unauthorized copying of this file, via any medium is strictly prohibited
  *  *  Proprietary and confidential
  *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 4 2018
+ *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 6 2018
  *
  */
 
@@ -17,23 +17,23 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AbyssController(routePathGET = "my-apis", routePathPOST = "my-apis", htmlTemplateFile = "my-apis.html")
-public class MyApisController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(MyApisController.class);
+@AbyssController(routePathGET = "my-policies", routePathPOST = "my-policies", htmlTemplateFile = "my-policies.html")
+public class MyPoliciesController extends PortalAbstractController {
+    private static Logger logger = LoggerFactory.getLogger(MyPoliciesController.class);
 
-    public MyApisController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public MyPoliciesController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("MyApisController.defaultGetHandler invoked...");
+        logger.trace("MyPoliciesController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("MyApisController.handle invoked...");
+        logger.trace("MyPoliciesController.handle invoked...");
     }
 
 }

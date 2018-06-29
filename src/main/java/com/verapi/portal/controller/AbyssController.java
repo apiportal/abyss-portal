@@ -22,7 +22,10 @@ import java.lang.annotation.Target;
 @Documented
 public @interface AbyssController {
     String routePathGET();
+
     String routePathPOST();
+
     String htmlTemplateFile();
+
     boolean isPublic() default false;
 }

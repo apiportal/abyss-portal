@@ -40,19 +40,19 @@ public class ActivateAccountController extends PortalAbstractController {
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.info("ActivateAccountController.defaultGetHandler invoked..");
+        logger.trace("ActivateAccountController.defaultGetHandler invoked..");
         handle(routingContext);
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("ActivateAccountController.handle invoked..");
+        logger.trace("ActivateAccountController.handle invoked..");
 
         String token = routingContext.request().getParam("v");
-        logger.info("Received token:" + token);
+        logger.trace("Received token:" + token);
 
         String path = routingContext.normalisedPath();
-        logger.info("Received path:" + path);
+        logger.trace("Received path:" + path);
 
         //TODO: Get Stored Token Info
         jdbcClient.rxGetConnection().flatMap(resConn ->
@@ -67,11 +67,11 @@ public class ActivateAccountController extends PortalAbstractController {
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
-                                logger.info("token NOT found...");
+                                logger.error("token NOT found...");
                                 return Single.error(new Exception("Token not found in our records"));
                             } else if (numOfRows == 1) {
                                 JsonObject row = resultSet.getRows(true).get(0);
-                                logger.info("Token found:" + row.encodePrettily());
+                                logger.trace("Token found:" + row.encodePrettily());
 
                                 if (row.getBoolean("isDeleted")) {
                                     logger.error("Received Token is deleted");
@@ -96,7 +96,7 @@ public class ActivateAccountController extends PortalAbstractController {
                                 AuthenticationInfo authResult = tokenValidator.validateToken(token, authInfo);
 
                                 if (authResult.isValid()) {
-                                    logger.info("Received Token is valid.");
+                                    logger.trace("Received Token is valid.");
 
                                     email = row.getString("email");
                                     displayName = row.getString("displayName");
@@ -108,12 +108,12 @@ public class ActivateAccountController extends PortalAbstractController {
                                 }
 
                             } else {
-                                logger.info("Multiple tokens found...");
+                                logger.error("Multiple tokens found...");
                                 return Single.error(new Exception("Valid token is not found in our records"));
                             }
                         })
                         .flatMap(row -> {
-                                    logger.info("Activate Account - Updating Subject with uuid:[" + row.getString("subjectId") + "] -> " + row.encodePrettily());
+                                    logger.trace("Activate Account - Updating Subject with uuid:[" + row.getString("subjectId") + "] -> " + row.encodePrettily());
                                     return resConn.rxUpdateWithParams("UPDATE subject SET " +
                                                     "updated = now()," +
                                                     "crudSubjectId = CAST(? AS uuid)," +
@@ -126,9 +126,9 @@ public class ActivateAccountController extends PortalAbstractController {
                                 }
                         )
                         .flatMap(updateResult -> {
-                            logger.info("Activate Account - Updating Subject... Number of rows updated:" + updateResult.getUpdated());
+                            logger.trace("Activate Account - Updating Subject... Number of rows updated:" + updateResult.getUpdated());
                             //logger.info("Activate Account - Subject Update Result information:" + updateResult.getKeys().encodePrettily());
-                            logger.info("Activate Account - Updating Subject Activation...");
+                            logger.trace("Activate Account - Updating Subject Activation...");
                             if (updateResult.getUpdated() == 1) {
                                 return resConn.rxUpdateWithParams("UPDATE subject_activation SET " +
                                                 "deleted = now()," +
@@ -146,7 +146,7 @@ public class ActivateAccountController extends PortalAbstractController {
                         // commit if all succeeded
                         .flatMap(updateResult -> {
                             if (updateResult.getUpdated() == 1) {
-                                logger.info("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
+                                logger.trace("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
                                 return resConn.rxCommit().toSingleDefault(true);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
@@ -161,7 +161,7 @@ public class ActivateAccountController extends PortalAbstractController {
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.info("Activate Account: User record is activated and Token is deleted. Both persisted successfully");
+                            logger.trace("Activate Account: User record is activated and Token is deleted. Both persisted successfully");
 
                             JsonObject json = new JsonObject();
                             json.put(Constants.EB_MSG_TOKEN, "");
@@ -169,17 +169,17 @@ public class ActivateAccountController extends PortalAbstractController {
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.WELCOME_TOKEN);
                             json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderWelcomeMailBody(routingContext, displayName));
 
-                            logger.info("Welcome mail is rendered successfully");
+                            logger.trace("Welcome mail is rendered successfully");
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
                                 if (result.succeeded()) {
-                                    logger.info("Welcome Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
+                                    logger.trace("Welcome Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
                                 } else {
-                                    logger.info("Welcome Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
+                                    logger.error("Welcome Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
                                 }
 
 
                             });
-                            logger.info("Welcome mail is sent to Mail Verticle over Event Bus");
+                            logger.trace("Welcome mail is sent to Mail Verticle over Event Bus");
 
                         })
 
@@ -187,7 +187,7 @@ public class ActivateAccountController extends PortalAbstractController {
                         .doAfterTerminate(resConn::close)
 
         ).subscribe(result -> {
-                    logger.info("Subscription to ActivateAccount successful:" + result);
+                    logger.trace("Subscription to ActivateAccount successful:" + result);
                     showTrxResult(routingContext, logger, 200, "Activation Successful!", "Welcome to API Portal", "");
                 }, t -> {
                     logger.error("ActivateAccount Error", t);

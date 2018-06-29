@@ -32,7 +32,7 @@ public class SuccessController extends PortalAbstractController {
         Integer statusCode = routingContext.session().get(Constants.HTTP_STATUSCODE);
         statusCode = statusCode > 0 ? statusCode : 200;
 
-        logger.info("SuccessController.defaultGetHandler invoked - status code: " + statusCode);
+        logger.trace("SuccessController.defaultGetHandler invoked - status code: " + statusCode);
 
         routingContext.put(Constants.HTTP_STATUSCODE, statusCode);
         routingContext.put(Constants.HTTP_URL, routingContext.session().get(Constants.HTTP_URL));
@@ -47,7 +47,7 @@ public class SuccessController extends PortalAbstractController {
         Integer statusCode = routingContext.session().get(Constants.HTTP_STATUSCODE);
         statusCode = statusCode > 0 ? statusCode : 200;
 
-        logger.info("SuccessController.handle invoked - status code: " + statusCode);
+        logger.trace("SuccessController.handle invoked - status code: " + statusCode);
 
         routingContext.put(Constants.HTTP_STATUSCODE, statusCode);
         routingContext.put(Constants.HTTP_URL, routingContext.session().get(Constants.HTTP_URL));
