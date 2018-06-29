@@ -1,0 +1,477 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
+info:
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: 'info@apiportal.com'
+    name: 'Abyss'
+    url: 'https://apiportal.com'
+  license:
+    name: 'Abyss 1.0'
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: ApiLicenses
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiLicenses crud operations'
+  - name: ApiLicense
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiLicense crud operations'
+paths:
+  /api-licenses:
+    get:
+      tags:
+        - ApiLicenses
+      summary: 'Get list of ApiLicenses'
+      description: 'Returns list of ApiLicenses'
+      operationId: getApiLicenses
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ApiLicenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ApiLicenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiLicense'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - ApiLicenses
+      summary: 'Add a bulk of ApiLicenses'
+      description: 'Provide a list of ApiLicenses to be inserted'
+      operationId: addApiLicenses
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApiLicense'
+    put:
+      tags:
+        - ApiLicenses
+      summary: 'Update a bulk of ApiLicenses'
+      description: 'Provide a bulk list of  ApiLicenses to be updated'
+      operationId: updateApiLicenses
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfApiLicenseObject'
+    delete:
+      tags:
+        - ApiLicenses
+      summary: 'Delete all ApiLicenses'
+      description: 'Deletes all ApiLicenses'
+      operationId: deleteApiLicenses
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-licenses/{uuid}:
+    get:
+      tags:
+        - ApiLicense
+      summary: 'Get an existing ApiLicense by uuid'
+      description: 'Provide an uuid of ApiLicense to be get'
+      operationId: getApiLicense
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of ApiLicense that need to be get'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    put:
+      tags:
+        - ApiLicense
+      summary: 'Update an existing ApiLicense'
+      description: 'Provide an altered ApiLicense to be updated'
+      operationId: updateApiLicense
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of ApiLicense that need to be updated'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ApiLicense'
+    delete:
+      tags:
+        - ApiLicense
+      summary: 'Delete ApiLicense'
+      description: 'Provide an uuid parameter of ApiLicense to be updated'
+      operationId: deleteApiLicense
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of ApiLicense that needs to be deleted'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+externalDocs:
+  description: 'See Abyss example'
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    MultiStatus:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'uuid of the record'
+        status:
+          type: integer
+          readOnly: true
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
+        response:
+          $ref: '#/components/schemas/ApiLicense'
+        error:
+          $ref: '#/components/schemas/Error'
+    ApiLicense:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
+        organizationid:
+          type: string
+          description: 'Id of Organization'
+        created:
+          type: string
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
+        updated:
+          type: string
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
+        deleted:
+          type: string
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
+        crudsubjectid:
+          type: string
+          description: 'ID of Subject that reads, creates, updates or deletes'
+        apiid:
+          type: string
+          description: 'FK ID of owning api'
+        licenseid:
+          type: string
+          description: 'FK ID of license'
+  requestBodies:
+    ApiLicense:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiLicense'
+      description: 'ApiLicense object that needs to be added or updated'
+      required: true
+    ListOfApiLicense:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiLicense'
+      description: 'ApiLicense array that needs to be added'
+      required: true
+    ListOfApiLicenseObject:
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+      description:  'list of ApiLicense objects that needs to be updated, each additional property name should be the uuid of coresponding ApiLicense record'
+      required: true
+  responses:
+    '200':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiLicense'
+    '200-ListOfApiLicense':
+      description: 'A ApiLicense array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiLicense'
+    '201':
+      description: 'New ApiLicense resource has been created'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiLicense'
+    '204':
+      description: 'The ApiLicense resource was successfully deleted'
+    '207':
+      description: 'Multi Status for bulk operation'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/MultiStatus'
+    '304':
+      description: 'Not Modified – The client can use cached data'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiLicense'
+    '400':
+      description: 'Invalid UUID supplied'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'Authorization information is missing or invalid'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: 'Not found – There is no resource behind the URI'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: 'Method not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: 'Unprocessable Entity – server cannot process the request'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: 'Too many request(rate limiting)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: 'Internal server error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: 'error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: 'The number of items to skip before starting to collect the result set'
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: 'The numbers of items to return'
+  securitySchemes:
+    abyssCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+    abyssHttpBasicAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+    abyssApiKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+    abyssJWTBearerAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+  links: {}
+  callbacks: {}
+security:
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []
