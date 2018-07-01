@@ -27,11 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : ApiApiTag crud operations'
-  - name: ApiTag
+  - name: ApiTags
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : list tags of specified API'
+    description: 'Abyss plaftorm APIs : Api Tags list operations'
 paths:
   /api-api-tags:
     get:
@@ -249,7 +249,7 @@ paths:
   /api-api-tags/api/{uuid}:
     get:
       tags:
-        - ApiTag
+        - ApiTags
       summary: 'Get api tag list of an API by uuid '
       description: 'Returns api tag list of an API'
       operationId: getApiTags
@@ -296,7 +296,7 @@ paths:
   /api-api-tags/subject/{uuid}:
     get:
       tags:
-        - ApiTag
+        - ApiTags
       summary: 'Get api tag list of a subject by uuid'
       description: 'Returns api tag list of a subject'
       operationId: getApiTagsOfSubject
@@ -343,7 +343,7 @@ paths:
   /api-api-tags/businesses/subject/{uuid}:
     get:
       tags:
-        - ApiTag
+        - ApiTags
       summary: 'Get business api tag list of a subject by uuid'
       description: 'Returns business api tag list of a subject'
       operationId: getBusinessApiTagsOfSubject
@@ -390,7 +390,7 @@ paths:
   /api-api-tags/proxies/subject/{uuid}:
     get:
       tags:
-        - ApiTag
+        - ApiTags
       summary: 'Get proxy api tag list of a subject by uuid'
       description: 'Returns proxy api tag list of a subject'
       operationId: getProxyApiTagsOfSubject

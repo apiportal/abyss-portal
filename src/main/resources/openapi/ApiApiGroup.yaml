@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : ApiApiGroup crud operations'
+  - name: ApiGroups
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Api Groups list operations'
 paths:
   /api-api-groups:
     get:

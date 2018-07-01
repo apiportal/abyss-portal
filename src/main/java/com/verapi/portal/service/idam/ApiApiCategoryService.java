@@ -271,4 +271,21 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
+    public static final String SQL_LIST_API_CATEGORIES = "select\n" +
+            "  api_category.uuid,\n" +
+            "  api_category.name\n" +
+            "from api__api_category, api_category\n" +
+            "where apiid = CAST(? AS uuid) and apicategoryid = api_category.uuid\n";
+
+    public static final String SQL_LIST_SUBJECT_API_CATEGORIES = "select distinct\n" +
+            "  api_category.uuid,\n" +
+            "  api_category.name\n" +
+            "from api__api_category, api_category, api\n" +
+            "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
+            "      apicategoryid = api_category.uuid\n";
+
+    public static final String SQL_LIST_SUBJECT_BUSINESS_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
+
+    public static final String SQL_LIST_SUBJECT_PROXY_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;
+
 }

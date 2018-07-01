@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : ApiApiCategory crud operations'
+  - name: ApiCategories
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Api Categories list operations'
 paths:
   /api-api-categories:
     get:
@@ -235,6 +240,194 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-api-categories/api/{uuid}:
+    get:
+      tags:
+        - ApiCategories
+      summary: 'Get api categories list of an API by uuid'
+      description: 'Returns api categories list of an API'
+      operationId: getApiCategories
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of API that needs to be listed for its api categories'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Categories which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Categories which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiApiCategory'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-api-categories/subject/{uuid}:
+    get:
+      tags:
+        - ApiCategories
+      summary: 'Get api categories list of a subject by uuid'
+      description: 'Returns api categories list of a subject'
+      operationId: getApiCategoriesOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of subject that needs to be listed for its api categories'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Categories which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Categories which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiApiCategory'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-api-categories/businesses/subject/{uuid}:
+    get:
+      tags:
+        - ApiCategories
+      summary: 'Get businesses api categories list of a subject by uuid'
+      description: 'Returns businesses api categories list of a subject'
+      operationId: getBusinessesApiCategoriesOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of subject that needs to be listed for its businesses api categories'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Businesses Api Categories which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Businesses Api Categories which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiApiCategory'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-api-categories/proxies/subject/{uuid}:
+    get:
+      tags:
+        - ApiCategories
+      summary: 'Get proxy api categories list of a subject by uuid'
+      description: 'Returns proxy api categories list of a subject'
+      operationId: getProxyApiCategoriesOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of subject that needs to be listed for its proxy api categories'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Proxy Api Categories which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Proxy Api Categories which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiApiCategory'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':
