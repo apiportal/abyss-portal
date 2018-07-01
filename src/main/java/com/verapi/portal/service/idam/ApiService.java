@@ -354,9 +354,9 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
-    public static final String SQL_CONDITION_NAME_IS = "openapidocument -> 'info' ->> 'title' = ?\n";
+    public static final String SQL_CONDITION_NAME_IS = "lower(openapidocument -> 'info' ->> 'title') = lower(?)\n";
 
-    public static final String SQL_CONDITION_NAME_LIKE = "openapidocument -> 'info' ->> 'title' like ?\n";
+    public static final String SQL_CONDITION_NAME_LIKE = "lower(openapidocument -> 'info' ->> 'title') like lower(?)\n";
 
     private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
 
