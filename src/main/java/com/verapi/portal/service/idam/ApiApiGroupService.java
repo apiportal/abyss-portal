@@ -271,4 +271,21 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
+    public static final String SQL_LIST_API_GROUPS = "select\n" +
+            "  api_group.uuid,\n" +
+            "  api_group.name\n" +
+            "from api__api_group, api_group\n" +
+            "where apiid = CAST(? AS uuid) and apigroupid = api_group.uuid\n";
+
+    public static final String SQL_LIST_SUBJECT_API_GROUPS = "select distinct\n" +
+            "  api_group.uuid,\n" +
+            "  api_group.name\n" +
+            "from api__api_group, api_group, api\n" +
+            "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
+            "      apigroupid = api_group.uuid\n";
+
+    public static final String SQL_LIST_SUBJECT_BUSINESS_API_GROUPS = SQL_LIST_SUBJECT_API_GROUPS + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
+
+    public static final String SQL_LIST_SUBJECT_PROXY_API_GROUPS = SQL_LIST_SUBJECT_API_GROUPS + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;
+
 }
