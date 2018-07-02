@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : SubjectApp crud operations'
+  - name: Subject Apps
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject Apps listing operations'
 paths:
   /subject-apps:
     get:
@@ -235,6 +240,53 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /subject-apps/subject/{uuid}:
+    get:
+      tags:
+        - Subject Apps
+      summary: 'Get list of subject''s Apps'
+      description: 'Returns list of Apps of a subject'
+      operationId: getAppsOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of subject'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Apps which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Apps which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectApp'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':
