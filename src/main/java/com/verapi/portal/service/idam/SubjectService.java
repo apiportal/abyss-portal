@@ -370,7 +370,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_NAME_LIKE = "lower(subjectname) like lower(?)\n";
 
-    private static final String SQL_CONDITION_IS_USER = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n";
+    public static final String SQL_CONDITION_IS_USER = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
 
@@ -393,6 +393,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static String FILTER_APPS= SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_APP;
+
+    public static String FILTER_USERS= SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_USER;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

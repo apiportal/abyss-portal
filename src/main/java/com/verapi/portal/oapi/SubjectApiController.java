@@ -297,4 +297,24 @@ public class SubjectApiController extends AbstractApiController {
         deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_APP));
     }
 
+    @AbyssApiOperationHandler
+    public void getUsers(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USERS));
+    }
+
+    @AbyssApiOperationHandler
+    public void addUsers(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_USER));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateUsers(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_USER));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteUsers(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_USER));
+    }
+
 }
