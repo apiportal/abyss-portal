@@ -305,8 +305,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
         UUID subjectUUID = UUID.fromString(routingContext.pathParam("uuid"));
         String oldPassword = requestBody.getString("oldpassword");
-        String newPassword = requestBody.getString("oldpassword");
-        String confirmPassword = requestBody.getString("oldpassword");
+        String newPassword = requestBody.getString("newpassword");
+        String confirmPassword = requestBody.getString("confirmpassword");
         String crudSubjectId = requestBody.getString("crudsubjectid");
 
         if (oldPassword == null || oldPassword.isEmpty()) {
