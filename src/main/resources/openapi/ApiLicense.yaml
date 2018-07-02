@@ -27,6 +27,16 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : ApiLicense crud operations'
+  - name: Api Licenses
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Api''s Licenses listing operations'
+  - name: License APIs
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : License''s APIs listing operations'
 paths:
   /api-licenses:
     get:
@@ -235,6 +245,100 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-licenses/api/{uuid}:
+    get:
+      tags:
+        - Api Licenses
+      summary: 'Get list of Api''s Licenses'
+      description: 'Returns list of Licenses of an API'
+      operationId: getLicensesOfApi
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Api'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiLicense'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-licenses/license/{uuid}:
+    get:
+      tags:
+        - License APIs
+      summary: 'Get list of License''s APIs'
+      description: 'Returns list of APIs of an License'
+      operationId: getApisOfLicense
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of License'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiLicense'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':

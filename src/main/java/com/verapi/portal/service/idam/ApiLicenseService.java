@@ -255,6 +255,10 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
+    private static final String SQL_CONDITION_APIID_IS = "apiid = CAST(? AS uuid)\n";
+
+    private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
+
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -271,4 +275,7 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
+    public static final String SQL_LIST_API_LICENSES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
+
+    public static final String SQL_LIST_LICENSE_APIS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
 }

@@ -12,6 +12,7 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ApiLicenseService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -135,6 +136,44 @@ public class ApiLicenseApiController extends AbstractApiController {
 
         try {
             deleteEntity(routingContext, ApiLicenseService.class);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void getLicensesOfApi(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    ApiLicenseService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiLicenseService.SQL_LIST_API_LICENSES)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void getApisOfLicense(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    ApiLicenseService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiLicenseService.SQL_LIST_LICENSE_APIS)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
