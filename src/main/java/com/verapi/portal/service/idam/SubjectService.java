@@ -12,8 +12,10 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
+import com.verapi.portal.oapi.exception.NoDataFoundException;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;
@@ -24,7 +26,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
+import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
+import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -290,6 +295,66 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return filter(apiFilterQuery);
     }
 
+    public Single<ResultSet> changePassword(RoutingContext routingContext, JDBCAuth jdbcAuth) {
+
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        UUID subjectUUID = UUID.fromString(routingContext.pathParam("uuid"));
+        String oldPassword = requestBody.getString("oldpassword");
+        String newPassword = requestBody.getString("oldpassword");
+        String confirmPassword = requestBody.getString("oldpassword");
+        String crudSubjectId = requestBody.getString("crudsubjectid");
+
+        if (oldPassword == null || oldPassword.isEmpty()) {
+            logger.error("oldPassword is null or empty.!");
+            return Single.error(new Throwable("Please enter Old Password field"));
+        }
+
+        if (newPassword == null || newPassword.isEmpty()) {
+            logger.error("newPassword is null or empty");
+            return Single.error(new Throwable("Please enter New Password field"));
+        }
+
+        if (confirmPassword == null || confirmPassword.isEmpty()) {
+            logger.warn("confirmPassword is null or empty");
+            return Single.error(new Throwable("Please enter Confirm Password field"));
+        }
+
+        if (!(newPassword.equals(confirmPassword))) {
+            logger.warn("newPassword and confirmPassword does not match");
+            return Single.error(new Throwable("New Password and Confirm Password does not match"));
+        }
+
+        return findById(subjectUUID)
+                .flatMap(findByIdResultSet -> {
+                    if (findByIdResultSet.getNumRows() == 0)
+                        return Single.error(new NoDataFoundException("The specified subject does not exist"));
+                    else
+                        return Single.just(findByIdResultSet);
+                })
+                .flatMap(resultSet -> {
+                    return jdbcAuth.rxAuthenticate(new JsonObject()
+                            .put("username", resultSet.getRows().get(0).getString("subjectname"))
+                            .put("password", oldPassword));
+                })
+                .flatMap(user -> {
+                    String salt = jdbcAuth.generateSalt();
+                    return update(new JsonArray()
+                                    .add(crudSubjectId)
+                                    .add(jdbcAuth.computeHash(newPassword, salt))
+                                    .add(salt)
+                                    .add(Config.getInstance().getConfigJsonObject().getInteger(Constants.PASSWORD_EXPIRATION_DAYS))
+                                    .add(subjectUUID.toString())
+                            , SQL_CHANGE_PASSWORD_BY_UUID);
+                })
+                .flatMap(updateResult -> findById(subjectUUID));
+    }
+
+
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
@@ -358,6 +423,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , subjectdirectoryid = CAST(? AS uuid)\n" +
             "  , islocked = ?\n" +
             "  , issandbox = ?\n";
+
+    private static final String SQL_CHANGE_PASSWORD = "update subject\n" +
+            "set updated              = now()\n" +
+            "  , crudsubjectid        = CAST(? AS uuid)\n" +
+            "  , password             = ?\n" +
+            "  , passwordsalt         = ?\n" +
+            "  , passwordexpiresat    =  now() + ? * interval '1 DAY'\n" +
+            "  , lastpasswordchangeat = now()\n";
+
     private static final String SQL_AND = "and\n";
 
     private static final String SQL_WHERE = "where\n";
@@ -392,9 +466,11 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    public static String FILTER_APPS= SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_APP;
+    private static final String SQL_CHANGE_PASSWORD_BY_UUID = SQL_CHANGE_PASSWORD + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    public static String FILTER_USERS= SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_USER;
+    public static String FILTER_APPS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_APP;
+
+    public static String FILTER_USERS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_USER;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

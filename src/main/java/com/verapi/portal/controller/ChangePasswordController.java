@@ -62,9 +62,10 @@ public class ChangePasswordController extends PortalAbstractController {
             showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter New Password field", "");
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
-            logger.warn("newPassword is null or empty");
+            logger.warn("confirmPassword is null or empty");
             showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter Confirm Password field", "");
         }
+
         if (!(newPassword.equals(confirmPassword))) {
             logger.warn("newPassword and confirmPassword does not match");
             showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "New Password and Confirm Password does not match", "Please check and enter again");
@@ -92,11 +93,11 @@ public class ChangePasswordController extends PortalAbstractController {
 
                             return resConn.rxUpdateWithParams("UPDATE subject SET \n" +
                                             "  updated = now(), \n" +
-                                            "  crudSubjectId = CAST(? AS uuid), \n" +
+                                            "  crudsubjectid = CAST(? AS uuid), \n" +
                                             "  password = ?, \n" +
-                                            "  passwordSalt = ? \n" +
+                                            "  passwordsalt = ? \n" +
                                             "WHERE\n" +
-                                            "  subjectName = ?;",
+                                            "  subjectname = ?;",
                                     new JsonArray()
                                             .add(Constants.SYSTEM_USER_UUID)
                                             .add(hash)

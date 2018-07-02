@@ -37,6 +37,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Users crud operations'
+  - name: Password Management
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Password Management crud operations'
 paths:
   /subjects:
     get:
@@ -483,6 +488,41 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /subjects/{uuid}/changepassword/:
+    put:
+      tags:
+        - Password Management
+      summary: 'Update an existing Subject''s password'
+      description: 'Provide old and new passwords to be updated'
+      operationId: updatePasswordOfSubject
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be changed its password'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/SubjectChangePassword'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -650,6 +690,24 @@ components:
         isrestrictedtoprocessing:
           type: boolean
           description: 'Is Subject Data Restricted to Processing - GDPR - https://github.com/vert-x3/vertx-auth/pull/184/files'
+    SubjectChangePassword:
+      type: object
+      properties:
+        oldpassword:
+          type: string
+          writeOnly: true
+          description: 'old password to be changed with new password'
+        newpassword:
+          type: string
+          writeOnly: true
+          description: 'requested new password'
+        confirmpassword:
+          type: string
+          writeOnly: true
+          description: 'confirm new password'
+        crudsubjectid:
+          type: string
+          description: 'ID of Subject that reads, creates, updates or deletes'
   requestBodies:
     Subject:
       content:
@@ -674,6 +732,13 @@ components:
             type: object
             additionalProperties: true
       description:  'list of Subject objects that needs to be updated, each additional property name should be the uuid of coresponding Subject record'
+      required: true
+    SubjectChangePassword:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectChangePassword'
+      description: 'Subject Change Password object that needs to update old password with new password'
       required: true
   responses:
     '200':

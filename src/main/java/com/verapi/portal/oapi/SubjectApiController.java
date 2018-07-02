@@ -133,6 +133,16 @@ public class SubjectApiController extends AbstractApiController {
         }
     }
 
+    void execServiceMethod(RoutingContext routingContext, String method) {
+        try {
+            execServiceMethod(routingContext, SubjectService.class, null, method);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
     @AbyssApiOperationHandler
     public void getSubjects(RoutingContext routingContext) {
         getEntities(routingContext, (ApiFilterQuery) null);
@@ -160,77 +170,16 @@ public class SubjectApiController extends AbstractApiController {
 */
 
         addEntities(routingContext, null);
-
-/*
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
-        // We get an user JSON array validated by Vert.x Open API validator
-        JsonArray requestBody = requestParameters.body().getJsonArray();
-
-        // 1- generate password salt and password
-        // 2-check subject request contains picture, if not then load default avatar picture
-        requestBody.forEach(requestItem -> {
-            String salt = authProvider.generateSalt();
-            String hash = authProvider.computeHash(((JsonObject) requestItem).getString("password"), salt);
-            ((JsonObject) requestItem).put("password", hash);
-            ((JsonObject) requestItem).put("passwordsalt", salt);
-            if ((!((JsonObject) requestItem).containsKey("picture")) || (((JsonObject) requestItem).getValue("picture") == null))
-                try {
-                    //insert default avatar image TODO: later use request base
-                    ClassLoader classLoader = getClass().getClassLoader();
-                    File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
-                    ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + encodeFileToBase64Binary(file));
-                } catch (IOException e) {
-                    logger.error(e.getLocalizedMessage());
-                    logger.error(Arrays.toString(e.getStackTrace()));
-                }
-        });
-
-        //now it is time to add entities
-        try {
-            addEntities(routingContext, SubjectService.class, requestBody);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void updateSubjects(RoutingContext routingContext) {
         updateEntities(routingContext, null);
-/*
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
-        // We get an user JSON object validated by Vert.x Open API validator
-        JsonObject requestBody = requestParameters.body().getJsonObject();
-
-        //now it is time to update entities
-        try {
-            updateEntities(routingContext, SubjectService.class, requestBody);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void deleteSubjects(RoutingContext routingContext) {
         deleteEntities(routingContext, (ApiFilterQuery) null);
-/*
-        try {
-            deleteEntities(routingContext, SubjectService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
@@ -315,6 +264,11 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void deleteUsers(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_USER));
+    }
+
+    @AbyssApiOperationHandler
+    public void updatePasswordOfSubject(RoutingContext routingContext) {
+        execServiceMethod(routingContext, "changePassword");
     }
 
 }

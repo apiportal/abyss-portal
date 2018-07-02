@@ -710,6 +710,29 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponseStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
     }
 
+    <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, String method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
+        Single<ResultSet> funcResult = service.initJDBCClient()
+                .flatMap(jdbcClient -> (Single<ResultSet>) service.getClass().getDeclaredMethod(method, RoutingContext.class, JDBCAuth.class).invoke(service, routingContext, authProvider))
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows() == 0) {
+                        return Single.error(new NoDataFoundException("no_data_found"));
+                    } else
+                        return Single.just(resultSet);
+                });
+        subscribeAndResponse(routingContext, funcResult, jsonColumns, HttpResponseStatus.OK.code());
+    }
+
+/*
+    <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, Function<RoutingContext, Single<ResultSet>> func, String method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
+        Single<ResultSet> funcResult = service.initJDBCClient()
+                .flatMap(jdbcClient -> func.apply(routingContext));
+        service.getClass().getDeclaredMethod(method, RoutingContext.class).invoke(routingContext);
+        subscribeAndResponse(routingContext, funcResult, jsonColumns, HttpResponseStatus.OK.code());
+    }
+*/
+
 //    public static final String SQL_CONDITION_NAME_IS = null;
 //
 //    public static final String SQL_CONDITION_NAME_LIKE = null;

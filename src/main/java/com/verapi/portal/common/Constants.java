@@ -160,7 +160,7 @@ public class Constants {
     public static final String VERTICLE_TYPE_API = "verticle.type.api";
 
 
-    public static final int PASSWORD_EXPIRATION_DAYS = 90;
+    public static final String PASSWORD_EXPIRATION_DAYS = "subject.password.renewal.period";
 
     public static final int INTERNAL_SUBJECT_DIRECTORY_ID = 1;
     public static final String INTERNAL_SUBJECT_DIRECTORY_UUID = "ac504ae6-2bc9-40fa-8dfb-0ce501089573";
