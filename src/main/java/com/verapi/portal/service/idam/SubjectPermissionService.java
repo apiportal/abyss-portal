@@ -229,18 +229,18 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
             "  , isdeleted = true\n";
 
     private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  permission,\n" +
-            "  description,\n" +
-            "  effectivestartdate,\n" +
-            "  effectiveenddate,\n" +
-            "  subjectid\n" +
+            "  subject_permission.uuid,\n" +
+            "  subject_permission.organizationid,\n" +
+            "  subject_permission.created,\n" +
+            "  subject_permission.updated,\n" +
+            "  subject_permission.deleted,\n" +
+            "  subject_permission.isdeleted,\n" +
+            "  subject_permission.crudsubjectid,\n" +
+            "  subject_permission.permission,\n" +
+            "  subject_permission.description,\n" +
+            "  subject_permission.effectivestartdate,\n" +
+            "  subject_permission.effectiveenddate,\n" +
+            "  subject_permission.subjectid\n" +
             "from subject_permission\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_permission\n" +
@@ -270,6 +270,8 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
+    private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
+
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -282,8 +284,15 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
 
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 
+    public static final String SQL_DELETE_BY_SUBJECT = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_SUBJECT_IS;
+
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
+    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+
+    public static final String SQL_LIST_SUBJECT_API_SUBSCRIPTIONS = SQL_SELECT + ", resource, resource_type\n" +
+            SQL_WHERE + "subject_permission.subjectid = CAST(? AS uuid) and subject_permission.resourceid = resource.uuid and\n" +
+            "resource.resourcetypeid = resource_type.uuid and resource_type.type = 'API'\n";
 }
