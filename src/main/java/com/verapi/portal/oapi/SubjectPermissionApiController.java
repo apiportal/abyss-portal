@@ -243,4 +243,11 @@ public class SubjectPermissionApiController extends AbstractApiController {
                 .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
+    @AbyssApiOperationHandler
+    public void getApiSubscriptionsToMyApis(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(SubjectPermissionService.SQL_LIST_SUBSCRIPTIONS_TO_MY_APIS)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
 }

@@ -295,4 +295,11 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
     public static final String SQL_LIST_SUBJECT_API_SUBSCRIPTIONS = SQL_SELECT + ", resource, resource_type\n" +
             SQL_WHERE + "subject_permission.subjectid = CAST(? AS uuid) and subject_permission.resourceid = resource.uuid and\n" +
             "resource.resourcetypeid = resource_type.uuid and resource_type.type = 'API'\n";
+    public static final String SQL_LIST_SUBSCRIPTIONS_TO_MY_APIS = SQL_SELECT + ", resource, resource_type, api\n" +
+            SQL_WHERE + "api.subjectid = CAST(? AS uuid) and\n" +
+            "  api.uuid = resource.resourcerefid and\n" +
+            "  subject_permission.resourceid = resource.uuid and\n" +
+            "  resource.resourcetypeid = resource_type.uuid\n" +
+            "  and resource_type.type = 'API'\n";
+
 }
