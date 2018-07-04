@@ -508,6 +508,15 @@ components:
         subjectid:
           type: string
           description: 'FK ID of Subject having the permission'
+        resourceid:
+          type: string
+          description: 'FK ID of Resource'
+        resourceactionid:
+          type: string
+          description: 'FK ID of Resource Action'
+        subjectgroupid:
+          type: string
+          description: 'FK ID of Subject Group having the permission'
   requestBodies:
     SubjectPermission:
       content:
