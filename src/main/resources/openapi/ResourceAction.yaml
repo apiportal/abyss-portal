@@ -314,9 +314,9 @@ components:
         description:
           type: string
           description: 'Description of Action'
-        subjectpermissionid:
+        resourceid:
           type: string
-          description: 'FK ID of Subject Permission'
+          description: 'FK ID of resource having the action'
   requestBodies:
     ResourceAction:
       content:
