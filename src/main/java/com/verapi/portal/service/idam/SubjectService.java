@@ -89,7 +89,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getValue("picture"))
                             .add(jsonObj.getString("subjectdirectoryid"))
                             .add(jsonObj.getBoolean("islocked"))
-                            .add(jsonObj.getBoolean("issandbox"));
+                            .add(jsonObj.getBoolean("issandbox"))
+                            .add(jsonObj.getString("url"))
+                            .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -167,6 +169,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("subjectdirectoryid"))
                 .add(updateRecord.getBoolean("islocked"))
                 .add(updateRecord.getBoolean("issandbox"))
+                .add(updateRecord.getString("url"))
+                .add(updateRecord.containsKey("isrestrictedtoprocessing") ? updateRecord.getBoolean("isrestrictedtoprocessing") : false)
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -212,6 +216,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subjectdirectoryid"))
                             .add(jsonObj.getBoolean("islocked"))
                             .add(jsonObj.getBoolean("issandbox"))
+                            .add(jsonObj.getString("url"))
+                            .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -361,11 +367,11 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
             "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
-            "                     subjectdirectoryid, islocked, issandbox)\n" +
+            "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
             "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
-            "   CAST(? AS uuid), ?, ?)";
+            "   CAST(? AS uuid), ?, ?, ?, false)";
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +
@@ -402,7 +408,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  lastfailedloginat,\n" +
             "  subjectdirectoryid,\n" +
             "  islocked,\n" +
-            "  issandbox\n" +
+            "  issandbox,\n" +
+            "  url,\n" +
+            "  isrestrictedtoprocessing\n" +
             "from subject\n";
 
     private static final String SQL_UPDATE = "UPDATE subject\n" +
@@ -422,7 +430,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , picture             = ?\n" +
             "  , subjectdirectoryid = CAST(? AS uuid)\n" +
             "  , islocked = ?\n" +
-            "  , issandbox = ?\n";
+            "  , issandbox = ?\n" +
+            "  , url = ?\n" +
+            "  , isrestrictedtoprocessing = ?\n";
 
     private static final String SQL_CHANGE_PASSWORD = "update subject\n" +
             "set updated              = now()\n" +
