@@ -17,47 +17,47 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: SubjectMemberships
+  - name: SubjectOrganizations
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectMemberships crud operations'
-  - name: SubjectMembership
+    description: 'Abyss plaftorm APIs : SubjectOrganizations crud operations'
+  - name: SubjectOrganization
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectMembership crud operations'
-  - name: Subject-Memberships
+    description: 'Abyss plaftorm APIs : SubjectOrganization crud operations'
+  - name: Subject-Organizations
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s Memberships crud operations'
+    description: 'Abyss plaftorm APIs : Subject''s Organizations listing operations'
 paths:
-  /subject-memberships:
+  /subject-organizations:
     get:
       tags:
-        - SubjectMemberships
-      summary: 'Get list of SubjectMemberships'
-      description: 'Returns list of SubjectMemberships'
-      operationId: getSubjectMemberships
+        - SubjectOrganizations
+      summary: 'Get list of SubjectOrganizations'
+      description: 'Returns list of SubjectOrganizations'
+      operationId: getSubjectOrganizations
       parameters:
         - name: byname
           in: query
           required: false
           schema:
             type: string
-          description: 'search SubjectMemberships which names exact match'
+          description: 'search SubjectOrganizations which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: 'search SubjectMemberships which names begin with'
+          description: 'search SubjectOrganizations which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfSubjectMembership'
+          $ref: '#/components/responses/200-ListOfSubjectOrganization'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -76,10 +76,10 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - SubjectMemberships
-      summary: 'Add a bulk of SubjectMemberships'
-      description: 'Provide a list of SubjectMemberships to be inserted'
-      operationId: addSubjectMemberships
+        - SubjectOrganizations
+      summary: 'Add a bulk of SubjectOrganizations'
+      description: 'Provide a list of SubjectOrganizations to be inserted'
+      operationId: addSubjectOrganizations
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -100,13 +100,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfSubjectMembership'
+        $ref: '#/components/requestBodies/ListOfSubjectOrganization'
     put:
       tags:
-        - SubjectMemberships
-      summary: 'Update a bulk of SubjectMemberships'
-      description: 'Provide a bulk list of  SubjectMemberships to be updated'
-      operationId: updateSubjectMemberships
+        - SubjectOrganizations
+      summary: 'Update a bulk of SubjectOrganizations'
+      description: 'Provide a bulk list of  SubjectOrganizations to be updated'
+      operationId: updateSubjectOrganizations
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -127,13 +127,13 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
+        $ref: '#/components/requestBodies/ListOfSubjectOrganizationObject'
     delete:
       tags:
-        - SubjectMemberships
-      summary: 'Delete all SubjectMemberships'
-      description: 'Deletes all SubjectMemberships'
-      operationId: deleteSubjectMemberships
+        - SubjectOrganizations
+      summary: 'Delete all SubjectOrganizations'
+      description: 'Deletes all SubjectOrganizations'
+      operationId: deleteSubjectOrganizations
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -149,17 +149,17 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subject-memberships/{uuid}:
+  /subject-organizations/{uuid}:
     get:
       tags:
-        - SubjectMembership
-      summary: 'Get an existing SubjectMembership by uuid'
-      description: 'Provide an uuid of SubjectMembership to be get'
-      operationId: getSubjectMembership
+        - SubjectOrganization
+      summary: 'Get an existing SubjectOrganization by uuid'
+      description: 'Provide an uuid of SubjectOrganization to be get'
+      operationId: getSubjectOrganization
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of SubjectMembership that need to be get'
+          description: 'uuid of SubjectOrganization that need to be get'
           required: true
           schema:
             type: string
@@ -184,14 +184,14 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - SubjectMembership
-      summary: 'Update an existing SubjectMembership'
-      description: 'Provide an altered SubjectMembership to be updated'
-      operationId: updateSubjectMembership
+        - SubjectOrganization
+      summary: 'Update an existing SubjectOrganization'
+      description: 'Provide an altered SubjectOrganization to be updated'
+      operationId: updateSubjectOrganization
       parameters:
         - name: uuid
           in: path
-          description: 'uuid of SubjectMembership that need to be updated'
+          description: 'uuid of SubjectOrganization that need to be updated'
           required: true
           schema:
             type: string
@@ -215,17 +215,17 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/SubjectMembership'
+        $ref: '#/components/requestBodies/SubjectOrganization'
     delete:
       tags:
-        - SubjectMembership
-      summary: 'Delete SubjectMembership'
-      description: 'Provide an uuid parameter of SubjectMembership to be updated'
-      operationId: deleteSubjectMembership
+        - SubjectOrganization
+      summary: 'Delete SubjectOrganization'
+      description: 'Provide an uuid parameter of SubjectOrganization to be updated'
+      operationId: deleteSubjectOrganization
       parameters:
         - name: uuid
           in: path
-          description: 'The uuid of SubjectMembership that needs to be deleted'
+          description: 'The uuid of SubjectOrganization that needs to be deleted'
           required: true
           schema:
             type: string
@@ -246,38 +246,37 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subject-memberships/subject/{uuid}:
-    parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Subject'
-        required: true
-        schema:
-          type: string
+  /subject-organizations/subject/{uuid}:
     get:
       tags:
-        - Subject-Memberships
-      summary: 'Get list of SubjectMemberships'
-      description: 'Returns list of SubjectMemberships'
-      operationId: getMembershipsOfSubject
+        - Subject-Organizations
+      summary: 'Get organization list of subject'
+      description: 'Returns organization list of subject'
+      operationId: getOrganizationsOfSubject
       parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of subject'
+          required: true
+          schema:
+            type: string
         - name: byname
           in: query
           required: false
           schema:
             type: string
-          description: 'search SubjectMemberships which names exact match'
+          description: 'search organizations which names exact match'
         - name: likename
           in: query
           required: false
           schema:
             type: string
-          description: 'search SubjectMemberships which names begin with'
+          description: 'search organizations which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfSubjectMembership'
+          $ref: '#/components/responses/200-ListOfSubjectOrganization'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -288,81 +287,6 @@ paths:
           $ref: '#/components/responses/404'
         '422':
           $ref: '#/components/responses/422'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        default:
-          $ref: '#/components/responses/default'
-    post:
-      tags:
-        - Subject-Memberships
-      summary: 'Add a bulk of SubjectMemberships'
-      description: 'Provide a list of SubjectMemberships to be inserted'
-      operationId: addMembershipsOfSubject
-      responses:
-        '207':
-          $ref: '#/components/responses/207'
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        default:
-          $ref: '#/components/responses/default'
-      requestBody:
-        $ref: '#/components/requestBodies/ListOfSubjectMembership'
-    put:
-      tags:
-        - Subject-Memberships
-      summary: 'Update a bulk of SubjectMemberships'
-      description: 'Provide a bulk list of  SubjectMemberships to be updated'
-      operationId: updateMembershipsOfSubject
-      responses:
-        '207':
-          $ref: '#/components/responses/207'
-        '400':
-          $ref: '#/components/responses/400'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '422':
-          $ref: '#/components/responses/422'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-        default:
-          $ref: '#/components/responses/default'
-      requestBody:
-        $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
-    delete:
-      tags:
-        - Subject-Memberships
-      summary: 'Delete all SubjectMemberships'
-      description: 'Deletes all SubjectMemberships'
-      operationId: deleteMembershipsOfSubject
-      responses:
-        '204':
-          $ref: '#/components/responses/204'
-        '401':
-          $ref: '#/components/responses/401'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -408,10 +332,10 @@ components:
           readOnly: true
           description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
         response:
-          $ref: '#/components/schemas/SubjectMembership'
+          $ref: '#/components/schemas/SubjectOrganization'
         error:
           $ref: '#/components/schemas/Error'
-    SubjectMembership:
+    SubjectOrganization:
       type: object
       properties:
         uuid:
@@ -442,34 +366,34 @@ components:
           description: 'ID of Subject that reads, creates, updates or deletes'
         subjectid:
           type: string
-          description: 'Id of Member User'
-        subjectgroupid:
+          description: 'FK ID of Subject'
+        organizationrefid:
           type: string
-          description: 'FK ID of Subject Group that Subject is member'
+          description: 'FK ID of Organization'
   requestBodies:
-    SubjectMembership:
+    SubjectOrganization:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SubjectMembership'
-      description: 'SubjectMembership object that needs to be added or updated'
+            $ref: '#/components/schemas/SubjectOrganization'
+      description: 'SubjectOrganization object that needs to be added or updated'
       required: true
-    ListOfSubjectMembership:
+    ListOfSubjectOrganization:
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/SubjectMembership'
-      description: 'SubjectMembership array that needs to be added'
+              $ref: '#/components/schemas/SubjectOrganization'
+      description: 'SubjectOrganization array that needs to be added'
       required: true
-    ListOfSubjectMembershipObject:
+    ListOfSubjectOrganizationObject:
       content:
         application/json:
           schema:
             type: object
             additionalProperties: true
-      description:  'list of SubjectMembership objects that needs to be updated, each additional property name should be the uuid of coresponding SubjectMembership record'
+      description:  'list of SubjectOrganization objects that needs to be updated, each additional property name should be the uuid of coresponding SubjectOrganization record'
       required: true
   responses:
     '200':
@@ -477,23 +401,23 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SubjectMembership'
-    '200-ListOfSubjectMembership':
-      description: 'A SubjectMembership array'
+            $ref: '#/components/schemas/SubjectOrganization'
+    '200-ListOfSubjectOrganization':
+      description: 'A SubjectOrganization array'
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: '#/components/schemas/SubjectMembership'
+              $ref: '#/components/schemas/SubjectOrganization'
     '201':
-      description: 'New SubjectMembership resource has been created'
+      description: 'New SubjectOrganization resource has been created'
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SubjectMembership'
+            $ref: '#/components/schemas/SubjectOrganization'
     '204':
-      description: 'The SubjectMembership resource was successfully deleted'
+      description: 'The SubjectOrganization resource was successfully deleted'
     '207':
       description: 'Multi Status for bulk operation'
       content:
@@ -507,7 +431,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/SubjectMembership'
+            $ref: '#/components/schemas/SubjectOrganization'
     '400':
       description: 'Invalid UUID supplied'
       content:
