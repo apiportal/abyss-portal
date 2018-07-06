@@ -314,9 +314,9 @@ components:
         description:
           type: string
           description: 'Description of Action'
-        resourceid:
+        resourcetypeid:
           type: string
-          description: 'FK ID of resource having the action'
+          description: 'FK ID of Resource Type'
   requestBodies:
     ResourceAction:
       content:
