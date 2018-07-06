@@ -318,6 +318,9 @@ components:
         description:
           type: string
           description: 'Description of organization'
+        url:
+          type: string
+          description: 'URL / Website of Organization'
   requestBodies:
     Organization:
       content:

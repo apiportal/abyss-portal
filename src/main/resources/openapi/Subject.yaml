@@ -689,7 +689,7 @@ components:
           description: 'Url / Web Site Address of Subject (User or APP)'
         isrestrictedtoprocessing:
           type: boolean
-          description: 'Is Subject Data Restricted to Processing - GDPR - https://github.com/vert-x3/vertx-auth/pull/184/files'
+          description: 'Is Subject Data Restricted to Processing - GDPR Compliance'
     SubjectChangePassword:
       type: object
       properties:

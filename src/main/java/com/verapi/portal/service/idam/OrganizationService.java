@@ -53,7 +53,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("description"));
+                            .add(jsonObj.getString("description"))
+                            .add(jsonObj.getString("url"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -105,6 +106,7 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("name"))
                 .add(updateRecord.getString("description"))
+                .add(updateRecord.getString("url"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -124,6 +126,7 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("name"))
                             .add(jsonObj.getString("description"))
+                            .add(jsonObj.getString("url"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -211,8 +214,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into organization (organizationid, crudsubjectid, name, description)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,? ,?)";
+    private static final String SQL_INSERT = "insert into organization (organizationid, crudsubjectid, name, description, url)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?)";
 
     private static final String SQL_DELETE = "update organization\n" +
             "set\n" +
@@ -228,7 +231,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
             "  name,\n" +
-            "  description\n" +
+            "  description,\n" +
+            "  url\n" +
             "from organization\n";
 
     private static final String SQL_UPDATE = "UPDATE organization\n" +
@@ -237,7 +241,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
-            "  , description      = ?\n";
+            "  , description      = ?\n" +
+            "  , url      = ?\n";
 
     private static final String SQL_AND = "and\n";
 
