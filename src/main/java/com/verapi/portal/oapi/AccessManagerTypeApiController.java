@@ -11,6 +11,7 @@
 
 package com.verapi.portal.oapi;
 
+import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.AccessManagerTypeService;
 import io.vertx.core.json.JsonArray;
@@ -24,11 +25,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/AccessManagerType.yaml")
 public class AccessManagerTypeApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(AccessManagerTypeApiController.class);
+
+    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
+        add(Constants.JSONB_COLUMN_ACCESS_MANAGER_TYPE_TEMPLATE);
+    }};
+
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -44,7 +52,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getAccessManagerTypes(RoutingContext routingContext) {
         try {
-            getEntities(routingContext, AccessManagerTypeService.class);
+            getEntities(routingContext, AccessManagerTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -61,7 +69,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
         try {
-            addEntities(routingContext, AccessManagerTypeService.class, requestBody);
+            addEntities(routingContext, AccessManagerTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -79,7 +87,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, AccessManagerTypeService.class, requestBody);
+            updateEntities(routingContext, AccessManagerTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -104,7 +112,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntity(routingContext, AccessManagerTypeService.class);
+            getEntity(routingContext, AccessManagerTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -122,7 +130,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, AccessManagerTypeService.class, requestBody);
+            updateEntity(routingContext, AccessManagerTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
