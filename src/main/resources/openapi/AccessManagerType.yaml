@@ -1,0 +1,480 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
+info:
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: 'info@apiportal.com'
+    name: 'Abyss'
+    url: 'https://apiportal.com'
+  license:
+    name: 'Abyss 1.0'
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: AccessManagerTypes
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : AccessManagerTypes crud operations'
+  - name: AccessManagerType
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : AccessManagerType crud operations'
+paths:
+  /access-manager-types:
+    get:
+      tags:
+        - AccessManagerTypes
+      summary: 'Get list of AccessManagerTypes'
+      description: 'Returns list of AccessManagerTypes'
+      operationId: getAccessManagerTypes
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search AccessManagerTypes which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search AccessManagerTypes which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfAccessManagerType'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - AccessManagerTypes
+      summary: 'Add a bulk of AccessManagerTypes'
+      description: 'Provide a list of AccessManagerTypes to be inserted'
+      operationId: addAccessManagerTypes
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfAccessManagerType'
+    put:
+      tags:
+        - AccessManagerTypes
+      summary: 'Update a bulk of AccessManagerTypes'
+      description: 'Provide a bulk list of  AccessManagerTypes to be updated'
+      operationId: updateAccessManagerTypes
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfAccessManagerTypeObject'
+    delete:
+      tags:
+        - AccessManagerTypes
+      summary: 'Delete all AccessManagerTypes'
+      description: 'Deletes all AccessManagerTypes'
+      operationId: deleteAccessManagerTypes
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /access-manager-types/{uuid}:
+    get:
+      tags:
+        - AccessManagerType
+      summary: 'Get an existing AccessManagerType by uuid'
+      description: 'Provide an uuid of AccessManagerType to be get'
+      operationId: getAccessManagerType
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of AccessManagerType that need to be get'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    put:
+      tags:
+        - AccessManagerType
+      summary: 'Update an existing AccessManagerType'
+      description: 'Provide an altered AccessManagerType to be updated'
+      operationId: updateAccessManagerType
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of AccessManagerType that need to be updated'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/AccessManagerType'
+    delete:
+      tags:
+        - AccessManagerType
+      summary: 'Delete AccessManagerType'
+      description: 'Provide an uuid parameter of AccessManagerType to be updated'
+      operationId: deleteAccessManagerType
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of AccessManagerType that needs to be deleted'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+externalDocs:
+  description: 'See Abyss example'
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    MultiStatus:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'uuid of the record'
+        status:
+          type: integer
+          readOnly: true
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
+        response:
+          $ref: '#/components/schemas/AccessManagerType'
+        error:
+          $ref: '#/components/schemas/Error'
+    AccessManagerType:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
+        organizationid:
+          type: string
+          description: 'Id of Organization'
+        created:
+          type: string
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
+        updated:
+          type: string
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
+        deleted:
+          type: string
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
+        crudsubjectid:
+          type: string
+          description: 'ID of Subject that reads, creates, updates or deletes'
+        typename:
+          type: string
+          description: 'Access Manager Type Name'
+        description:
+          type: string
+          description: 'Description of Access Manager Type'
+        attributetemplate:
+          type: object
+          description: 'Access Manager Attributes Template'
+  requestBodies:
+    AccessManagerType:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessManagerType'
+      description: 'AccessManagerType object that needs to be added or updated'
+      required: true
+    ListOfAccessManagerType:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AccessManagerType'
+      description: 'AccessManagerType array that needs to be added'
+      required: true
+    ListOfAccessManagerTypeObject:
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+      description:  'list of AccessManagerType objects that needs to be updated, each additional property name should be the uuid of coresponding AccessManagerType record'
+      required: true
+  responses:
+    '200':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessManagerType'
+    '200-ListOfAccessManagerType':
+      description: 'A AccessManagerType array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AccessManagerType'
+    '201':
+      description: 'New AccessManagerType resource has been created'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessManagerType'
+    '204':
+      description: 'The AccessManagerType resource was successfully deleted'
+    '207':
+      description: 'Multi Status for bulk operation'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/MultiStatus'
+    '304':
+      description: 'Not Modified – The client can use cached data'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AccessManagerType'
+    '400':
+      description: 'Invalid UUID supplied'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'Authorization information is missing or invalid'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: 'Not found – There is no resource behind the URI'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: 'Method not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: 'Unprocessable Entity – server cannot process the request'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: 'Too many request(rate limiting)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: 'Internal server error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: 'error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: 'The number of items to skip before starting to collect the result set'
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: 'The numbers of items to return'
+  securitySchemes:
+    abyssCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+    abyssHttpBasicAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+    abyssApiKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+    abyssJWTBearerAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+  links: {}
+  callbacks: {}
+security:
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []
