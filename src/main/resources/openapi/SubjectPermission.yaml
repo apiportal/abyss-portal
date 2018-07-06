@@ -517,6 +517,9 @@ components:
         subjectgroupid:
           type: string
           description: 'FK ID of Subject Group having the permission'
+        accessmanagerid:
+          type: string
+          description: 'FK ID of Access Manager'
   requestBodies:
     SubjectPermission:
       content:
