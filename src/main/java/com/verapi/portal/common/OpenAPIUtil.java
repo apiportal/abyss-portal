@@ -13,6 +13,7 @@ package com.verapi.portal.common;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
 import io.reactivex.Single;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -77,7 +78,7 @@ public class OpenAPIUtil {
             } else {
                 //there are parse validation errors, so return eror message array
                 swaggerParseResult.getMessages().forEach(jsonArray::add);
-                return Single.error(new Exception(jsonArray.encode()));
+                return Single.error(new UnProcessableEntity422Exception(jsonArray.encode()));
             }
         } catch (Exception e) {
             logger.error("openAPIParser error | {} | {}", e.getLocalizedMessage(), e.getStackTrace());
