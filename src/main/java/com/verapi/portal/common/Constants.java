@@ -194,5 +194,6 @@ public class Constants {
     public static final String JSONB_COLUMN_LICENSE_LICENSEDOCUMENT = "licensedocument";
     public static final String JSONB_COLUMN_POLICY_TYPE_TEMPLATE = "template";
     public static final String JSONB_COLUMN_ACCESS_MANAGER_TYPE_TEMPLATE = "attributetemplate";
+    public static final String JSONB_COLUMN_ACCESS_MANAGER_ATTRIBUTES = "accessmanagerattributes";
 
 }
