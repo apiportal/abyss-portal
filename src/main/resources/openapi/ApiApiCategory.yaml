@@ -276,7 +276,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApiApiCategory'
+          $ref: '#/components/responses/200-ListOfApiCategory'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -323,7 +323,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApiApiCategory'
+          $ref: '#/components/responses/200-ListOfApiCategory'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -370,7 +370,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApiApiCategory'
+          $ref: '#/components/responses/200-ListOfApiCategory'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -417,7 +417,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApiApiCategory'
+          $ref: '#/components/responses/200-ListOfApiCategory'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -511,6 +511,16 @@ components:
         apicategoryid:
           type: string
           description: 'FK UUID of API category for many to many relationship of API categories'
+    ApiCategory:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'API category uuid'
+        name:
+          type: string
+          description: 'API category name'
   requestBodies:
     ApiApiCategory:
       content:
@@ -544,13 +554,21 @@ components:
           schema:
             $ref: '#/components/schemas/ApiApiCategory'
     '200-ListOfApiApiCategory':
-      description: 'A ApiApiCategory array'
+      description: 'An ApiApiCategory array'
       content:
         application/json:
           schema:
             type: array
             items:
               $ref: '#/components/schemas/ApiApiCategory'
+    '200-ListOfApiCategory':
+      description: 'An ApiCategory array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiCategory'
     '201':
       description: 'New ApiApiCategory resource has been created'
       content:
