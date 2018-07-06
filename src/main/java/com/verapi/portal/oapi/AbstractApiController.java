@@ -477,7 +477,7 @@ public abstract class AbstractApiController implements IApiController {
                 });
     }
 
-    private void subscribeAndResponseBulk(RoutingContext routingContext, Single<JsonArray> jsonArraySingle, int httpResponseStatus) {
+    protected void subscribeAndResponseBulk(RoutingContext routingContext, Single<JsonArray> jsonArraySingle, int httpResponseStatus) {
         jsonArraySingle.subscribe(resp -> {
                     routingContext.response()
                             .putHeader("content-type", "application/json; charset=utf-8")

@@ -17,6 +17,7 @@ import io.reactivex.Single;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.contract.RouterFactoryException;
 import org.apache.commons.lang3.StringUtils;
@@ -57,4 +58,31 @@ public class OpenAPIUtil {
             return Single.error(RouterFactoryException.createSpecInvalidException(e.getLocalizedMessage()));
         }
     }
+
+    public static Single<JsonArray> openAPIParser(String apiSpec) {
+        logger.trace("---openAPIParser invoked");
+        ObjectMapper mapper;
+        try {
+            if (apiSpec.trim().startsWith("{")) {
+                mapper = ObjectMapperFactory.createJson();
+            } else {
+                mapper = ObjectMapperFactory.createYaml();
+            }
+            JsonNode rootNode = mapper.readTree(apiSpec);
+            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readWithInfo(rootNode);
+            JsonArray jsonArray = new JsonArray();
+            if (swaggerParseResult.getMessages().size() == 0) {
+                //no result message means openapi spec is valid, it is OK, so return empty error message array
+                return Single.just(jsonArray);
+            } else {
+                //there are parse validation errors, so return eror message array
+                swaggerParseResult.getMessages().forEach(jsonArray::add);
+                return Single.error(new Exception(jsonArray.encode()));
+            }
+        } catch (Exception e) {
+            logger.error("openAPIParser error | {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+            return Single.error(RouterFactoryException.createSpecInvalidException(e.getLocalizedMessage()));
+        }
+    }
+
 }

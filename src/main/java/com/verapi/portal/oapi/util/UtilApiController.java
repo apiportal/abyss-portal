@@ -11,12 +11,15 @@
 
 package com.verapi.portal.oapi.util;
 
+import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.common.PlatformAPIList;
 import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.AbyssApiController;
 import com.verapi.portal.oapi.AbyssApiOperationHandler;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.web.Router;
@@ -46,6 +49,24 @@ public class UtilApiController extends AbstractApiController {
         try {
             logger.trace("getYamlFileList invoked");
             subscribeAndResponse(routingContext, PlatformAPIList.getInstance().getPlatformAPIList(), HttpResponseStatus.OK.code());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void validateOpenAPIv3Spec(RoutingContext routingContext) {
+        try {
+            logger.trace("validateOpenAPIv3Spec invoked");
+            // Get the parsed parameters
+            RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+            // We get an user JSON array validated by Vert.x Open API validator
+            JsonObject requestBody = requestParameters.body().getJsonObject();
+
+            subscribeAndResponseBulk(routingContext, OpenAPIUtil.openAPIParser(requestBody.getJsonObject("spec").encode()), HttpResponseStatus.OK.code());
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));

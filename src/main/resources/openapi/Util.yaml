@@ -21,7 +21,12 @@ tags:
     externalDocs:
       url: 'https://apiportal.com'
       description: 'Find out more'
-    description: 'Abyss plaftorm APIs : File Util operations'
+    description: 'Abyss plaftorm APIs : File Utility operations'
+  - name: OpenAPI Utils
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : OpenAPI Utility operations'
 paths:
   /yaml-files:
     get:
@@ -49,6 +54,34 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /validate-oas:
+    post:
+      tags:
+        - OpenAPI Utils
+      summary: 'Get list of Platform OpenAPI yaml files'
+      description: 'Returns list of Platform OpenAPI yaml files'
+      operationId: validateOpenAPIv3Spec
+      responses:
+        '200':
+          $ref: '#/components/responses/200-OASValidationSuccessful'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/OpenApiSpec'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -79,8 +112,21 @@ components:
       properties:
         filename:
           type: string
-          readOnly: true
           description: 'yaml file name'
+    OpenApiSpec:
+      type: object
+      properties:
+        spec:
+          type: object
+          description: 'open api spec'
+  requestBodies:
+    OpenApiSpec:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/OpenApiSpec'
+      description: 'open api spec'
+      required: true
   responses:
     '200':
       description: 'Successful operation'
@@ -96,6 +142,8 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/YamlFile'
+    '200-OASValidationSuccessful':
+      description: 'OAS spec is validated successfully'
     '304':
       description: 'Not Modified – The client can use cached data'
       content:
