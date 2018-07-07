@@ -290,6 +290,8 @@ public class ContractService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_APPID_IS = "subjectid = CAST(? AS uuid)\n";
 
+    private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
+
     private static final String SQL_ORDERBY_NAME = "order by name\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
@@ -311,6 +313,8 @@ public class ContractService extends AbstractService<UpdateResult> {
     public static final String FILTER_BY_APIID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
 
     public static final String FILTER_BY_APPID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPID_IS;
+
+    public static final String FILTER_BY_LICENSEID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
