@@ -13,9 +13,16 @@ package com.verapi.portal.controller;
 
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.service.ApiFilterQuery;
+import com.verapi.portal.service.idam.OrganizationService;
+import com.verapi.portal.service.idam.SubjectOrganizationService;
 import com.verapi.portal.service.idam.SubjectService;
+import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
@@ -24,7 +31,9 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 
 @AbyssController(routePathGET = "login", routePathPOST = "login-auth", htmlTemplateFile = "login.html", isPublic = true)
 public class LoginController extends PortalAbstractController {
@@ -80,13 +89,66 @@ public class LoginController extends PortalAbstractController {
                                 routingContext.session().put("user.uuid", userUUID);
                                 routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)
                                         .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
+
                                 logger.debug("Logged in user: " + user.principal().encodePrettily());
                                 routingContext.put("username", user.principal().getString("username"));
-                                redirect(routingContext, Constants.ABYSS_ROOT + "/index");
+                                //redirect(routingContext, Constants.ABYSS_ROOT + "/index");
+
+                                // --------- getOrganizationListOfSubject(userUUID);--------------
+                                SubjectOrganizationService subjectOrganizationService = new SubjectOrganizationService(routingContext.vertx());
+
+                                subjectOrganizationService.initJDBCClient()
+                                        .flatMap(jdbcClient -> subjectOrganizationService.findAll(new ApiFilterQuery()
+                                                .setFilterQuery(SubjectOrganizationService.FILTER_BY_SUBJECT)
+                                                .setFilterQueryParams(new JsonArray().add(userUUID)))
+                                        )
+                                        .flatMap(resultSet -> {
+                                            logger.trace(resultSet.toJson().encodePrettily());
+                                            return Single.just(resultSet);
+                                        })
+                                        .flatMap(userOrganizations -> {
+                                            if (userOrganizations.getNumRows() == 0) {
+                                                return Single.just(new ArrayList<JsonObject>());
+                                            } else {
+                                                OrganizationService organizationService = new OrganizationService(routingContext.vertx());
+
+                                                return organizationService.initJDBCClient()
+                                                        .flatMap(jdbcClient -> {
+
+                                                            JsonArray userOrganizationArray = new JsonArray();
+                                                            Observable<JsonObject> observable = Observable.fromIterable(userOrganizations.getRows());
+
+                                                            return observable
+                                                                    .flatMap(entries -> organizationService.findById(UUID.fromString(entries.getString("organizationrefid"))).toObservable())
+                                                                    .flatMap(resultSet -> {
+
+                                                                        //userOrganizationArray.add(
+                                                                        return Observable.just(new JsonObject()
+                                                                                .put("uuid", resultSet.getRows().get(0).getString("uuid"))
+                                                                                .put("name", resultSet.getRows().get(0).getString("name"))
+                                                                        );
+                                                                    }).toList();
+                                                        });
+                                            }
+                                        })
+                                        .subscribe(jsonObjects -> {
+                                                    if (jsonObjects.isEmpty()) {
+                                                        redirect(routingContext, Constants.ABYSS_ROOT + "/create-organization"); //Render src\main\resources\webroot\create-organization.html
+                                                    } else {
+                                                        JsonArray jsonArray = new JsonArray(jsonObjects);
+                                                        logger.trace("LoginController.handle() findByIdResult.subscribe result: {}", jsonArray);
+                                                        routingContext.session().put("userOrganizationArray", jsonArray);
+                                                        redirect(routingContext, Constants.ABYSS_ROOT + "/select-organization"); //Render src\main\resources\webroot\select-organization.html
+
+                                                    }
+                                                }
+                                                , throwable -> {
+                                                    logger.error("LoginController.handle() findByIdResult.subscribe replied error {} | {}: ", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                                });
+
                             },
                             throwable -> {
-                                logger.error("LoginController.handle() subjectService.findBySubjectName replied error : ", throwable.getLocalizedMessage());
-                                logger.error("LoginController.handle() subjectService.findBySubjectName replied error : ", Arrays.toString(throwable.getStackTrace()));
+                                logger.error("LoginController.handle() subjectService.findBySubjectName replied error {} | {}: ", throwable.getLocalizedMessage(), throwable.getStackTrace());
                             });
                 } catch (Exception e) {
                     logger.error("LoginController.handle() subjectService error : ", Arrays.toString(e.getStackTrace()));
