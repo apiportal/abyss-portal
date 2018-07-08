@@ -78,7 +78,9 @@ public class SubjectApiController extends AbstractApiController {
             String hash = authProvider.computeHash(((JsonObject) requestItem).getString("password"), salt);
             ((JsonObject) requestItem).put("password", hash);
             ((JsonObject) requestItem).put("passwordsalt", salt);
-            if ((!((JsonObject) requestItem).containsKey("picture")) || (((JsonObject) requestItem).getValue("picture") == null))
+            if ((!((JsonObject) requestItem).containsKey("picture")) ||
+                    (((JsonObject) requestItem).getValue("picture") == null) ||
+                    (((JsonObject) requestItem).getValue("picture") == ""))
                 try {
                     //insert default avatar image TODO: later use request base
                     ClassLoader classLoader = getClass().getClassLoader();

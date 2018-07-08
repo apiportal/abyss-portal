@@ -35,12 +35,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class SubjectService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(SubjectService.class);
@@ -81,9 +83,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("lastname"))
                             .add(jsonObj.getString("displayname"))
                             .add(jsonObj.getString("email"))
-                            .add(jsonObj.containsKey("secondaryemail") ? jsonObj.getString("secondaryemail") : null)
+                            .add(jsonObj.containsKey("secondaryemail") ? jsonObj.getString("secondaryemail") : "")
                             .add(jsonObj.getInstant("effectivestartdate"))
-                            .add(jsonObj.containsKey("effectiveenddate") ? jsonObj.getInstant("effectiveenddate") : null)
+                            .add(jsonObj.containsKey("effectiveenddate") ? jsonObj.getInstant("effectiveenddate") : Instant.now().plus(90, DAYS))
                             .add(jsonObj.getString("password"))
                             .add(jsonObj.getString("passwordsalt"))
                             .add(jsonObj.getValue("picture"))
@@ -158,9 +160,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("lastname"))
                 .add(updateRecord.getString("displayname"))
                 .add(updateRecord.getString("email"))
-                .add(updateRecord.containsKey("secondaryemail") ? updateRecord.getString("secondaryemail") : null)
+                .add(updateRecord.containsKey("secondaryemail") ? updateRecord.getString("secondaryemail") : "")
                 .add(updateRecord.getInstant("effectivestartdate"))
-                .add(updateRecord.containsKey("effectiveenddate") ? updateRecord.getInstant("effectiveenddate") : null)
+                .add(updateRecord.containsKey("effectiveenddate") ? updateRecord.getInstant("effectiveenddate") : Instant.now().plus(90, DAYS))
 /*
                 .add(updateRecord.getString("password"))
                 .add(updateRecord.getString("passwordsalt"))
@@ -205,9 +207,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("lastname"))
                             .add(jsonObj.getString("displayname"))
                             .add(jsonObj.getString("email"))
-                            .add(jsonObj.containsKey("secondaryemail") ? jsonObj.getString("secondaryemail") : null)
+                            .add(jsonObj.containsKey("secondaryemail") ? jsonObj.getString("secondaryemail") : "")
                             .add(jsonObj.getInstant("effectivestartdate"))
-                            .add(jsonObj.containsKey("effectiveenddate") ? jsonObj.getInstant("effectiveenddate") : null)
+                            .add(jsonObj.containsKey("effectiveenddate") ? jsonObj.getInstant("effectiveenddate") : Instant.now().plus(90, DAYS))
 /*
                             .add(jsonObj.getString("password"))
                             .add(jsonObj.getString("passwordsalt"))
@@ -371,7 +373,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
             "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
-            "   CAST(? AS uuid), ?, ?, ?, false)";
+            "   CAST(? AS uuid), ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +
