@@ -24,7 +24,7 @@ public class Constants {
     public static final String HOST = "host";
     public static final String ISSANDBOX = "issandbox";
 
-    public static final String BROWSER_SESSION_TIMEOUT = "browser.session.timeout";
+    public static final String SESSION_IDLE_TIMEOUT = "session.idle.timeout";
 
     public static final String HTTP_ECHO_SERVER_HOST = "http.echo.server.host";
     public static final String HTTP_ECHO_SERVER_PORT = "http.echo.server.port";

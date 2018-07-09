@@ -72,6 +72,8 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
             context.user().clearCache();
             context.clearUser();
 
+            context.session().remove("user.login.organization.name");
+            context.session().remove("user.login.organization.uuid");
 
             logger.trace("Cookie list before logout:");
             for (Cookie c : context.cookies()) {
@@ -81,6 +83,9 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
             context.removeCookie("abyss.principal.uuid");
             context.removeCookie("abyss.session");
             context.removeCookie("abyss_principal"); //TODO: Bunu kim koyuyor?
+
+            context.removeCookie("user.login.organization.name");
+            context.removeCookie("user.login.organization.uuid");
 
             logger.trace("Cookie list after logout:");
             for (Cookie c : context.cookies()) {

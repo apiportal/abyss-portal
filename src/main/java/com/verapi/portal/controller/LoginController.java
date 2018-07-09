@@ -21,8 +21,6 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
@@ -87,8 +85,8 @@ public class LoginController extends PortalAbstractController {
                                 user.principal().put("user.uuid", userUUID);
                                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                                 routingContext.session().put("user.uuid", userUUID);
-                                routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)
-                                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
+                                routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID));
+//                                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                                 logger.debug("Logged in user: " + user.principal().encodePrettily());
                                 routingContext.put("username", user.principal().getString("username"));

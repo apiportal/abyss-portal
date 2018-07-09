@@ -295,14 +295,14 @@ public abstract class AbstractApiController implements IApiController {
                                 });
 
                         apiResponse.subscribe(resp -> {
-                                    logger.trace("LoginController.handle() subjectService.findBySubjectName replied successfully " + resp.encodePrettily());
+                                    logger.trace("abyssHttpBasicAuthSecurityHandler() subjectService.findBySubjectName replied successfully " + resp.encodePrettily());
                                     User user = authResult.result();
                                     String userUUID = resp.getString("uuid");
                                     user.principal().put("user.uuid", userUUID);
                                     routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                                     routingContext.session().put("user.uuid", userUUID);
-                                    routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)
-                                            .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
+                                    routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID));
+//                                            .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
                                     logger.trace("Logged in user: " + user.principal().encodePrettily());
                                     routingContext.put("username", user.principal().getString("username"));
 

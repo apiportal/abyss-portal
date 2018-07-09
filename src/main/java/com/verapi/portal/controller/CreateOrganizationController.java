@@ -11,20 +11,13 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.key.generate.impl.Token;
-import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.MailUtil;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.OrganizationService;
 import com.verapi.portal.service.idam.SubjectOrganizationService;
 import io.reactivex.Single;
-import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Cookie;
@@ -34,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
 
 @AbyssController(routePathGET = "create-organization", routePathPOST = "create-organization", htmlTemplateFile = "create-organization.html", isPublic = true)
 public class CreateOrganizationController extends PortalAbstractController {
@@ -119,10 +111,10 @@ public class CreateOrganizationController extends PortalAbstractController {
                         routingContext.session().put("user.login.organization.name", userLoginOrganizationName);
                         routingContext.session().put("user.login.organization.uuid", userLoginOrganizationUUID);
 
-                        routingContext.addCookie(Cookie.cookie("abyss.login.organization.name", userLoginOrganizationName)
-                                .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
-                        routingContext.addCookie(Cookie.cookie("abyss.login.organization.uuid", userLoginOrganizationUUID)
-                                .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
+                        routingContext.addCookie(Cookie.cookie("abyss.login.organization.name", userLoginOrganizationName));
+//                                .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
+                        routingContext.addCookie(Cookie.cookie("abyss.login.organization.uuid", userLoginOrganizationUUID));
+//                                .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                         redirect(routingContext, Constants.ABYSS_ROOT + "/index");
 

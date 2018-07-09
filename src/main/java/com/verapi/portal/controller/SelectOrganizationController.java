@@ -11,13 +11,8 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.key.generate.impl.Token;
-import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.MailUtil;
-import io.reactivex.Single;
-import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -30,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.List;
 
 @AbyssController(routePathGET = "select-organization", routePathPOST = "select-organization", htmlTemplateFile = "select-organization.html", isPublic = true)
 public class SelectOrganizationController extends PortalAbstractController {
@@ -91,10 +85,10 @@ public class SelectOrganizationController extends PortalAbstractController {
                 routingContext.session().put("user.login.organization.name", userLoginOrganizationName);
                 routingContext.session().put("user.login.organization.uuid", userLoginOrganizationUUID);
 
-                routingContext.addCookie(Cookie.cookie("abyss.login.organization.name", userLoginOrganizationName)
-                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
-                routingContext.addCookie(Cookie.cookie("abyss.login.organization.uuid", userLoginOrganizationUUID)
-                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.BROWSER_SESSION_TIMEOUT) * 60));
+                routingContext.addCookie(Cookie.cookie("abyss.login.organization.name", userLoginOrganizationName));
+//                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
+                routingContext.addCookie(Cookie.cookie("abyss.login.organization.uuid", userLoginOrganizationUUID));
+//                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                 redirect(routingContext, Constants.ABYSS_ROOT + "/index");
 
