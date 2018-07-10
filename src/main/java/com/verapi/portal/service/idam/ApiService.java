@@ -12,6 +12,7 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
@@ -297,27 +298,27 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  api.deleted,\n" +
             "  api.isdeleted,\n" +
             "  api.crudsubjectid,\n" +
-            "  isproxyapi,\n" +
-            "  subjectid,\n" +
-            "  apistateid,\n" +
-            "  apivisibilityid,\n" +
-            "  languagename,\n" +
-            "  languageversion,\n" +
-            "  languageformat,\n" +
-            "  originaldocument,\n" +
-            "  openapidocument::JSON,\n" +
-            "  extendeddocument::JSON,\n" +
-            "  businessapiid,\n" +
-            "  image,\n" +
-            "  color,\n" +
-            "  deployed,\n" +
-            "  changelog,\n" +
-            "  apioriginuuid,\n" +
-            "  version,\n" +
-            "  issandbox,\n" +
-            "  islive,\n" +
-            "  isdefaultversion,\n" +
-            "  islatestversion\n" +
+            "  api.isproxyapi,\n" +
+            "  api.subjectid,\n" +
+            "  api.apistateid,\n" +
+            "  api.apivisibilityid,\n" +
+            "  api.languagename,\n" +
+            "  api.languageversion,\n" +
+            "  api.languageformat,\n" +
+            "  api.originaldocument,\n" +
+            "  api.openapidocument::JSON,\n" +
+            "  api.extendeddocument::JSON,\n" +
+            "  api.businessapiid,\n" +
+            "  api.image,\n" +
+            "  api.color,\n" +
+            "  api.deployed,\n" +
+            "  api.changelog,\n" +
+            "  api.apioriginuuid,\n" +
+            "  api.version,\n" +
+            "  api.issandbox,\n" +
+            "  api.islive,\n" +
+            "  api.isdefaultversion,\n" +
+            "  api.islatestversion\n" +
             "from api\n";
     private static final String SQL_UPDATE = "UPDATE api\n" +
             "SET\n" +
@@ -409,6 +410,14 @@ public class ApiService extends AbstractService<UpdateResult> {
     public static final String FILTER_BY_SUBJECT_AND_GROUP = SQL_SELECT + ", api__api_group\n" +
             SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
             SQL_AND + SQL_CONDITION_GROUP_IS;
+
+    public static final String FILTER_APIS_SHARED_WITH_SUBJECT = SQL_SELECT + ", subject_permission, resource\n" +
+            SQL_WHERE + "subject_permission.subjectid = CAST(? AS uuid) and\n" +
+            "subject_permission.resourceid = resource.uuid and\n" +
+            "resource.resourcerefid = api.uuid and\n" +
+            "resource.resourcetypeid = CAST('" + Constants.RESOURCE_TYPE_API + "' AS uuid) and\n" +
+            "(subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_VIEW_API + "' AS uuid) OR\n" +
+            "subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_EDIT_API + "' AS uuid))";
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

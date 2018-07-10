@@ -175,6 +175,15 @@ public class Constants {
     public static final String SUBJECT_TYPE_APP = "ca80dd37-7484-46d3-b4a1-a8af93b2d3c6";
     public static final String SUBJECT_TYPE_SYSTEM = "80fc37d5-0594-456c-851b-a7e68fe55e9e";
 
+    public static final String RESOURCE_TYPE_API = "505099b4-19da-401c-bd17-8c3a85d89743";
+    public static final String RESOURCE_TYPE_POLICY = "4ddbc735-8905-488a-81a4-f21a45ebc4ef";
+    public static final String RESOURCE_TYPE_CONTRACT = "0e600a0a-8edc-41f2-8749-2560278d33f1";
+    public static final String RESOURCE_TYPE_LICENSE = "4a3d51ce-cbd6-405b-bf58-328332efa499";
+
+    public static final String RESOURCE_ACTION_INVOKE_API = "c5639f00-94c9-4cc9-8ad9-df76f9d162a8";
+    public static final String RESOURCE_ACTION_VIEW_API = "bf0b6ac2-7d07-49c6-b3f8-0fd7c927126e";
+    public static final String RESOURCE_ACTION_EDIT_API = "7e55b086-75e0-4209-9cc5-51baa38393ed";
+
     public static final String RESOURCE_DEFAULT_SUBJECT_AVATAR = "webroot/dist/img/avatar.jpg";
     public static final String RESOURCE_DEFAULT_API_AVATAR = "webroot/dist/img/thumb.png";
 
