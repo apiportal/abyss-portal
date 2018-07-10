@@ -260,6 +260,8 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
+    private static final String SQL_CONDITION_RESOURCETYPE_IS = "resourcetypeid = CAST(? AS uuid)\n";
+
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -273,6 +275,8 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    public static final String FILTER_BY_RESOURCETYPE = SQL_SELECT + SQL_WHERE + SQL_CONDITION_RESOURCETYPE_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
