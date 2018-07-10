@@ -233,7 +233,7 @@ public class ContractService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into contract (organizationid, crudsubjectid, name, description, apiid, subjectid, environment, contractstateid, status, isrestrictedtosubsetofapi, licenseid)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), ?, ?, CAST(? AS uuid))";
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS e_contract_status), ?, CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update contract\n" +
             "set\n" +
@@ -270,7 +270,7 @@ public class ContractService extends AbstractService<UpdateResult> {
             "  , subjectid      = CAST(? AS uuid)\n" +
             "  , environment      = ?\n" +
             "  , contractstateid      = CAST(? AS uuid)\n" +
-            "  , status      = ?\n" +
+            "  , status      = CAST(? AS e_contract_status)\n" +
             "  , isrestrictedtosubsetofapi      = ?\n" +
             "  , licenseid      = CAST(? AS uuid)\n";
 
