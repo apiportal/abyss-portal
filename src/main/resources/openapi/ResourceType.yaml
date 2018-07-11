@@ -311,6 +311,9 @@ components:
         type:
           type: string
           description: 'Resource Type'
+        isactive:
+          type: boolean
+          description: 'Is Resource Type Active'
   requestBodies:
     ResourceType:
       content:

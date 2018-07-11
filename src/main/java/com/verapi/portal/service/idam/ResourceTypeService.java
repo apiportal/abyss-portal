@@ -52,7 +52,8 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("type"));
+                            .add(jsonObj.getString("type"))
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -103,6 +104,7 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("type"))
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -121,6 +123,7 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("type"))
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -208,8 +211,8 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into resource_type (organizationid, crudsubjectid, type)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,?)";
+    private static final String SQL_INSERT = "insert into resource_type (organizationid, crudsubjectid, type, isactive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?)";
 
     private static final String SQL_DELETE = "update resource_type\n" +
             "set\n" +
@@ -224,7 +227,8 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
             "  deleted,\n" +
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
-            "  type\n" +
+            "  type,\n" +
+            "  isactive\n" +
             "from resource_type\n";
 
     private static final String SQL_UPDATE = "UPDATE resource_type\n" +
@@ -232,7 +236,8 @@ public class ResourceTypeService extends AbstractService<UpdateResult> {
             "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , type      = ?\n";
+            "  , type      = ?\n" +
+            "  , isactive      = ?\n";
 
     private static final String SQL_AND = "and\n";
 
