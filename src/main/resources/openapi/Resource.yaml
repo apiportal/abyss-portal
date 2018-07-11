@@ -518,6 +518,9 @@ components:
         resourcerefid:
           type: string
           description: 'FK ID of the resource with the designated type'
+        isactive:
+          type: boolean
+          description: 'Is Resource Active'
   requestBodies:
     Resource:
       content:
