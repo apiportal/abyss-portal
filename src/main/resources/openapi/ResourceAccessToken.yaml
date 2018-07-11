@@ -1,0 +1,498 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
+info:
+  description: 'Abyss platform APIs'
+  version: '1.0.0'
+  title: 'Abyss'
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: 'info@apiportal.com'
+    name: 'Abyss'
+    url: 'https://apiportal.com'
+  license:
+    name: 'Abyss 1.0'
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: ResourceAccessTokens
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ResourceAccessTokens crud operations'
+  - name: ResourceAccessToken
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ResourceAccessToken crud operations'
+paths:
+  /resource-access-tokens:
+    get:
+      tags:
+        - ResourceAccessTokens
+      summary: 'Get list of ResourceAccessTokens'
+      description: 'Returns list of ResourceAccessTokens'
+      operationId: getResourceAccessTokens
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ResourceAccessTokens which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ResourceAccessTokens which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfResourceAccessToken'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - ResourceAccessTokens
+      summary: 'Add a bulk of ResourceAccessTokens'
+      description: 'Provide a list of ResourceAccessTokens to be inserted'
+      operationId: addResourceAccessTokens
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfResourceAccessToken'
+    put:
+      tags:
+        - ResourceAccessTokens
+      summary: 'Update a bulk of ResourceAccessTokens'
+      description: 'Provide a bulk list of  ResourceAccessTokens to be updated'
+      operationId: updateResourceAccessTokens
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfResourceAccessTokenObject'
+    delete:
+      tags:
+        - ResourceAccessTokens
+      summary: 'Delete all ResourceAccessTokens'
+      description: 'Deletes all ResourceAccessTokens'
+      operationId: deleteResourceAccessTokens
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /resource-access-tokens/{uuid}:
+    get:
+      tags:
+        - ResourceAccessToken
+      summary: 'Get an existing ResourceAccessToken by uuid'
+      description: 'Provide an uuid of ResourceAccessToken to be get'
+      operationId: getResourceAccessToken
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of ResourceAccessToken that need to be get'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    put:
+      tags:
+        - ResourceAccessToken
+      summary: 'Update an existing ResourceAccessToken'
+      description: 'Provide an altered ResourceAccessToken to be updated'
+      operationId: updateResourceAccessToken
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of ResourceAccessToken that need to be updated'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ResourceAccessToken'
+    delete:
+      tags:
+        - ResourceAccessToken
+      summary: 'Delete ResourceAccessToken'
+      description: 'Provide an uuid parameter of ResourceAccessToken to be updated'
+      operationId: deleteResourceAccessToken
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of ResourceAccessToken that needs to be deleted'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+externalDocs:
+  description: 'See Abyss example'
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    MultiStatus:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'uuid of the record'
+        status:
+          type: integer
+          readOnly: true
+          description: 'status -Http response code status (2XX, 3XX, 4XX, 5XX)'
+        response:
+          $ref: '#/components/schemas/ResourceAccessToken'
+        error:
+          $ref: '#/components/schemas/Error'
+    ResourceAccessToken:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
+        organizationid:
+          type: string
+          description: 'Id of Organization'
+        created:
+          type: string
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
+        updated:
+          type: string
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
+        deleted:
+          type: string
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
+        crudsubjectid:
+          type: string
+          description: 'ID of Subject that reads, creates, updates or deletes'
+        subjectpermissionid:
+          type: string
+          description: 'FK ID of corresponding subject permission'
+        resourcetypeid:
+          type: string
+          description: 'FK ID of resource type that specifies type of token'
+        resourcerefid:
+          type: string
+          description: 'FK ID of the resource with the designated resource type'
+        token:
+          type: string
+          description: 'Activation token'
+        expiredate:
+          type: string
+          description: 'Expire date of activation code'
+        email:
+          type: string
+          description: 'The email address that token is sent to'
+        nonce:
+          type: string
+          description: 'The number used only once in the token generation process'
+        userdata:
+          type: string
+          description: 'User Data used in token generation process'
+        isactive:
+          type: boolean
+          description: 'Is Token Active'
+  requestBodies:
+    ResourceAccessToken:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAccessToken'
+      description: 'ResourceAccessToken object that needs to be added or updated'
+      required: true
+    ListOfResourceAccessToken:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ResourceAccessToken'
+      description: 'ResourceAccessToken array that needs to be added'
+      required: true
+    ListOfResourceAccessTokenObject:
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+      description:  'list of ResourceAccessToken objects that needs to be updated, each additional property name should be the uuid of coresponding ResourceAccessToken record'
+      required: true
+  responses:
+    '200':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAccessToken'
+    '200-ListOfResourceAccessToken':
+      description: 'A ResourceAccessToken array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ResourceAccessToken'
+    '201':
+      description: 'New ResourceAccessToken resource has been created'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAccessToken'
+    '204':
+      description: 'The ResourceAccessToken resource was successfully deleted'
+    '207':
+      description: 'Multi Status for bulk operation'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/MultiStatus'
+    '304':
+      description: 'Not Modified – The client can use cached data'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceAccessToken'
+    '400':
+      description: 'Invalid UUID supplied'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'Authorization information is missing or invalid'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: 'Not found – There is no resource behind the URI'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: 'Method not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: 'Unprocessable Entity – server cannot process the request'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: 'Too many request(rate limiting)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: 'Internal server error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: 'error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    offsetParam:
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: 'The number of items to skip before starting to collect the result set'
+    limitParam:
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+      description: 'The numbers of items to return'
+  securitySchemes:
+    abyssCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+    abyssHttpBasicAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+    abyssApiKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+    abyssJWTBearerAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppKeyAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppKeyCookieAuth:
+      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+  links: {}
+  callbacks: {}
+security:
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppKeyAuth: []
+  - abyssAppKeyCookieAuth: []
