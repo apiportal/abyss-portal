@@ -520,6 +520,9 @@ components:
         accessmanagerid:
           type: string
           description: 'FK ID of Access Manager'
+        isactive:
+          type: boolean
+          description: 'Is Subject Permission Active'
   requestBodies:
     SubjectPermission:
       content:
