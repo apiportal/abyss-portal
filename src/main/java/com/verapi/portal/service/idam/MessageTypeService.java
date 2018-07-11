@@ -31,14 +31,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class MessageService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
+public class MessageTypeService extends AbstractService<UpdateResult> {
+    private static final Logger logger = LoggerFactory.getLogger(MessageTypeService.class);
 
-    public MessageService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
+    public MessageTypeService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
 
-    public MessageService(Vertx vertx) {
+    public MessageTypeService(Vertx vertx) {
         super(vertx);
     }
 
@@ -52,17 +52,9 @@ public class MessageService extends AbstractService<UpdateResult> {
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("messagetypeid"))
-                            .add(jsonObj.getString("parentmessageid"))
-                            .add(jsonObj.getString("sendersubjectid"))
-                            .add(jsonObj.getString("receiversubjectid"))
-                            .add(jsonObj.getString("subject"))
-                            .add(jsonObj.getString("body"))
-                            .add(jsonObj.getString("priority"))
-                            .add(jsonObj.getBoolean("isstarred"))
-                            .add(jsonObj.getBoolean("isread"))
-                            .add(jsonObj.getInstant("sentat"))
-                            .add(jsonObj.getInstant("readat"));
+                            .add(jsonObj.getString("name"))
+                            .add(jsonObj.getString("description"))
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -112,17 +104,9 @@ public class MessageService extends AbstractService<UpdateResult> {
         JsonArray updateParams = new JsonArray()
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.getString("messagetypeid"))
-                .add(updateRecord.getString("parentmessageid"))
-                .add(updateRecord.getString("sendersubjectid"))
-                .add(updateRecord.getString("receiversubjectid"))
-                .add(updateRecord.getString("subject"))
-                .add(updateRecord.getString("body"))
-                .add(updateRecord.getString("priority"))
-                .add(updateRecord.getBoolean("isstarred"))
-                .add(updateRecord.getBoolean("isread"))
-                .add(updateRecord.getInstant("sentat"))
-                .add(updateRecord.getInstant("readat"))
+                .add(updateRecord.getString("name"))
+                .add(updateRecord.getString("description"))
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -140,17 +124,9 @@ public class MessageService extends AbstractService<UpdateResult> {
                     JsonArray updateParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("messagetypeid"))
-                            .add(jsonObj.getString("parentmessageid"))
-                            .add(jsonObj.getString("sendersubjectid"))
-                            .add(jsonObj.getString("receiversubjectid"))
-                            .add(jsonObj.getString("subject"))
-                            .add(jsonObj.getString("body"))
-                            .add(jsonObj.getString("priority"))
-                            .add(jsonObj.getBoolean("isstarred"))
-                            .add(jsonObj.getBoolean("isread"))
-                            .add(jsonObj.getInstant("sentat"))
-                            .add(jsonObj.getInstant("readat"))
+                            .add(jsonObj.getString("name"))
+                            .add(jsonObj.getString("description"))
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -238,12 +214,10 @@ public class MessageService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, sendersubjectid, receiversubjectid, \n" +
-            "subject, body, priority, isstarred, isread, sentat, readat)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid),\n" +
-            "?, ?, ?, ?, false, now(), null)";
+    private static final String SQL_INSERT = "insert into message_type (organizationid, crudsubjectid, name, description, isactive)" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?)";
 
-    private static final String SQL_DELETE = "update message\n" +
+    private static final String SQL_DELETE = "update message_type\n" +
             "set\n" +
             "  deleted     = now()\n" +
             "  , isdeleted = true\n";
@@ -256,35 +230,19 @@ public class MessageService extends AbstractService<UpdateResult> {
             "  deleted,\n" +
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
-            "  messagetypeid,\n" +
-            "  parentmessageid,\n" +
-            "  sendersubjectid,\n" +
-            "  receiversubjectid,\n" +
-            "  subject,\n" +
-            "  body,\n" +
-            "  priority,\n" +
-            "  isstarred,\n" +
-            "  isread,\n" +
-            "  sentat,\n" +
-            "  readat\n" +
-            "from message\n";
+            "  name,\n" +
+            "  description,\n" +
+            "  isactive\n" +
+            "from message_type\n";
 
-    private static final String SQL_UPDATE = "UPDATE message\n" +
+    private static final String SQL_UPDATE = "UPDATE message_type\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , messagetypeid      = CAST(? AS uuid)\n" +
-            "  , parentmessageid      = CAST(? AS uuid)\n" +
-            "  , sendersubjectid      = CAST(? AS uuid)\n" +
-            "  , receiversubjectid      = CAST(? AS uuid)\n" +
-            "  , subject      = ?\n" +
-            "  , body      = ?\n" +
-            "  , priority      = ?\n" +
-            "  , isstarred      = ?\n" +
-            "  , isread      = ?\n" +
-            "  , sentat      = ?\n" +
-            "  , readat      = ?\n";
+            "  , name      = ?\n" +
+            "  , description      = ?\n" +
+            "  , isactive      = ?\n";
 
     private static final String SQL_AND = "and\n";
 
@@ -294,11 +252,11 @@ public class MessageService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
-    private static final String SQL_CONDITION_NAME_IS = "lower(subject) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(subject) like lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
 
-    private static final String SQL_ORDERBY_NAME = "order by subject\n";
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
