@@ -54,7 +54,8 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(((String) jsonObj.getValue("actionname")))
                             .add(((String) jsonObj.getValue("description")))
-                            .add(jsonObj.getString("resourcetypeid"));
+                            .add(jsonObj.getString("resourcetypeid"))
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -107,6 +108,7 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
                 .add(((String) updateRecord.getValue("actionname")))
                 .add(((String) updateRecord.getValue("description")))
                 .add(updateRecord.getString("resourcetypeid"))
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -127,6 +129,7 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
                             .add(((String) jsonObj.getValue("actionname")))
                             .add(((String) jsonObj.getValue("description")))
                             .add(jsonObj.getString("resourcetypeid"))
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -214,8 +217,8 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into resource_action (organizationid, crudsubjectid, actionname, description, resourcetypeid)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid))";
+    private static final String SQL_INSERT = "insert into resource_action (organizationid, crudsubjectid, actionname, description, resourcetypeid, isactive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?)";
 
     private static final String SQL_DELETE = "update resource_action\n" +
             "set\n" +
@@ -232,7 +235,8 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  actionname,\n" +
             "  description,\n" +
-            "  resourcetypeid\n" +
+            "  resourcetypeid,\n" +
+            "  isactive\n" +
             "from resource_action\n";
 
     private static final String SQL_UPDATE = "UPDATE resource_action\n" +
@@ -242,7 +246,8 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , actionname      = ?\n" +
             "  , description      = ?\n" +
-            "  , resourcetypeid      = CAST(? AS uuid)\n";
+            "  , resourcetypeid      = CAST(? AS uuid)\n" +
+            "  , isactive      = ?\n";
 
     private static final String SQL_AND = "and\n";
 

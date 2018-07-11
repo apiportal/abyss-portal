@@ -369,6 +369,9 @@ components:
         resourcetypeid:
           type: string
           description: 'FK ID of Resource Type'
+        isactive:
+          type: boolean
+          description: 'Is Resource Action Active'
   requestBodies:
     ResourceAction:
       content:
