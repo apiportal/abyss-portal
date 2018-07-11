@@ -1620,6 +1620,53 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /apis/sharedby/subject/{uuid}:
+    get:
+      tags:
+        - Shared APIs
+      summary: Get APIs shared by subject
+      description: 'Provide an uuid of Subject to get APIs shared by him'
+      operationId: getApisSharedBySubject
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Subject'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his APIs which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search his APIs which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'

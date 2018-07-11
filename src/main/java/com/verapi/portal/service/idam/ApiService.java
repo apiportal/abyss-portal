@@ -419,6 +419,13 @@ public class ApiService extends AbstractService<UpdateResult> {
             "(subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_VIEW_API + "' AS uuid) OR\n" +
             "subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_EDIT_API + "' AS uuid))";
 
+    public static final String FILTER_APIS_SHARED_BY_SUBJECT = SQL_SELECT + ", subject_permission, resource\n" +
+            SQL_WHERE + "api.subjectid = CAST(? AS uuid) and\n" +
+            "api.uuid = resource.resourcerefid and\n" +
+            "resource.uuid = subject_permission.resourceid and\n" +
+            "(subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_VIEW_API + "' AS uuid) OR\n" +
+            "subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_EDIT_API + "' AS uuid))";
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     /*static {
