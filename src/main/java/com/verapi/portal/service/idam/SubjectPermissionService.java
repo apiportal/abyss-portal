@@ -60,7 +60,6 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("resourceid"))
                             .add(jsonObj.getString("resourceactionid"))
-                            .add(jsonObj.getString("subjectgroupid"))
                             .add(jsonObj.getString("accessmanagerid"))
                             .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
@@ -119,7 +118,6 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("subjectid"))
                 .add(updateRecord.getString("resourceid"))
                 .add(updateRecord.getString("resourceactionid"))
-                .add(updateRecord.getString("subjectgroupid"))
                 .add(updateRecord.getString("accessmanagerid"))
                 .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
@@ -146,7 +144,6 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("resourceid"))
                             .add(jsonObj.getString("resourceactionid"))
-                            .add(jsonObj.getString("subjectgroupid"))
                             .add(jsonObj.getString("accessmanagerid"))
                             .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
@@ -236,8 +233,8 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into subject_permission (organizationid, crudsubjectid, permission, description, effectivestartdate, effectiveenddate, subjectid, resourceid, resourceactionid, subjectgroupid, accessmanagerid, isactive)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?)";
+    private static final String SQL_INSERT = "insert into subject_permission (organizationid, crudsubjectid, permission, description, effectivestartdate, effectiveenddate, subjectid, resourceid, resourceactionid, accessmanagerid, isactive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?)";
 
     private static final String SQL_DELETE = "update subject_permission\n" +
             "set\n" +
@@ -259,7 +256,6 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
             "  subject_permission.subjectid,\n" +
             "  subject_permission.resourceid,\n" +
             "  subject_permission.resourceactionid,\n" +
-            "  subject_permission.subjectgroupid,\n" +
             "  subject_permission.accessmanagerid,\n" +
             "  subject_permission.isactive\n" +
             "from subject_permission\n";
@@ -276,7 +272,6 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
             "  , subjectid      = CAST(? AS uuid)\n" +
             "  , resourceid      = CAST(? AS uuid)\n" +
             "  , resourceactionid      = CAST(? AS uuid)\n" +
-            "  , subjectgroupid      = CAST(? AS uuid)\n" +
             "  , accessmanagerid      = CAST(? AS uuid)\n" +
             "  , isactive      = ?\n";
 

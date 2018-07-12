@@ -514,9 +514,6 @@ components:
         resourceactionid:
           type: string
           description: 'FK ID of Resource Action'
-        subjectgroupid:
-          type: string
-          description: 'FK ID of Subject Group having the permission'
         accessmanagerid:
           type: string
           description: 'FK ID of Access Manager'
