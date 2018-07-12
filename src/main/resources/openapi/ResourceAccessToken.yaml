@@ -323,19 +323,12 @@ components:
           description: 'FK ID of the resource with the designated resource type'
         token:
           type: string
+          readOnly: true
           description: 'Activation token'
         expiredate:
           type: string
+          readOnly: true
           description: 'Expire date of activation code'
-        email:
-          type: string
-          description: 'The email address that token is sent to'
-        nonce:
-          type: string
-          description: 'The number used only once in the token generation process'
-        userdata:
-          type: string
-          description: 'User Data used in token generation process'
         isactive:
           type: boolean
           description: 'Is Token Active'

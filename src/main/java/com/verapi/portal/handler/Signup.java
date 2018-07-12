@@ -1,10 +1,13 @@
 package com.verapi.portal.handler;
 
+import com.verapi.key.generate.impl.Token;
+import com.verapi.key.model.AuthenticationInfo;
+import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
@@ -12,17 +15,10 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
-
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.verapi.key.generate.impl.Token;
-import com.verapi.key.model.AuthenticationInfo;
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
+import java.io.UnsupportedEncodingException;
 
 public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
@@ -104,22 +100,22 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
                                 // save user to the database
                                 return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject(" +
-                                        "organization_id," +
-                                        //"now()," +          //created
-                                        //"now()," +          //updated
-                                        "crud_subject_id," +
-                                        "is_activated," +
-                                        "subject_type_id," +
-                                        "subject_name," +
-                                        "first_name," +
-                                        "last_name," +
-                                        "display_name," +
-                                        "email," +
-                                        "effective_start_date," +
-                                        //"effective_end_date," +
-                                        "password," +
-                                        "password_salt) " +
-                                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?) RETURNING id",
+                                                "organization_id," +
+                                                //"now()," +          //created
+                                                //"now()," +          //updated
+                                                "crud_subject_id," +
+                                                "is_activated," +
+                                                "subject_type_id," +
+                                                "subject_name," +
+                                                "first_name," +
+                                                "last_name," +
+                                                "display_name," +
+                                                "email," +
+                                                "effective_start_date," +
+                                                //"effective_end_date," +
+                                                "password," +
+                                                "password_salt) " +
+                                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?) RETURNING id",
                                         new JsonArray()
                                                 .add(0)
                                                 .add(1)
@@ -135,10 +131,10 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                             }
                         })
                         .flatMap(updateResult -> {
-                            if(updateResult instanceof UpdateResult) {
+                            if (updateResult instanceof UpdateResult) {
                                 subjectId = ((UpdateResult) updateResult).getKeys().getInteger(0);
                                 logger.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0:" + subjectId);
-                            } else if(updateResult instanceof ResultSet) {
+                            } else if (updateResult instanceof ResultSet) {
                                 logger.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | Integer Key @pos=0:" + ((ResultSet) updateResult).getRows(true).get(0).getInteger("id") + " subjectID:" + subjectId);
                             }
 
@@ -147,7 +143,9 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                             Token tokenGenerator = new Token();
                             AuthenticationInfo authInfo;
                             try {
-                                authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx().getDelegate());
+                                authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                        email,
+                                        routingContext.vertx().getDelegate());
                                 logger.info("activation token is created successfully: " + authInfo.getToken());
                                 authToken = authInfo.getToken();
                             } catch (UnsupportedEncodingException e) {
@@ -155,16 +153,16 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
                             return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
-                                    "organization_id," +
-                                    "crud_subject_id," +
-                                    "subject_id," +
-                                    "expire_date," +
-                                    "token," +
-                                    "token_type, " +
-                                    "email," +
-                                    "nonce," +
-                                    "user_data) " +
-                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                            "organization_id," +
+                                            "crud_subject_id," +
+                                            "subject_id," +
+                                            "expire_date," +
+                                            "token," +
+                                            "token_type, " +
+                                            "email," +
+                                            "nonce," +
+                                            "user_data) " +
+                                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                     new JsonArray()
                                             .add(0)
                                             .add(1)
@@ -182,8 +180,8 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
                         // Rollback if any failed with exception propagation
                         .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
-                                            .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
-                                            .flatMap(ignore -> Single.error(ex))
+                                .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
+                                .flatMap(ignore -> Single.error(ex))
                         )
 
                         .doAfterSuccess(succ -> {
@@ -194,7 +192,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                             json.put(Constants.EB_MSG_TO_EMAIL, email);
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
                             json.put(Constants.EB_MSG_HTML_STRING, renderMailPage(routingContext,
-                                    Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL)+Constants.ACTIVATION_PATH+"/?v="+authToken,
+                                    Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + authToken,
                                     Constants.ACTIVATION_TEXT));
 
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
@@ -206,15 +204,15 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-                        ).subscribe(result -> {
-                                logger.info("Subscription to Signup successfull:" + result);
-                                generateResponse(routingContext, logger,200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "" );
-                                //TODO: Send email to user
-                            }, t -> {
-                                logger.error("Signup Error", t);
-                                generateResponse(routingContext, logger,401, "Signup Error Occured", t.getLocalizedMessage(), "", "" );
-                            }
-                        );
+        ).subscribe(result -> {
+                    logger.info("Subscription to Signup successfull:" + result);
+                    generateResponse(routingContext, logger, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "");
+                    //TODO: Send email to user
+                }, t -> {
+                    logger.error("Signup Error", t);
+                    generateResponse(routingContext, logger, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "");
+                }
+        );
     }
 
     public void pageRender(RoutingContext routingContext) {

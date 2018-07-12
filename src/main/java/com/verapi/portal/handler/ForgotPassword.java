@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 
 
 /**
@@ -82,7 +81,9 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                                     Token tokenGenerator = new Token();
                                     AuthenticationInfo authInfo;
                                     try {
-                                        authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("quarter.hour.in.seconds"), username, routingContext.vertx().getDelegate());
+                                        authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.renewal.password.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                                username,
+                                                routingContext.vertx().getDelegate());
                                         logger.info("Reset Password: token is created successfully: " + authInfo.getToken());
                                         authToken = authInfo.getToken();
                                     } catch (UnsupportedEncodingException e) {
@@ -90,16 +91,16 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                                         return Single.error(new Exception("Reset Password: token could not be generated"));
                                     }
                                     return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
-                                            "organization_id," +
-                                            "crud_subject_id," +
-                                            "subject_id," +
-                                            "expire_date," +
-                                            "token," +
-                                            "token_type, " +
-                                            "email," +
-                                            "nonce," +
-                                            "user_data) " +
-                                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                                    "organization_id," +
+                                                    "crud_subject_id," +
+                                                    "subject_id," +
+                                                    "expire_date," +
+                                                    "token," +
+                                                    "token_type, " +
+                                                    "email," +
+                                                    "nonce," +
+                                                    "user_data) " +
+                                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                             new JsonArray()
                                                     .add(0)
                                                     .add(1)

@@ -89,7 +89,9 @@ public class ForgotPasswordController extends PortalAbstractController {
                                     Token tokenGenerator = new Token();
                                     AuthenticationInfo authInfo;
                                     try {
-                                        authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("quarter.hour.in.seconds"), username, routingContext.vertx().getDelegate());
+                                        authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.renewal.password.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                                username,
+                                                routingContext.vertx().getDelegate());
                                         logger.trace("Reset Password: token is created successfully: " + authInfo.getToken());
                                         authToken = authInfo.getToken();
                                     } catch (UnsupportedEncodingException e) {

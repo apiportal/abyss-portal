@@ -11,7 +11,11 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.key.generate.impl.Token;
+import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
@@ -27,6 +31,7 @@ import io.vertx.reactivex.core.Vertx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -49,17 +54,35 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
                 .flatMap(o -> Observable.just((JsonObject) o))
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
+
+                    //Generate and Persist Activation Token
+                    Token tokenGenerator = new Token();
+                    AuthenticationInfo authInfo;
+                    try {
+                        long tokenTTL = 0;
+                        if (jsonObj.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_API))
+                            tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.api.ttl") * Constants.ONE_DAY_IN_SECONDS;
+                        else if (jsonObj.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_APP))
+                            tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.app.ttl") * Constants.ONE_DAY_IN_SECONDS;
+                        authInfo = tokenGenerator.generateToken(tokenTTL,
+                                jsonObj.getString("subjectpermissionid") + jsonObj.getString("resourcerefid"),
+                                vertx.getDelegate());
+                        logger.trace("access token is created successfully: " + authInfo.getToken());
+                    } catch (UnsupportedEncodingException e) {
+                        logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                        return Observable.error(new Exception("activation token could not be generated"));
+                    }
+
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectpermissionid"))
                             .add(jsonObj.getString("resourcetypeid"))
                             .add(jsonObj.getString("resourcerefid"))
-                            .add(jsonObj.getString("token"))
-                            .add(jsonObj.getInstant("expiredate"))
-                            .add(jsonObj.getString("email"))
-                            .add(jsonObj.getString("nonce"))
-                            .add(jsonObj.getString("userdata"))
+                            .add(authInfo.getToken())
+                            .add(authInfo.getExpireDate())
+                            .add(authInfo.getNonce())
+                            .add(authInfo.getUserData())
                             .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
@@ -113,11 +136,6 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("subjectpermissionid"))
                 .add(updateRecord.getString("resourcetypeid"))
                 .add(updateRecord.getString("resourcerefid"))
-                .add(updateRecord.getString("token"))
-                .add(updateRecord.getInstant("expiredate"))
-                .add(updateRecord.getString("email"))
-                .add(updateRecord.getString("nonce"))
-                .add(updateRecord.getString("userdata"))
                 .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
@@ -139,11 +157,6 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subjectpermissionid"))
                             .add(jsonObj.getString("resourcetypeid"))
                             .add(jsonObj.getString("resourcerefid"))
-                            .add(jsonObj.getString("token"))
-                            .add(jsonObj.getInstant("expiredate"))
-                            .add(jsonObj.getString("email"))
-                            .add(jsonObj.getString("nonce"))
-                            .add(jsonObj.getString("userdata"))
                             .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
@@ -233,9 +246,9 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
     }
 
     private static final String SQL_INSERT = "insert into resource_access_token (organizationid, crudsubjectid, subjectpermissionid, resourcetypeid, resourcerefid, \n" +
-            "token, expiredate, email, nonce, userdata, isactive)\n" +
+            "token, expiredate, nonce, userdata, isactive)\n" +
             "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
-            "?, ?, ?, ?, ?, ?)";
+            "?, ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "update resource_access_token\n" +
             "set\n" +
@@ -255,9 +268,6 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
             "  resourcerefid,\n" +
             "  token,\n" +
             "  expiredate,\n" +
-            "  email,\n" +
-            "  nonce,\n" +
-            "  userdata,\n" +
             "  isactive\n" +
             "from resource_access_token\n";
 
@@ -269,11 +279,6 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
             "  , subjectpermissionid      = CAST(? AS uuid)\n" +
             "  , resourcetypeid      = CAST(? AS uuid)\n" +
             "  , resourcerefid      = CAST(? AS uuid)\n" +
-            "  , token      = ?\n" +
-            "  , expiredate      = ?\n" +
-            "  , email      = ?\n" +
-            "  , nonce      = ?\n" +
-            "  , userdata      = ?\n" +
             "  , isactive      = ?\n";
 
     private static final String SQL_AND = "and\n";
@@ -284,11 +289,11 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
-    private static final String SQL_CONDITION_NAME_IS = "lower(email) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(token) = lower(?)\n";
 
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(email) like lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(token) like lower(?)\n";
 
-    private static final String SQL_ORDERBY_NAME = "order by email\n";
+    private static final String SQL_ORDERBY_NAME = "order by token\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 

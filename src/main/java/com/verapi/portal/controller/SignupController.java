@@ -148,7 +148,9 @@ public class SignupController extends PortalAbstractController {
                             Token tokenGenerator = new Token();
                             AuthenticationInfo authInfo;
                             try {
-                                authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("one.hour.in.seconds"), email, routingContext.vertx().getDelegate());
+                                authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                        email,
+                                        routingContext.vertx().getDelegate());
                                 logger.trace("activation token is created successfully: " + authInfo.getToken());
                                 authToken = authInfo.getToken();
                             } catch (UnsupportedEncodingException e) {

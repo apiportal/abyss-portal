@@ -176,6 +176,7 @@ public class Constants {
     public static final String SUBJECT_TYPE_SYSTEM = "80fc37d5-0594-456c-851b-a7e68fe55e9e";
 
     public static final String RESOURCE_TYPE_API = "505099b4-19da-401c-bd17-8c3a85d89743";
+    public static final String RESOURCE_TYPE_APP = "9f4be4c4-fbbe-4f13-a5e1-5b8f3d8e30ec";
     public static final String RESOURCE_TYPE_POLICY = "4ddbc735-8905-488a-81a4-f21a45ebc4ef";
     public static final String RESOURCE_TYPE_CONTRACT = "0e600a0a-8edc-41f2-8749-2560278d33f1";
     public static final String RESOURCE_TYPE_LICENSE = "4a3d51ce-cbd6-405b-bf58-328332efa499";
@@ -204,5 +205,10 @@ public class Constants {
     public static final String JSONB_COLUMN_POLICY_TYPE_TEMPLATE = "template";
     public static final String JSONB_COLUMN_ACCESS_MANAGER_TYPE_TEMPLATE = "attributetemplate";
     public static final String JSONB_COLUMN_ACCESS_MANAGER_ATTRIBUTES = "accessmanagerattributes";
+
+    public static final int ONE_MINUTE_IN_SECONDS = 60;
+    public static final int ONE_HOUR_IN_SECONDS = 3600;
+    public static final int ONE_DAY_IN_SECONDS = 86400;
+
 
 }
