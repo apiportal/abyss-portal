@@ -16,6 +16,7 @@ import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
+import com.verapi.portal.service.es.ElasticSearchService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -23,16 +24,12 @@ import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public abstract class AbstractService<T> implements IService<T> {
@@ -42,6 +39,7 @@ public abstract class AbstractService<T> implements IService<T> {
     protected Vertx vertx;
     protected JDBCClient jdbcClient;
     private AbyssJDBCService abyssJDBCService;
+    protected static ElasticSearchService elasticSearchService = new ElasticSearchService();
 
     public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         this.vertx = vertx;

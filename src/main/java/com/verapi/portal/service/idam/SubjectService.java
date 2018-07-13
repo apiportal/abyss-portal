@@ -458,6 +458,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     public static final String SQL_CONDITION_IS_USER = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n";
 
+    public static final String SQL_CONDITION_IS_NOT_SYSTEM = "subjecttypeid!=CAST('" + Constants.SUBJECT_TYPE_SYSTEM + "' AS uuid)\n";
+
     private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
@@ -472,7 +474,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_IS_USER + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_IS_NOT_SYSTEM + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 

@@ -15,7 +15,6 @@ package com.verapi.portal.oapi;
 
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
-import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
@@ -26,6 +25,7 @@ import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
 import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
+import com.verapi.portal.service.es.ElasticSearchService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
@@ -58,6 +58,7 @@ import static com.verapi.portal.common.Util.nnvl;
 public abstract class AbstractApiController implements IApiController {
     private static final Logger logger = LoggerFactory.getLogger(AbstractApiController.class);
 
+    protected static ElasticSearchService elasticSearchService = new ElasticSearchService();
     protected Vertx vertx;
     private Router abyssRouter;
     protected JDBCAuth authProvider;
@@ -402,6 +403,29 @@ public abstract class AbstractApiController implements IApiController {
                 });
     }
 
+    private void subscribeAndResponseDeleteStatusOnly(RoutingContext routingContext, Single<ResultSet> updateResultSingle, int httpResponseStatus) {
+        updateResultSingle.subscribe(resp -> {
+                    resp.getRows().forEach(jsonObject -> {
+                        elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", jsonObject);
+                    });
+                    routingContext.response()
+                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .setStatusCode(httpResponseStatus)
+                            .end();
+                    logger.trace("replied successfully");
+                },
+                throwable -> {
+                    logger.error("exception occured " + throwable.getLocalizedMessage());
+                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+                    if (throwable instanceof NoDataFoundException)
+                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
+                    else if (throwable instanceof UnProcessableEntity422Exception)
+                        throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
+                    else
+                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                });
+    }
+
     private void subscribeAndResponseStatusOnlyList(RoutingContext routingContext, Single<List<UpdateResult>> updateResultListSingle, int httpResponseStatus) {
         updateResultListSingle.subscribe(resp -> {
                     routingContext.response()
@@ -424,22 +448,6 @@ public abstract class AbstractApiController implements IApiController {
 
     private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, int httpResponseStatus) {
         subscribeAndResponse(routingContext, resultSetSingle, null, httpResponseStatus);
-        /*
-        resultSetSingle.subscribe(resp -> {
-                    JsonArray arr = new JsonArray();
-                    resp.getRows().forEach(arr::add);
-                    routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
-                            .setStatusCode(httpResponseStatus)
-                            .end(arr.encode(), "UTF-8");
-                    logger.trace("replied successfully " + arr.encodePrettily());
-                },
-                throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
-                });
-*/
     }
 
     private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
@@ -465,6 +473,9 @@ public abstract class AbstractApiController implements IApiController {
                             arr.add(row);
                         });
                     }
+                    resp.getRows().forEach(jsonObject -> {
+                        elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", jsonObject);
+                    });
                     routingContext.response()
                             .putHeader("content-type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
@@ -544,6 +555,9 @@ public abstract class AbstractApiController implements IApiController {
                                     arr.add(newJsonObject);
                                 });
                             }
+                            resp.forEach(jsonObject -> {
+                                elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", jsonObject);
+                            });
                             routingContext.response()
                                     .putHeader("content-type", "application/json; charset=utf-8")
                                     .setStatusCode(httpResponseStatus)
@@ -633,6 +647,12 @@ public abstract class AbstractApiController implements IApiController {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException("no_data_found"));
                     } else
+/*
+                        resultSet.getRows().forEach(jsonObject -> {
+                            elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
+                                    jsonObject);
+                        });
+*/
                         return Single.just(resultSet);
                 });
         subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
@@ -713,11 +733,27 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponseStatusOnly(routingContext, deleteAllResult, HttpResponseStatus.NO_CONTENT.code());
     }
 
+/*
     <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<CompositeResult> deleteResult = service.initJDBCClient()
                 .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))));
         subscribeAndResponseStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
+    }
+*/
+
+    <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
+        Single<ResultSet> deleteResult = service.initJDBCClient()
+                .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))))
+                .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows() == 0) {
+                        return Single.error(new NoDataFoundException("no_data_found"));
+                    } else
+                        return Single.just(resultSet);
+                });
+        subscribeAndResponseDeleteStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
     }
 
     <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, String method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
