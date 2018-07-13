@@ -77,8 +77,13 @@ public abstract class AbstractElasticSearchService {
             sourceMap.put("@httpsession", routingContext.session().id());
         }
 
-        request.source(sourceMap.getMap(), XContentType.JSON);
-        client.indexAsync(request, listener);
+        try {
+            request.source(sourceMap.getMap(), XContentType.JSON);
+            client.indexAsync(request, listener);
+        } catch (Exception e) {
+            logger.error("indexDocument error : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+        }
+
     }
 }
 
