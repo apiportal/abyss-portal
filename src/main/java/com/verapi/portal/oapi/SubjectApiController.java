@@ -78,6 +78,7 @@ public class SubjectApiController extends AbstractApiController {
             String hash = authProvider.computeHash(((JsonObject) requestItem).getString("password"), salt);
             ((JsonObject) requestItem).put("password", hash);
             ((JsonObject) requestItem).put("passwordsalt", salt);
+/* TODO: read from jar file!!!
             if ((!((JsonObject) requestItem).containsKey("picture")) ||
                     (((JsonObject) requestItem).getValue("picture") == null) ||
                     (((JsonObject) requestItem).getValue("picture") == ""))
@@ -90,6 +91,7 @@ public class SubjectApiController extends AbstractApiController {
                     logger.error(e.getLocalizedMessage());
                     logger.error(Arrays.toString(e.getStackTrace()));
                 }
+*/
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
                 appendRequestBody.forEach(entry -> {
                     ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
