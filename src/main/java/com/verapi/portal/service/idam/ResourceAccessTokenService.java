@@ -241,6 +241,8 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
         return filter(apiFilterQuery);
     }
 
+    public Single<ResultSet> findBySubjectPermissionId(UUID uuid) {return findById(uuid, SQL_FIND_BY_SUBJECT_PERMISSION_UUID); }
+
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
@@ -293,6 +295,8 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_NAME_LIKE = "lower(token) like lower(?)\n";
 
+    private static final String SQL_CONDITION_SUBJECT_PERMISSION_UUID_IS = "subjectpermissionid = CAST(? AS uuid)\n";
+
     private static final String SQL_ORDERBY_NAME = "order by token\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
@@ -310,6 +314,8 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    public static final String SQL_FIND_BY_SUBJECT_PERMISSION_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_PERMISSION_UUID_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

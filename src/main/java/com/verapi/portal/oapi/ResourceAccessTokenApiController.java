@@ -12,6 +12,7 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ResourceAccessTokenService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -141,5 +142,26 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
+
+    @AbyssApiOperationHandler
+    public void getResourceAccessTokenBySubjectPermission(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ResourceAccessTokenService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ResourceAccessTokenService.SQL_FIND_BY_SUBJECT_PERMISSION_UUID)
+                            .setFilterQueryParams(new JsonArray()
+                                    .add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 
 }
