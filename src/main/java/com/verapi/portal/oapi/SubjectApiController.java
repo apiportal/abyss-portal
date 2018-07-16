@@ -25,13 +25,14 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Objects;
-
-import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
+import java.util.Base64;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
@@ -78,20 +79,27 @@ public class SubjectApiController extends AbstractApiController {
             String hash = authProvider.computeHash(((JsonObject) requestItem).getString("password"), salt);
             ((JsonObject) requestItem).put("password", hash);
             ((JsonObject) requestItem).put("passwordsalt", salt);
-/* TODO: read from jar file!!!
+
+
+            //insert default avatar image TODO: later use request base
             if ((!((JsonObject) requestItem).containsKey("picture")) ||
                     (((JsonObject) requestItem).getValue("picture") == null) ||
                     (((JsonObject) requestItem).getValue("picture") == ""))
                 try {
-                    //insert default avatar image TODO: later use request base
-                    ClassLoader classLoader = getClass().getClassLoader();
-                    File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
-                    ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + encodeFileToBase64Binary(file));
+                    InputStream in = getClass().getResourceAsStream(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line).append("\n");
+                    }
+                    in.close();
+                    ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + new String(Base64.getEncoder().encode(sb.toString().getBytes()), StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     logger.error(e.getLocalizedMessage());
                     logger.error(Arrays.toString(e.getStackTrace()));
                 }
-*/
+
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
                 appendRequestBody.forEach(entry -> {
                     ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
