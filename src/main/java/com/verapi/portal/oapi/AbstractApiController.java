@@ -464,8 +464,10 @@ public abstract class AbstractApiController implements IApiController {
                             arr.add(row);
                         });
                     }
-                    resp.getRows().forEach(jsonObject -> {
-                        elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", jsonObject);
+                    arr.forEach(arrayItem -> {
+                        elasticSearchService.indexDocument(routingContext,
+                                this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
+                                (JsonObject) arrayItem);
                     });
                     routingContext.response()
                             .putHeader("content-type", "application/json; charset=utf-8")
@@ -532,8 +534,10 @@ public abstract class AbstractApiController implements IApiController {
                                     arr.add(newJsonObject);
                                 });
                             }
-                            resp.forEach(jsonObject -> {
-                                elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", jsonObject);
+                            arr.forEach(arrayItem -> {
+                                elasticSearchService.indexDocument(routingContext,
+                                        this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
+                                        ((JsonObject) arrayItem).getJsonObject("response"));
                             });
                             routingContext.response()
                                     .putHeader("content-type", "application/json; charset=utf-8")

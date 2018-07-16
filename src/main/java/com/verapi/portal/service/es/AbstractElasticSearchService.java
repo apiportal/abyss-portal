@@ -81,7 +81,7 @@ public abstract class AbstractElasticSearchService {
             request.source(sourceMap.getMap(), XContentType.JSON);
             client.indexAsync(request, listener);
         } catch (Exception e) {
-            logger.error("indexDocument error : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+            logger.error("indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), source);
         }
 
     }
