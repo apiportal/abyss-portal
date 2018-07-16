@@ -47,10 +47,10 @@ public class OpenAPIUtil {
                 return Single.just(swaggerParseResult);
             } else {
                 if (swaggerParseResult.getMessages().size() == 1 && swaggerParseResult.getMessages().get(0).matches("unable to read location")) {
-                    logger.error("openAPIParser error | {}", swaggerParseResult.getMessages());
+                    logger.error("openAPIParser error for: {}| {}", data.substring(1,40), swaggerParseResult.getMessages());
                     return Single.error(RouterFactoryException.createSpecNotExistsException(""));
                 } else {
-                    logger.error("openAPIParser error | {}", swaggerParseResult.getMessages());
+                    logger.error("openAPIParser error for: {}| {}", data.substring(1,40), swaggerParseResult.getMessages());
                     return Single.error(RouterFactoryException.createSpecInvalidException(StringUtils.join(swaggerParseResult.getMessages(), ", ")));
                 }
             }
