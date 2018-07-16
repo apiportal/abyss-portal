@@ -188,8 +188,8 @@ public class Constants {
     public static final String RESOURCE_ACTION_VIEW_API = "bf0b6ac2-7d07-49c6-b3f8-0fd7c927126e";
     public static final String RESOURCE_ACTION_EDIT_API = "7e55b086-75e0-4209-9cc5-51baa38393ed";
 
-    public static final String RESOURCE_DEFAULT_SUBJECT_AVATAR = "webroot/dist/img/avatar.jpg";
-    public static final String RESOURCE_DEFAULT_API_AVATAR = "webroot/dist/img/thumb.png";
+    public static final String RESOURCE_DEFAULT_SUBJECT_AVATAR = "/webroot/dist/img/avatar.jpg";
+    public static final String RESOURCE_DEFAULT_API_AVATAR = "/webroot/dist/img/thumb.png";
 
     public static final String RESTAPI_FILTERING_BY_NAME = "byname";
     public static final String RESTAPI_FILTERING_LIKE_NAME = "likename";

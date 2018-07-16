@@ -383,7 +383,7 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
+    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
 

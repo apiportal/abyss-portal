@@ -383,6 +383,18 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.next();
     }
 
+    private void processException(RoutingContext routingContext, Throwable throwable) {
+        if (throwable instanceof NoDataFoundException)
+            throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
+        else if (throwable instanceof UnProcessableEntity422Exception) {
+            logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+            throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
+        } else {
+            logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+            throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+        }
+    }
+
     private void subscribeAndResponseStatusOnly(RoutingContext routingContext, Single<CompositeResult> updateResultSingle, int httpResponseStatus) {
         updateResultSingle.subscribe(resp -> {
                     routingContext.response()
@@ -392,14 +404,7 @@ public abstract class AbstractApiController implements IApiController {
                     logger.trace("replied successfully");
                 },
                 throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    if (throwable instanceof NoDataFoundException)
-                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-                    else if (throwable instanceof UnProcessableEntity422Exception)
-                        throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
-                    else
-                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    processException(routingContext, throwable);
                 });
     }
 
@@ -415,14 +420,7 @@ public abstract class AbstractApiController implements IApiController {
                     logger.trace("replied successfully");
                 },
                 throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    if (throwable instanceof NoDataFoundException)
-                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-                    else if (throwable instanceof UnProcessableEntity422Exception)
-                        throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
-                    else
-                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    processException(routingContext, throwable);
                 });
     }
 
@@ -435,14 +433,7 @@ public abstract class AbstractApiController implements IApiController {
                     logger.trace("replied successfully");
                 },
                 throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    if (throwable instanceof NoDataFoundException)
-                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-                    else if (throwable instanceof UnProcessableEntity422Exception)
-                        throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
-                    else
-                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    processException(routingContext, throwable);
                 });
     }
 
@@ -483,14 +474,7 @@ public abstract class AbstractApiController implements IApiController {
                     logger.trace("replied successfully " + arr.encodePrettily());
                 },
                 throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    if (throwable instanceof NoDataFoundException)
-                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-                    else if (throwable instanceof UnProcessableEntity422Exception)
-                        throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
-                    else
-                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    processException(routingContext, throwable);
                 });
     }
 
@@ -503,14 +487,7 @@ public abstract class AbstractApiController implements IApiController {
                     logger.trace("replied successfully " + resp.encodePrettily());
                 },
                 throwable -> {
-                    logger.error("exception occured " + throwable.getLocalizedMessage());
-                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                    if (throwable instanceof NoDataFoundException)
-                        throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-                    else if (throwable instanceof UnProcessableEntity422Exception)
-                        throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
-                    else
-                        throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                    processException(routingContext, throwable);
                 });
     }
 
@@ -565,14 +542,7 @@ public abstract class AbstractApiController implements IApiController {
                             logger.trace("replied successfully " + arr.encodePrettily());
                         },
                         throwable -> {
-                            logger.error("exception occured " + throwable.getLocalizedMessage());
-                            logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
-                            if (throwable instanceof NoDataFoundException)
-                                throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-                            else if (throwable instanceof UnProcessableEntity422Exception)
-                                throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
-                            else
-                                throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
+                            processException(routingContext, throwable);
                         });
     }
 

@@ -450,7 +450,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                    <skip>false</skip>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
 
@@ -471,9 +471,9 @@
                 <configuration>
                     <serverId>InternalSnapshots</serverId>
                     <nexusUrl>http://nexus.verapi.com:8081/</nexusUrl>
-                    <!--<skipStaging>true</skipStaging>-->
+                    <skipStaging>true</skipStaging>
                     <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                    <skipLocalStaging>false</skipLocalStaging>
+                    <skipLocalStaging>true</skipLocalStaging>
                 </configuration>
             </plugin>
 
