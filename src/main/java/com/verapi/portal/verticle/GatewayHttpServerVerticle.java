@@ -126,6 +126,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
 
                             createSubRouter(o.getString("uuid"))
                                     .flatMap(this::enableCorsSupport)
+                                    .doOnError(throwable -> logger.error("loadAllProxyApis createSubRouter error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
                                     .subscribe(subRouter -> logger.trace("gatewayRouter route list{} \n subRouter route list: {}", gatewayRouter.getRoutes(), subRouter.getRoutes()));
 
                             return Observable.just(o);
@@ -157,7 +158,9 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                             .setRoot("/")
                                             .toJson()))
                                     .setName(o.getString("uuid"))
-                                    .setMetadata(new JsonObject().put("organization", o.getString("organizationid")).put("apiSpec", o.getString("openapidocument"))));
+                                    .setMetadata(new JsonObject()
+                                            .put("organization", o.getString("organizationid"))
+                                            .put("apiSpec", o.getString("openapidocument"))));
                         }
                 )
                 .flatMap(record -> AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).toObservable()))
