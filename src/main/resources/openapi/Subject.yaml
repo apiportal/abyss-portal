@@ -859,9 +859,9 @@ components:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
-    abyssAppKeyAuth:
+    abyssAppAccessTokenAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
-    abyssAppKeyCookieAuth:
+    abyssAppAccessTokenCookieAuth:
       $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
@@ -870,5 +870,5 @@ security:
   - abyssHttpBasicAuth: []
   - abyssApiKeyAuth: []
   - abyssJWTBearerAuth: []
-  - abyssAppKeyAuth: []
-  - abyssAppKeyCookieAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

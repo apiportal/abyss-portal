@@ -111,8 +111,8 @@ public abstract class AbstractApiController implements IApiController {
                         factory.addSecurityHandler("abyssHttpBasicAuth", this::abyssHttpBasicAuthSecurityHandler);
                         factory.addSecurityHandler("abyssApiKeyAuth", this::abyssApiKeyAuthSecurityHandler);
                         factory.addSecurityHandler("abyssJWTBearerAuth", this::abyssJWTBearerAuthSecurityHandler);
-                        factory.addSecurityHandler("abyssAppKeyAuth", this::abyssHttpBasicAuthSecurityHandler); //TODO: implement app key auth
-                        factory.addSecurityHandler("abyssAppKeyCookieAuth", this::abyssHttpBasicAuthSecurityHandler); //TODO: implement app key auth
+                        factory.addSecurityHandler("abyssAppAccessTokenAuth", this::abyssApiKeyAuthSecurityHandler); //TODO: implement app access token auth
+                        factory.addSecurityHandler("abyssAppAccessTokenCookieAuth", this::abyssApiKeyAuthSecurityHandler); //TODO: implement app access token auth
 
 /*
                         ChainAuthHandler chain = ChainAuthHandler.create();
