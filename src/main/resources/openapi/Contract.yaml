@@ -499,6 +499,9 @@ archived - Indicates that the active life of the contract is over. The workflow 
         licenseid:
           type: string
           description: 'FK ID of license'
+        subjectpermissionid:
+          type: string
+          description: 'FK ID of Subject Permission'
   requestBodies:
     Contract:
       content:

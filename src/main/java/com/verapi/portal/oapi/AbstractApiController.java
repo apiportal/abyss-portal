@@ -124,7 +124,6 @@ public abstract class AbstractApiController implements IApiController {
                                 .setMountValidationFailureHandler(true) // Disable mounting of dedicated validation failure handler
                                 .setMountResponseContentTypeHandler(true) // Mount ResponseContentTypeHandler automatically
                                 .setMountNotImplementedHandler(true);
-
                         // Now you have to generate the router
                         Router router = factory.setOptions(factoryOptions).getRouter();
 
@@ -207,8 +206,9 @@ public abstract class AbstractApiController implements IApiController {
         if (failure instanceof ValidationException)
             // Handle Validation Exception
             routingContext.response()
-                    .setStatusCode(422)
-                    .setStatusMessage("ValidationException thrown! " + ((ValidationException) failure).type().name())
+                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .setStatusCode(HttpResponseStatus.UNPROCESSABLE_ENTITY.code())
+                    .setStatusMessage(HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase() + " " + ((ValidationException) failure).type().name() + " " + failure.getLocalizedMessage())
                     .end();
         else if (failure instanceof AbyssApiException)
             //Handle Abyss Api Exception
@@ -221,10 +221,10 @@ public abstract class AbstractApiController implements IApiController {
             // Handle other exception
             routingContext.response()
                     .putHeader("content-type", "application/json; charset=utf-8")
-                    .setStatusCode(500)
+                    .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .setStatusMessage("Exception thrown! " + failure.getLocalizedMessage())
-                    .end(new ApiSchemaError().setCode(500)
-                            .setUsermessage("An unknown error occured")
+                    .end(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                            .setUsermessage(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase())
                             .setInternalmessage(failure.getLocalizedMessage())
                             .setDetails(Arrays.toString(failure.getStackTrace()))
                             .setRecommendation(null)
@@ -348,6 +348,7 @@ public abstract class AbstractApiController implements IApiController {
         }
         if (user.principal().isEmpty()) {
             throwApiException(routingContext, UnAuthorized401Exception.class);
+            return;
         }
 
         //if authorized then set this security handler's flag and route next
@@ -556,7 +557,25 @@ public abstract class AbstractApiController implements IApiController {
                 .setStatusCode(httpResponseStatus)
                 .end(response.encode());
         logger.trace("replied successfully");
+    }
 
+    protected void subscribeAndResponseJsonObject(RoutingContext routingContext, Single<JsonObject> response, int httpResponseStatus) {
+        subscribeAndResponseJsonObject(routingContext, response, httpResponseStatus, false);
+    }
+
+    protected void subscribeAndResponseJsonObject(RoutingContext routingContext, Single<JsonObject> response, int httpResponseStatus, boolean onlyStatus) {
+        response.subscribe(jsonObject -> {
+            elasticSearchService.indexDocument(routingContext,
+                    this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
+                    jsonObject);
+            routingContext.response()
+                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .setStatusCode(httpResponseStatus)
+                    .end((onlyStatus) ? null : jsonObject.encode());
+            logger.trace("replied successfully");
+        }, throwable -> {
+            processException(routingContext, throwable);
+        });
     }
 
 

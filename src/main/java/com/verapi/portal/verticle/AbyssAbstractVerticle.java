@@ -250,14 +250,16 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
     }
 
-    void globalJavascript(RoutingContext context) {
+    private void globalJavascript(RoutingContext context) {
         String filecontent =
-                "var hostProtocol='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_PROTOCOL) + "';" +
-                        "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';" +
-                        "var hostPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_OPENAPI_SERVER_PORT) + "';" +
-                        "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_SERVER_PORT) + "';" +
-                        "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";" +
-                        "var version='" + BuildProperties.getInstance().getConfigJsonObject().getString(Constants.ABYSS_BUILD_TIMESTAMP) + "';";
+                "var hostProtocol='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_PROTOCOL) + "';\n" +
+                        "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';\n" +
+                        "var hostPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_OPENAPI_SERVER_PORT) + "';\n" +
+                        "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_SERVER_PORT) + "';\n" +
+                        "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";\n" +
+                        "var version='" + BuildProperties.getInstance().getConfigJsonObject().getString(Constants.ABYSS_BUILD_TIMESTAMP) + "';\n" +
+                        "var gatewayContext='" + Constants.ABYSS_GW + "';\n" +
+                        "var gatewayPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_GATEWAY_SERVER_PORT) + "';\n";
         context.response().putHeader("Content-Type", "application/javascript");
         context.response().setStatusCode(200);
         context.response().end(filecontent);

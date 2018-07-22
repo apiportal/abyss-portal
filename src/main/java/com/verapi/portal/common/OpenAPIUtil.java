@@ -21,6 +21,7 @@ import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.contract.RouterFactoryException;
+import io.vertx.ext.web.api.contract.openapi3.impl.OpenApi3Utils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,8 @@ public class OpenAPIUtil {
 
     public static final String OPENAPI_SECTION_SERVERS = "servers";
 
-    public static Single<SwaggerParseResult> openAPIParser(JsonObject apiSpec) {
+    @Deprecated
+    public static Single<SwaggerParseResult> _openAPIParser(JsonObject apiSpec) {
         logger.trace("---openAPIParser invoked");
         ObjectMapper mapper;
         String data = apiSpec.toString();
@@ -47,10 +49,34 @@ public class OpenAPIUtil {
                 return Single.just(swaggerParseResult);
             } else {
                 if (swaggerParseResult.getMessages().size() == 1 && swaggerParseResult.getMessages().get(0).matches("unable to read location")) {
-                    logger.error("openAPIParser error for: {}| {}", data.substring(1,40), swaggerParseResult.getMessages());
+                    logger.error("openAPIParser error for: {}| {}", data.substring(1, 40), swaggerParseResult.getMessages());
                     return Single.error(RouterFactoryException.createSpecNotExistsException(""));
                 } else {
-                    logger.error("openAPIParser error for: {}| {}", data.substring(1,40), swaggerParseResult.getMessages());
+                    logger.error("openAPIParser error for: {}| {}", data.substring(1, 40), swaggerParseResult.getMessages());
+                    return Single.error(RouterFactoryException.createSpecInvalidException(StringUtils.join(swaggerParseResult.getMessages(), ", ")));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("openAPIParser error | {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+            return Single.error(RouterFactoryException.createSpecInvalidException(e.getLocalizedMessage()));
+        }
+    }
+
+    public static Single<SwaggerParseResult> openAPIParser(JsonObject apiSpec) {
+        logger.trace("---openAPIParser invoked");
+        String data = apiSpec.toString();
+        try {
+            //SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(data);
+            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(data, null, OpenApi3Utils.getParseOptions());
+            if (swaggerParseResult.getMessages().isEmpty()) {
+                logger.trace("openAPIParser OK");
+                return Single.just(swaggerParseResult);
+            } else {
+                if (swaggerParseResult.getMessages().size() == 1 && swaggerParseResult.getMessages().get(0).matches("unable to read location")) {
+                    logger.error("openAPIParser error for: {}| {}", data.substring(1, 40), swaggerParseResult.getMessages());
+                    return Single.error(RouterFactoryException.createSpecNotExistsException(""));
+                } else {
+                    logger.error("openAPIParser error for: {}| {}", data.substring(1, 40), swaggerParseResult.getMessages());
                     return Single.error(RouterFactoryException.createSpecInvalidException(StringUtils.join(swaggerParseResult.getMessages(), ", ")));
                 }
             }

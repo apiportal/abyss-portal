@@ -188,6 +188,10 @@ public class Constants {
     public static final String RESOURCE_ACTION_VIEW_API = "bf0b6ac2-7d07-49c6-b3f8-0fd7c927126e";
     public static final String RESOURCE_ACTION_EDIT_API = "7e55b086-75e0-4209-9cc5-51baa38393ed";
 
+    public static final String CONTRACT_STATE_IS_ACTIVATED = "846282ec-1329-4a3c-908b-672b4de3ade2";
+
+    public static final String CONTRACT_STATUS_IS_INFORCED = "inforced";
+
     public static final String RESOURCE_DEFAULT_SUBJECT_AVATAR = "/webroot/dist/img/avatar.jpg";
     public static final String RESOURCE_DEFAULT_API_AVATAR = "/webroot/dist/img/thumb.png";
 
@@ -213,5 +217,7 @@ public class Constants {
     public static final int ONE_HOUR_IN_SECONDS = 3600;
     public static final int ONE_DAY_IN_SECONDS = 86400;
 
+    public static final String AUTH_ABYSS_GATEWAY_COOKIE_NAME = "abyss-gateway-session";
+    public static final String AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME = "abyss-gateway-api-access-token"; //spinal case recommended
 
 }

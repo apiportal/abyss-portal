@@ -21,9 +21,12 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.api.contract.RouterFactoryException;
+import io.vertx.ext.web.api.contract.RouterFactoryOptions;
+import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.ext.web.handler.UserSessionHandler;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.servicediscovery.Record;
@@ -31,10 +34,12 @@ import io.vertx.servicediscovery.types.HttpLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implements IGatewayVerticle {
     private static Logger logger = LoggerFactory.getLogger(GatewayHttpServerVerticle.class);
+    private Boolean attachAbyssGatewayUserSessionHandler = false;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -73,6 +78,8 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
         String apiPathParamValue = context.request().path().substring(("/" + Constants.ABYSS_GW + "/").length() + 36, context.request().path().length());
         logger.trace("captured path parameter: {} | {}", apiUUIDParamValue, apiPathParamValue);
         logger.trace("captured mountpoint: {} | method: {}", context.mountPoint(), context.request().method().toString());
+
+/* 2018 07 19 14 45
         lookupHttpService(apiUUIDParamValue)
                 .flatMap(abyssServiceReference -> {
                     JsonObject apiSpec = new JsonObject(abyssServiceReference.serviceReference.record().getMetadata().getString("apiSpec"));
@@ -95,6 +102,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             logger.error("invocation error | {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                         }
                 );
+*/
 
 
         //if (apiUUIDParamValue.equals("echo")) {
@@ -124,7 +132,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             //gatewayRouter.route(Constants.ABYSS_GATEWAY_ROOT + "/" + o.getString("uuid")).handler(this::routingContextHandler);
                             //TODO:depreciate below
 
-                            createSubRouter(o.getString("uuid"))
+                            createSubRouter("old-" + o.getString("uuid"))
                                     .flatMap(this::enableCorsSupport)
                                     .doOnError(throwable -> logger.error("loadAllProxyApis createSubRouter error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
                                     .subscribe(subRouter -> logger.trace("gatewayRouter route list{} \n subRouter route list: {}", gatewayRouter.getRoutes(), subRouter.getRoutes()));
@@ -134,7 +142,63 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                 )
                 .flatMap(o -> {
                     JsonObject apiSpec = new JsonObject(o.getString("openapidocument"));
-                    OpenAPIUtil.openAPIParser(apiSpec).subscribe();
+                    String apiUUID = o.getString("uuid");
+                    attachAbyssGatewayUserSessionHandler = false;
+                    OpenAPIUtil.openAPIParser(apiSpec)
+                            .flatMap(swaggerParseResult -> {
+                                createOpenAPI3RouterFactory(vertx.getDelegate(), swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
+                                    if (openAPI3RouterFactoryAsyncResult.succeeded()) {
+                                        OpenAPI3RouterFactory factory = openAPI3RouterFactoryAsyncResult.result();
+                                        // add operation handler and failure handlers for each operation
+                                        swaggerParseResult.getOpenAPI().getPaths().forEach((s, pathItem) -> {
+                                            pathItem.readOperations().forEach(operation -> {
+                                                logger.trace("adding handlers for operation {}", operation.getOperationId());
+                                                factory.addHandlerByOperationId(operation.getOperationId(), this::genericAuthorizationHandler);
+                                                factory.addHandlerByOperationId(operation.getOperationId(), this::genericOperationHandler);
+                                                factory.addFailureHandlerByOperationId(operation.getOperationId(), this::genericFailureHandler);
+                                                logger.trace("added handlers for operation {}", operation.getOperationId());
+                                            });
+                                        });
+                                        //add generic security handler for each security requirement
+                                        swaggerParseResult.getOpenAPI().getSecurity().forEach(securityRequirement -> {
+                                            securityRequirement.forEach((key, value) -> factory.addSecurityHandler(key, routingContext -> {
+                                                if ((swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key).getType() == SecurityScheme.Type.APIKEY)
+                                                        && (swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key).getIn() == SecurityScheme.In.COOKIE)
+                                                        && (Objects.equals(swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key).getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME))
+                                                        ) {
+                                                    attachAbyssGatewayUserSessionHandler = true;
+                                                }
+                                                genericSecuritySchemaHandler(key, swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key), routingContext);
+                                            }));
+                                        });
+                                        // set router factory behaviours
+                                        RouterFactoryOptions factoryOptions = new RouterFactoryOptions()
+                                                .setMountValidationFailureHandler(true) // Disable mounting of dedicated validation failure handler
+                                                .setMountResponseContentTypeHandler(true) // Mount ResponseContentTypeHandler automatically
+                                                .setMountNotImplementedHandler(true);
+
+                                        // Now you have to generate the router
+                                        io.vertx.ext.web.Router router = factory.setOptions(factoryOptions).getRouter();
+
+                                        // if needed then attach UserSessionHandler
+                                        if (attachAbyssGatewayUserSessionHandler) {
+                                            router.route().handler(UserSessionHandler.create(jdbcAuth));
+                                        }
+
+                                        //Mount router into main router
+                                        gatewayRouter.getDelegate().mountSubRouter(Constants.ABYSS_GATEWAY_ROOT + "/" + apiUUID + "/", router);
+                                        logger.trace("+++++ {} openapi router route list: {}", apiUUID, router.getRoutes());
+
+                                    } else {
+                                        throw new RuntimeException("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
+                                    }
+                                });
+                                return Single.just(swaggerParseResult);
+                            })
+                            .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                            .doAfterSuccess(swaggerParseResult -> logger.trace("successfully loaded API proxy {}", apiUUID))
+                            .doFinally(() -> logger.trace("+++++gatewayRouter route list: {}", gatewayRouter.getRoutes()))
+                            .subscribe();
                     return Observable.just(o);
                 })
                 .flatMap(o -> {

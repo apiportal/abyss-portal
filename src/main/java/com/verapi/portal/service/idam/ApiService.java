@@ -62,20 +62,21 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(((Number) jsonObj.getValue("languageformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
                             .add(jsonObj.getJsonObject("openapidocument").encode())
-                            .add(jsonObj.getJsonObject("extendeddocument").encode())
-                            .add(jsonObj.getString("businessapiid"))
-                            .add(jsonObj.getString("image"))
+                            .add(jsonObj.getJsonObject("extendeddocument").encode());
+                    if (jsonObj.getBoolean("isproxyapi"))
+                        insertParam.add(jsonObj.getString("businessapiid"));
+                    insertParam.add(jsonObj.getString("image"))
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
-                            .add(jsonObj.getString("apioriginuuid"))
+                            //.add(jsonObj.getString("apioriginuuid")) //TODO: whenever API versioning implemented then this field will be mandatory for new API versions
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getBoolean("islive"))
                             .add(jsonObj.getBoolean("isdefaultversion"))
                             .add(jsonObj.getBoolean("islatestversion"));
 
-                    return insert(insertParam, SQL_INSERT).toObservable();
+                    return insert(insertParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_INSERT : SQL_INSERT_BUSINESS_API).toObservable();
                 })
                 .flatMap(insertResult -> {
                     if (insertResult.getThrowable() == null) {
@@ -139,7 +140,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("color"))
                 .add(updateRecord.getInstant("deployed"))
                 .add(updateRecord.getString("changelog"))
-                .add(updateRecord.getString("apioriginuuid"))
+                //.add(updateRecord.getString("apioriginuuid"))
                 .add(updateRecord.getString("version"))
                 .add(updateRecord.getBoolean("issandbox"))
                 .add(updateRecord.getBoolean("islive"))
@@ -174,7 +175,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
-                            .add(jsonObj.getString("apioriginuuid"))
+                            //.add(jsonObj.getString("apioriginuuid"))
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getBoolean("islive"))
@@ -279,11 +280,19 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion,\n" +
             "                 languageformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog,\n" +
-            "                 apioriginuuid, version, issandbox, islive, isdefaultversion, islatestversion)\n" +
+            "                 version, issandbox, islive, isdefaultversion, islatestversion)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
             "                    ?, ?, ?::JSON, ?::JSON, CAST(? AS uuid), ?, ?, ?, ?,\n" +
-            "                             CAST(? AS uuid), ?, ?, ?, ?, ?);";
+            "                             ?, ?, ?, ?, ?);";
+
+    private static final String SQL_INSERT_BUSINESS_API = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion,\n" +
+            "                 languageformat, originaldocument, openapidocument, extendeddocument, image, color, deployed, changelog,\n" +
+            "                 version, issandbox, islive, isdefaultversion, islatestversion)\n" +
+            "values\n" +
+            "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
+            "                    ?, ?, ?::JSON, ?::JSON, ?, ?, ?, ?,\n" +
+            "                             ?, ?, ?, ?, ?);";
 
     private static final String SQL_DELETE = "update api\n" +
             "set\n" +
@@ -340,7 +349,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , color      = ?\n" +
             "  , deployed      = ?\n" +
             "  , changelog      = ?\n" +
-            "  , apioriginuuid      = CAST(? AS uuid)\n" +
+            //"  , apioriginuuid      = CAST(? AS uuid)\n" +
             "  , version      = ?\n" +
             "  , issandbox      = ?\n" +
             "  , islive      = ?\n" +

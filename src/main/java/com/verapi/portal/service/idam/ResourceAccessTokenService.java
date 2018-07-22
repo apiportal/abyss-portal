@@ -301,6 +301,8 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
+    private static final String SQL_CONDITION_TOKEN_IS = "token = ?\n";
+
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -316,6 +318,8 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static final String SQL_FIND_BY_SUBJECT_PERMISSION_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_PERMISSION_UUID_IS;
+
+    public static final String SQL_FIND_BY_SUBJECT_TOKEN = SQL_SELECT + SQL_WHERE + SQL_CONDITION_TOKEN_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

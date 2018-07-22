@@ -16,25 +16,37 @@ import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
+import com.verapi.portal.oapi.exception.AbyssApiException;
+import com.verapi.portal.oapi.exception.NotFound404Exception;
+import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
+import com.verapi.portal.service.idam.AuthenticationService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.parser.ResolverCache;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClientOptions;
-
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
-import io.vertx.core.net.ProxyOptions;
-import io.vertx.core.net.ProxyType;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.jdbc.JDBCAuth;
+import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
+import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.ext.web.api.contract.openapi3.impl.OpenAPI3RouterFactoryImpl;
+import io.vertx.ext.web.api.validation.ValidationException;
 import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.reactivex.RxHelper;
 import io.vertx.reactivex.core.AbstractVerticle;
-import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.core.http.HttpClient;
 import io.vertx.reactivex.core.http.HttpClientRequest;
 import io.vertx.reactivex.core.http.HttpClientResponse;
@@ -44,10 +56,13 @@ import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.handler.BodyHandler;
+import io.vertx.reactivex.ext.web.handler.CookieHandler;
 import io.vertx.reactivex.ext.web.handler.CorsHandler;
 import io.vertx.reactivex.ext.web.handler.LoggerHandler;
 import io.vertx.reactivex.ext.web.handler.ResponseTimeHandler;
+import io.vertx.reactivex.ext.web.handler.SessionHandler;
 import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
+import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.reactivex.servicediscovery.ServiceReference;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.HttpLocation;
@@ -58,6 +73,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -70,6 +86,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     static Router gatewayRouter;
     private AbyssJDBCService abyssJDBCService;
     private JDBCClient jdbcClient;
+    JDBCAuth jdbcAuth;
     VerticleConf verticleConf;
 
     @Override
@@ -96,10 +113,20 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         //log HTTP requests
         router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
-        //install body handler
+        // 1: install cookie handler
+        //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
+        router.route().handler(CookieHandler.create());
+
+        // 2: install body handler
         //A handler which gathers the entire request body and sets it on the RoutingContext
         //It also handles HTTP file uploads and can be used to limit body sizes
         router.route().handler(BodyHandler.create());
+
+        // 3: install session handler
+        //A handler that maintains a Session for each browser session
+        //The session is available on the routing context with RoutingContext.session()
+        //The session handler requires a CookieHandler to be on the routing chain before it
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)).setSessionCookieName(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME).setSessionTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60 * 1000));
 
         //If a request times out before the response is written a 503 response will be returned to the client, default abyss-gw timeout 30 secs
         router.route().handler(TimeoutHandler.create(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_TIMEOUT)));
@@ -114,6 +141,17 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
         //router.route().handler(ctx -> ctx.fail(HttpResponseStatus.NOT_FOUND.code()));
         logger.trace("router route list: {}", router.getRoutes());
+
+        // jdbcAuth is only prepared for UserSessionHandler usage inside openAPI routers
+        jdbcAuth = JDBCAuth.create(vertx.getDelegate(), jdbcClient.getDelegate());
+
+        jdbcAuth.setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
+
+        jdbcAuth.setAuthenticationQuery("select password, passwordsalt from subject where isdeleted = false and isactivated = true and subjectname = ?");
+
+        jdbcAuth.setPermissionsQuery("select permission from subject_permission up, subject u where um.subjectname = ? and up.subjectid = u.id");
+
+        jdbcAuth.setRolesQuery("select groupname from subject_group ug, subject_membership um, subject u where u.subjectname = ? and um.subjectid = u.id and um.groupId = ug.id");
 
         return Single.just(router);
     }
@@ -148,8 +186,25 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         return Single.just(subRouter);
     }
 
-    private void failureHandler(RoutingContext context) {
-        context.response().setStatusCode(context.statusCode()).end();
+    private void failureHandler(RoutingContext routingContext) {
+
+        // This is the failure handler
+        Throwable failure = routingContext.failure();
+        if (failure instanceof AbyssApiException) {
+            //Handle Abyss Api Exception
+            routingContext.response()
+                    .setStatusCode(((AbyssApiException) failure).getHttpResponseStatus().code())
+                    .setStatusMessage(((AbyssApiException) failure).getHttpResponseStatus().reasonPhrase())
+                    .end();
+        } else {
+            if (routingContext.statusCode() == -1)
+                routingContext.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
+            // Handle other exception
+            routingContext.response()
+                    .setStatusCode(routingContext.statusCode())
+                    .setStatusMessage(HttpResponseStatus.valueOf(routingContext.statusCode()).reasonPhrase())
+                    .end();
+        }
     }
 
     private Single<HttpServer> createHttpServer(Router router, String serverHost, int serverPort, Boolean isSSL) {
@@ -414,17 +469,149 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         context.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
     }
 
-    public static final class VerticleConf {
+    static final class VerticleConf {
         String serverHost;
         int serverPort;
         Boolean isSSL = Boolean.FALSE;
         Boolean isSandbox = Boolean.FALSE;
 
-        public VerticleConf(String serverHost, int serverPort, Boolean isSSL, Boolean isSandbox) {
+        VerticleConf(String serverHost, int serverPort, Boolean isSSL, Boolean isSandbox) {
             this.serverHost = serverHost;
             this.serverPort = serverPort;
             this.isSSL = isSSL;
             this.isSandbox = isSandbox;
         }
     }
+
+    static void createOpenAPI3RouterFactory(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
+            handler) {
+        vertx.executeBlocking((Future<OpenAPI3RouterFactory> future) -> {
+            future.complete(new OpenAPI3RouterFactoryImpl(vertx, openAPI, new ResolverCache(openAPI, null, null)));
+        }, handler);
+    }
+
+    void genericSecuritySchemaHandler(String securitySchemeName, SecurityScheme securityScheme, io.vertx.ext.web.RoutingContext routingContext) {
+        logger.trace("---genericSecuritySchemaHandler invoked for security schema name {}", securitySchemeName);
+        SecurityScheme.Type securitySchemeType = securityScheme.getType();
+        SecurityScheme.In securitySchemeIn = securityScheme.getIn();
+
+        if (securitySchemeType == SecurityScheme.Type.APIKEY) {
+            if (securitySchemeIn == SecurityScheme.In.COOKIE) {
+                if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
+                    //check if this cookie exists in http request headers
+                    if (routingContext.getCookie(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME) == null) {
+                        logger.error("platform security scheme cookie [{}] does not exist inside cookies", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
+                        routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+                        return;
+                    }
+                    // Handle security here
+                    User user = routingContext.user();
+                    if (user == null) {
+                        routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
+                        return;
+                    }
+                    if (user.principal().isEmpty()) {
+                        routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
+                        return;
+                    }
+                } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
+                    logger.error("unsupported platform security scheme [{}] in cookie", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+                    routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+                    return;
+                }
+            } else if (securitySchemeIn == SecurityScheme.In.HEADER) {
+                if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
+                    logger.error("unsupported platform security scheme [{}] in header", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
+                    routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+                    return;
+                } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
+                    //check if this access token sent via http request header
+                    if (!routingContext.request().headers().names().contains(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
+                        logger.error("platform security scheme access token [{}] does not exist inside headers", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+                        routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+                        return;
+                    }
+                    String apiAccessToken = routingContext.request().getHeader(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+                    AuthenticationService authenticationService = new AuthenticationService(vertx);
+                    JsonObject accessTokenValidation = authenticationService.validateAccessToken(apiAccessToken);
+                    if (!accessTokenValidation.getBoolean("status")) {
+                        logger.error("platform security scheme access token [{}] validation failed: {} \n validation report: {}",
+                                Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME,
+                                accessTokenValidation.getString("error"),
+                                accessTokenValidation.getJsonObject("validationreport"));
+                        routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
+                        return;
+                    }
+                    routingContext.put("validationreport", accessTokenValidation.getJsonObject("validationreport"));
+                }
+            } else if (securitySchemeIn == SecurityScheme.In.QUERY) {
+                if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
+                    logger.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
+                    routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+                    return;
+                } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
+                    logger.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+                    routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+                    return;
+                }
+            }
+        } else if (securitySchemeType == SecurityScheme.Type.HTTP) {
+            logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+            return;
+        } else if (securitySchemeType == SecurityScheme.Type.OAUTH2) {
+            logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+            return;
+        } else if (securitySchemeType == SecurityScheme.Type.OPENIDCONNECT) {
+            logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+            return;
+        } else {
+            //logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
+            return;
+        }
+
+        routingContext.next();
+    }
+
+    void genericFailureHandler(io.vertx.ext.web.RoutingContext routingContext) {
+        logger.error("failureHandler invoked {} | {} ", routingContext.failure().getLocalizedMessage(), routingContext.failure().getStackTrace());
+
+        // This is the failure handler
+        Throwable failure = routingContext.failure();
+        if (failure instanceof ValidationException)
+            // Handle Validation Exception
+            routingContext.response()
+                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .setStatusCode(HttpResponseStatus.UNPROCESSABLE_ENTITY.code())
+                    .setStatusMessage(HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase() + " " + ((ValidationException) failure).type().name() + " " + failure.getLocalizedMessage())
+                    .end();
+        else if (failure instanceof AbyssApiException)
+            //Handle Abyss Api Exception
+            routingContext.response()
+                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .setStatusCode(((AbyssApiException) failure).getHttpResponseStatus().code())
+                    .setStatusMessage(((AbyssApiException) failure).getHttpResponseStatus().reasonPhrase())
+                    .end(((AbyssApiException) failure).getApiError().toJson().toString(), "UTF-8");
+        else
+            // Handle other exception
+            routingContext.response()
+                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .setStatusCode(routingContext.statusCode())
+                    .setStatusMessage(failure.getLocalizedMessage())
+                    .end();
+    }
+
+    void genericOperationHandler(io.vertx.ext.web.RoutingContext routingContext) {
+        logger.trace("---genericOperationHandler invoked");
+        routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
+    }
+
+    void genericAuthorizationHandler(io.vertx.ext.web.RoutingContext routingContext) {
+        logger.trace("---genericAuthorizationHandler invoked");
+        routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
+    }
+
 }

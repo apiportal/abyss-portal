@@ -60,7 +60,8 @@ public class ContractService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("contractstateid"))
                             .add(jsonObj.getString("status"))
                             .add(jsonObj.getBoolean("isrestrictedtosubsetofapi"))
-                            .add(jsonObj.getString("licenseid"));
+                            .add(jsonObj.getString("licenseid"))
+                            .add(jsonObj.getString("subjectpermissionid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -119,6 +120,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("status"))
                 .add(updateRecord.getBoolean("isrestrictedtosubsetofapi"))
                 .add(updateRecord.getString("licenseid"))
+                .add(updateRecord.getString("subjectpermissionid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -145,6 +147,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("status"))
                             .add(jsonObj.getBoolean("isrestrictedtosubsetofapi"))
                             .add(jsonObj.getString("licenseid"))
+                            .add(jsonObj.getString("subjectpermissionid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -232,8 +235,8 @@ public class ContractService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into contract (organizationid, crudsubjectid, name, description, apiid, subjectid, environment, contractstateid, status, isrestrictedtosubsetofapi, licenseid)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS e_contract_status), ?, CAST(? AS uuid))";
+    private static final String SQL_INSERT = "insert into contract (organizationid, crudsubjectid, name, description, apiid, subjectid, environment, contractstateid, status, isrestrictedtosubsetofapi, licenseid, subjectpermissionid)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS e_contract_status), ?, CAST(? AS uuid), CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update contract\n" +
             "set\n" +
@@ -256,7 +259,8 @@ public class ContractService extends AbstractService<UpdateResult> {
             "  contractstateid,\n" +
             "  status,\n" +
             "  isrestrictedtosubsetofapi,\n" +
-            "  licenseid\n" +
+            "  licenseid,\n" +
+            "  subjectpermissionid\n" +
             "from contract\n";
 
     private static final String SQL_UPDATE = "UPDATE contract\n" +
@@ -272,7 +276,8 @@ public class ContractService extends AbstractService<UpdateResult> {
             "  , contractstateid      = CAST(? AS uuid)\n" +
             "  , status      = CAST(? AS e_contract_status)\n" +
             "  , isrestrictedtosubsetofapi      = ?\n" +
-            "  , licenseid      = CAST(? AS uuid)\n";
+            "  , licenseid      = CAST(? AS uuid)\n" +
+            "  , subjectpermissionid      = CAST(? AS uuid)\n";
 
     private static final String SQL_AND = "and\n";
 
@@ -291,6 +296,8 @@ public class ContractService extends AbstractService<UpdateResult> {
     private static final String SQL_CONDITION_APPID_IS = "subjectid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
+
+    private static final String SQL_CONDITION_SUBJECTPERMISSIONID_IS = "subjectpermissionid = CAST(? AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by name\n";
 
@@ -313,6 +320,8 @@ public class ContractService extends AbstractService<UpdateResult> {
     public static final String FILTER_BY_APIID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
 
     public static final String FILTER_BY_APPID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPID_IS;
+
+    static final String FILTER_BY_SUBJECTPERMISSIONID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECTPERMISSIONID_IS;
 
     public static final String FILTER_BY_LICENSEID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
 
