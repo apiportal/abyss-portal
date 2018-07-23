@@ -490,8 +490,13 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }, handler);
     }
 
-    void genericSecuritySchemaHandler(String securitySchemeName, SecurityScheme securityScheme, io.vertx.ext.web.RoutingContext routingContext) {
-        logger.trace("---genericSecuritySchemaHandler invoked for security schema name {}", securitySchemeName);
+    void dummySecuritySchemaHandler(SecurityScheme securityScheme, io.vertx.ext.web.RoutingContext routingContext) {
+        logger.trace("---dummySecuritySchemaHandler invoked");
+        routingContext.next();
+    }
+
+    void genericSecuritySchemaHandler(SecurityScheme securityScheme, io.vertx.ext.web.RoutingContext routingContext) {
+        logger.trace("---genericSecuritySchemaHandler invoked for security schema name {}", securityScheme.getName());
         SecurityScheme.Type securitySchemeType = securityScheme.getType();
         SecurityScheme.In securitySchemeIn = securityScheme.getIn();
 

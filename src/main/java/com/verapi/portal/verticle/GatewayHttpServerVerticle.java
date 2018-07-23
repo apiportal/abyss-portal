@@ -21,6 +21,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -34,7 +36,7 @@ import io.vertx.servicediscovery.types.HttpLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implements IGatewayVerticle {
@@ -152,25 +154,15 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         // add operation handler and failure handlers for each operation
                                         swaggerParseResult.getOpenAPI().getPaths().forEach((s, pathItem) -> {
                                             pathItem.readOperations().forEach(operation -> {
-                                                logger.trace("adding handlers for operation {}", operation.getOperationId());
+                                                logger.trace("adding handlers for operation {}", operation.getOperationId(), operation.getSecurity());
                                                 factory.addHandlerByOperationId(operation.getOperationId(), this::genericAuthorizationHandler);
                                                 factory.addHandlerByOperationId(operation.getOperationId(), this::genericOperationHandler);
                                                 factory.addFailureHandlerByOperationId(operation.getOperationId(), this::genericFailureHandler);
-                                                logger.trace("added handlers for operation {}", operation.getOperationId());
+                                                AddSecurityHandlers(swaggerParseResult.getOpenAPI(), operation.getSecurity(), factory);
                                             });
                                         });
                                         //add generic security handler for each security requirement
-                                        swaggerParseResult.getOpenAPI().getSecurity().forEach(securityRequirement -> {
-                                            securityRequirement.forEach((key, value) -> factory.addSecurityHandler(key, routingContext -> {
-                                                if ((swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key).getType() == SecurityScheme.Type.APIKEY)
-                                                        && (swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key).getIn() == SecurityScheme.In.COOKIE)
-                                                        && (Objects.equals(swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key).getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME))
-                                                        ) {
-                                                    attachAbyssGatewayUserSessionHandler = true;
-                                                }
-                                                genericSecuritySchemaHandler(key, swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key), routingContext);
-                                            }));
-                                        });
+                                        AddSecurityHandlers(swaggerParseResult.getOpenAPI(), swaggerParseResult.getOpenAPI().getSecurity(), factory);
                                         // set router factory behaviours
                                         RouterFactoryOptions factoryOptions = new RouterFactoryOptions()
                                                 .setMountValidationFailureHandler(true) // Disable mounting of dedicated validation failure handler
@@ -201,7 +193,11 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             .subscribe();
                     return Observable.just(o);
                 })
-                .flatMap(o -> {
+                .
+
+                        flatMap(o ->
+
+                                {
 /*
                             String mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + o.getString("uuid");
                             Router subRouter = Router.router(vertx);
@@ -212,37 +208,98 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
                             logger.trace("subRouter route list: {}", subRouter.getRoutes());
 */
-                            return Observable.just(new Record()
-                                    .setType("http-endpoint")
-                                    //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
-                                    .setLocation((new HttpLocation()
-                                            .setSsl(false)
-                                            .setHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST))
-                                            .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT))
-                                            .setRoot("/")
-                                            .toJson()))
-                                    .setName(o.getString("uuid"))
-                                    .setMetadata(new JsonObject()
-                                            .put("organization", o.getString("organizationid"))
-                                            .put("apiSpec", o.getString("openapidocument"))));
-                        }
-                )
-                .flatMap(record -> AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxPublish(record).toObservable()))
-                .doOnError(throwable -> logger.error("loadAllProxyApis error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
-                .andThen(super.loadAllProxyApis())
-                .doFinally(() -> {
-                    String mountPoint = "";
-                    mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + "echo";
-                    Router subRouter = Router.router(vertx);
-                    subRouter.route().handler(this::echoContextHandler);
-                    gatewayRouter.mountSubRouter(mountPoint, subRouter);
-                    logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
-                    logger.trace("subRouter route list: {}", subRouter.getRoutes());
-                    logger.info("loadAllProxyApis() completed");
-                });
+                                    return Observable.just(new Record()
+                                            .setType("http-endpoint")
+                                            //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
+                                            .setLocation((new HttpLocation()
+                                                    .setSsl(false)
+                                                    .setHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST))
+                                                    .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT))
+                                                    .setRoot("/")
+                                                    .toJson()))
+                                            .setName(o.getString("uuid"))
+                                            .setMetadata(new JsonObject()
+                                                    .put("organization", o.getString("organizationid"))
+                                                    .put("apiSpec", o.getString("openapidocument"))));
+                                }
+                        )
+                .
+
+                        flatMap(record -> AbyssServiceDiscovery.getInstance(vertx).
+
+                                getServiceDiscovery().
+
+                                rxPublish(record).
+
+                                toObservable()))
+                .
+
+                        doOnError(throwable -> logger.error("loadAllProxyApis error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                .
+
+                        andThen(super.loadAllProxyApis())
+                .
+
+                        doFinally(() ->
+
+                        {
+                            String mountPoint;
+                            mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + "echo";
+                            Router subRouter = Router.router(vertx);
+                            subRouter.route().handler(this::echoContextHandler);
+                            gatewayRouter.mountSubRouter(mountPoint, subRouter);
+                            logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
+                            logger.trace("subRouter route list: {}", subRouter.getRoutes());
+                            logger.info("loadAllProxyApis() completed");
+                        });
     }
 
-    public void echoContextHandler(RoutingContext context) {
+    private void AddSecurityHandlers(OpenAPI openAPI, List<SecurityRequirement> securityRequirements, OpenAPI3RouterFactory factory) {
+        if (securityRequirements != null) {
+            securityRequirements.forEach(securityRequirement -> {
+                securityRequirement.forEach((key, value) -> {
+                    SecurityScheme securityScheme = openAPI.getComponents().getSecuritySchemes().get(key);
+                    if (securityScheme == null) {
+                        logger.warn("missing security scheme for security requirement: {}", key);
+                    } else {
+                        SecurityScheme.Type type = securityScheme.getType();
+                        SecurityScheme.In in = securityScheme.getIn();
+                        String name = securityScheme.getName();
+                        logger.trace("***** detected security requirement key: {}\nvalue: {}\ntype: {}\nIn: {}\nname: {}", key, value.toArray(), type, in, name);
+                        if ((name != null) && (name.equals(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME))) {
+                            if ((type == SecurityScheme.Type.APIKEY) && (in == SecurityScheme.In.COOKIE)) {
+                                attachAbyssGatewayUserSessionHandler = true;
+                                factory.addSecurityHandler(key, routingContext -> {
+                                    genericSecuritySchemaHandler(securityScheme, routingContext);
+                                });
+                                logger.trace("added security schema handlers for security schema {}", key);
+                            } else {
+                                logger.warn("Configured to useAbyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
+                            }
+                        } else if ((name != null) && (name.equals(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME))) {
+                            if ((type == SecurityScheme.Type.APIKEY)
+                                    && (in == SecurityScheme.In.HEADER)) {
+                                attachAbyssGatewayUserSessionHandler = true;
+                                factory.addSecurityHandler(key, routingContext -> {
+                                    genericSecuritySchemaHandler(securityScheme, routingContext);
+                                });
+                                logger.trace("added security schema handlers for security schema {}", key);
+                            } else {
+                                logger.warn("Configured to useAbyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
+                            }
+                        } else {
+                            factory.addSecurityHandler(key, routingContext -> {
+                                dummySecuritySchemaHandler(securityScheme, routingContext);
+                            });
+                            logger.trace("added dummy security schema handlers for security schema {}", key);
+                        }
+                    }
+                });
+            });
+        }
+    }
+
+    private void echoContextHandler(RoutingContext context) {
         logger.trace("---echoContextHandler invoked");
         context.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
     }
