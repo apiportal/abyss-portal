@@ -640,12 +640,6 @@ public abstract class AbstractApiController implements IApiController {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException("no_data_found"));
                     } else
-/*
-                        resultSet.getRows().forEach(jsonObject -> {
-                            elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
-                                    jsonObject);
-                        });
-*/
                         return Single.just(resultSet);
                 });
         subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
