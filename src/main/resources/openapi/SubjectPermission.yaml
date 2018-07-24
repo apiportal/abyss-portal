@@ -37,6 +37,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Listing operation of Subcriptions to my APIs'
+  - name: Subscriptions of Subject
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Listing operation of Subcriptions of Subject'
 paths:
   /subject-permissions:
     get:
@@ -401,6 +406,54 @@ paths:
           schema:
             type: string
           description: 'search  API subscriptions which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectPermission'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /subject-permissions/subject/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        description: 'The uuid of Subject'
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Subscriptions of Subject
+      summary: 'Get list of subscriptions of subject'
+      description: 'Returns list of subscriptions of subject'
+      operationId: getPermissionsOfSubject
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search subscriptions which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search subscriptions which names begin with'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:

@@ -301,6 +301,8 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
+    public static final String SQL_FIND_BY_SUBJECTID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
 
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
