@@ -66,10 +66,10 @@ public class AuthenticationApiController extends AbstractApiController {
         }
     }
 
-    @AbyssApiOperationHandler
+    //@AbyssApiOperationHandler //TODO: enable and define inside YAML
     public void validateToken(RoutingContext routingContext) {
         try {
-            logger.trace("logout invoked");
+            logger.trace("validateToken invoked");
 
             // Get the parsed parameters
             RequestParameters requestParameters = routingContext.get("parsedParameters");

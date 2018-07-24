@@ -190,7 +190,7 @@ public class Constants {
 
     public static final String CONTRACT_STATE_IS_ACTIVATED = "846282ec-1329-4a3c-908b-672b4de3ade2";
 
-    public static final String CONTRACT_STATUS_IS_INFORCED = "inforced";
+    public static final String CONTRACT_STATUS_IS_INFORCE = "inforce";
 
     public static final String RESOURCE_DEFAULT_SUBJECT_AVATAR = "/webroot/dist/img/avatar.jpg";
     public static final String RESOURCE_DEFAULT_API_AVATAR = "/webroot/dist/img/thumb.png";

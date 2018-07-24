@@ -17,6 +17,7 @@ import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.oapi.exception.AbyssApiException;
+import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.NotFound404Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.idam.AuthenticationService;
@@ -38,8 +39,6 @@ import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
-import io.vertx.ext.auth.User;
-import io.vertx.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 import io.vertx.ext.web.api.contract.openapi3.impl.OpenAPI3RouterFactoryImpl;
@@ -52,6 +51,8 @@ import io.vertx.reactivex.core.http.HttpClientRequest;
 import io.vertx.reactivex.core.http.HttpClientResponse;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.core.http.HttpServerRequest;
+import io.vertx.reactivex.ext.auth.User;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -76,6 +77,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+
+//import io.vertx.ext.auth.jdbc.JDBCAuth;
 
 //import io.vertx.core.http.HttpClient;
 
@@ -139,13 +142,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         //router.route(Constants.ABYSS_GATEWAY_ROOT + "/:apiUUID/:apiPath").handler(this::routingContextHandler);
         router.route(Constants.ABYSS_GATEWAY_ROOT).handler(this::routingContextHandler);
 
-        //router.route().handler(ctx -> ctx.fail(HttpResponseStatus.NOT_FOUND.code()));
         logger.trace("router route list: {}", router.getRoutes());
 
         // jdbcAuth is only prepared for UserSessionHandler usage inside openAPI routers
-        jdbcAuth = JDBCAuth.create(vertx.getDelegate(), jdbcClient.getDelegate());
+        jdbcAuth = JDBCAuth.create(vertx, jdbcClient);
 
-        jdbcAuth.setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
+        jdbcAuth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
 
         jdbcAuth.setAuthenticationQuery("select password, passwordsalt from subject where isdeleted = false and isactivated = true and subjectname = ?");
 
@@ -201,8 +203,8 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                 routingContext.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
             // Handle other exception
             routingContext.response()
-                    .setStatusCode(routingContext.statusCode())
-                    .setStatusMessage(HttpResponseStatus.valueOf(routingContext.statusCode()).reasonPhrase())
+                    .setStatusCode(routingContext.response().getStatusCode())
+                    .setStatusMessage(HttpResponseStatus.valueOf(routingContext.response().getStatusCode()).reasonPhrase())
                     .end();
         }
     }
@@ -483,19 +485,38 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }
     }
 
-    static void createOpenAPI3RouterFactory(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
+    static void createOpenAPI3RouterFactory2(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
             handler) {
         vertx.executeBlocking((Future<OpenAPI3RouterFactory> future) -> {
             future.complete(new OpenAPI3RouterFactoryImpl(vertx, openAPI, new ResolverCache(openAPI, null, null)));
         }, handler);
     }
 
-    void dummySecuritySchemaHandler(SecurityScheme securityScheme, io.vertx.ext.web.RoutingContext routingContext) {
+    //*******************
+    public static void createOpenAPI3RouterFactory(io.vertx.reactivex.core.Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory>> handler) {
+        create(vertx.getDelegate(), openAPI, ar -> {
+            if (ar.succeeded()) {
+                handler.handle(Future.succeededFuture(io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory.newInstance(ar.result())));
+            } else {
+                handler.handle(Future.failedFuture(ar.cause()));
+            }
+        });
+    }
+
+    static void create(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
+            handler) {
+        vertx.executeBlocking((Future<OpenAPI3RouterFactory> future) -> {
+            future.complete(new OpenAPI3RouterFactoryImpl(vertx, openAPI, new ResolverCache(openAPI, null, null)));
+        }, handler);
+    }
+
+    //***************
+    void dummySecuritySchemaHandler(SecurityScheme securityScheme, RoutingContext routingContext) {
         logger.trace("---dummySecuritySchemaHandler invoked");
         routingContext.next();
     }
 
-    void genericSecuritySchemaHandler(SecurityScheme securityScheme, io.vertx.ext.web.RoutingContext routingContext) {
+    void genericSecuritySchemaHandler(SecurityScheme securityScheme, RoutingContext routingContext) {
         logger.trace("---genericSecuritySchemaHandler invoked for security schema name {}", securityScheme.getName());
         SecurityScheme.Type securitySchemeType = securityScheme.getType();
         SecurityScheme.In securitySchemeIn = securityScheme.getIn();
@@ -538,16 +559,21 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     }
                     String apiAccessToken = routingContext.request().getHeader(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
                     AuthenticationService authenticationService = new AuthenticationService(vertx);
-                    JsonObject accessTokenValidation = authenticationService.validateAccessToken(apiAccessToken);
-                    if (!accessTokenValidation.getBoolean("status")) {
-                        logger.error("platform security scheme access token [{}] validation failed: {} \n validation report: {}",
-                                Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME,
-                                accessTokenValidation.getString("error"),
-                                accessTokenValidation.getJsonObject("validationreport"));
-                        routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
-                        return;
-                    }
-                    routingContext.put("validationreport", accessTokenValidation.getJsonObject("validationreport"));
+                    authenticationService.validateAccessToken(apiAccessToken).subscribe(accessTokenValidation -> {
+                        if (!accessTokenValidation.getBoolean("status")) {
+                            logger.error("platform security scheme access token [{}] validation failed: {} \n validation report: {}",
+                                    Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME,
+                                    accessTokenValidation.getString("error"),
+                                    accessTokenValidation.getJsonObject("validationreport"));
+                            routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
+                        } else {
+                            routingContext.put("validationreport", accessTokenValidation.getJsonObject("validationreport"));
+                            routingContext.next();
+                        }
+                    }, throwable -> {
+                        logger.error("error occured during platform security scheme access token [{}] validation: {} | {}", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME, throwable.getLocalizedMessage(), throwable.getStackTrace());
+                        routingContext.fail(new InternalServerError500Exception(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()));
+                    });
                 }
             } else if (securitySchemeIn == SecurityScheme.In.QUERY) {
                 if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
@@ -577,11 +603,9 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
             return;
         }
-
-        routingContext.next();
     }
 
-    void genericFailureHandler(io.vertx.ext.web.RoutingContext routingContext) {
+    void genericFailureHandler(RoutingContext routingContext) {
         logger.error("failureHandler invoked {} | {} ", routingContext.failure().getLocalizedMessage(), routingContext.failure().getStackTrace());
 
         // This is the failure handler
@@ -609,14 +633,15 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     .end();
     }
 
-    void genericOperationHandler(io.vertx.ext.web.RoutingContext routingContext) {
+    void genericOperationHandler(RoutingContext routingContext) {
         logger.trace("---genericOperationHandler invoked");
         routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
     }
 
-    void genericAuthorizationHandler(io.vertx.ext.web.RoutingContext routingContext) {
+    void genericAuthorizationHandler(RoutingContext routingContext) {
         logger.trace("---genericAuthorizationHandler invoked");
-        routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
+        //routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
+        routingContext.next();
     }
 
 }

@@ -273,6 +273,24 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
             "  isactive\n" +
             "from resource_access_token\n";
 
+    private static final String SQL_SELECT_ALL = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  subjectpermissionid,\n" +
+            "  resourcetypeid,\n" +
+            "  resourcerefid,\n" +
+            "  token,\n" +
+            "  expiredate,\n" +
+            "  nonce,\n" +
+            "  userdata,\n" +
+            "  isactive\n" +
+            "from resource_access_token\n";
+
     private static final String SQL_UPDATE = "UPDATE resource_access_token\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
@@ -319,7 +337,7 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
 
     public static final String SQL_FIND_BY_SUBJECT_PERMISSION_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_PERMISSION_UUID_IS;
 
-    public static final String SQL_FIND_BY_SUBJECT_TOKEN = SQL_SELECT + SQL_WHERE + SQL_CONDITION_TOKEN_IS;
+    public static final String SQL_FIND_BY_SUBJECT_TOKEN = SQL_SELECT_ALL + SQL_WHERE + SQL_CONDITION_TOKEN_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

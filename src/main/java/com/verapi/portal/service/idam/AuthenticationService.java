@@ -87,7 +87,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     }
 
     private Single<JsonObject> rxValidateToken(String token) {
-        logger.trace("logout invoked");
+        logger.trace("rxValidateToken invoked");
 
         ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(vertx);
 
@@ -106,6 +106,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                             resultSet.getRows().get(0).getString("userdata"));
                     Token tokenValidator = new Token();
 
+//                    return Single.just(resultSet); //TODO:remove after debug
                     AuthenticationInfo authResult = tokenValidator.validateToken(token, authInfo);
                     if (authResult.isValid()) {
                         return Single.just(resultSet);
@@ -181,7 +182,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                     logger.error("rxValidateToken error: {} resourcerefid:{}", "no row for api", jsonObject.getString("resourcerefid"));
                                                     return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
                                                 } else {
-                                                    return Single.just(jsonObject.put("apiuuid", apiResultSet.getRows().get(0).getBoolean("uuid"))
+                                                    return Single.just(jsonObject.put("apiuuid", apiResultSet.getRows().get(0).getString("uuid"))
                                                             .put("apiisproxyapi", apiResultSet.getRows().get(0).getBoolean("isproxyapi"))
                                                             .put("apiissandbox", apiResultSet.getRows().get(0).getBoolean("issandbox"))
                                                             .put("apiislive", apiResultSet.getRows().get(0).getBoolean("islive"))
@@ -225,10 +226,11 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                 });
     }
 
-    public JsonObject validateAccessToken(String token) {
-        final JsonObject validationStatus = new JsonObject().put("status", false).put("error", "").put("validationreport", "");
+    public Single<JsonObject> validateAccessToken(String token) {
+        logger.trace("validateAccessToken invoked");
+        JsonObject validationStatus = new JsonObject().put("status", false).put("error", "").put("validationreport", new JsonObject());
 
-        rxValidateToken(token)
+        return rxValidateToken(token)
                 .flatMap(jsonObject -> {
                     validationStatus.put("validationreport", jsonObject);
                     //check if any record is deleted
@@ -246,13 +248,13 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         return Single.error(new Exception("contract is deleted"));
 
                     //check if any record is not active
-                    if (jsonObject.getBoolean("accesstokenisactive"))
+                    if (!jsonObject.getBoolean("accesstokenisactive"))
                         return Single.error(new Exception("access token is not active"));
-                    if (jsonObject.getBoolean("subjectpermissionisactive"))
+                    if (!jsonObject.getBoolean("subjectpermissionisactive"))
                         return Single.error(new Exception("subject permission is not active"));
-                    if (jsonObject.getBoolean("resourceisactive"))
+                    if (!jsonObject.getBoolean("resourceisactive"))
                         return Single.error(new Exception("resource is not active"));
-                    if (jsonObject.getBoolean("resourceactionisactive"))
+                    if (!jsonObject.getBoolean("resourceactionisactive"))
                         return Single.error(new Exception("resource action is not active"));
 
                     //check if any record is expired
@@ -262,24 +264,34 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         return Single.error(new Exception("subject permission is expired"));
 
                     //check if contract is valid
-                    if (Objects.equals(jsonObject.getString("contractstateid"), Constants.CONTRACT_STATE_IS_ACTIVATED))
+                    if (!Objects.equals(jsonObject.getString("contractstateid"), Constants.CONTRACT_STATE_IS_ACTIVATED))
                         return Single.error(new Exception("contract state is not 'activated'"));
-                    if (Objects.equals(jsonObject.getString("contractstatus"), Constants.CONTRACT_STATUS_IS_INFORCED))
-                        return Single.error(new Exception("contract status is not 'inforced'"));
+                    if (!Objects.equals(jsonObject.getString("contractstatus"), Constants.CONTRACT_STATUS_IS_INFORCE))
+                        return Single.error(new Exception("contract status is not 'inforce'"));
 
-                    return Single.just(jsonObject);
-                })
+                    return Single.just(validationStatus.put("status", true));
+                });
+        //.doAfterSuccess(validateAccessTokenStatus -> validationStatus.put("status", true).put("error", "").put("validationreport", validateAccessTokenStatus))
+/*
+                .doOnError(throwable -> {
+                            Single.error(throwable);
+                            //return Single.just(validationStatus.put("status", false).put("error", throwable.getLocalizedMessage()));
+                        }
+                );
+*/
+/*
                 .subscribe(validateAccessTokenStatus -> {
-                            validationStatus.put("status", true).put("error", "");
+                            validationStatus.put("status", true).put("error", "").put("validationreport", validateAccessTokenStatus);
                         }
                         , throwable -> {
                             validationStatus.put("status", false).put("error", throwable.getLocalizedMessage());
                         });
-        return validationStatus;
+*/
+        //return validationStatus;
     }
 
     public Single<JsonObject> rxValidateAccessToken(String token) {
-        return Single.just(validateAccessToken(token));
+        return validateAccessToken(token);
     }
 
     @Override

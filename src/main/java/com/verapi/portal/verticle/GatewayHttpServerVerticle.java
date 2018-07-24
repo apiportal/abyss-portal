@@ -16,6 +16,7 @@ import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
+import com.verapi.portal.oapi.AuthenticationApiController;
 import com.verapi.portal.service.idam.ApiService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
@@ -27,10 +28,10 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.contract.RouterFactoryOptions;
-import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
-import io.vertx.ext.web.handler.UserSessionHandler;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.reactivex.ext.web.handler.UserSessionHandler;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.HttpLocation;
 import org.slf4j.Logger;
@@ -148,7 +149,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     attachAbyssGatewayUserSessionHandler = false;
                     OpenAPIUtil.openAPIParser(apiSpec)
                             .flatMap(swaggerParseResult -> {
-                                createOpenAPI3RouterFactory(vertx.getDelegate(), swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
+                                createOpenAPI3RouterFactory(vertx, swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
                                     if (openAPI3RouterFactoryAsyncResult.succeeded()) {
                                         OpenAPI3RouterFactory factory = openAPI3RouterFactoryAsyncResult.result();
                                         // add operation handler and failure handlers for each operation
@@ -170,15 +171,18 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                                 .setMountNotImplementedHandler(true);
 
                                         // Now you have to generate the router
-                                        io.vertx.ext.web.Router router = factory.setOptions(factoryOptions).getRouter();
+                                        Router router = factory.setOptions(factoryOptions).getRouter();
+
+                                        //Mount router into main router
+                                        gatewayRouter.mountSubRouter(Constants.ABYSS_GATEWAY_ROOT + "/" + apiUUID + "/", router);
 
                                         // if needed then attach UserSessionHandler
                                         if (attachAbyssGatewayUserSessionHandler) {
                                             router.route().handler(UserSessionHandler.create(jdbcAuth));
+                                            AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, router, jdbcAuth);
+                                            logger.info("Loading Platform Authentication API for user API {}", apiUUID);
                                         }
 
-                                        //Mount router into main router
-                                        gatewayRouter.getDelegate().mountSubRouter(Constants.ABYSS_GATEWAY_ROOT + "/" + apiUUID + "/", router);
                                         logger.trace("+++++ {} openapi router route list: {}", apiUUID, router.getRoutes());
 
                                     } else {
@@ -193,11 +197,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             .subscribe();
                     return Observable.just(o);
                 })
-                .
-
-                        flatMap(o ->
-
-                                {
+                .flatMap(o -> {
 /*
                             String mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + o.getString("uuid");
                             Router subRouter = Router.router(vertx);
@@ -208,50 +208,44 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
                             logger.trace("subRouter route list: {}", subRouter.getRoutes());
 */
-                                    return Observable.just(new Record()
-                                            .setType("http-endpoint")
-                                            //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
-                                            .setLocation((new HttpLocation()
-                                                    .setSsl(false)
-                                                    .setHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST))
-                                                    .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT))
-                                                    .setRoot("/")
-                                                    .toJson()))
-                                            .setName(o.getString("uuid"))
-                                            .setMetadata(new JsonObject()
-                                                    .put("organization", o.getString("organizationid"))
-                                                    .put("apiSpec", o.getString("openapidocument"))));
-                                }
-                        )
-                .
+                            return Observable.just(new Record()
+                                    .setType("http-endpoint")
+                                    //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
+                                    .setLocation((new HttpLocation()
+                                            .setSsl(false)
+                                            .setHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST))
+                                            .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT))
+                                            .setRoot("/")
+                                            .toJson()))
+                                    .setName(o.getString("uuid"))
+                                    .setMetadata(new JsonObject()
+                                            .put("organization", o.getString("organizationid"))
+                                            .put("apiSpec", o.getString("openapidocument"))));
+                        }
+                )
+                .flatMap(record -> AbyssServiceDiscovery.getInstance(vertx)
+                        .getServiceDiscovery()
+                        .rxPublish(record)
+                        .toObservable()))
+                .doOnError(throwable -> logger.error("loadAllProxyApis error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                .andThen(super.loadAllProxyApis())
+                .doFinally(() -> {
+                    String mountPoint;
+                    mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + "echo";
+                    Router subRouter = Router.router(vertx);
+                    subRouter.route().handler(this::echoContextHandler);
+                    gatewayRouter.mountSubRouter(mountPoint, subRouter);
+                    logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
+                    logger.trace("subRouter route list: {}", subRouter.getRoutes());
+                    logger.info("Loading All API proxies stage completed");
 
-                        flatMap(record -> AbyssServiceDiscovery.getInstance(vertx).
+/*
+                    AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, gatewayRouter, jdbcAuth);
+                    logger.info("Loading Plaftorm Authentication API stage completed");
+*/
 
-                                getServiceDiscovery().
-
-                                rxPublish(record).
-
-                                toObservable()))
-                .
-
-                        doOnError(throwable -> logger.error("loadAllProxyApis error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
-                .
-
-                        andThen(super.loadAllProxyApis())
-                .
-
-                        doFinally(() ->
-
-                        {
-                            String mountPoint;
-                            mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + "echo";
-                            Router subRouter = Router.router(vertx);
-                            subRouter.route().handler(this::echoContextHandler);
-                            gatewayRouter.mountSubRouter(mountPoint, subRouter);
-                            logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
-                            logger.trace("subRouter route list: {}", subRouter.getRoutes());
-                            logger.info("loadAllProxyApis() completed");
-                        });
+                    logger.info("loadAllProxyApis() completed");
+                });
     }
 
     private void AddSecurityHandlers(OpenAPI openAPI, List<SecurityRequirement> securityRequirements, OpenAPI3RouterFactory factory) {
@@ -274,7 +268,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                 });
                                 logger.trace("added security schema handlers for security schema {}", key);
                             } else {
-                                logger.warn("Configured to useAbyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
+                                logger.warn("Configured to use Abyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
                             }
                         } else if ((name != null) && (name.equals(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME))) {
                             if ((type == SecurityScheme.Type.APIKEY)
@@ -285,7 +279,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                 });
                                 logger.trace("added security schema handlers for security schema {}", key);
                             } else {
-                                logger.warn("Configured to useAbyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
+                                logger.warn("Configured to use Abyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
                             }
                         } else {
                             factory.addSecurityHandler(key, routingContext -> {
