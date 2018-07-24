@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : ApiApiTag crud operations'
+  - name: ApiApiTagOfApi
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiApiTag of Api and Tag'
   - name: ApiTags
     externalDocs:
       url: 'https://apiportal.com'
@@ -143,6 +148,45 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-api-tags/api/{uuid}/tag/{taguuid}:
+    get:
+      tags:
+        - ApiApiTagOfApi
+      summary: 'Get api tag relation of an API by uuid of Api and uuid of Tag '
+      description: 'Returns api tag list of an API'
+      operationId: getApiApiTagByApiAndTag
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of API that needs to be listed for its api tag relation'
+          required: true
+          schema:
+            type: string
+        - name: taguuid
+          in: path
+          description: 'The uuid of API Tag that needs to be listed for its api tag relation'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':
