@@ -159,7 +159,7 @@ paths:
       tags:
         - ApiApiTagOfApi
       summary: 'Get api tag relation of an API by uuid of Api and uuid of Tag '
-      description: 'Returns api tag list of an API'
+      description: 'Returns api tag relation of an API'
       operationId: getApiApiTagByApiAndTag
       parameters:
         - name: uuid
