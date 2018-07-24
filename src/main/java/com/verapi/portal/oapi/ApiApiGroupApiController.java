@@ -225,4 +225,23 @@ public class ApiApiGroupApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getApiApiGroupsByApiAndGroup(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    ApiApiGroupService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiApiGroupService.SQL_API_API_GROUPS_BY_API_AND_GROUP)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")).add(routingContext.pathParam("groupuuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 }

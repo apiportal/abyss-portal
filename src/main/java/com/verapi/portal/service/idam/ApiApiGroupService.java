@@ -284,6 +284,11 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
             "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
             "      apigroupid = api_group.uuid\n";
 
+    public static final String SQL_API_API_GROUPS_BY_API_AND_GROUP = "select\n" +
+            "  id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apigroupid\n" +
+            "from api__api_group\n" +
+            "where apiid = CAST(? AS uuid) and apigroupid = CAST(? AS uuid)\n";
+
     public static final String SQL_LIST_SUBJECT_BUSINESS_API_GROUPS = SQL_LIST_SUBJECT_API_GROUPS + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
 
     public static final String SQL_LIST_SUBJECT_PROXY_API_GROUPS = SQL_LIST_SUBJECT_API_GROUPS + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;

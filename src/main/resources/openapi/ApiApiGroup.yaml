@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : ApiApiGroup crud operations'
+  - name: ApiApiGroupsOfApi
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiApiGroup of Api and Group'
   - name: ApiGroups
     externalDocs:
       url: 'https://apiportal.com'
@@ -143,6 +148,45 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-api-groups/api/{uuid}/group/{groupuuid}:
+    get:
+      tags:
+        - ApiApiGroupsOfApi
+      summary: 'Get api group of an API by uuid and uuid of Group'
+      description: 'Returns api group relation of an API'
+      operationId: getApiApiGroupsByApiAndGroup
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of API that needs to be listed for its api group relation'
+          required: true
+          schema:
+            type: string
+        - name: groupuuid
+          in: path
+          description: 'The uuid of API Group that needs to be listed for its api group relation'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':

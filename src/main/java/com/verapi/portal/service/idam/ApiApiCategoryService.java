@@ -284,6 +284,11 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
             "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
             "      apicategoryid = api_category.uuid\n";
 
+    public static final String SQL_API_API_CATEGORIES_BY_API_AND_CATEGORY = "select\n" +
+            "  id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apicategoryid\n" +
+            "from api__api_category\n" +
+            "where apiid = CAST(? AS uuid) and apicategoryid = CAST(? AS uuid)\n";
+
     public static final String SQL_LIST_SUBJECT_BUSINESS_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
 
     public static final String SQL_LIST_SUBJECT_PROXY_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;

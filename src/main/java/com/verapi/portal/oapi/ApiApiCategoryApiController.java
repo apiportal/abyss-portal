@@ -219,4 +219,23 @@ public class ApiApiCategoryApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getApiApiCategoryByApiAndCategory(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    ApiApiCategoryService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiApiCategoryService.SQL_API_API_CATEGORIES_BY_API_AND_CATEGORY)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")).add(routingContext.pathParam("categoryuuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 }
