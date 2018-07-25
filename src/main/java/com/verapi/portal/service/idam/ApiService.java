@@ -148,7 +148,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getBoolean("isdefaultversion"))
                 .add(updateRecord.getBoolean("islatestversion"))
                 .add(uuid.toString());
-        return update(updateParams, SQL_UPDATE_BY_UUID);
+        return update(updateParams, (updateRecord.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID);
     }
 
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
@@ -184,7 +184,7 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getBoolean("isdefaultversion"))
                             .add(jsonObj.getBoolean("islatestversion"))
                             .add(jsonObj.getString("uuid"));
-                    return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
+                    return update(updateParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID).toObservable();
                 })
                 .flatMap(updateResult -> {
                     if (updateResult.getThrowable() == null) {
@@ -358,6 +358,33 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , isdefaultversion      = ?\n" +
             "  , islatestversion      = ?\n";
 
+    private static final String SQL_UPDATE_BUSINESS_API = "UPDATE api\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
+            "  , isproxyapi      = ?\n" +
+            "  , apistateid      = CAST(? AS uuid)\n" +
+            "  , apivisibilityid      = CAST(? AS uuid)\n" +
+            "  , languagename      = ?\n" +
+            "  , languageversion      = ?\n" +
+            "  , languageformat      = ?\n" +
+            "  , originaldocument      = ?\n" +
+            "  , openapidocument      = ?::JSON\n" +
+            "  , extendeddocument      = ?::JSON\n" +
+            //"  , businessapiid      = CAST(? AS uuid)\n" +
+            "  , image      = ?\n" +
+            "  , color      = ?\n" +
+            "  , deployed      = ?\n" +
+            "  , changelog      = ?\n" +
+            //"  , apioriginuuid      = CAST(? AS uuid)\n" +
+            "  , version      = ?\n" +
+            "  , issandbox      = ?\n" +
+            "  , islive      = ?\n" +
+            "  , isdefaultversion      = ?\n" +
+            "  , islatestversion      = ?\n";
+
     public static final String SQL_AND = "and\n";
 
     private static final String SQL_WHERE = "where\n";
@@ -403,6 +430,8 @@ public class ApiService extends AbstractService<UpdateResult> {
     public static final String SQL_DELETE_BY_SUBJECT = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_SUBJECT_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    private static final String SQL_UPDATE_BUSINESS_API_BY_UUID = SQL_UPDATE_BUSINESS_API + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
 
