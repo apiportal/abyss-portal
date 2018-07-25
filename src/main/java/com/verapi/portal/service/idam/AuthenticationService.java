@@ -179,7 +179,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .flatMap(jdbcClient -> apiService.findById(UUID.fromString(jsonObject.getString("resourcerefid"))))
                                             .flatMap(apiResultSet -> {
                                                 if (apiResultSet.getNumRows() == 0) {
-                                                    logger.error("rxValidateToken error: {} resourcerefid:{}", "no row for api", jsonObject.getString("resourcerefid"));
+                                                    logger.error("rxValidateToken error: {} uuid:{}", "no row for proxy api", jsonObject.getString("resourcerefid"));
                                                     return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
                                                 } else {
                                                     return Single.just(jsonObject.put("apiuuid", apiResultSet.getRows().get(0).getString("uuid"))
@@ -187,6 +187,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                             .put("apiissandbox", apiResultSet.getRows().get(0).getBoolean("issandbox"))
                                                             .put("apiislive", apiResultSet.getRows().get(0).getBoolean("islive"))
                                                             .put("apiisdeleted", apiResultSet.getRows().get(0).getBoolean("isdeleted"))
+                                                            .put("businessapiid", apiResultSet.getRows().get(0).getString("businessapiid"))
                                                     );
                                                 }
                                             });
@@ -194,6 +195,25 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                     logger.error("rxValidateToken error: {} {}", "undefined resource type", jsonObject.getString("resourcetypeid"));
                                     return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
                                 }
+                            })
+                            .flatMap(jsonObject -> {
+                                    ApiService apiService = new ApiService(vertx);
+                                    return apiService.initJDBCClient()
+                                            .flatMap(jdbcClient -> apiService.findById(UUID.fromString(jsonObject.getString("businessapiid"))))
+                                            .flatMap(apiResultSet -> {
+                                                if (apiResultSet.getNumRows() == 0) {
+                                                    logger.error("rxValidateToken error: {} uuid:{}", "no row for business api", jsonObject.getString("businessapiid"));
+                                                    return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
+                                                } else {
+                                                    return Single.just(jsonObject.put("businessapiuuid", apiResultSet.getRows().get(0).getString("uuid"))
+                                                            .put("businessapiisproxyapi", apiResultSet.getRows().get(0).getBoolean("isproxyapi"))
+                                                            .put("businessapiissandbox", apiResultSet.getRows().get(0).getBoolean("issandbox"))
+                                                            .put("businessapiislive", apiResultSet.getRows().get(0).getBoolean("islive"))
+                                                            .put("businessapiisdeleted", apiResultSet.getRows().get(0).getBoolean("isdeleted"))
+                                                            .put("businessapiopenapidocument", apiResultSet.getRows().get(0).getString("openapidocument"))
+                                                    );
+                                                }
+                                            });
                             })
                             .flatMap(jsonObject -> {
                                 if (jsonObject.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_API)) {
@@ -243,7 +263,9 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     if (jsonObject.getBoolean("resourceactionisdeleted"))
                         return Single.error(new Exception("resource action is deleted"));
                     if (jsonObject.getBoolean("apiisdeleted"))
-                        return Single.error(new Exception("api is deleted"));
+                        return Single.error(new Exception("proxy api is deleted"));
+                    if (jsonObject.getBoolean("businessapiisdeleted"))
+                        return Single.error(new Exception("business api is deleted"));
                     if (jsonObject.getBoolean("contractisdeleted"))
                         return Single.error(new Exception("contract is deleted"));
 

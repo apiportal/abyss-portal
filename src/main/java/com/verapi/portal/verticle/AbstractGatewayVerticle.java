@@ -28,6 +28,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.ResolverCache;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -75,6 +76,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -640,12 +642,137 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         String requestUriPath = routingContext.request().path();
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
         String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36, requestUriPath.length());
-        logger.trace("captured path parameter: {} | {}", requestUriPath, pathParameters);
+        logger.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
         logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
         JsonObject validationReport = routingContext.get("validationreport");
+        JsonObject apiSpec = new JsonObject(validationReport.getString("businessapiopenapidocument"));
 
-        //the final
-        routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
+        OpenAPIUtil.openAPIParser(apiSpec)
+                .flatMap(swaggerParseResult -> {
+                    List<Server> serversList = swaggerParseResult.getOpenAPI().getServers();
+                    URL businessApiServerURL;
+                    String businessApiServerURLStr = serversList.get(new Random().nextInt(serversList.size())).getUrl();
+                    try {
+                        businessApiServerURL = new URL(businessApiServerURLStr + pathParameters);
+                        return Single.just(businessApiServerURL);
+                    } catch (MalformedURLException e) {
+                        logger.error("malformed server url {}", businessApiServerURLStr);
+                        return Single.error(e);
+                    }
+                })
+                .subscribe(businessApiServerURL -> {
+                            logger.trace("Business API Server URL : {} Path: {}", businessApiServerURL, businessApiServerURL.getPath());
+                            HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions()
+                                    .setSsl("https".equals(businessApiServerURL.getProtocol()))
+                                    .setTrustAll(true) //TODO: re-engineering for parametric trust certificate of api
+                                    .setVerifyHost(false)); //TODO: re-engineering for parametric trust certificate of api
+                            RequestOptions requestOptions = new RequestOptions()
+                                    .setHost(businessApiServerURL.getHost());
+                            if (businessApiServerURL.getPort() != -1) {
+                                requestOptions.setPort(businessApiServerURL.getPort());
+                            } else {
+                                if ("https".equals(businessApiServerURL.getProtocol()))
+                                    requestOptions.setPort(443);
+                            }
+                            requestOptions.setSsl("https".equals(businessApiServerURL.getProtocol()))
+                                    .setURI(businessApiServerURL.getPath());
+                            // pass through http request method
+                            HttpClientRequest request = httpClient.request(routingContext.request().method(), requestOptions);
+                            request.setChunked(true);
+                            routingContext.response().setChunked(true);
+                            // pass through http request headers
+                            request.headers().setAll(routingContext.request().headers());
+/*
+                            request.endHandler(event -> {
+                                logger.trace("request stream ended");
+                                routingContext.response().headers().setAll(request.headers());
+                                //routingContext.response().end();
+                                routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end();
+                            });
+*/
+                            //routingContext.request().handler(request::write);
+/*
+                            routingContext.request().endHandler(event -> {
+                                request.end();
+                            });
+*/
+                            request
+                                    .toFlowable()
+                                    .flatMap(httpClientResponse -> {
+                                        logger.trace("httpClientResponse statusCode: {} | statusMessage: {}", httpClientResponse.statusCode(), httpClientResponse.statusMessage());
+                                        routingContext.response()
+                                                .setStatusCode(httpClientResponse.statusCode())
+                                                .putHeader("Content-Type", "application/json; charset=utf-8");
+                                        return httpClientResponse.toFlowable();
+                                    })
+                                    .doFinally(() -> {
+                                        //the final
+                                        logger.trace("finally finished");
+                                        routingContext.response().end();
+                                    })
+                                    .subscribe(data -> {
+                                        logger.trace("httpClientResponse subcribe data: {}", data);
+                                        //////routingContext.response().write(data);
+                                        routingContext.response().headers().setAll(request.headers());
+                                        routingContext.response()
+                                                .putHeader("Content-Type", "application/json; charset=utf-8")
+                                                .write(data);
+                                    }, throwable -> {
+                                        logger.error("error occured during business api invocation, error: {} | stack: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                        routingContext.fail(new InternalServerError500Exception(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()));
+                                    });
+                            request.end();
+                        },
+                        throwable -> {
+                            logger.error("error occured during business api spec parsing and server url extraction, error: {} | stack: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                            routingContext.fail(new InternalServerError500Exception(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()));
+                        });
+
+/*
+        OpenAPIUtil.openAPIParser(apiSpec)
+                .flatMap(swaggerParseResult -> {
+                    List<Server> serversList = swaggerParseResult.getOpenAPI().getServers();
+                    URL businessApiServerURL;
+                    String businessApiServerURLStr = serversList.get(new Random().nextInt(serversList.size())).getUrl();
+                    try {
+                        businessApiServerURL = new URL(businessApiServerURLStr);
+                        return Single.just(businessApiServerURL);
+                    } catch (MalformedURLException e) {
+                        logger.error("malformed server url {}", businessApiServerURLStr);
+                        return Single.error(e);
+                    }
+                })
+                .flatMap(businessApiServerURL -> {
+                    HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions()
+                            .setSsl("https".equals(businessApiServerURL.getProtocol()))
+                            .setTrustAll(false) //TODO: re-engineering for parametric trust certificate of api
+                            .setVerifyHost(true)); //TODO: re-engineering for parametric trust certificate of api
+                    RequestOptions requestOptions = new RequestOptions()
+                            .setHost(businessApiServerURL.getHost())
+                            .setPort(businessApiServerURL.getPort())
+                            .setSsl("https".equals(businessApiServerURL.getProtocol()))
+                            .setURI(businessApiServerURL.getPath());
+                    // pass through http request method
+                    HttpClientRequest request = httpClient.request(routingContext.request().method(), requestOptions);
+                    // pass through http request headers
+                    request.headers().setAll(routingContext.request().headers());
+                    request.end(routingContext.getBody());
+                    return Single.just(request);
+                })
+                .toFlowable()
+                .flatMap(HttpClientRequest::toFlowable)
+                .subscribe(httpClientResponse -> routingContext.response().setStatusCode(httpClientResponse.statusCode()).end(httpClientResponse.));
+*/
+
+
+
+/*
+                .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                .doAfterSuccess(swaggerParseResult -> logger.trace("successfully loaded API proxy {}", apiUUID))
+                .doFinally(() -> logger.trace("+++++gatewayRouter route list: {}", gatewayRouter.getRoutes()))
+                .subscribe();
+*/
+
     }
 
     void genericAuthorizationHandler(RoutingContext routingContext) {
@@ -653,7 +780,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         String requestUriPath = routingContext.request().path();
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
         String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36, requestUriPath.length());
-        logger.trace("captured path parameter: {} | {}", requestUriPath, pathParameters);
+        logger.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
         logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
         JsonObject validationReport = routingContext.get("validationreport");
 

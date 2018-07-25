@@ -16,8 +16,8 @@ import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
-import com.verapi.portal.oapi.AuthenticationApiController;
 import com.verapi.portal.handler.OpenAPI3ResponseValidationHandlerImpl;
+import com.verapi.portal.oapi.AuthenticationApiController;
 import com.verapi.portal.service.idam.ApiService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
@@ -134,14 +134,10 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     }
                 })
                 .flatMap(o -> {
-                            //gatewayRouter.route(Constants.ABYSS_GATEWAY_ROOT + "/" + o.getString("uuid")).handler(this::routingContextHandler);
-                            //TODO:depreciate below
-
                             createSubRouter("old-" + o.getString("uuid"))
                                     .flatMap(this::enableCorsSupport)
                                     .doOnError(throwable -> logger.error("loadAllProxyApis createSubRouter error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
-                                    .subscribe(subRouter -> logger.trace("gatewayRouter route list{} \n subRouter route list: {}", gatewayRouter.getRoutes(), subRouter.getRoutes()));
-
+                                    .subscribe();
                             return Observable.just(o);
                         }
                 )
@@ -157,13 +153,14 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         // add operation handler and failure handlers for each operation
                                         swaggerParseResult.getOpenAPI().getPaths().forEach((s, pathItem) -> {
                                             pathItem.readOperations().forEach(operation -> {
-                                                logger.trace("adding handlers for operation {}", operation.getOperationId(), operation.getSecurity());
                                                 factory.addHandlerByOperationId(operation.getOperationId(), this::genericAuthorizationHandler);
                                                 factory.addHandlerByOperationId(operation.getOperationId(), this::genericOperationHandler);
                                                 factory.addFailureHandlerByOperationId(operation.getOperationId(), this::genericFailureHandler);
                                                 AddSecurityHandlers(swaggerParseResult.getOpenAPI(), operation.getSecurity(), factory);
+/*
                                                 Handler<io.vertx.ext.web.RoutingContext> responseValidationHandler = new OpenAPI3ResponseValidationHandlerImpl(operation, swaggerParseResult.getOpenAPI());
                                                 factory.getDelegate().addHandlerByOperationId(operation.getOperationId(), responseValidationHandler);
+*/
                                                 logger.trace("added handlers for operation {}", operation.getOperationId());
                                             });
                                         });
@@ -198,7 +195,6 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             })
                             .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
                             .doAfterSuccess(swaggerParseResult -> logger.trace("successfully loaded API proxy {}", apiUUID))
-                            .doFinally(() -> logger.trace("+++++gatewayRouter route list: {}", gatewayRouter.getRoutes()))
                             .subscribe();
                     return Observable.just(o);
                 })
@@ -243,12 +239,6 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
                     logger.trace("subRouter route list: {}", subRouter.getRoutes());
                     logger.info("Loading All API proxies stage completed");
-
-/*
-                    AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, gatewayRouter, jdbcAuth);
-                    logger.info("Loading Plaftorm Authentication API stage completed");
-*/
-
                     logger.info("loadAllProxyApis() completed");
                 });
     }

@@ -206,21 +206,21 @@ public abstract class AbstractApiController implements IApiController {
         if (failure instanceof ValidationException)
             // Handle Validation Exception
             routingContext.response()
-                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.UNPROCESSABLE_ENTITY.code())
                     .setStatusMessage(HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase() + " " + ((ValidationException) failure).type().name() + " " + failure.getLocalizedMessage())
                     .end();
         else if (failure instanceof AbyssApiException)
             //Handle Abyss Api Exception
             routingContext.response()
-                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getApiError().getCode())
                     .setStatusMessage(((AbyssApiException) failure).getApiError().getUsermessage())
                     .end(((AbyssApiException) failure).getApiError().toJson().toString(), "UTF-8");
         else
             // Handle other exception
             routingContext.response()
-                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .setStatusMessage("Exception thrown! " + failure.getLocalizedMessage())
                     .end(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -399,7 +399,7 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponseStatusOnly(RoutingContext routingContext, Single<CompositeResult> updateResultSingle, int httpResponseStatus) {
         updateResultSingle.subscribe(resp -> {
                     routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end();
                     logger.trace("replied successfully");
@@ -415,7 +415,7 @@ public abstract class AbstractApiController implements IApiController {
                         elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", jsonObject);
                     });
                     routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end();
                     logger.trace("replied successfully");
@@ -428,7 +428,7 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponseStatusOnlyList(RoutingContext routingContext, Single<List<UpdateResult>> updateResultListSingle, int httpResponseStatus) {
         updateResultListSingle.subscribe(resp -> {
                     routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end();
                     logger.trace("replied successfully");
@@ -471,7 +471,7 @@ public abstract class AbstractApiController implements IApiController {
                                 (JsonObject) arrayItem);
                     });
                     routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end(arr.encode(), "UTF-8");
                     logger.trace("replied successfully " + arr.encodePrettily());
@@ -484,7 +484,7 @@ public abstract class AbstractApiController implements IApiController {
     protected void subscribeAndResponseBulk(RoutingContext routingContext, Single<JsonArray> jsonArraySingle, int httpResponseStatus) {
         jsonArraySingle.subscribe(resp -> {
                     routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end(resp.encode(), "UTF-8");
                     logger.trace("replied successfully " + resp.encodePrettily());
@@ -541,7 +541,7 @@ public abstract class AbstractApiController implements IApiController {
                                         ((JsonObject) arrayItem).getJsonObject("response"));
                             });
                             routingContext.response()
-                                    .putHeader("content-type", "application/json; charset=utf-8")
+                                    .putHeader("Content-Type", "application/json; charset=utf-8")
                                     .setStatusCode(httpResponseStatus)
                                     .end(arr.encode(), "UTF-8");
                             logger.trace("replied successfully " + arr.encodePrettily());
@@ -553,7 +553,7 @@ public abstract class AbstractApiController implements IApiController {
 
     protected void subscribeAndResponse(RoutingContext routingContext, JsonArray response, int httpResponseStatus) {
         routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
+                .putHeader("Content-Type", "application/json; charset=utf-8")
                 .setStatusCode(httpResponseStatus)
                 .end(response.encode());
         logger.trace("replied successfully");
@@ -569,7 +569,7 @@ public abstract class AbstractApiController implements IApiController {
                     this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
                     jsonObject);
             routingContext.response()
-                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(httpResponseStatus)
                     .end((onlyStatus) ? null : jsonObject.encode());
             logger.trace("replied successfully");

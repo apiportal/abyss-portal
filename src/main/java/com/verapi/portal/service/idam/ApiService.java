@@ -134,9 +134,10 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(((Number) updateRecord.getValue("languageformat")).longValue())
                 .add(updateRecord.getString("originaldocument"))
                 .add(updateRecord.getJsonObject("openapidocument").encode())
-                .add(updateRecord.getJsonObject("extendeddocument").encode())
-                .add(updateRecord.getString("businessapiid"))
-                .add(updateRecord.getValue("image"))
+                .add(updateRecord.getJsonObject("extendeddocument").encode());
+        if (updateRecord.getBoolean("isproxyapi"))
+            updateParams.add(updateRecord.getString("businessapiid"));
+        updateParams.add(updateRecord.getValue("image"))
                 .add(updateRecord.getString("color"))
                 .add(updateRecord.getInstant("deployed"))
                 .add(updateRecord.getString("changelog"))
@@ -169,9 +170,10 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(((Number) jsonObj.getValue("languageformat")).longValue())
                             .add(jsonObj.getString("originaldocument"))
                             .add(jsonObj.getJsonObject("openapidocument").encode())
-                            .add(jsonObj.getJsonObject("extendeddocument").encode())
-                            .add(jsonObj.getString("businessapiid"))
-                            .add(jsonObj.getValue("image"))
+                            .add(jsonObj.getJsonObject("extendeddocument").encode());
+                    if (jsonObj.getBoolean("isproxyapi"))
+                        updateParam.add(jsonObj.getString("businessapiid"));
+                    updateParam.add(jsonObj.getString("image"))
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
