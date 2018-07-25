@@ -130,7 +130,7 @@ public class SignupController extends PortalAbstractController {
                                                 .add(email)
                                                 .add(hash)
                                                 .add(salt)
-                                                .add(Constants.PASSWORD_EXPIRATION_DAYS)
+                                                .add(Config.getInstance().getConfigJsonObject().getInteger(Constants.PASSWORD_EXPIRATION_DAYS))
                                                 .add(Constants.INTERNAL_SUBJECT_DIRECTORY_UUID));
                             }
                         })
