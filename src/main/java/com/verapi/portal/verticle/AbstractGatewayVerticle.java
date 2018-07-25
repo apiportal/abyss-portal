@@ -21,6 +21,7 @@ import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.NotFound404Exception;
 import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.idam.AuthenticationService;
+import com.verapi.portal.service.idam.AuthorizationService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
@@ -77,6 +78,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 //import io.vertx.ext.auth.jdbc.JDBCAuth;
 
@@ -493,7 +495,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     //*******************
-    public static void createOpenAPI3RouterFactory(io.vertx.reactivex.core.Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory>> handler) {
+    static void createOpenAPI3RouterFactory(io.vertx.reactivex.core.Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory>> handler) {
         create(vertx.getDelegate(), openAPI, ar -> {
             if (ar.succeeded()) {
                 handler.handle(Future.succeededFuture(io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory.newInstance(ar.result())));
@@ -503,7 +505,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         });
     }
 
-    static void create(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
+    private static void create(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
             handler) {
         vertx.executeBlocking((Future<OpenAPI3RouterFactory> future) -> {
             future.complete(new OpenAPI3RouterFactoryImpl(vertx, openAPI, new ResolverCache(openAPI, null, null)));
@@ -635,13 +637,32 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
     void genericOperationHandler(RoutingContext routingContext) {
         logger.trace("---genericOperationHandler invoked");
+        String requestUriPath = routingContext.request().path();
+        String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
+        String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36, requestUriPath.length());
+        logger.trace("captured path parameter: {} | {}", requestUriPath, pathParameters);
+        logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
+        JsonObject validationReport = routingContext.get("validationreport");
+
+        //the final
         routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
     }
 
     void genericAuthorizationHandler(RoutingContext routingContext) {
         logger.trace("---genericAuthorizationHandler invoked");
-        //routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
-        routingContext.next();
+        String requestUriPath = routingContext.request().path();
+        String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
+        String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36, requestUriPath.length());
+        logger.trace("captured path parameter: {} | {}", requestUriPath, pathParameters);
+        logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
+        JsonObject validationReport = routingContext.get("validationreport");
+
+        AuthorizationService authorizationService = new AuthorizationService(vertx);
+        if (authorizationService.authorize(UUID.fromString(validationReport.getString("apiuuid")), UUID.fromString(requestedApi)))
+            routingContext.next();
+        else
+            routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
+
     }
 
 }
