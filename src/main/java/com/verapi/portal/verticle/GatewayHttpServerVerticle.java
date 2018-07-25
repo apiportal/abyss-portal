@@ -17,6 +17,7 @@ import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.oapi.AuthenticationApiController;
+import com.verapi.portal.handler.OpenAPI3ResponseValidationHandlerImpl;
 import com.verapi.portal.service.idam.ApiService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
@@ -26,6 +27,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.contract.RouterFactoryOptions;
 import io.vertx.reactivex.ext.web.Router;
@@ -160,6 +162,9 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                                 factory.addHandlerByOperationId(operation.getOperationId(), this::genericOperationHandler);
                                                 factory.addFailureHandlerByOperationId(operation.getOperationId(), this::genericFailureHandler);
                                                 AddSecurityHandlers(swaggerParseResult.getOpenAPI(), operation.getSecurity(), factory);
+                                                Handler<io.vertx.ext.web.RoutingContext> responseValidationHandler = new OpenAPI3ResponseValidationHandlerImpl(operation, swaggerParseResult.getOpenAPI());
+                                                factory.getDelegate().addHandlerByOperationId(operation.getOperationId(), responseValidationHandler);
+                                                logger.trace("added handlers for operation {}", operation.getOperationId());
                                             });
                                         });
                                         //add generic security handler for each security requirement
