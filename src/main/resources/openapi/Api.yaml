@@ -463,7 +463,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApi'
+          $ref: '#/components/responses/200-ListOfBusinessApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -571,7 +571,7 @@ paths:
             type: string
       responses:
         '200':
-          $ref: '#/components/responses/200'
+          $ref: '#/components/responses/200-BusinessApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -603,7 +603,7 @@ paths:
             type: string
       responses:
         '200':
-          $ref: '#/components/responses/200'
+          $ref: '#/components/responses/200-BusinessApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -621,7 +621,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/Api'
+        $ref: '#/components/requestBodies/BusinessApi'
     delete:
       tags:
         - Business-API
@@ -895,7 +895,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApi'
+          $ref: '#/components/responses/200-ListOfBusinessApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -945,7 +945,7 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfApi'
+        $ref: '#/components/requestBodies/ListOfBusinessApi'
     put:
       tags:
         - Subject-Business-APIs
@@ -1291,7 +1291,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApi'
+          $ref: '#/components/responses/200-ListOfBusinessApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -1344,7 +1344,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApi'
+          $ref: '#/components/responses/200-ListOfBusinessApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -1397,7 +1397,7 @@ paths:
         - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
-          $ref: '#/components/responses/200-ListOfApi'
+          $ref: '#/components/responses/200-ListOfBusinessApi'
         '400':
           $ref: '#/components/responses/400'
         '401':
@@ -1771,7 +1771,6 @@ components:
           description: 'Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #jsonb#'
         businessapiid:
           type: string
-          nullable: true
           description: 'FK ID of Business API for API Proxies'
         image:
           type: string
@@ -1785,10 +1784,104 @@ components:
         changelog:
           type: string
           description: 'Release notes and change log of API'
-        apioriginuuid:
+        # apioriginuuid:
+        #   type: string
+        #   nullable: true
+        #   description: 'Origin ID of this API version'
+        version:
           type: string
-          nullable: true
-          description: 'Origin ID of this API version'
+          description: 'Version of API'
+        issandbox:
+          type: boolean
+          description: 'Is API Sandbox'
+        islive:
+          type: boolean
+          description: 'Is API Live'
+        isdefaultversion:
+          type: boolean
+          description: 'Is this API Version Default'
+        islatestversion:
+          type: boolean
+          description: 'Is this API Version Latest'
+    BusinessApi:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
+        organizationid:
+          type: string
+          description: 'Id of Organization'
+        created:
+          type: string
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
+        updated:
+          type: string
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
+        deleted:
+          type: string
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
+        crudsubjectid:
+          type: string
+          description: 'ID of Subject that reads, creates, updates or deletes'
+        subjectid:
+          type: string
+          description: 'FK ID of owner Subject'
+        isproxyapi:
+          type: boolean
+          description: 'Type of API. False - Business API, True - API Proxy'
+        apistateid:
+          type: string
+          description: 'FK ID of State of Business API'
+        apivisibilityid:
+          type: string
+          description: 'ID of Business API Visibility - Private, Closed Group, Public, ...'
+        languagename:
+          type: string
+          description: 'Formal API Description Language - Swagger, OpenAPI, RAML, WADL, WSDL, ...'
+        languageversion:
+          type: string
+          description: 'Version of Description Language'
+        languageformat:
+          type: integer
+          format: int32
+          description: 'Data format type. 0 - JSON, 1 - YAML, 2 - XML'
+        originaldocument:
+          type: string
+          description: 'Original API DSL Document'
+        openapidocument:
+          type: object
+          description: 'Transformed API DSL document in Open API json format. Shareable. #jsonb#'
+        extendeddocument:
+          type: object
+          description: 'Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #jsonb#'
+        # businessapiid:
+        #   type: string
+        #   description: 'FK ID of Business API for API Proxies'
+        image:
+          type: string
+          description: 'Image data of Business API'
+        color:
+          type: string
+          description: 'Color of Business API'
+        deployed:
+          type: string
+          description: 'Deployed Date Time of API'
+        changelog:
+          type: string
+          description: 'Release notes and change log of API'
+        # apioriginuuid:
+        #   type: string
+        #   nullable: true
+        #   description: 'Origin ID of this API version'
         version:
           type: string
           description: 'Version of API'
@@ -1898,6 +1991,13 @@ components:
             $ref: '#/components/schemas/Api'
       description: 'Api object that needs to be added or updated'
       required: true
+    BusinessApi:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BusinessApi'
+      description: 'Api object that needs to be added or updated'
+      required: true
     ListOfApi:
       content:
         application/json:
@@ -1905,6 +2005,15 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Api'
+      description: 'Api array that needs to be added'
+      required: true
+    ListOfBusinessApi:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BusinessApi'
       description: 'Api array that needs to be added'
       required: true
     ListOfApiObject:
@@ -1922,6 +2031,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Api'
+    '200-BusinessApi':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BusinessApi'
     '200-ListOfApi':
       description: 'An Api array'
       content:
@@ -1930,6 +2045,14 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Api'
+    '200-ListOfBusinessApi':
+      description: 'An Api array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BusinessApi'
     '201':
       description: 'New Api resource has been created'
       content:

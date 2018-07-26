@@ -77,6 +77,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -95,6 +96,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     private JDBCClient jdbcClient;
     JDBCAuth jdbcAuth;
     VerticleConf verticleConf;
+
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -542,18 +544,15 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     }
                     if (user.principal().isEmpty()) {
                         routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
-                        return;
                     }
                 } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
                     logger.error("unsupported platform security scheme [{}] in cookie", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-                    return;
                 }
             } else if (securitySchemeIn == SecurityScheme.In.HEADER) {
                 if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
                     logger.error("unsupported platform security scheme [{}] in header", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-                    return;
                 } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
                     //check if this access token sent via http request header
                     if (!routingContext.request().headers().names().contains(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
@@ -583,29 +582,23 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                 if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
                     logger.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-                    return;
                 } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
                     logger.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-                    return;
                 }
             }
         } else if (securitySchemeType == SecurityScheme.Type.HTTP) {
             logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-            return;
         } else if (securitySchemeType == SecurityScheme.Type.OAUTH2) {
             logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-            return;
         } else if (securitySchemeType == SecurityScheme.Type.OPENIDCONNECT) {
             logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-            return;
         } else {
             //logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
-            return;
         }
     }
 
@@ -639,6 +632,13 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
     void genericOperationHandler(RoutingContext routingContext) {
         logger.trace("---genericOperationHandler invoked");
+        if (routingContext.get("method") == null)
+            routingContext.put("method", routingContext.request().method());
+        else {
+            logger.trace("genericOperationHandler already executed, so skipping..");
+            routingContext.next();
+            return;
+        }
         String requestUriPath = routingContext.request().path();
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
         String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36, requestUriPath.length());
@@ -665,7 +665,10 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                             HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions()
                                     .setSsl("https".equals(businessApiServerURL.getProtocol()))
                                     .setTrustAll(true) //TODO: re-engineering for parametric trust certificate of api
-                                    .setVerifyHost(false)); //TODO: re-engineering for parametric trust certificate of api
+                                    .setVerifyHost(false)
+                                    .setLogActivity(true)
+                                    .setMaxPoolSize(50)
+                            );
                             RequestOptions requestOptions = new RequestOptions()
                                     .setHost(businessApiServerURL.getHost());
                             if (businessApiServerURL.getPort() != -1) {
@@ -674,14 +677,26 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                 if ("https".equals(businessApiServerURL.getProtocol()))
                                     requestOptions.setPort(443);
                             }
-                            requestOptions.setSsl("https".equals(businessApiServerURL.getProtocol()))
+                            requestOptions
+                                    .setSsl("https".equals(businessApiServerURL.getProtocol()))
                                     .setURI(businessApiServerURL.getPath());
+
+                            if (routingContext.request().params().size() > 0) {
+                                String apiQueryParams = "?";
+
+                                for (Map.Entry<String, String> stringStringEntry : routingContext.request().params().getDelegate()) {
+                                    apiQueryParams = (apiQueryParams.equals("?")) ? apiQueryParams : apiQueryParams.concat("&");
+                                    apiQueryParams = apiQueryParams.concat(stringStringEntry.getKey()).concat("=").concat(stringStringEntry.getValue());
+                                }
+                                requestOptions.setURI(businessApiServerURL.getPath().concat(apiQueryParams));
+                            }
                             // pass through http request method
                             HttpClientRequest request = httpClient.request(routingContext.request().method(), requestOptions);
                             request.setChunked(true);
                             routingContext.response().setChunked(true);
                             // pass through http request headers
                             request.headers().setAll(routingContext.request().headers());
+
 /*
                             request.endHandler(event -> {
                                 logger.trace("request stream ended");
@@ -709,14 +724,16 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                         //the final
                                         logger.trace("finally finished");
                                         routingContext.response().end();
+                                        routingContext.next();
                                     })
                                     .subscribe(data -> {
-                                        logger.trace("httpClientResponse subcribe data: {}", data);
+                                        //logger.trace("httpClientResponse subcribe data: {}", data);
                                         //////routingContext.response().write(data);
                                         routingContext.response().headers().setAll(request.headers());
                                         routingContext.response()
                                                 .putHeader("Content-Type", "application/json; charset=utf-8")
                                                 .write(data);
+                                        //routingContext.next();
                                     }, throwable -> {
                                         logger.error("error occured during business api invocation, error: {} | stack: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                                         routingContext.fail(new InternalServerError500Exception(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()));

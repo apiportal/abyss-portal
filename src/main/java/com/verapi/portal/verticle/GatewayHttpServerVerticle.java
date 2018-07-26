@@ -133,6 +133,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                         return Observable.fromIterable(resultSet.getRows());
                     }
                 })
+/*
                 .flatMap(o -> {
                             createSubRouter("old-" + o.getString("uuid"))
                                     .flatMap(this::enableCorsSupport)
@@ -141,31 +142,37 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             return Observable.just(o);
                         }
                 )
+*/
                 .flatMap(o -> {
                     JsonObject apiSpec = new JsonObject(o.getString("openapidocument"));
                     String apiUUID = o.getString("uuid");
                     attachAbyssGatewayUserSessionHandler = false;
-                    OpenAPIUtil.openAPIParser(apiSpec)
+                    return OpenAPIUtil.openAPIParser(apiSpec)
                             .flatMap(swaggerParseResult -> {
                                 createOpenAPI3RouterFactory(vertx, swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
                                     if (openAPI3RouterFactoryAsyncResult.succeeded()) {
                                         OpenAPI3RouterFactory factory = openAPI3RouterFactoryAsyncResult.result();
+
+                                        //add generic security handler for each security requirement
+                                        AddSecurityHandlers(swaggerParseResult.getOpenAPI(), swaggerParseResult.getOpenAPI().getSecurity(), factory);
+
                                         // add operation handler and failure handlers for each operation
                                         swaggerParseResult.getOpenAPI().getPaths().forEach((s, pathItem) -> {
                                             pathItem.readOperations().forEach(operation -> {
-                                                factory.addHandlerByOperationId(operation.getOperationId(), this::genericAuthorizationHandler);
-                                                factory.addHandlerByOperationId(operation.getOperationId(), this::genericOperationHandler);
+
                                                 factory.addFailureHandlerByOperationId(operation.getOperationId(), this::genericFailureHandler);
                                                 AddSecurityHandlers(swaggerParseResult.getOpenAPI(), operation.getSecurity(), factory);
-/*
+
+                                                factory.addHandlerByOperationId(operation.getOperationId(), this::genericAuthorizationHandler);
+
+                                                factory.addHandlerByOperationId(operation.getOperationId(), this::genericOperationHandler);
+
                                                 Handler<io.vertx.ext.web.RoutingContext> responseValidationHandler = new OpenAPI3ResponseValidationHandlerImpl(operation, swaggerParseResult.getOpenAPI());
                                                 factory.getDelegate().addHandlerByOperationId(operation.getOperationId(), responseValidationHandler);
-*/
+
                                                 logger.trace("added handlers for operation {}", operation.getOperationId());
                                             });
                                         });
-                                        //add generic security handler for each security requirement
-                                        AddSecurityHandlers(swaggerParseResult.getOpenAPI(), swaggerParseResult.getOpenAPI().getSecurity(), factory);
                                         // set router factory behaviours
                                         RouterFactoryOptions factoryOptions = new RouterFactoryOptions()
                                                 .setMountValidationFailureHandler(true) // Disable mounting of dedicated validation failure handler
@@ -191,24 +198,13 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         throw new RuntimeException("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
                                     }
                                 });
-                                return Single.just(swaggerParseResult);
+                                return Single.just(o);
                             })
                             .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
                             .doAfterSuccess(swaggerParseResult -> logger.trace("successfully loaded API proxy {}", apiUUID))
-                            .subscribe();
-                    return Observable.just(o);
+                            .toObservable();
                 })
                 .flatMap(o -> {
-/*
-                            String mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + o.getString("uuid");
-                            Router subRouter = Router.router(vertx);
-                            gatewayRouter.mountSubRouter(mountPoint, subRouter);
-                            subRouter.route().handler(this::routingContextHandler);
-                            logger.trace("route added for path {}", o.getString("uuid"));
-                            //logger.trace("route added for path {} and openapi spec is {}", o.getString("openapidocument"));
-                            logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
-                            logger.trace("subRouter route list: {}", subRouter.getRoutes());
-*/
                             return Observable.just(new Record()
                                     .setType("http-endpoint")
                                     //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
@@ -229,15 +225,15 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                         .rxPublish(record)
                         .toObservable()))
                 .doOnError(throwable -> logger.error("loadAllProxyApis error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
-                .andThen(super.loadAllProxyApis())
+                //.andThen(super.loadAllProxyApis())
                 .doFinally(() -> {
                     String mountPoint;
                     mountPoint = Constants.ABYSS_GATEWAY_ROOT + "/" + "echo";
                     Router subRouter = Router.router(vertx);
                     subRouter.route().handler(this::echoContextHandler);
                     gatewayRouter.mountSubRouter(mountPoint, subRouter);
-                    logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
-                    logger.trace("subRouter route list: {}", subRouter.getRoutes());
+                    //logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
+                    //logger.trace("subRouter route list: {}", subRouter.getRoutes());
                     logger.info("Loading All API proxies stage completed");
                     logger.info("loadAllProxyApis() completed");
                 });
