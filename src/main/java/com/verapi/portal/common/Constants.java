@@ -85,6 +85,7 @@ public class Constants {
     public static final String PORTAL_DBUSER_NAME = "portal.dbuser.name";
     public static final String PORTAL_DBUSER_PASSWORD = "portal.dbuser.password";
     public static final String PORTAL_DBCONN_MAX_POOL_SIZE = "portal.dbconn.max.pool.size";
+    public static final String PORTAL_DBCONN_MAX_IDLE_TIME = "portal.dbconn.max.idle.time";
 
     public static final String PORTAL_DATA_SOURCE_SERVICE = "portal-data-source-service";
     public static final String PORTAL_DBQUERY_TIMEOUT = "portal.dbconn.query.timeout";
