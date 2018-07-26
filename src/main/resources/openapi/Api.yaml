@@ -1771,6 +1771,7 @@ components:
           description: 'Extended OpenAPI document of Abyss Platform changed both for Business API registration and Proxy API creation. Private. #jsonb#'
         businessapiid:
           type: string
+          nullable: true
           description: 'FK ID of Business API for API Proxies'
         image:
           type: string
@@ -1786,6 +1787,7 @@ components:
           description: 'Release notes and change log of API'
         apioriginuuid:
           type: string
+          nullable: true
           description: 'Origin ID of this API version'
         version:
           type: string
