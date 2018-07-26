@@ -219,7 +219,7 @@ public class ResetPasswordController extends PortalAbstractController {
                                                     "password = ?," +
                                                     "passwordSalt = ?, " +
                                                     "isPasswordChangeRequired = false," +
-                                                    "passwordExpiresAt = NOW() + " + String.valueOf(Constants.PASSWORD_EXPIRATION_DAYS) + " * INTERVAL '1 DAY' " +
+                                                    "passwordExpiresAt = NOW() + " + String.valueOf(Config.getInstance().getConfigJsonObject().getInteger(Constants.PASSWORD_EXPIRATION_DAYS)) + " * INTERVAL '1 DAY' " +
                                                     " WHERE " +
                                                     "uuid = CAST(? AS uuid);",
                                             new JsonArray()
