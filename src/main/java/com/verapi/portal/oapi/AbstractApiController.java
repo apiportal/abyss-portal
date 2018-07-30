@@ -466,14 +466,7 @@ public abstract class AbstractApiController implements IApiController {
                         });
                     }
                     arr.forEach(arrayItem -> {
-                        JsonObject jsonObject = ((JsonObject) arrayItem).copy();
-                        if (((JsonObject) arrayItem).getString("originaldocument") != null) {
-                            jsonObject.remove("originaldocument");
-                            //jsonObject.put("originaldocument", new JsonObject(((JsonObject) arrayItem).getString("originaldocument"))); //TODO: YAML to JSON conversion
-                        }
-                        elasticSearchService.indexDocument(routingContext,
-                                this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
-                                jsonObject);
+                        elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", (JsonObject) arrayItem);
                     });
                     routingContext.response()
                             .putHeader("Content-Type", "application/json; charset=utf-8")

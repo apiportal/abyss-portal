@@ -1,0 +1,48 @@
+{
+  "index_patterns": [
+    "api-api-*"
+  ],
+  "settings": {
+    "index": {
+      "mapping": {
+        "total_fields": {
+          "limit": "10000"
+        },
+        "nested_fields": {
+          "limit": "5"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "api-api": {
+      "properties": {
+        "@remoteaddress": {
+          "type": "ip"
+        },
+        "image": {
+          "enabled": false
+        },
+        "originaldocument": {
+          "enabled": false
+        },
+        "openapidocument": {
+          "type": "nested",
+          "enabled": false
+        },
+        "extendeddocument": {
+          "type": "nested",
+          "enabled": false
+        }
+      },
+      "_source": {
+        "excludes": [
+          "image",
+          "originaldocument"
+        ]
+      }
+    }
+  },
+  "aliases": {
+  }
+}

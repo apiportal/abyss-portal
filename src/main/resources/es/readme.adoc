@@ -1,0 +1,53 @@
+= Index templates
+Doc Writer <doc.writer@verapi.com>
+v1.0,
+:toc:
+
+== api-api type index templating
+=== Creating index template for `api-api` type
+
+[source, indent=0]
+----
+PUT http://es-server:9200/_template/api-api-index-template HTTP/1.1
+----
+[source, JSON, indent=0]
+----
+{
+	"index_patterns": ["api-api-*"],
+	"settings": {
+		"index": {
+			"mapping": {
+				"total_fields": {
+					"limit": "10000"
+				}
+			}
+		}
+	},
+	"mappings": {
+		"api-api": {
+			"properties": {
+				"@remoteaddress": {
+					"type": "ip"
+				},
+				"image": {
+					"enabled": false
+				},
+				"originaldocument": {
+					"enabled": false
+				}
+			},
+			"_source": {
+				"excludes": ["image",
+				"originaldocument"]
+			}
+		}
+	},
+	"aliases": {
+	}
+}
+----
+=== Getting index template for `api-api` type
+[source, indent=0]
+----
+GET http://es-server:9200/_template/api-api-index-template HTTP/1.1
+----
