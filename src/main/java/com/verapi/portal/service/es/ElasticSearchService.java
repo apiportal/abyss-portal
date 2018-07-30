@@ -16,6 +16,8 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 public class ElasticSearchService extends AbstractElasticSearchService {
@@ -23,11 +25,21 @@ public class ElasticSearchService extends AbstractElasticSearchService {
 
     public void indexDocument(String type, JsonObject source) {
         logger.trace("indexDocument() invoked");
-        this.indexDocument((RoutingContext) null, type, source);
+        indexDocument((RoutingContext) null, type, source);
+    }
+
+    public void indexDocument(String index, String type, JsonObject source) {
+        indexDocument(null, index, type, source);
+    }
+    public void indexDocument(RoutingContext routingContext, String index, String type, JsonObject source) {
+        logger.trace("indexDocument() invoked");
+        super.indexDocument(routingContext, index, type, UUID.randomUUID().toString(), source);
     }
 
     public void indexDocument(RoutingContext routingContext, String type, JsonObject source) {
         logger.trace("indexDocument() invoked");
-        super.indexDocument(routingContext, type, type, UUID.randomUUID().toString(), source);
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        String index = type + "-" + f.format(new Date());
+        indexDocument(routingContext, index, type, source);
     }
 }

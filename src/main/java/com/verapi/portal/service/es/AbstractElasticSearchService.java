@@ -64,8 +64,7 @@ public abstract class AbstractElasticSearchService {
 
     void indexDocument(RoutingContext routingContext, String index, String type, String id, JsonObject source) {
         logger.trace("indexDocument() invoked");
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
-        IndexRequest request = new IndexRequest(index + "-" + f.format(new Date()), type, id);
+        IndexRequest request = new IndexRequest(index, type, id);
         JsonObject sourceMap = source.copy();
 
         sourceMap.put("@timestamp", Instant.now());

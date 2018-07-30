@@ -221,4 +221,24 @@ public class Constants {
     public static final String AUTH_ABYSS_GATEWAY_COOKIE_NAME = "abyss-gateway-session";
     public static final String AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME = "abyss-gateway-api-access-token"; //spinal case recommended
 
+    /*
+    # enums
+    */
+
+    public enum ConfigState {
+        INITIALIZED("initialized"),
+        CHANGED("changed");
+
+        private final String desc;
+
+        ConfigState(String desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public String toString() {
+            return desc;
+        }
+
+    }
 }

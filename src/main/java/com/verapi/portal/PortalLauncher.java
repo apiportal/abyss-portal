@@ -16,8 +16,7 @@ import ch.qos.logback.classic.LoggerContext;
 import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.common.FileUtil;
-import com.verapi.portal.common.PlatformAPIList;
+import com.verapi.portal.service.es.ElasticSearchService;
 import com.verapi.shell.PortalMetricsListCommand;
 import com.verapi.shell.PortalVersionCommand;
 import io.vertx.config.ConfigRetriever;
@@ -119,6 +118,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 future.complete(ar.result());
                 logger.info("afterStartingVertx ConfigRetriever getConfig OK..");
                 logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+                ElasticSearchService elasticSearchService = new ElasticSearchService();
+                elasticSearchService.indexDocument("configuration-audit", "configuration",
+                        new JsonObject()
+                                .put("op", Constants.ConfigState.INITIALIZED.toString())
+                                .put("old", ar.result())
+                                .put("new", new JsonObject()));
             }
         });
         try {
@@ -129,8 +134,14 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         }
         retriever.listen(configChange -> {
             Config config = Config.getInstance().setConfig(configChange.getNewConfiguration());
+            logger.info("Config changed and reloaded... ");
             logger.debug("Config changed and reloaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
-
+            ElasticSearchService elasticSearchService = new ElasticSearchService();
+            elasticSearchService.indexDocument("configuration-audit", "configuration",
+                    new JsonObject()
+                            .put("op", Constants.ConfigState.CHANGED.toString())
+                            .put("old", configChange.getPreviousConfiguration())
+                            .put("new", configChange.getNewConfiguration()));
         });
         vertx.exceptionHandler((Throwable event) -> {
             logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + Arrays.toString(event.getStackTrace()));
