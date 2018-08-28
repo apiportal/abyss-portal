@@ -93,7 +93,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getBoolean("islocked"))
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getString("url"))
-                            .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false);
+                            .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
+                            .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "");
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -173,6 +174,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getBoolean("issandbox"))
                 .add(updateRecord.getString("url"))
                 .add(updateRecord.containsKey("isrestrictedtoprocessing") ? updateRecord.getBoolean("isrestrictedtoprocessing") : false)
+                .add(updateRecord.containsKey("description") ? updateRecord.getString("description") : "")
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -220,6 +222,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getString("url"))
                             .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
+                            .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "")
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -369,11 +372,11 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
             "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
-            "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing)\n" +
+            "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing, description)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
             "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
-            "   CAST(? AS uuid), ?, ?, ?, ?)";
+            "   CAST(? AS uuid), ?, ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +
@@ -412,7 +415,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  islocked,\n" +
             "  issandbox,\n" +
             "  url,\n" +
-            "  isrestrictedtoprocessing\n" +
+            "  isrestrictedtoprocessing,\n" +
+            "  description\n" +
             "from subject\n";
 
     private static final String SQL_UPDATE = "UPDATE subject\n" +
@@ -458,6 +462,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     public static final String SQL_CONDITION_IS_USER = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n";
 
+    public static final String SQL_CONDITION_IS_GROUP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
+
     public static final String SQL_CONDITION_IS_NOT_SYSTEM = "subjecttypeid!=CAST('" + Constants.SUBJECT_TYPE_SYSTEM + "' AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
@@ -485,6 +491,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public static String FILTER_APPS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_APP;
 
     public static String FILTER_USERS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_USER;
+
+    public static String FILTER_GROUPS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_GROUP;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

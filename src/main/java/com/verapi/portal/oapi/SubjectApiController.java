@@ -279,6 +279,27 @@ public class SubjectApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
+    public void getGroups(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_GROUPS));
+    }
+
+    @AbyssApiOperationHandler
+    public void addGroups(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_GROUP));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateGroups(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_GROUP));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteGroups(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_GROUP));
+    }
+
+
+    @AbyssApiOperationHandler
     public void updatePasswordOfSubject(RoutingContext routingContext) {
         execServiceMethod(routingContext, "changePassword");
     }
