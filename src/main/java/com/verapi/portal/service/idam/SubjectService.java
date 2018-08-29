@@ -438,7 +438,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , islocked = ?\n" +
             "  , issandbox = ?\n" +
             "  , url = ?\n" +
-            "  , isrestrictedtoprocessing = ?\n";
+            "  , isrestrictedtoprocessing = ?\n" +
+            "  , description = ?\n";
 
     private static final String SQL_CHANGE_PASSWORD = "update subject\n" +
             "set updated              = now()\n" +
