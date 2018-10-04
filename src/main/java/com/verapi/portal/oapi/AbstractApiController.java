@@ -43,6 +43,7 @@ import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 import org.owasp.encoder.Encode;
+import com.google.json.JsonSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,14 +218,14 @@ public abstract class AbstractApiController implements IApiController {
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getApiError().getCode())
                     .setStatusMessage(((AbyssApiException) failure).getApiError().getUsermessage())
-                    .end(Encode.forJavaScriptSource(((AbyssApiException) failure).getApiError().toJson().toString()), "UTF-8");
+                    .end(JsonSanitizer.sanitize(((AbyssApiException) failure).getApiError().toJson().toString()), "UTF-8");
         else
             // Handle other exception
             routingContext.response()
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .setStatusMessage("Exception thrown! " + failure.getLocalizedMessage())
-                    .end(Encode.forJavaScriptSource(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                    .end(JsonSanitizer.sanitize(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                             .setUsermessage(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase())
                             .setInternalmessage(failure.getLocalizedMessage())
                             .setDetails(Arrays.toString(failure.getStackTrace()))
@@ -472,7 +473,7 @@ public abstract class AbstractApiController implements IApiController {
                     routingContext.response()
                             .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
-                            .end(Encode.forJavaScriptSource(arr.encode()), "UTF-8");
+                            .end(JsonSanitizer.sanitize(arr.encode()), "UTF-8");
                     logger.trace("replied successfully " + arr.encodePrettily());
                 },
                 throwable -> {
@@ -485,7 +486,7 @@ public abstract class AbstractApiController implements IApiController {
                     routingContext.response()
                             .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
-                            .end(Encode.forJavaScriptSource(resp.encode()), "UTF-8");
+                            .end(JsonSanitizer.sanitize(resp.encode()), "UTF-8");
                     logger.trace("replied successfully " + resp.encodePrettily());
                 },
                 throwable -> {
@@ -542,7 +543,7 @@ public abstract class AbstractApiController implements IApiController {
                             routingContext.response()
                                     .putHeader("Content-Type", "application/json; charset=utf-8")
                                     .setStatusCode(httpResponseStatus)
-                                    .end(Encode.forJavaScriptSource(arr.encode()), "UTF-8");
+                                    .end(JsonSanitizer.sanitize(arr.encode()), "UTF-8");
                             logger.trace("replied successfully " + arr.encodePrettily());
                         },
                         throwable -> {
@@ -554,7 +555,7 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.response()
                 .putHeader("Content-Type", "application/json; charset=utf-8")
                 .setStatusCode(httpResponseStatus)
-                .end(Encode.forJavaScriptSource(response.encode()),"UTF-8");
+                .end(JsonSanitizer.sanitize(response.encode()),"UTF-8");
         logger.trace("replied successfully");
     }
 
@@ -570,7 +571,7 @@ public abstract class AbstractApiController implements IApiController {
             routingContext.response()
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(httpResponseStatus)
-                    .end((onlyStatus) ? null : Encode.forJavaScriptSource(jsonObject.encode()));
+                    .end((onlyStatus) ? null : JsonSanitizer.sanitize(jsonObject.encode()));
             logger.trace("replied successfully");
         }, throwable -> {
             processException(routingContext, throwable);
