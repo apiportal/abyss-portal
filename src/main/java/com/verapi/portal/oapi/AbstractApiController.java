@@ -217,7 +217,7 @@ public abstract class AbstractApiController implements IApiController {
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getApiError().getCode())
                     .setStatusMessage(((AbyssApiException) failure).getApiError().getUsermessage())
-                    .end(Encode.forJavaScriptSource((((AbyssApiException) failure).getApiError().toJson().toString()), "UTF-8");
+                    .end(Encode.forJavaScriptSource(((AbyssApiException) failure).getApiError().toJson().toString()), "UTF-8");
         else
             // Handle other exception
             routingContext.response()
