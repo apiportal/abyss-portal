@@ -84,8 +84,11 @@ public class LoginController extends PortalAbstractController {
                                 String userUUID = resp.getString("uuid");
                                 user.principal().put("user.uuid", userUUID);
                                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
+                                routingContext.session().regenerateId();
+                                routingContext.session().destroy();
+                                routingContext.session().put("username", user.principal().getString("username"));
                                 routingContext.session().put("user.uuid", userUUID);
-                                routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID));
+                                routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)); //TODO: Remove for OWASP Compliance
 //                                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                                 logger.debug("Logged in user: " + user.principal().encodePrettily());

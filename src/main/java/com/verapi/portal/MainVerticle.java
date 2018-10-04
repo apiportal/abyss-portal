@@ -36,6 +36,7 @@ import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.LoggerFormat;
+import io.vertx.reactivex.ext.web.handler.CSRFHandler;
 import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
@@ -145,6 +146,9 @@ public class MainVerticle extends AbstractVerticle {
             //The session handler requires a CookieHandler to be on the routing chain before it
             abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session"));
 
+            //TODO: CSRF Handler for OWASP
+            abyssRouter.route().handler(CSRFHandler.create("cok.cok.gizli"));
+
             //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
             //It requires that the session handler is already present on previous matching routes
             //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
@@ -208,6 +212,9 @@ public class MainVerticle extends AbstractVerticle {
 
             router.route("/logout").handler(context -> {
                 context.clearUser();
+                context.session().remove("username");
+                context.session().remove("user.uuid");
+                context.session().destroy();
                 context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
             });
 

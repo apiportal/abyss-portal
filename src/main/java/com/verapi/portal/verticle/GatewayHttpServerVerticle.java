@@ -195,7 +195,8 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         logger.trace("+++++ {} openapi router route list: {}", apiUUID, router.getRoutes());
 
                                     } else {
-                                        throw new RuntimeException("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
+                                        //throw new RuntimeException("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
+                                        logger.error("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
                                     }
                                 });
                                 return Single.just(o);

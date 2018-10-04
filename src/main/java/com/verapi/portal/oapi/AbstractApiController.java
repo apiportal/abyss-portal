@@ -42,6 +42,7 @@ import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import org.owasp.encoder.Encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,21 +217,21 @@ public abstract class AbstractApiController implements IApiController {
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getApiError().getCode())
                     .setStatusMessage(((AbyssApiException) failure).getApiError().getUsermessage())
-                    .end(((AbyssApiException) failure).getApiError().toJson().toString(), "UTF-8");
+                    .end(Encode.forHtml(((AbyssApiException) failure).getApiError().toJson().toString()), "UTF-8");
         else
             // Handle other exception
             routingContext.response()
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .setStatusMessage("Exception thrown! " + failure.getLocalizedMessage())
-                    .end(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                    .end(Encode.forHtml(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                             .setUsermessage(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase())
                             .setInternalmessage(failure.getLocalizedMessage())
                             .setDetails(Arrays.toString(failure.getStackTrace()))
                             .setRecommendation(null)
                             .setMoreinfo(null)
                             .toJson()
-                            .toString()
+                            .toString()), "UTF-8"
                     );
 
     }
@@ -302,7 +303,7 @@ public abstract class AbstractApiController implements IApiController {
                                     user.principal().put("user.uuid", userUUID);
                                     routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                                     routingContext.session().put("user.uuid", userUUID);
-                                    routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID));
+                                    routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)); //TODO: Remove for OWASP
 //                                            .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
                                     logger.trace("Logged in user: " + user.principal().encodePrettily());
                                     routingContext.put("username", user.principal().getString("username"));
@@ -471,7 +472,7 @@ public abstract class AbstractApiController implements IApiController {
                     routingContext.response()
                             .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
-                            .end(arr.encode(), "UTF-8");
+                            .end(Encode.forHtml(arr.encode()), "UTF-8");
                     logger.trace("replied successfully " + arr.encodePrettily());
                 },
                 throwable -> {
@@ -484,7 +485,7 @@ public abstract class AbstractApiController implements IApiController {
                     routingContext.response()
                             .putHeader("Content-Type", "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
-                            .end(resp.encode(), "UTF-8");
+                            .end(Encode.forHtml(resp.encode()), "UTF-8");
                     logger.trace("replied successfully " + resp.encodePrettily());
                 },
                 throwable -> {
@@ -541,7 +542,7 @@ public abstract class AbstractApiController implements IApiController {
                             routingContext.response()
                                     .putHeader("Content-Type", "application/json; charset=utf-8")
                                     .setStatusCode(httpResponseStatus)
-                                    .end(arr.encode(), "UTF-8");
+                                    .end(Encode.forHtml(arr.encode()), "UTF-8");
                             logger.trace("replied successfully " + arr.encodePrettily());
                         },
                         throwable -> {
@@ -553,7 +554,7 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.response()
                 .putHeader("Content-Type", "application/json; charset=utf-8")
                 .setStatusCode(httpResponseStatus)
-                .end(response.encode());
+                .end(Encode.forHtml(response.encode()),"UTF-8");
         logger.trace("replied successfully");
     }
 
@@ -569,7 +570,7 @@ public abstract class AbstractApiController implements IApiController {
             routingContext.response()
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(httpResponseStatus)
-                    .end((onlyStatus) ? null : jsonObject.encode());
+                    .end((onlyStatus) ? null : Encode.forHtml(jsonObject.encode()));
             logger.trace("replied successfully");
         }, throwable -> {
             processException(routingContext, throwable);

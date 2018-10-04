@@ -260,7 +260,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                         "var version='" + BuildProperties.getInstance().getConfigJsonObject().getString(Constants.ABYSS_BUILD_TIMESTAMP) + "';\n" +
                         "var gatewayContext='" + Constants.ABYSS_GW + "';\n" +
                         "var gatewayPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_GATEWAY_SERVER_PORT) + "';\n" +
-                        "var searchAllUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.ES_SERVER_URL) + "_search" + "';\n";
+                        "var searchAllUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.ES_SERVER_URL) + "/_search" + "';\n";
         context.response().putHeader("Content-Type", "application/javascript");
         context.response().setStatusCode(200);
         context.response().end(filecontent);
