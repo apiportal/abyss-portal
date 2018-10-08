@@ -59,10 +59,10 @@ public class MessageService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subject"))
                             .add(jsonObj.getString("body"))
                             .add(jsonObj.getString("priority"))
-                            .add(jsonObj.getBoolean("isstarred"))
-                            .add(jsonObj.getBoolean("isread"))
-                            .add(jsonObj.getInstant("sentat"))
-                            .add(jsonObj.getInstant("readat"));
+                            .add(jsonObj.getBoolean("isstarred"));
+                            //.add(jsonObj.getBoolean("isread"))
+                            //.add(jsonObj.getInstant("sentat"))
+                            //.add(jsonObj.getInstant("readat"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
