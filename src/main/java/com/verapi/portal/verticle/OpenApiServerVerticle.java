@@ -5,7 +5,7 @@
  *  *  Unauthorized copying of this file, via any medium is strictly prohibited
  *  *  Proprietary and confidential
  *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 5 2018
+ *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 10 2018
  *
  */
 
@@ -16,12 +16,14 @@ import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.AbyssApiController;
+import com.verapi.portal.common.OwaspCharacterEscapes;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.Json;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -37,6 +39,18 @@ import java.util.Set;
 
 public class OpenApiServerVerticle extends AbyssAbstractVerticle {
     private static Logger logger = LoggerFactory.getLogger(OpenApiServerVerticle.class);
+
+
+    /**
+     * This demonstrates how to configure a Spring Java Config application to encode JSON rather than simply escaping it as recommended by OWASP XSS cheat sheet.
+     * Specifically it states JavaScript should be encoded as
+     * "Except for alphanumeric characters, escape all characters with the \\uXXXX unicode escaping format (X = Integer)"
+     */
+    static {
+        Json.mapper.getFactory().setCharacterEscapes(new OwaspCharacterEscapes());
+        logger.debug("OwaspCharacterEscapes has been set");
+    }
+
 
     @Override
     protected Single<HttpServer> createHttpServer() {

@@ -42,7 +42,6 @@ import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
-import org.owasp.encoder.Encode;
 import com.google.json.JsonSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -555,7 +554,7 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.response()
                 .putHeader("Content-Type", "application/json; charset=utf-8")
                 .setStatusCode(httpResponseStatus)
-                .end(JsonSanitizer.sanitize(response.encode()),"UTF-8");
+                .end(JsonSanitizer.sanitize(response.encode()), "UTF-8");
         logger.trace("replied successfully");
     }
 
