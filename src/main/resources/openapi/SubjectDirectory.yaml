@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,39 +17,39 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: SubjectDirectories
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectDirectories crud operations'
-  - name: SubjectDirectory
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectDirectory crud operations'
+- name: SubjectDirectories
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectDirectories crud operations'
+- name: SubjectDirectory
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectDirectory crud operations'
 paths:
   /subject-directories:
     get:
       tags:
-        - SubjectDirectories
+      - SubjectDirectories
       summary: 'Get list of SubjectDirectories'
       description: 'Returns list of SubjectDirectories'
       operationId: getSubjectDirectories
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectDirectories which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectDirectories which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectDirectories which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectDirectories which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectDirectory'
@@ -71,7 +71,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - SubjectDirectories
+      - SubjectDirectories
       summary: 'Add a bulk of SubjectDirectories'
       description: 'Provide a list of SubjectDirectories to be inserted'
       operationId: addSubjectDirectories
@@ -98,7 +98,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectDirectory'
     put:
       tags:
-        - SubjectDirectories
+      - SubjectDirectories
       summary: 'Update a bulk of SubjectDirectories'
       description: 'Provide a bulk list of  SubjectDirectories to be updated'
       operationId: updateSubjectDirectories
@@ -125,7 +125,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectDirectoryObject'
     delete:
       tags:
-        - SubjectDirectories
+      - SubjectDirectories
       summary: 'Delete all SubjectDirectories'
       description: 'Deletes all SubjectDirectories'
       operationId: deleteSubjectDirectories
@@ -147,17 +147,17 @@ paths:
   /subject-directories/{uuid}:
     get:
       tags:
-        - SubjectDirectory
+      - SubjectDirectory
       summary: 'Get an existing SubjectDirectory by uuid'
       description: 'Provide an uuid of SubjectDirectory to be get'
       operationId: getSubjectDirectory
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectDirectory that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectDirectory that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -179,17 +179,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - SubjectDirectory
+      - SubjectDirectory
       summary: 'Update an existing SubjectDirectory'
       description: 'Provide an altered SubjectDirectory to be updated'
       operationId: updateSubjectDirectory
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectDirectory that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectDirectory that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -213,17 +213,17 @@ paths:
         $ref: '#/components/requestBodies/SubjectDirectory'
     delete:
       tags:
-        - SubjectDirectory
+      - SubjectDirectory
       summary: 'Delete SubjectDirectory'
       description: 'Provide an uuid parameter of SubjectDirectory to be updated'
       operationId: deleteSubjectDirectory
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of SubjectDirectory that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of SubjectDirectory that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,8 +249,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -269,7 +269,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -478,23 +478,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []

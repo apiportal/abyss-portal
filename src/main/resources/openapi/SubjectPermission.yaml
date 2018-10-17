@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,54 +17,54 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: SubjectPermissions
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectPermissions crud operations'
-  - name: SubjectPermission
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectPermission crud operations'
-  - name: Api Subscriptions
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : API Subcriptions crud operations'
-  - name: Subscriptions to My APIs
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Listing operation of Subcriptions to my APIs'
-  - name: Subscriptions of Subject
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Listing operation of Subcriptions of Subject'
+- name: SubjectPermissions
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectPermissions crud operations'
+- name: SubjectPermission
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectPermission crud operations'
+- name: Api Subscriptions
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : API Subcriptions crud operations'
+- name: Subscriptions to My APIs
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Listing operation of Subcriptions to my APIs'
+- name: Subscriptions of Subject
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Listing operation of Subcriptions of Subject'
 paths:
   /subject-permissions:
     get:
       tags:
-        - SubjectPermissions
+      - SubjectPermissions
       summary: 'Get list of SubjectPermissions'
       description: 'Returns list of SubjectPermissions'
       operationId: getSubjectPermissions
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectPermissions which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectPermissions which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectPermissions which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectPermissions which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectPermission'
@@ -86,7 +86,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - SubjectPermissions
+      - SubjectPermissions
       summary: 'Add a bulk of SubjectPermissions'
       description: 'Provide a list of SubjectPermissions to be inserted'
       operationId: addSubjectPermissions
@@ -113,7 +113,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectPermission'
     put:
       tags:
-        - SubjectPermissions
+      - SubjectPermissions
       summary: 'Update a bulk of SubjectPermissions'
       description: 'Provide a bulk list of  SubjectPermissions to be updated'
       operationId: updateSubjectPermissions
@@ -140,7 +140,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectPermissionObject'
     delete:
       tags:
-        - SubjectPermissions
+      - SubjectPermissions
       summary: 'Delete all SubjectPermissions'
       description: 'Deletes all SubjectPermissions'
       operationId: deleteSubjectPermissions
@@ -162,17 +162,17 @@ paths:
   /subject-permissions/{uuid}:
     get:
       tags:
-        - SubjectPermission
+      - SubjectPermission
       summary: 'Get an existing SubjectPermission by uuid'
       description: 'Provide an uuid of SubjectPermission to be get'
       operationId: getSubjectPermission
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectPermission that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectPermission that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -194,17 +194,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - SubjectPermission
+      - SubjectPermission
       summary: 'Update an existing SubjectPermission'
       description: 'Provide an altered SubjectPermission to be updated'
       operationId: updateSubjectPermission
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectPermission that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectPermission that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -228,17 +228,17 @@ paths:
         $ref: '#/components/requestBodies/SubjectPermission'
     delete:
       tags:
-        - SubjectPermission
+      - SubjectPermission
       summary: 'Delete SubjectPermission'
       description: 'Provide an uuid parameter of SubjectPermission to be updated'
       operationId: deleteSubjectPermission
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of SubjectPermission that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of SubjectPermission that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -258,33 +258,33 @@ paths:
           $ref: '#/components/responses/default'
   /subject-permissions/api-subscriptions/subject/{uuid}:
     parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of Subject'
-        required: true
-        schema:
-          type: string
+    - name: uuid
+      in: path
+      description: 'The uuid of Subject'
+      required: true
+      schema:
+        type: string
     get:
       tags:
-        - Api Subscriptions
+      - Api Subscriptions
       summary: 'Get list of Subject''s API subscriptions'
       description: 'Returns list of API subscriptions of subject'
       operationId: getApiSubscriptionsOfSubject
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search  API subscriptions which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search  API subscriptions which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search  API subscriptions which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search  API subscriptions which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectPermission'
@@ -306,7 +306,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Api Subscriptions
+      - Api Subscriptions
       summary: 'Add a bulk of Subject''s API subscriptions'
       description: 'Provide a list of API subscriptions of subject to be inserted'
       operationId: addApiSubscriptionsOfSubject
@@ -333,7 +333,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectPermission'
     put:
       tags:
-        - Api Subscriptions
+      - Api Subscriptions
       summary: 'Update a bulk of Subject''s API subscriptions'
       description: 'Provide a bulk list of  API subscriptions of subject to be updated'
       operationId: updateApiSubscriptionsOfSubject
@@ -360,7 +360,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectPermissionObject'
     delete:
       tags:
-        - Api Subscriptions
+      - Api Subscriptions
       summary: 'Delete all API subscriptions of subject'
       description: 'Deletes all API subscriptions of subject'
       operationId: deleteApiSubscriptionsOfSubject
@@ -381,33 +381,33 @@ paths:
           $ref: '#/components/responses/default'
   /subject-permissions/my-apis-subscriptions/subject/{uuid}:
     parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of Subject'
-        required: true
-        schema:
-          type: string
+    - name: uuid
+      in: path
+      description: 'The uuid of Subject'
+      required: true
+      schema:
+        type: string
     get:
       tags:
-        - Subscriptions to My APIs
+      - Subscriptions to My APIs
       summary: 'Get list of API subscriptions to my APIs'
       description: 'Returns list of API subscriptions to my APIs'
       operationId: getApiSubscriptionsToMyApis
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search  API subscriptions which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search  API subscriptions which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search  API subscriptions which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search  API subscriptions which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectPermission'
@@ -429,33 +429,33 @@ paths:
           $ref: '#/components/responses/default'
   /subject-permissions/subject/{uuid}:
     parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of Subject'
-        required: true
-        schema:
-          type: string
+    - name: uuid
+      in: path
+      description: 'The uuid of Subject'
+      required: true
+      schema:
+        type: string
     get:
       tags:
-        - Subscriptions of Subject
+      - Subscriptions of Subject
       summary: 'Get list of subscriptions of subject'
       description: 'Returns list of subscriptions of subject'
       operationId: getPermissionsOfSubject
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search subscriptions which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search subscriptions which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search subscriptions which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search subscriptions which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectPermission'
@@ -483,8 +483,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -503,7 +503,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -710,23 +710,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []

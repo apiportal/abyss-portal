@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,94 +17,94 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: Apis
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Apis crud operations'
-  - name: Api
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Api crud operations'
-  - name: Subject-APIs
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject APIs crud operations'
-  - name: Business-APIs
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Business APIs crud operations'
-  - name: Business-API
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Business API crud operations'
-  - name: API-Proxies
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : API Proxies crud operations'
-  - name: API-Proxy
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : API Proxy crud operations'
-  - name: Subject-Business-APIs
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subjects'' Business APIs crud operations'
-  - name: Subject-API-Proxies
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s API Proxies crud operations'
-  - name: Subject-Business API-Tags
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s Business API tags'
-  - name: Subject Business APIs By Tag-Category-Group
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s Business APIs by tag'
-  - name: Subject API Proxies By Tag-Category-Group
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s API Proxies by tag'
-  - name: Shared APIs
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Shared APIs listing operations'
+- name: Apis
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Apis crud operations'
+- name: Api
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Api crud operations'
+- name: Subject-APIs
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subject APIs crud operations'
+- name: Business-APIs
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Business APIs crud operations'
+- name: Business-API
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Business API crud operations'
+- name: API-Proxies
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : API Proxies crud operations'
+- name: API-Proxy
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : API Proxy crud operations'
+- name: Subject-Business-APIs
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subjects'' Business APIs crud operations'
+- name: Subject-API-Proxies
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subject''s API Proxies crud operations'
+- name: Subject-Business API-Tags
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subject''s Business API tags'
+- name: Subject Business APIs By Tag-Category-Group
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subject''s Business APIs by tag'
+- name: Subject API Proxies By Tag-Category-Group
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subject''s API Proxies by tag'
+- name: Shared APIs
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Shared APIs listing operations'
 paths:
   /apis:
     get:
       tags:
-        - Apis
+      - Apis
       summary: 'Get list of Apis'
       description: 'Returns list of Apis'
       operationId: getApis
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Apis which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Apis which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Apis which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Apis which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -126,7 +126,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Apis
+      - Apis
       summary: 'Add a bulk of Apis'
       description: 'Provide a list of Apis to be inserted'
       operationId: addApis
@@ -153,7 +153,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - Apis
+      - Apis
       summary: 'Update a bulk of Apis'
       description: 'Provide a bulk list of  Apis to be updated'
       operationId: updateApis
@@ -180,7 +180,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - Apis
+      - Apis
       summary: 'Delete all Apis'
       description: 'Deletes all Apis'
       operationId: deleteApis
@@ -202,17 +202,17 @@ paths:
   /apis/{uuid}:
     get:
       tags:
-        - Api
+      - Api
       summary: 'Get an existing Api by uuid'
       description: 'Provide an uuid of Api to be get'
       operationId: getApi
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Api that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Api that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -234,17 +234,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - Api
+      - Api
       summary: 'Update an existing Api'
       description: 'Provide an altered Api to be updated'
       operationId: updateApi
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Api that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Api that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -268,17 +268,17 @@ paths:
         $ref: '#/components/requestBodies/Api'
     delete:
       tags:
-        - Api
+      - Api
       summary: 'Delete Api'
       description: 'Provide an uuid parameter of Api to be updated'
       operationId: deleteApi
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of Api that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of Api that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -299,31 +299,31 @@ paths:
   /apis/subject/{uuid}:
     get:
       tags:
-        - Subject-APIs
+      - Subject-APIs
       summary: 'Get APIs by Subject uuid'
       description: 'Provide an uuid of Subject to get his APIs'
       operationId: getApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to get his APIs'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to get his APIs'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -345,17 +345,17 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Subject-APIs
+      - Subject-APIs
       summary: 'Add a bulk of new APIs for a Subject'
       description: 'Provide a list of Api objects to be inserted'
       operationId: addApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to add his APIs'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to add his APIs'
+        required: true
+        schema:
+          type: string
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -379,17 +379,17 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - Subject-APIs
+      - Subject-APIs
       summary: 'Update APIs of Subject'
       description: 'Provide a list of Api objects to be updated'
       operationId: updateApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to update his APIs'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to update his APIs'
+        required: true
+        schema:
+          type: string
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -413,17 +413,17 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - Subject-APIs
+      - Subject-APIs
       summary: 'Delete all APIs of Subject'
       description: 'Provide an uuid parameter of Api to be deleted'
       operationId: deleteApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to delete his APIs'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to delete his APIs'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -439,28 +439,28 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/businesses/:
+  /apis/businesses:
     get:
       tags:
-        - Business-APIs
+      - Business-APIs
       summary: 'Get list of Business APIs'
       description: 'Returns list of Business APIs'
       operationId: getBusinessApis
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Business APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Business APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Business APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Business APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfBusinessApi'
@@ -482,7 +482,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Business-APIs
+      - Business-APIs
       summary: 'Add a bulk of Business APIs'
       description: 'Provide a list of Business APIs objects to be inserted'
       operationId: addBusinessApis
@@ -509,7 +509,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - Business-APIs
+      - Business-APIs
       summary: 'Update a bulk of Business APIs'
       description: 'Provide a bulk list of  Business APIs objects to be updated'
       operationId: updateBusinessApis
@@ -536,7 +536,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - Business-APIs
+      - Business-APIs
       summary: 'Delete all Business APIs'
       description: 'Deletes all Business APIs'
       operationId: deleteBusinessApis
@@ -558,17 +558,17 @@ paths:
   /apis/businesses/{uuid}:
     get:
       tags:
-        - Business-API
+      - Business-API
       summary: 'Get an existing Business API by uuid'
       description: 'Provide an uuid of Api to be get'
       operationId: getBusinessApi
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Business API that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Business API that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200-BusinessApi'
@@ -590,17 +590,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - Business-API
+      - Business-API
       summary: 'Update an existing Business API'
       description: 'Provide an altered Business API to be updated'
       operationId: updateBusinessApi
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Business API that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Business API that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200-BusinessApi'
@@ -624,17 +624,17 @@ paths:
         $ref: '#/components/requestBodies/BusinessApi'
     delete:
       tags:
-        - Business-API
+      - Business-API
       summary: 'Delete Business API'
       description: 'Provide an uuid parameter of Business API to be updated'
       operationId: deleteBusinessApi
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of Business API that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of Business API that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -652,28 +652,28 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/proxies/:
+  /apis/proxies:
     get:
       tags:
-        - API-Proxies
+      - API-Proxies
       summary: 'Get list of API Proxies'
       description: 'Returns list of API Proxies'
       operationId: getApiProxies
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search API Proxies which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search API Proxies which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search API Proxies which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search API Proxies which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -695,7 +695,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - API-Proxies
+      - API-Proxies
       summary: 'Add a bulk of API Proxies'
       description: 'Provide a list of API Proxies objects to be inserted'
       operationId: addApiProxies
@@ -722,7 +722,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - API-Proxies
+      - API-Proxies
       summary: 'Update a bulk of API Proxies'
       description: 'Provide a bulk list of  API Proxies objects to be updated'
       operationId: updateApiProxies
@@ -749,7 +749,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - API-Proxies
+      - API-Proxies
       summary: 'Delete all API Proxies'
       description: 'Deletes all API Proxies'
       operationId: deleteApiProxies
@@ -771,17 +771,17 @@ paths:
   /apis/proxies/{uuid}:
     get:
       tags:
-        - API-Proxy
+      - API-Proxy
       summary: 'Get an existing API Proxy by uuid'
       description: 'Provide an uuid of API Proxy to be get'
       operationId: getApiProxy
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of API Proxy that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of API Proxy that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -803,17 +803,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - API-Proxy
+      - API-Proxy
       summary: 'Update an existing API Proxy'
       description: 'Provide an altered API Proxy to be updated'
       operationId: updateApiProxy
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of API Proxy that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of API Proxy that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -837,17 +837,17 @@ paths:
         $ref: '#/components/requestBodies/Api'
     delete:
       tags:
-        - API-Proxy
+      - API-Proxy
       summary: 'Delete API Proxy'
       description: 'Provide an uuid parameter of API Proxy to be deleted'
       operationId: deleteApiProxy
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of API Proxy that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of API Proxy that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -868,31 +868,31 @@ paths:
   /apis/businesses/subject/{uuid}:
     get:
       tags:
-        - Subject-Business-APIs
+      - Subject-Business-APIs
       summary: 'Get Business APIs by Subject uuid'
       description: 'Provide an uuid of Subject to get his Business APIs'
       operationId: getBusinessApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to get his Business APIs'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to get his Business APIs'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfBusinessApi'
@@ -914,17 +914,17 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Subject-Business-APIs
+      - Subject-Business-APIs
       summary: 'Add a bulk of Business APIs for Subject'
       description: 'Provide a list of his Business APIs objects to be inserted'
       operationId: addBusinessApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to add his Business APIs'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to add his Business APIs'
+        required: true
+        schema:
+          type: string
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -948,17 +948,17 @@ paths:
         $ref: '#/components/requestBodies/ListOfBusinessApi'
     put:
       tags:
-        - Subject-Business-APIs
+      - Subject-Business-APIs
       summary: 'Update a bulk of Business APIs for Subject'
       description: 'Provide a bulk list of  his Business APIs objects to be updated'
       operationId: updateBusinessApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to update his Business APIs'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to update his Business APIs'
+        required: true
+        schema:
+          type: string
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -982,17 +982,17 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - Subject-Business-APIs
+      - Subject-Business-APIs
       summary: Delete all Business APIs for Subject
       description: 'Deletes his all Business APIs'
       operationId: deleteBusinessApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to delete his Business APIs'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to delete his Business APIs'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -1011,31 +1011,31 @@ paths:
   /apis/proxies/subject/{uuid}:
     get:
       tags:
-        - Subject-API-Proxies
+      - Subject-API-Proxies
       summary: 'Get API Proxies by Subject uuid'
       description: 'Provide an uuid of Subject to get his API Proxies'
       operationId: getApiProxiesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to get his API Proxies'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to get his API Proxies'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -1057,17 +1057,17 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Subject-API-Proxies
+      - Subject-API-Proxies
       summary: 'Add a bulk of API Proxies for Subject'
       description: 'Provide a list of his API Proxies objects to be inserted'
       operationId: addApiProxiesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to add his API Proxies'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to add his API Proxies'
+        required: true
+        schema:
+          type: string
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -1091,17 +1091,17 @@ paths:
         $ref: '#/components/requestBodies/ListOfApi'
     put:
       tags:
-        - Subject-API-Proxies
+      - Subject-API-Proxies
       summary: 'Update a bulk of API Proxies for Subject'
       description: 'Provide a bulk list of  his API Proxies objects to be updated'
       operationId: updateApiProxiesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to update his API Proxies'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to update his API Proxies'
+        required: true
+        schema:
+          type: string
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -1125,17 +1125,17 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiObject'
     delete:
       tags:
-        - Subject-API-Proxies
+      - Subject-API-Proxies
       summary: 'Delete all API Proxies for Subject'
       description: 'Deletes his all API Proxies'
       operationId: deleteApiProxiesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to delete his API Proxies'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to delete his API Proxies'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -1151,34 +1151,34 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/businesses/subject/{uuid}/tags/:
+  /apis/businesses/subject/{uuid}/tags:
     get:
       tags:
-        - Subject-Business API-Tags
+      - Subject-Business API-Tags
       summary: Get Tags of Business APIs by Subject uuid
       description: 'Provide an uuid of Subject to get his Business APIs tags'
       operationId: getTagsOfBusinessApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to get his Business APIs tags'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business API tags which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business API tag which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to get his Business APIs tags'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business API tags which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business API tag which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTags'
@@ -1201,41 +1201,41 @@ paths:
   /apis/businesses/subject/{uuid}/tags/aggregate/{aggregation}:
     get:
       tags:
-        - Subject-Business API-Tags
+      - Subject-Business API-Tags
       summary: 'Get Aggregation of Tags of Business APIs by Subject uuid'
       description: 'Provide an uuid of Subject to get his Business APIs tags'
       operationId: getAggregatedTagsOfBusinessApisOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject that need to get his Business API tags'
-          required: true
-          schema:
-            type: string
-        - name: aggregation
-          in: path
-          required: true
-          schema:
-            type: string
-            enum:
-              - count
-              - sum
-              - avg
-            default: count
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business API tags which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business API tags which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to get his Business API tags'
+        required: true
+        schema:
+          type: string
+      - name: aggregation
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - count
+          - sum
+          - avg
+          default: count
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business API tags which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business API tags which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTagSummary'
@@ -1255,40 +1255,40 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/businesses/tag/{tag}/subject/{uuid}/:
+  /apis/businesses/tag/{tag}/subject/{uuid}:
     get:
       tags:
-        - Subject Business APIs By Tag-Category-Group
+      - Subject Business APIs By Tag-Category-Group
       summary: Get Business APIs by both Subject and Tag
       description: 'Provide an uuid of Subject and uuid of Tag to get his Business APIs'
       operationId: getBusinessApisOfSubjectByTag
       parameters:
-        - name: tag
-          in: path
-          description: 'uuid of Tag'
-          required: true
-          schema:
-            type: string
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: tag
+        in: path
+        description: 'uuid of Tag'
+        required: true
+        schema:
+          type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfBusinessApi'
@@ -1308,40 +1308,40 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/businesses/category/{category}/subject/{uuid}/:
+  /apis/businesses/category/{category}/subject/{uuid}:
     get:
       tags:
-        - Subject Business APIs By Tag-Category-Group
+      - Subject Business APIs By Tag-Category-Group
       summary: Get Business APIs by both Subject and Category
       description: 'Provide an uuid of Subject and uuid of Category to get his Business APIs'
       operationId: getBusinessApisOfSubjectByCategory
       parameters:
-        - name: category
-          in: path
-          description: 'uuid of Category'
-          required: true
-          schema:
-            type: string
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: category
+        in: path
+        description: 'uuid of Category'
+        required: true
+        schema:
+          type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfBusinessApi'
@@ -1361,40 +1361,40 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/businesses/group/{group}/subject/{uuid}/:
+  /apis/businesses/group/{group}/subject/{uuid}:
     get:
       tags:
-        - Subject Business APIs By Tag-Category-Group
+      - Subject Business APIs By Tag-Category-Group
       summary: Get Business APIs by both Subject and API Group
       description: 'Provide an uuid of Subject and uuid of API Group to get his Business APIs'
       operationId: getBusinessApisOfSubjectByGroup
       parameters:
-        - name: group
-          in: path
-          description: 'uuid of API Group'
-          required: true
-          schema:
-            type: string
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his Business APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: group
+        in: path
+        description: 'uuid of API Group'
+        required: true
+        schema:
+          type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his Business APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfBusinessApi'
@@ -1414,40 +1414,40 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/proxies/tag/{tag}/subject/{uuid}/:
+  /apis/proxies/tag/{tag}/subject/{uuid}:
     get:
       tags:
-        - Subject API Proxies By Tag-Category-Group
+      - Subject API Proxies By Tag-Category-Group
       summary: Get API Proxies by both Subject and Tag
       description: 'Provide an uuid of Subject and uuid of Tag to get his API Proxies'
       operationId: getApiProxiesOfSubjectByTag
       parameters:
-        - name: tag
-          in: path
-          description: 'uuid of Tag'
-          required: true
-          schema:
-            type: string
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: tag
+        in: path
+        description: 'uuid of Tag'
+        required: true
+        schema:
+          type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -1467,40 +1467,40 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/proxies/category/{category}/subject/{uuid}/:
+  /apis/proxies/category/{category}/subject/{uuid}:
     get:
       tags:
-        - Subject API Proxies By Tag-Category-Group
+      - Subject API Proxies By Tag-Category-Group
       summary: Get API Proxies by both Subject and Category
       description: 'Provide an uuid of Subject and uuid of Category to get his API Proxies'
       operationId: getApiProxiesOfSubjectByCategory
       parameters:
-        - name: category
-          in: path
-          description: 'uuid of Category'
-          required: true
-          schema:
-            type: string
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: category
+        in: path
+        description: 'uuid of Category'
+        required: true
+        schema:
+          type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -1520,40 +1520,40 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /apis/proxies/group/{group}/subject/{uuid}/:
+  /apis/proxies/group/{group}/subject/{uuid}:
     get:
       tags:
-        - Subject API Proxies By Tag-Category-Group
+      - Subject API Proxies By Tag-Category-Group
       summary: Get API Proxies by both Subject and API Group
       description: 'Provide an uuid of Subject and uuid of API Group to get his API Proxies'
       operationId: getApiProxiesOfSubjectByGroup
       parameters:
-        - name: group
-          in: path
-          description: 'uuid of API Group'
-          required: true
-          schema:
-            type: string
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his API Proxies which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: group
+        in: path
+        description: 'uuid of API Group'
+        required: true
+        schema:
+          type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his API Proxies which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -1576,31 +1576,31 @@ paths:
   /apis/sharedwith/subject/{uuid}:
     get:
       tags:
-        - Shared APIs
+      - Shared APIs
       summary: Get APIs shared with subject
       description: 'Provide an uuid of Subject to get APIs shared with him'
       operationId: getApisSharedWithSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -1623,31 +1623,31 @@ paths:
   /apis/sharedby/subject/{uuid}:
     get:
       tags:
-        - Shared APIs
+      - Shared APIs
       summary: Get APIs shared by subject
       description: 'Provide an uuid of Subject to get APIs shared by him'
       operationId: getApisSharedBySubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his APIs which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search his APIs which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his APIs which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search his APIs which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApi'
@@ -1675,8 +1675,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -1695,7 +1695,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -2130,7 +2130,7 @@ components:
           schema:
             type: array
             items:
-              $ref: 'ApiTag.yaml#/components/schemas/ApiTag'
+              $ref: '/openapi/ApiTag.yaml#/components/schemas/ApiTag'
     '200-ListOfApiTagSummary':
       description: 'List of ApiTagSummary'
       content:
@@ -2146,7 +2146,7 @@ components:
           schema:
             type: array
             items:
-              $ref: 'ApiCategory.yaml#/components/schemas/ApiCategory'
+              $ref: '/openapi/ApiCategory.yaml#/components/schemas/ApiCategory'
     '200-ListOfApiCategorySummary':
       description: 'List of ApiCategorySummary'
       content:
@@ -2162,7 +2162,7 @@ components:
           schema:
             type: array
             items:
-              $ref: 'ApiGroup.yaml#/components/schemas/ApiGroup'
+              $ref: '/openapi/ApiGroup.yaml#/components/schemas/ApiGroup'
     '200-ListOfApiGroupSummary':
       description: 'List of ApiGroupSummary'
       content:
@@ -2178,7 +2178,7 @@ components:
           schema:
             type: array
             items:
-              $ref: 'ApiState.yaml#/components/schemas/ApiState'
+              $ref: '/openapi/ApiState.yaml#/components/schemas/ApiState'
     '200-ListOfApiStateSummary':
       description: 'List of ApiStateSummary'
       content:
@@ -2194,7 +2194,7 @@ components:
           schema:
             type: array
             items:
-              $ref: 'ApiVisibilityType.yaml#/components/schemas/ApiVisibilityType'
+              $ref: '/openapi/ApiVisibilityType.yaml#/components/schemas/ApiVisibilityType'
     '200-ListOfApiVisibilityTypeSummary':
       description: 'List of ApiVisibilityTypeSummary'
       content:
@@ -2230,23 +2230,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []

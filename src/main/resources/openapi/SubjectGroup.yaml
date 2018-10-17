@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,39 +17,39 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: SubjectGroups
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectGroups crud operations'
-  - name: SubjectGroup
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectGroup crud operations'
+- name: SubjectGroups
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectGroups crud operations'
+- name: SubjectGroup
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectGroup crud operations'
 paths:
   /subject-groups:
     get:
       tags:
-        - SubjectGroups
+      - SubjectGroups
       summary: 'Get list of SubjectGroups'
       description: 'Returns list of SubjectGroups'
       operationId: getSubjectGroups
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectGroups which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectGroups which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectGroups which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectGroups which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectGroup'
@@ -71,7 +71,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - SubjectGroups
+      - SubjectGroups
       summary: 'Add a bulk of SubjectGroups'
       description: 'Provide a list of SubjectGroups to be inserted'
       operationId: addSubjectGroups
@@ -98,7 +98,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectGroup'
     put:
       tags:
-        - SubjectGroups
+      - SubjectGroups
       summary: 'Update a bulk of SubjectGroups'
       description: 'Provide a bulk list of  SubjectGroups to be updated'
       operationId: updateSubjectGroups
@@ -125,7 +125,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectGroupObject'
     delete:
       tags:
-        - SubjectGroups
+      - SubjectGroups
       summary: 'Delete all SubjectGroups'
       description: 'Deletes all SubjectGroups'
       operationId: deleteSubjectGroups
@@ -147,17 +147,17 @@ paths:
   /subject-groups/{uuid}:
     get:
       tags:
-        - SubjectGroup
+      - SubjectGroup
       summary: 'Get an existing SubjectGroup by uuid'
       description: 'Provide an uuid of SubjectGroup to be get'
       operationId: getSubjectGroup
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectGroup that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectGroup that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -179,17 +179,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - SubjectGroup
+      - SubjectGroup
       summary: 'Update an existing SubjectGroup'
       description: 'Provide an altered SubjectGroup to be updated'
       operationId: updateSubjectGroup
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectGroup that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectGroup that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -213,17 +213,17 @@ paths:
         $ref: '#/components/requestBodies/SubjectGroup'
     delete:
       tags:
-        - SubjectGroup
+      - SubjectGroup
       summary: 'Delete SubjectGroup'
       description: 'Provide an uuid parameter of SubjectGroup to be updated'
       operationId: deleteSubjectGroup
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of SubjectGroup that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of SubjectGroup that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,8 +249,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -269,7 +269,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -467,23 +467,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []

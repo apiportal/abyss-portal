@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,49 +17,49 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: ApiApiTags
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiApiTags crud operations'
-  - name: ApiApiTag
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiApiTag crud operations'
-  - name: ApiApiTagOfApi
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiApiTag of Api and Tag'
-  - name: ApiTags
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Api Tags list operations'
+- name: ApiApiTags
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiApiTags crud operations'
+- name: ApiApiTag
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiApiTag crud operations'
+- name: ApiApiTagOfApi
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiApiTag of Api and Tag'
+- name: ApiTags
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Api Tags list operations'
 paths:
   /api-api-tags:
     get:
       tags:
-        - ApiApiTags
+      - ApiApiTags
       summary: 'Get list of ApiApiTags'
       description: 'Returns list of ApiApiTags'
       operationId: getApiApiTags
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiApiTags which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiApiTags which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiApiTags which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiApiTags which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiApiTag'
@@ -81,7 +81,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - ApiApiTags
+      - ApiApiTags
       summary: 'Add a bulk of ApiApiTags'
       description: 'Provide a list of ApiApiTags to be inserted'
       operationId: addApiApiTags
@@ -108,7 +108,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiApiTag'
     put:
       tags:
-        - ApiApiTags
+      - ApiApiTags
       summary: 'Update a bulk of ApiApiTags'
       description: 'Provide a bulk list of  ApiApiTags to be updated'
       operationId: updateApiApiTags
@@ -135,7 +135,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiApiTagObject'
     delete:
       tags:
-        - ApiApiTags
+      - ApiApiTags
       summary: 'Delete all ApiApiTags'
       description: 'Deletes all ApiApiTags'
       operationId: deleteApiApiTags
@@ -157,23 +157,23 @@ paths:
   /api-api-tags/api/{uuid}/tag/{taguuid}:
     get:
       tags:
-        - ApiApiTagOfApi
+      - ApiApiTagOfApi
       summary: 'Get api tag relation of an API by uuid of Api and uuid of Tag '
       description: 'Returns api tag relation of an API'
       operationId: getApiApiTagByApiAndTag
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of API that needs to be listed for its api tag relation'
-          required: true
-          schema:
-            type: string
-        - name: taguuid
-          in: path
-          description: 'The uuid of API Tag that needs to be listed for its api tag relation'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of API that needs to be listed for its api tag relation'
+        required: true
+        schema:
+          type: string
+      - name: taguuid
+        in: path
+        description: 'The uuid of API Tag that needs to be listed for its api tag relation'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -196,17 +196,17 @@ paths:
   /api-api-tags/{uuid}:
     get:
       tags:
-        - ApiApiTag
+      - ApiApiTag
       summary: 'Get an existing ApiApiTag by uuid'
       description: 'Provide an uuid of ApiApiTag to be get'
       operationId: getApiApiTag
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of ApiApiTag that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of ApiApiTag that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -228,17 +228,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - ApiApiTag
+      - ApiApiTag
       summary: 'Update an existing ApiApiTag'
       description: 'Provide an altered ApiApiTag to be updated'
       operationId: updateApiApiTag
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of ApiApiTag that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of ApiApiTag that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -262,17 +262,17 @@ paths:
         $ref: '#/components/requestBodies/ApiApiTag'
     delete:
       tags:
-        - ApiApiTag
+      - ApiApiTag
       summary: 'Delete ApiApiTag'
       description: 'Provide an uuid parameter of ApiApiTag to be updated'
       operationId: deleteApiApiTag
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of ApiApiTag that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of ApiApiTag that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -293,31 +293,31 @@ paths:
   /api-api-tags/api/{uuid}:
     get:
       tags:
-        - ApiTags
+      - ApiTags
       summary: 'Get api tag list of an API by uuid '
       description: 'Returns api tag list of an API'
       operationId: getApiTags
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of API that needs to be listed for its api tags'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search API tags which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search API tags which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of API that needs to be listed for its api tags'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search API tags which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search API tags which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTag'
@@ -340,31 +340,31 @@ paths:
   /api-api-tags/subject/{uuid}:
     get:
       tags:
-        - ApiTags
+      - ApiTags
       summary: 'Get api tag list of a subject by uuid'
       description: 'Returns api tag list of a subject'
       operationId: getApiTagsOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of Subject that needs to be listed for its API tags'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search API tags which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search API tags which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of Subject that needs to be listed for its API tags'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search API tags which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search API tags which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTag'
@@ -387,31 +387,31 @@ paths:
   /api-api-tags/businesses/subject/{uuid}:
     get:
       tags:
-        - ApiTags
+      - ApiTags
       summary: 'Get business api tag list of a subject by uuid'
       description: 'Returns business api tag list of a subject'
       operationId: getBusinessApiTagsOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of Subject that needs to be listed for its Business API tags'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Business API tags which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Business API tags which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of Subject that needs to be listed for its Business API tags'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Business API tags which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Business API tags which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTag'
@@ -434,31 +434,31 @@ paths:
   /api-api-tags/proxies/subject/{uuid}:
     get:
       tags:
-        - ApiTags
+      - ApiTags
       summary: 'Get proxy api tag list of a subject by uuid'
       description: 'Returns proxy api tag list of a subject'
       operationId: getProxyApiTagsOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of Subject that needs to be listed for its Proxy API tags'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Proxy API tags which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Proxy API tags which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of Subject that needs to be listed for its Proxy API tags'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Proxy API tags which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Proxy API tags which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTag'
@@ -486,8 +486,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -506,7 +506,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -710,23 +710,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []
