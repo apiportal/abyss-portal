@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  *
@@ -67,9 +66,9 @@ public class Util {
         return new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
     }
 
-    private static JsonObject convertYamlToJson(String yamlString) {
+    public static JsonObject convertYamlToJson(String yamlString) {
         Yaml yaml = new Yaml();
-        Map<String, Object> map = (Map<String, Object>) yaml.load(yamlString);
+        Map<String, Object> map = yaml.load(yamlString);
 
         return new JsonObject(map);
     }
@@ -79,7 +78,7 @@ public class Util {
 //        File file = new File(Objects.requireNonNull(classLoader.getResource(yamlFileName)).getFile());
         InputStream inputStream = new FileInputStream(yamlFileName);
         Yaml yaml = new Yaml();
-        Map<String, Object> map = (Map<String, Object>) yaml.load(inputStream);
+        Map<String, Object> map = yaml.load(inputStream);
         return new JsonObject(map);
     }
 }

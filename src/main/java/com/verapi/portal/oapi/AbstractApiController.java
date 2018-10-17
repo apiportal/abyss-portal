@@ -13,9 +13,11 @@ package com.verapi.portal.oapi;
 
 //import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 
+import com.google.json.JsonSanitizer;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
 import com.verapi.portal.common.Constants;
+import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.oapi.exception.AbyssApiException;
 import com.verapi.portal.oapi.exception.InternalServerError500Exception;
 import com.verapi.portal.oapi.exception.NoDataFoundException;
@@ -29,6 +31,7 @@ import com.verapi.portal.service.es.ElasticSearchService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
+import io.swagger.parser.util.ClasspathHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -42,7 +45,6 @@ import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
-import com.google.json.JsonSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,9 +81,8 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void init() {
-        logger.trace("initializing");
-
-        OpenAPI3RouterFactory.createRouterFactoryFromFile(vertx, apiSpec, ar -> {
+        logger.trace("initializing AbstractApiController for api spec: {}", apiSpec);
+        OpenAPIUtil.createOpenAPI3RouterFactory(vertx, ClasspathHelper.loadFileFromClasspath(apiSpec), ar -> {
                     // The router factory instantiation could fail
                     if (ar.succeeded()) {
                         logger.trace("OpenAPI3RouterFactory created");

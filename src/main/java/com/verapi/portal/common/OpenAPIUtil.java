@@ -15,13 +15,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
 import io.reactivex.Single;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.ResolverCache;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.contract.RouterFactoryException;
+import io.vertx.ext.web.api.contract.openapi3.impl.OpenAPI3RouterFactoryImpl;
 import io.vertx.ext.web.api.contract.openapi3.impl.OpenApi3Utils;
+import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +51,7 @@ public class OpenAPIUtil {
                 mapper = ObjectMapperFactory.createYaml();
             }
             JsonNode rootNode = mapper.readTree(data);
-            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readWithInfo(rootNode);
+            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readWithInfo("streamed yaml", rootNode);
             if (swaggerParseResult.getMessages().isEmpty()) {
                 logger.trace("openAPIParser OK");
                 return Single.just(swaggerParseResult);
@@ -96,7 +104,7 @@ public class OpenAPIUtil {
                 mapper = ObjectMapperFactory.createYaml();
             }
             JsonNode rootNode = mapper.readTree(apiSpec);
-            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readWithInfo(rootNode);
+            SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readWithInfo("streamed yaml", rootNode);
             JsonArray jsonArray = new JsonArray();
             if (swaggerParseResult.getMessages().size() == 0) {
                 //no result message means openapi spec is valid, it is OK, so return empty error message array
@@ -110,6 +118,28 @@ public class OpenAPIUtil {
             logger.error("openAPIParser error | {} | {}", e.getLocalizedMessage(), e.getStackTrace());
             return Single.error(RouterFactoryException.createSpecInvalidException(e.getLocalizedMessage()));
         }
+    }
+
+    public static void createOpenAPI3RouterFactory(io.vertx.reactivex.core.Vertx vertx, String yaml, Handler<AsyncResult<OpenAPI3RouterFactory>> handler) {
+        SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readContents(yaml);
+        createOpenAPI3RouterFactory(vertx, swaggerParseResult.getOpenAPI(), handler);
+    }
+
+    public static void createOpenAPI3RouterFactory(io.vertx.reactivex.core.Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>> handler) {
+        createOpenAPI3RouterFactoryImpl(vertx.getDelegate(), openAPI, ar -> {
+            if (ar.succeeded()) {
+                handler.handle(Future.succeededFuture(io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory.newInstance(ar.result())));
+            } else {
+                handler.handle(Future.failedFuture(ar.cause()));
+            }
+        });
+    }
+
+    private static void createOpenAPI3RouterFactoryImpl(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory>>
+            handler) {
+        vertx.executeBlocking((Future<io.vertx.ext.web.api.contract.openapi3.OpenAPI3RouterFactory> future) -> {
+            future.complete(new OpenAPI3RouterFactoryImpl(vertx, openAPI, new ResolverCache(openAPI, null, null)));
+        }, handler);
     }
 
 }
