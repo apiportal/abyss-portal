@@ -34,6 +34,8 @@ import java.util.UUID;
 public class MessageService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
 
+    private Integer conversationId = null;
+
     public MessageService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
@@ -47,22 +49,33 @@ public class MessageService extends AbstractService<UpdateResult> {
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
+                .flatMap(jsonObj -> {
+                    conversationId = jsonObj.getInteger("conversationid");
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("messagetypeid"))
                             .add(jsonObj.getString("parentmessageid"))
-                            .add(jsonObj.getString("sendersubjectid"))
-                            .add(jsonObj.getString("receiversubjectid"))
+                            .add(jsonObj.getString("ownersubjectid"));
+                    if (conversationId>0) { //if zero-->nullify then get new id from sequence
+                        insertParam.add(jsonObj.getInteger("conversationid"));
+                    } else {
+                        conversationId = null;
+                        insertParam.add(conversationId);
+                    }
+                    insertParam
+                            .add(jsonObj.getString("folder"))
+                            .add(jsonObj.getJsonObject("sender").encode())
+                            .add(jsonObj.getJsonObject("receiver").encode())
                             .add(jsonObj.getString("subject"))
+                            .add(jsonObj.getString("bodycontenttype"))
                             .add(jsonObj.getString("body"))
                             .add(jsonObj.getString("priority"))
                             .add(jsonObj.getBoolean("isstarred"));
                             //.add(jsonObj.getBoolean("isread"))
                             //.add(jsonObj.getInstant("sentat"))
-                            //.add(jsonObj.getInstant("readat"));
+                            //.add(jsonObj.getInstant("readat"))
+                            //.add(jsonObj.getBoolean("istrashed"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -238,10 +251,12 @@ public class MessageService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, sendersubjectid, receiversubjectid, \n" +
-            "subject, body, priority, isstarred, isread, sentat, readat)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid),\n" +
-            "?, ?, ?, ?, false, now(), null)";
+    private static final String SQL_INSERT = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, \n" +
+            "ownersubjectid, conversationid, folder, sender, receiver, \n" +
+            "subject, bodycontenttype, body, priority, isstarred, isread, sentat, readat)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
+            "CAST(? AS uuid), ?, ?, ?::JSON, ?::JSON,\n" +
+            "?, ?, ?, ?, ?, false, now(), null)";
 
     private static final String SQL_DELETE = "update message\n" +
             "set\n" +
@@ -258,33 +273,43 @@ public class MessageService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  messagetypeid,\n" +
             "  parentmessageid,\n" +
-            "  sendersubjectid,\n" +
-            "  receiversubjectid,\n" +
+            "  ownersubjectid, \n" +
+            "  conversationid, \n" +
+            "  folder, \n" +
+            "  sender,\n" +
+            "  receiver,\n" +
             "  subject,\n" +
+            "  bodycontenttype,\n" +
             "  body,\n" +
             "  priority,\n" +
             "  isstarred,\n" +
             "  isread,\n" +
             "  sentat,\n" +
-            "  readat\n" +
+            "  readat,\n" +
+            "  istrashed\n" +
             "from message\n";
 
     private static final String SQL_UPDATE = "UPDATE message\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , messagetypeid      = CAST(? AS uuid)\n" +
-            "  , parentmessageid      = CAST(? AS uuid)\n" +
-            "  , sendersubjectid      = CAST(? AS uuid)\n" +
-            "  , receiversubjectid      = CAST(? AS uuid)\n" +
-            "  , subject      = ?\n" +
-            "  , body      = ?\n" +
-            "  , priority      = ?\n" +
-            "  , isstarred      = ?\n" +
-            "  , isread      = ?\n" +
-            "  , sentat      = ?\n" +
-            "  , readat      = ?\n";
+            "  , updated           = now()\n" +
+            "  , crudsubjectid     = CAST(? AS uuid)\n" +
+            "  , messagetypeid     = CAST(? AS uuid)\n" +
+            "  , parentmessageid   = CAST(? AS uuid)\n" +
+            "  , ownersubjectid    = CAST(? AS uuid)\n" +
+            "  , conversationid    = CAST(? AS uuid)\n" +
+            "  , folder            = ?\n" +
+            "  , sender            = CAST(? AS uuid)\n" +
+            "  , receiver          = CAST(? AS uuid)\n" +
+            "  , subject           = ?\n" +
+            "  , bodycontenttype   = ?\n" +
+            "  , body              = ?\n" +
+            "  , priority          = ?\n" +
+            "  , isstarred         = ?\n" +
+            "  , isread            = ?\n" +
+            "  , sentat            = ?\n" +
+            "  , readat            = ?\n" +
+            "  , istrashed         = ?";
 
     private static final String SQL_AND = "and\n";
 
@@ -317,5 +342,7 @@ public class MessageService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
+
+    //private static final String SQL_NEXT_CONVERSATION_ID = "select nextval('conversationid_seq')\n";
 
 }
