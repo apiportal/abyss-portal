@@ -491,32 +491,6 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }
     }
 
-    static void createOpenAPI3RouterFactory2(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
-            handler) {
-        vertx.executeBlocking((Future<OpenAPI3RouterFactory> future) -> {
-            future.complete(new OpenAPI3RouterFactoryImpl(vertx, openAPI, new ResolverCache(openAPI, null, null)));
-        }, handler);
-    }
-
-    //*******************
-    static void createOpenAPI3RouterFactory(io.vertx.reactivex.core.Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory>> handler) {
-        create(vertx.getDelegate(), openAPI, ar -> {
-            if (ar.succeeded()) {
-                handler.handle(Future.succeededFuture(io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory.newInstance(ar.result())));
-            } else {
-                handler.handle(Future.failedFuture(ar.cause()));
-            }
-        });
-    }
-
-    private static void create(Vertx vertx, OpenAPI openAPI, Handler<AsyncResult<OpenAPI3RouterFactory>>
-            handler) {
-        vertx.executeBlocking((Future<OpenAPI3RouterFactory> future) -> {
-            future.complete(new OpenAPI3RouterFactoryImpl(vertx, openAPI, new ResolverCache(openAPI, null, null)));
-        }, handler);
-    }
-
-    //***************
     void dummySecuritySchemaHandler(SecurityScheme securityScheme, RoutingContext routingContext) {
         logger.trace("---dummySecuritySchemaHandler invoked");
         routingContext.next();

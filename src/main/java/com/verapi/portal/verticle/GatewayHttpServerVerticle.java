@@ -149,7 +149,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     attachAbyssGatewayUserSessionHandler = false;
                     return OpenAPIUtil.openAPIParser(apiSpec)
                             .flatMap(swaggerParseResult -> {
-                                createOpenAPI3RouterFactory(vertx, swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
+                                OpenAPIUtil.createOpenAPI3RouterFactory(vertx, swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
                                     if (openAPI3RouterFactoryAsyncResult.succeeded()) {
                                         OpenAPI3RouterFactory factory = openAPI3RouterFactoryAsyncResult.result();
 

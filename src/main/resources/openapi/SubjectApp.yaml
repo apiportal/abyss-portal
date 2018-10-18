@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,44 +17,44 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: SubjectApps
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectApps crud operations'
-  - name: SubjectApp
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : SubjectApp crud operations'
-  - name: Subject Apps
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject Apps listing operations'
+- name: SubjectApps
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectApps crud operations'
+- name: SubjectApp
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : SubjectApp crud operations'
+- name: Subject Apps
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subject Apps listing operations'
 paths:
   /subject-apps:
     get:
       tags:
-        - SubjectApps
+      - SubjectApps
       summary: 'Get list of SubjectApps'
       description: 'Returns list of SubjectApps'
       operationId: getSubjectApps
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectApps which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search SubjectApps which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectApps which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search SubjectApps which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectApp'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - SubjectApps
+      - SubjectApps
       summary: 'Add a bulk of SubjectApps'
       description: 'Provide a list of SubjectApps to be inserted'
       operationId: addSubjectApps
@@ -103,7 +103,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectApp'
     put:
       tags:
-        - SubjectApps
+      - SubjectApps
       summary: 'Update a bulk of SubjectApps'
       description: 'Provide a bulk list of  SubjectApps to be updated'
       operationId: updateSubjectApps
@@ -130,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectAppObject'
     delete:
       tags:
-        - SubjectApps
+      - SubjectApps
       summary: 'Delete all SubjectApps'
       description: 'Deletes all SubjectApps'
       operationId: deleteSubjectApps
@@ -152,17 +152,17 @@ paths:
   /subject-apps/{uuid}:
     get:
       tags:
-        - SubjectApp
+      - SubjectApp
       summary: 'Get an existing SubjectApp by uuid'
       description: 'Provide an uuid of SubjectApp to be get'
       operationId: getSubjectApp
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectApp that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectApp that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +184,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - SubjectApp
+      - SubjectApp
       summary: 'Update an existing SubjectApp'
       description: 'Provide an altered SubjectApp to be updated'
       operationId: updateSubjectApp
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of SubjectApp that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of SubjectApp that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +218,17 @@ paths:
         $ref: '#/components/requestBodies/SubjectApp'
     delete:
       tags:
-        - SubjectApp
+      - SubjectApp
       summary: 'Delete SubjectApp'
       description: 'Provide an uuid parameter of SubjectApp to be updated'
       operationId: deleteSubjectApp
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of SubjectApp that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of SubjectApp that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,31 +249,31 @@ paths:
   /subject-apps/subject/{uuid}:
     get:
       tags:
-        - Subject Apps
+      - Subject Apps
       summary: 'Get list of subject''s Apps'
       description: 'Returns list of Apps of a subject'
       operationId: getAppsOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Apps which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Apps which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Apps which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Apps which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectApp'
@@ -301,8 +301,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -321,7 +321,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -507,23 +507,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []

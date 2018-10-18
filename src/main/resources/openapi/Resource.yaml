@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,44 +17,44 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: Resources
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Resources crud operations'
-  - name: Resource
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Resource crud operations'
-  - name: List Resources
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : List Resources listing operations'
+- name: Resources
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Resources crud operations'
+- name: Resource
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Resource crud operations'
+- name: List Resources
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : List Resources listing operations'
 paths:
   /resources:
     get:
       tags:
-        - Resources
+      - Resources
       summary: 'Get list of Resources'
       description: 'Returns list of Resources'
       operationId: getResources
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfResource'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - Resources
+      - Resources
       summary: 'Add a bulk of Resources'
       description: 'Provide a list of Resources to be inserted'
       operationId: addResources
@@ -103,7 +103,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfResource'
     put:
       tags:
-        - Resources
+      - Resources
       summary: 'Update a bulk of Resources'
       description: 'Provide a bulk list of  Resources to be updated'
       operationId: updateResources
@@ -130,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfResourceObject'
     delete:
       tags:
-        - Resources
+      - Resources
       summary: 'Delete all Resources'
       description: 'Deletes all Resources'
       operationId: deleteResources
@@ -152,17 +152,17 @@ paths:
   /resources/{uuid}:
     get:
       tags:
-        - Resource
+      - Resource
       summary: 'Get an existing Resource by uuid'
       description: 'Provide an uuid of Resource to be get'
       operationId: getResource
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Resource that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Resource that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +184,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - Resource
+      - Resource
       summary: 'Update an existing Resource'
       description: 'Provide an altered Resource to be updated'
       operationId: updateResource
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of Resource that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Resource that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +218,17 @@ paths:
         $ref: '#/components/requestBodies/Resource'
     delete:
       tags:
-        - Resource
+      - Resource
       summary: 'Delete Resource'
       description: 'Provide an uuid parameter of Resource to be updated'
       operationId: deleteResource
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of Resource that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of Resource that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,31 +249,31 @@ paths:
   /resources/reference/{uuid}:
     get:
       tags:
-        - List Resources
+      - List Resources
       summary: 'Get resource list of resource reference'
       description: 'Returns resource list of resource reference(e.x. api reference)'
       operationId: getResourcesOfResourceReference
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of resource reference (refers to api, license, contract, etc)'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of resource reference (refers to api, license, contract, etc)'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfResource'
@@ -296,31 +296,31 @@ paths:
   /resources/subject/{uuid}:
     get:
       tags:
-        - List Resources
+      - List Resources
       summary: 'Get resource list of subject'
       description: 'Returns resource list of subject'
       operationId: getResourcesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfResource'
@@ -343,31 +343,31 @@ paths:
   /resources/type/{uuid}:
     get:
       tags:
-        - List Resources
+      - List Resources
       summary: 'Get resource list of resource type'
       description: 'Returns resource list of resource type'
       operationId: getResourcesOfResourceType
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of resource type'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of resource type'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfResource'
@@ -390,31 +390,31 @@ paths:
   /resources/organization/{uuid}:
     get:
       tags:
-        - List Resources
+      - List Resources
       summary: 'Get resource list of organization'
       description: 'Returns resource list of organization'
       operationId: getResourcesOfOrganization
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of organization'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Resources which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of organization'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Resources which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfResource'
@@ -443,8 +443,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -463,7 +463,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -658,23 +658,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []

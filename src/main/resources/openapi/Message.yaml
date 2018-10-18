@@ -3,7 +3,7 @@ servers:
 - url: 'http://192.168.21.99:38083/abyss/oapi'
 - url: 'http://192.168.21.139:38083/abyss/oapi'
 - url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: /abyss/oapi
+- url: '/abyss/oapi'
 info:
   description: Abyss platform APIs
   version: 1.0.0
@@ -20,20 +20,20 @@ tags:
 - name: Messages
   externalDocs:
     url: 'https://apiportal.com'
-    description: Find out more
+    description: 'Find out more'
   description: 'Abyss plaftorm APIs : Messages crud operations'
 - name: Message
   externalDocs:
     url: 'https://apiportal.com'
-    description: Find out more
+    description: 'Find out more'
   description: 'Abyss plaftorm APIs : Message crud operations'
 paths:
   /messages:
     get:
       tags:
       - Messages
-      summary: Get list of Messages
-      description: Returns list of Messages
+      summary: 'Get list of Messages'
+      description: 'Returns list of Messages'
       operationId: getMessages
       parameters:
       - name: byname
@@ -41,13 +41,13 @@ paths:
         required: false
         schema:
           type: string
-        description: search Messages which names exact match
+        description: 'search Messages which names exact match'
       - name: likename
         in: query
         required: false
         schema:
           type: string
-        description: search Messages which names begin with
+        description: 'search Messages which names begin with'
       - $ref: '#/components/parameters/offsetParam'
       - $ref: '#/components/parameters/limitParam'
       responses:
@@ -72,8 +72,8 @@ paths:
     post:
       tags:
       - Messages
-      summary: Add a bulk of Messages
-      description: Provide a list of Messages to be inserted
+      summary: 'Add a bulk of Messages'
+      description: 'Provide a list of Messages to be inserted'
       operationId: addMessages
       responses:
         '207':
@@ -100,8 +100,8 @@ paths:
     put:
       tags:
       - Messages
-      summary: Update a bulk of Messages
-      description: Provide a bulk list of  Messages to be updated
+      summary: 'Update a bulk of Messages'
+      description: 'Provide a bulk list of  Messages to be updated'
       operationId: updateMessages
       responses:
         '207':
@@ -128,8 +128,8 @@ paths:
     delete:
       tags:
       - Messages
-      summary: Delete all Messages
-      description: Deletes all Messages
+      summary: 'Delete all Messages'
+      description: 'Deletes all Messages'
       operationId: deleteMessages
       responses:
         '204':
@@ -151,13 +151,13 @@ paths:
     get:
       tags:
       - Message
-      summary: Get an existing Message by uuid
-      description: Provide an uuid of Message to be get
+      summary: 'Get an existing Message by uuid'
+      description: 'Provide an uuid of Message to be get'
       operationId: getMessage
       parameters:
       - name: uuid
         in: path
-        description: uuid of Message that need to be get
+        description: 'uuid of Message that need to be get'
         required: true
         schema:
           type: string
@@ -183,13 +183,13 @@ paths:
     put:
       tags:
       - Message
-      summary: Update an existing Message
-      description: Provide an altered Message to be updated
+      summary: 'Update an existing Message'
+      description: 'Provide an altered Message to be updated'
       operationId: updateMessage
       parameters:
       - name: uuid
         in: path
-        description: uuid of Message that need to be updated
+        description: 'uuid of Message that need to be updated'
         required: true
         schema:
           type: string
@@ -217,13 +217,13 @@ paths:
     delete:
       tags:
       - Message
-      summary: Delete Message
-      description: Provide an uuid parameter of Message to be updated
+      summary: 'Delete Message'
+      description: 'Provide an uuid parameter of Message to be updated'
       operationId: deleteMessage
       parameters:
       - name: uuid
         in: path
-        description: The uuid of Message that needs to be deleted
+        description: 'The uuid of Message that needs to be deleted'
         required: true
         schema:
           type: string
@@ -528,17 +528,17 @@ components:
       description: The numbers of items to return
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:

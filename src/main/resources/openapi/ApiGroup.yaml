@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,44 +17,44 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: ApiGroups
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiGroups crud operations'
-  - name: ApiGroup
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiGroup crud operations'
-  - name: Api Groups of Subject
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Subject''s Api Group listing operations'
+- name: ApiGroups
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiGroups crud operations'
+- name: ApiGroup
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiGroup crud operations'
+- name: Api Groups of Subject
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Subject''s Api Group listing operations'
 paths:
   /api-groups:
     get:
       tags:
-        - ApiGroups
+      - ApiGroups
       summary: 'Get list of ApiGroups'
       description: 'Returns list of ApiGroups'
       operationId: getApiGroups
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiGroups which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiGroups which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiGroups which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiGroups which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiGroup'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - ApiGroups
+      - ApiGroups
       summary: 'Add a bulk of ApiGroups'
       description: 'Provide a list of ApiGroups to be inserted'
       operationId: addApiGroups
@@ -103,7 +103,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiGroup'
     put:
       tags:
-        - ApiGroups
+      - ApiGroups
       summary: 'Update a bulk of ApiGroups'
       description: 'Provide a bulk list of  ApiGroups to be updated'
       operationId: updateApiGroups
@@ -130,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiGroupObject'
     delete:
       tags:
-        - ApiGroups
+      - ApiGroups
       summary: 'Delete all ApiGroups'
       description: 'Deletes all ApiGroups'
       operationId: deleteApiGroups
@@ -152,17 +152,17 @@ paths:
   /api-groups/{uuid}:
     get:
       tags:
-        - ApiGroup
+      - ApiGroup
       summary: 'Get an existing ApiGroup by uuid'
       description: 'Provide an uuid of ApiGroup to be get'
       operationId: getApiGroup
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of ApiGroup that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of ApiGroup that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +184,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - ApiGroup
+      - ApiGroup
       summary: 'Update an existing ApiGroup'
       description: 'Provide an altered ApiGroup to be updated'
       operationId: updateApiGroup
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of ApiGroup that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of ApiGroup that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +218,17 @@ paths:
         $ref: '#/components/requestBodies/ApiGroup'
     delete:
       tags:
-        - ApiGroup
+      - ApiGroup
       summary: 'Delete ApiGroup'
       description: 'Provide an uuid parameter of ApiGroup to be updated'
       operationId: deleteApiGroup
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of ApiGroup that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of ApiGroup that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,31 +249,31 @@ paths:
   /api-groups/subject/{uuid}:
     get:
       tags:
-        - Api Groups of Subject
+      - Api Groups of Subject
       summary: 'Get list of Api Groups of Subject'
       description: 'Returns list of Subject Api Groups'
       operationId: getApiGroupsOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of Subject'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiGroups which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiGroups which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of Subject'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiGroups which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiGroups which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiGroup'
@@ -301,8 +301,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -321,7 +321,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -506,23 +506,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []

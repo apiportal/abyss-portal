@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-  - url: 'http://192.168.21.99:38083/abyss/oapi'
-  - url: 'http://192.168.21.139:38083/abyss/oapi'
-  - url: 'http://192.168.10.46:38083/abyss/oapi'
-  - url: '/abyss/oapi'
+- url: 'http://192.168.21.99:38083/abyss/oapi'
+- url: 'http://192.168.21.139:38083/abyss/oapi'
+- url: 'http://192.168.10.46:38083/abyss/oapi'
+- url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,49 +17,49 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-  - name: ApiApiCategories
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiApiCategories crud operations'
-  - name: ApiApiCategory
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiApiCategory crud operations'
-  - name: ApiApiCategoryOfApi
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : ApiApiCategory of Api and Category'
-  - name: ApiCategories
-    externalDocs:
-      url: 'https://apiportal.com'
-      description: 'Find out more'
-    description: 'Abyss plaftorm APIs : Api Categories list operations'
+- name: ApiApiCategories
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiApiCategories crud operations'
+- name: ApiApiCategory
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiApiCategory crud operations'
+- name: ApiApiCategoryOfApi
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : ApiApiCategory of Api and Category'
+- name: ApiCategories
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Api Categories list operations'
 paths:
   /api-api-categories:
     get:
       tags:
-        - ApiApiCategories
+      - ApiApiCategories
       summary: 'Get list of ApiApiCategories'
       description: 'Returns list of ApiApiCategories'
       operationId: getApiApiCategories
       parameters:
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiApiCategories which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search ApiApiCategories which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiApiCategories which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search ApiApiCategories which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiApiCategory'
@@ -81,7 +81,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-        - ApiApiCategories
+      - ApiApiCategories
       summary: 'Add a bulk of ApiApiCategories'
       description: 'Provide a list of ApiApiCategories to be inserted'
       operationId: addApiApiCategories
@@ -108,7 +108,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiApiCategory'
     put:
       tags:
-        - ApiApiCategories
+      - ApiApiCategories
       summary: 'Update a bulk of ApiApiCategories'
       description: 'Provide a bulk list of  ApiApiCategories to be updated'
       operationId: updateApiApiCategories
@@ -135,7 +135,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiApiCategoryObject'
     delete:
       tags:
-        - ApiApiCategories
+      - ApiApiCategories
       summary: 'Delete all ApiApiCategories'
       description: 'Deletes all ApiApiCategories'
       operationId: deleteApiApiCategories
@@ -157,23 +157,23 @@ paths:
   /api-api-categories/api/{uuid}/category/{categoryuuid}:
     get:
       tags:
-        - ApiApiCategoryOfApi
+      - ApiApiCategoryOfApi
       summary: 'Get api category relation of an API by uuid and uuid of Category'
       description: 'Returns api category of an API'
       operationId: getApiApiCategoryByApiAndCategory
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of API that needs to be listed for its api category relation'
-          required: true
-          schema:
-            type: string
-        - name: categoryuuid
-          in: path
-          description: 'The uuid of API Category that needs to be listed for its api category relation'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of API that needs to be listed for its api category relation'
+        required: true
+        schema:
+          type: string
+      - name: categoryuuid
+        in: path
+        description: 'The uuid of API Category that needs to be listed for its api category relation'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -196,17 +196,17 @@ paths:
   /api-api-categories/{uuid}:
     get:
       tags:
-        - ApiApiCategory
+      - ApiApiCategory
       summary: 'Get an existing ApiApiCategory by uuid'
       description: 'Provide an uuid of ApiApiCategory to be get'
       operationId: getApiApiCategory
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of ApiApiCategory that need to be get'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of ApiApiCategory that need to be get'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -228,17 +228,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-        - ApiApiCategory
+      - ApiApiCategory
       summary: 'Update an existing ApiApiCategory'
       description: 'Provide an altered ApiApiCategory to be updated'
       operationId: updateApiApiCategory
       parameters:
-        - name: uuid
-          in: path
-          description: 'uuid of ApiApiCategory that need to be updated'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'uuid of ApiApiCategory that need to be updated'
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -262,17 +262,17 @@ paths:
         $ref: '#/components/requestBodies/ApiApiCategory'
     delete:
       tags:
-        - ApiApiCategory
+      - ApiApiCategory
       summary: 'Delete ApiApiCategory'
       description: 'Provide an uuid parameter of ApiApiCategory to be updated'
       operationId: deleteApiApiCategory
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of ApiApiCategory that needs to be deleted'
-          required: true
-          schema:
-            type: string
+      - name: uuid
+        in: path
+        description: 'The uuid of ApiApiCategory that needs to be deleted'
+        required: true
+        schema:
+          type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -293,31 +293,31 @@ paths:
   /api-api-categories/api/{uuid}:
     get:
       tags:
-        - ApiCategories
+      - ApiCategories
       summary: 'Get api categories list of an API by uuid'
       description: 'Returns api categories list of an API'
       operationId: getApiCategories
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of API that needs to be listed for its api categories'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Api Categories which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Api Categories which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of API that needs to be listed for its api categories'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Api Categories which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Api Categories which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiCategory'
@@ -340,31 +340,31 @@ paths:
   /api-api-categories/subject/{uuid}:
     get:
       tags:
-        - ApiCategories
+      - ApiCategories
       summary: 'Get api categories list of a subject by uuid'
       description: 'Returns api categories list of a subject'
       operationId: getApiCategoriesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of subject that needs to be listed for its api categories'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Api Categories which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Api Categories which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of subject that needs to be listed for its api categories'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Api Categories which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Api Categories which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiCategory'
@@ -387,31 +387,31 @@ paths:
   /api-api-categories/businesses/subject/{uuid}:
     get:
       tags:
-        - ApiCategories
+      - ApiCategories
       summary: 'Get businesses api categories list of a subject by uuid'
       description: 'Returns businesses api categories list of a subject'
       operationId: getBusinessesApiCategoriesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of subject that needs to be listed for its businesses api categories'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Businesses Api Categories which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Businesses Api Categories which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of subject that needs to be listed for its businesses api categories'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Businesses Api Categories which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Businesses Api Categories which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiCategory'
@@ -434,31 +434,31 @@ paths:
   /api-api-categories/proxies/subject/{uuid}:
     get:
       tags:
-        - ApiCategories
+      - ApiCategories
       summary: 'Get proxy api categories list of a subject by uuid'
       description: 'Returns proxy api categories list of a subject'
       operationId: getProxyApiCategoriesOfSubject
       parameters:
-        - name: uuid
-          in: path
-          description: 'The uuid of subject that needs to be listed for its proxy api categories'
-          required: true
-          schema:
-            type: string
-        - name: byname
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Proxy Api Categories which names exact match'
-        - name: likename
-          in: query
-          required: false
-          schema:
-            type: string
-          description: 'search Proxy Api Categories which names begin with'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
+      - name: uuid
+        in: path
+        description: 'The uuid of subject that needs to be listed for its proxy api categories'
+        required: true
+        schema:
+          type: string
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Proxy Api Categories which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search Proxy Api Categories which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiCategory'
@@ -486,8 +486,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - usermessage
+      - code
+      - usermessage
       properties:
         code:
           type: integer
@@ -506,7 +506,7 @@ components:
     MultiStatus:
       type: object
       required:
-        - uuid
+      - uuid
       properties:
         uuid:
           type: string
@@ -710,23 +710,23 @@ components:
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: 'AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
-  - abyssCookieAuth: []
-  - abyssHttpBasicAuth: []
-  - abyssApiKeyAuth: []
-  - abyssJWTBearerAuth: []
-  - abyssAppAccessTokenAuth: []
-  - abyssAppAccessTokenCookieAuth: []
+- abyssCookieAuth: []
+- abyssHttpBasicAuth: []
+- abyssApiKeyAuth: []
+- abyssJWTBearerAuth: []
+- abyssAppAccessTokenAuth: []
+- abyssAppAccessTokenCookieAuth: []
