@@ -27,6 +27,11 @@ tags:
     url: 'https://apiportal.com'
     description: 'Find out more'
   description: 'Abyss plaftorm APIs : Message crud operations'
+- name: Subject-Messages
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Messages by Subject crud operations'
 paths:
   /messages:
     get:
@@ -244,6 +249,32 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  '/messages/subject/':
+    get:
+      tags:
+      - Subject-Messages
+      summary: 'Get Messages by Subject uuid'
+      description: 'Provide an uuid of Subject owning the messages to be get'
+      operationId: getMessagesOfSubject
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'
@@ -340,6 +371,8 @@ components:
               type: string
             senderorganizationid:
               type: string
+            senderorganizationname:
+              type: string
             sendersubjecttypeid:
               type: string
             senderdisplayname:
@@ -353,6 +386,8 @@ components:
             receiversubjectid:
               type: string
             receiverorganizationid:
+              type: string
+            receiverorganizationname:
               type: string
             receiversubjecttypeid:
               type: string

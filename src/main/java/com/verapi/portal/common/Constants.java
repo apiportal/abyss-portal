@@ -214,6 +214,8 @@ public class Constants {
     public static final String JSONB_COLUMN_POLICY_TYPE_TEMPLATE = "template";
     public static final String JSONB_COLUMN_ACCESS_MANAGER_TYPE_TEMPLATE = "attributetemplate";
     public static final String JSONB_COLUMN_ACCESS_MANAGER_ATTRIBUTES = "accessmanagerattributes";
+    public static final String JSONB_COLUMN_MESSAGE_RECEIVER = "receiver";
+    public static final String JSONB_COLUMN_MESSAGE_SENDER = "sender";
 
     public static final int ONE_MINUTE_IN_SECONDS = 60;
     public static final int ONE_HOUR_IN_SECONDS = 3600;
