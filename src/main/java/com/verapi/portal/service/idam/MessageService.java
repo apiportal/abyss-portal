@@ -86,13 +86,13 @@ public class MessageService extends AbstractService<UpdateResult> {
                         senderRecordId = insertResult.getUpdateResult().getKeys().getInteger(0);
 
                         JsonArray insertReceiverParam = new JsonArray()
-                                .add(senderJson.getJsonObject("receiver").getString("receiverorganizationid")) //Receiver Org
+                                .add(senderJson.getJsonObject("receiver").getString("organizationid")) //Receiver Org
                                 .add(senderJson.getString("crudsubjectid"))
                                 .add(senderJson.getString("messagetypeid"))
                                 .add(senderJson.getString("parentmessageid")) //TODO: Change parent for receiver???
-                                .add(senderJson.getJsonObject("receiver").getString("receiversubjectid")) //Change owner for receiver
+                                .add(senderJson.getJsonObject("receiver").getString("subjectid")) //Change owner for receiver
                                 .add(conversationId) //Add sender's conversation id for receiver
-                                .add("INBOX") //Change folder for receiver
+                                .add("Inbox") //Change folder for receiver
                                 .add(senderJson.getJsonObject("sender").encode())
                                 .add(senderJson.getJsonObject("receiver").encode())
                                 .add(senderJson.getString("subject"))

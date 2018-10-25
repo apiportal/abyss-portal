@@ -367,33 +367,33 @@ components:
           type: object
           description: Sender Subject
           properties:
-            sendersubjectid:
+            subjectid:
               type: string
-            senderorganizationid:
+            organizationid:
               type: string
-            senderorganizationname:
+            organizationname:
               type: string
-            sendersubjecttypeid:
+            subjecttypeid:
               type: string
-            senderdisplayname:
+            displayname:
               type: string
-            senderpicture:
+            picture:
               type: string
         receiver:
           type: object
           description: Receiver Subject
           properties:
-            receiversubjectid:
+            subjectid:
               type: string
-            receiverorganizationid:
+            organizationid:
               type: string
-            receiverorganizationname:
+            organizationname:
               type: string
-            receiversubjecttypeid:
+            subjecttypeid:
               type: string
-            receiverdisplayname:
+            displayname:
               type: string
-            receiverpicture:
+            picture:
               type: string
         subject:
           type: string
