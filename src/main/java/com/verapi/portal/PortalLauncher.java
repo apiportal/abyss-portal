@@ -54,9 +54,18 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         if (null == System.getProperty("vertx.logger-delegate-factory-class-name"))
             System.setProperty("vertx.logger-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
 
-        System.setProperty("abyss-jar.name", new java.io.File(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+        try {
+            System.setProperty("abyss-jar.name", new java.io.File(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+        } catch (Exception e) {
+            System.setProperty("abyss-jar.name", "abyss-portal.jar");
+        }
 
-        System.setProperty("es.server.api.bulk.url", getProperty("es.server.api.bulk.url"));
+        try {
+            System.setProperty("es.server.api.bulk.url", getProperty("es.server.api.bulk.url"));
+        } catch (Exception e) {
+            System.setProperty("es.server.api.bulk.url", "http://localhost:9200/_bulk");
+        }
+
 
         attachShutDownHook();
 
