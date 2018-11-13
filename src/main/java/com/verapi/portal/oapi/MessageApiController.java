@@ -154,7 +154,7 @@ public class MessageApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getMessagesOfSubject(RoutingContext routingContext) {
         try {
-            String userUuid = routingContext.session().get("user.uuid");
+            String userUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
             getEntities(routingContext, MessageService.class, jsonbColumnsList,
                     new ApiFilterQuery()
                         .setFilterQuery(MessageService.SQL_FIND_BY_SUBJECT)

@@ -82,13 +82,13 @@ public class LoginController extends PortalAbstractController {
                                 logger.trace("LoginController.handle() subjectService.findBySubjectName replied successfully " + resp.encodePrettily());
                                 User user = authResult.result();
                                 String userUUID = resp.getString("uuid");
-                                user.principal().put("user.uuid", userUUID);
+                                user.principal().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
                                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                                 routingContext.session().regenerateId();
                                 routingContext.session().destroy();
-                                routingContext.session().put("username", user.principal().getString("username"));
-                                routingContext.session().put("user.uuid", userUUID);
-                                routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)); //TODO: Remove for OWASP Compliance
+                                routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME, user.principal().getString("username"));
+                                routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
+                                routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID)); //TODO: Remove for OWASP Compliance
 //                                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                                 logger.debug("Logged in user: " + user.principal().encodePrettily());

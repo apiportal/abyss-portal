@@ -82,12 +82,12 @@ public class SelectOrganizationController extends PortalAbstractController {
                 String userLoginOrganizationName = URLEncoder.encode(values[1], "UTF-8");
                 String userLoginOrganizationUUID = URLEncoder.encode(values[0], "UTF-8");
 
-                routingContext.session().put("user.login.organization.name", userLoginOrganizationName);
-                routingContext.session().put("user.login.organization.uuid", userLoginOrganizationUUID);
+                routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName);
+                routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID);
 
-                routingContext.addCookie(Cookie.cookie("abyss.login.organization.name", userLoginOrganizationName));
+                routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName));
 //                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
-                routingContext.addCookie(Cookie.cookie("abyss.login.organization.uuid", userLoginOrganizationUUID));
+                routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID));
 //                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                 redirect(routingContext, Constants.ABYSS_ROOT + "/index");

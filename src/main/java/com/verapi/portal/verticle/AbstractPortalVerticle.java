@@ -21,16 +21,13 @@ import com.verapi.portal.controller.PortalAbstractController;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.net.PemKeyCertOptions;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
-import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.handler.ResponseTimeHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,25 +64,26 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
         verticleRouter.route().handler(ResponseTimeHandler.create());
 
         verticleRouter.route("/logout").handler(context -> {
-            context.session().remove("user.uuid");
-            context.remove("username");
+            context.session().remove(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+            context.session().remove(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME);
+            context.remove("username"); //TODO: ??
             context.user().clearCache();
             context.clearUser();
 
-            context.session().remove("user.login.organization.name");
-            context.session().remove("user.login.organization.uuid");
+            context.session().remove(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME);
+            context.session().remove(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
 
             logger.trace("Cookie list before logout:");
             for (Cookie c : context.cookies()) {
                 logger.debug(c.getName() + ":" + c.getValue());
             }
 
-            context.removeCookie("abyss.principal.uuid");
-            context.removeCookie("abyss.session");
-            context.removeCookie("abyss_principal"); //TODO: Bunu kim koyuyor?
+            context.removeCookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME);
+            context.removeCookie(Constants.AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME);
+            context.removeCookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_COOKIE_NAME); //TODO: Bunu kim koyuyor?
 
-            context.removeCookie("user.login.organization.name");
-            context.removeCookie("user.login.organization.uuid");
+            context.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME);
+            context.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
 
             logger.trace("Cookie list after logout:");
             for (Cookie c : context.cookies()) {

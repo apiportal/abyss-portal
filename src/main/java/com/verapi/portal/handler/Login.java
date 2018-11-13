@@ -38,9 +38,12 @@ public class Login implements Handler<RoutingContext> {
         authProvider.authenticate(creds, authResult -> {
             if (authResult.succeeded()) {
                 User user = authResult.result();
+                String userName = user.principal().getString("username");
                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context? 
                 logger.info("Logged in user: " + user.principal().encodePrettily());
-                routingContext.put("username", user.principal().getString("username"));
+                routingContext.put("username", userName);
+                routingContext.session().regenerateId();
+                routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME, userName);
                 routingContext.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
                 logger.info("redirected../index");
             } else {

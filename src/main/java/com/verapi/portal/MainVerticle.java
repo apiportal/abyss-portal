@@ -144,7 +144,7 @@ public class MainVerticle extends AbstractVerticle {
             //A handler that maintains a Session for each browser session
             //The session is available on the routing context with RoutingContext.session()
             //The session handler requires a CookieHandler to be on the routing chain before it
-            abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session"));
+            abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName(Constants.AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME));
 
             //TODO: CSRF Handler for OWASP
             abyssRouter.route().handler(CSRFHandler.create("cok.cok.gizli"));
@@ -211,10 +211,22 @@ public class MainVerticle extends AbstractVerticle {
             router.get("/index").handler(index::pageRender).failureHandler(this::failureHandler);
 
             router.route("/logout").handler(context -> {
+                context.user().clearCache();
                 context.clearUser();
-                context.session().remove("username");
-                context.session().remove("user.uuid");
+
+                context.session().remove(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME);
+                context.session().remove(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME);
+                context.session().remove(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME);
+                context.session().remove(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+
                 context.session().destroy();
+
+                context.removeCookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME);
+                context.removeCookie(Constants.AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME);
+                context.removeCookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_COOKIE_NAME); //TODO: Bunu kim koyuyor?
+                context.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME);
+                context.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+
                 context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
             });
 

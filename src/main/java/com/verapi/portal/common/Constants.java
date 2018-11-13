@@ -224,6 +224,14 @@ public class Constants {
     public static final String AUTH_ABYSS_GATEWAY_COOKIE_NAME = "abyss-gateway-session";
     public static final String AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME = "abyss-gateway-api-access-token"; //spinal case recommended
 
+    public static final String AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME = "abyss.login.organization.name";
+    public static final String AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME = "abyss.login.organization.uuid";
+    public static final String AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME = "abyss.session";
+    public static final String AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME = "abyss.principal.uuid";
+    public static final String AUTH_ABYSS_PORTAL_PRINCIPAL_COOKIE_NAME = "abyss_principal";
+    public static final String AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME = "user.uuid";
+    public static final String AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME = "username";
+
     /*
     # enums
     */
