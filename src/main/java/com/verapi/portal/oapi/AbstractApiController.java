@@ -458,7 +458,11 @@ public abstract class AbstractApiController implements IApiController {
                                     if (eachRow.getString(i) == null) {
                                         row.put(resp.getColumnNames().get(i), new JsonObject());
                                     } else {
-                                        row.put(resp.getColumnNames().get(i), new JsonObject(eachRow.getString(i)));
+                                        if (eachRow.getString(i).startsWith("[")) {
+                                            row.put(resp.getColumnNames().get(i), new JsonArray(eachRow.getString(i)));
+                                        } else {
+                                            row.put(resp.getColumnNames().get(i), new JsonObject(eachRow.getString(i)));
+                                        }
                                     }
                                 } else {
                                     row.put(resp.getColumnNames().get(i), eachRow.getValue(i));

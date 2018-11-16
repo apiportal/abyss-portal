@@ -217,6 +217,9 @@ public class Constants {
     public static final String JSONB_COLUMN_MESSAGE_RECEIVER = "receiver";
     public static final String JSONB_COLUMN_MESSAGE_SENDER = "sender";
 
+    public static final String NESTED_COLUMN_USER_GROUPS = "groups";
+    public static final String NESTED_COLUMN_USER_PERMISSIONS = "permissions";
+
     public static final int ONE_MINUTE_IN_SECONDS = 60;
     public static final int ONE_HOUR_IN_SECONDS = 3600;
     public static final int ONE_DAY_IN_SECONDS = 86400;
