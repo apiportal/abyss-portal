@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
@@ -35,6 +37,10 @@ import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 @AbyssApiController(apiSpec = "/openapi/SubjectDirectoryType.yaml")
 public class SubjectDirectoryTypeApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(SubjectDirectoryTypeApiController.class);
+
+    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
+        add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_TYPE_ATTRIBUTE_TEMPLATE);
+    }};
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -50,7 +56,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectDirectoryTypes(RoutingContext routingContext) {
         try {
-            getEntities(routingContext, SubjectDirectoryTypeService.class);
+            getEntities(routingContext, SubjectDirectoryTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -67,7 +73,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
         try {
-            addEntities(routingContext, SubjectDirectoryTypeService.class, requestBody);
+            addEntities(routingContext, SubjectDirectoryTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -85,7 +91,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, SubjectDirectoryTypeService.class, requestBody);
+            updateEntities(routingContext, SubjectDirectoryTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -110,7 +116,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         try {
-            getEntity(routingContext, SubjectDirectoryTypeService.class);
+            getEntity(routingContext, SubjectDirectoryTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -128,7 +134,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, SubjectDirectoryTypeService.class, requestBody);
+            updateEntity(routingContext, SubjectDirectoryTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
