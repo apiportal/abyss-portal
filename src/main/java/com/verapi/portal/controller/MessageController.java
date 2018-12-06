@@ -17,7 +17,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AbyssController(routePathGET = "messages", routePathPOST = "", htmlTemplateFile = "my-messages.html")
+@AbyssController(routePathGET = "my-messages", routePathPOST = "", htmlTemplateFile = "my-messages.html")
 public class MessageController extends PortalAbstractController {
     private static Logger logger = LoggerFactory.getLogger(MessageController.class);
 
