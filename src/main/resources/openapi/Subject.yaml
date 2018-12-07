@@ -777,21 +777,9 @@ components:
           type: string
           readOnly: true
           description: 'Secondary primary key. Used in front end messages for security reasons.'
-          x-abyss-privacy:
-            attributeClass: id
-            action: remove
-            pattern:
-            maskPattern:
-            generalizationLevel:
         organizationid:
           type: string
           description: 'FK ID of Organization'
-          x-abyss-privacy:
-            attributeClass: qid
-            action: mask
-            pattern:
-            maskPattern:
-            generalizationLevel:
         created:
           type: string
           readOnly: true
@@ -849,22 +837,10 @@ components:
           format: password
           writeOnly: true
           description: 'Password of user that is going to be used as credential #Level:1# #writeOnly#'
-          x-abyss-privacy:
-            attributeClass: sensitive
-            action: mask
-            pattern:
-            maskPattern:
-            generalizationLevel:
         picture:
           type: string
           format: byte
           description: 'Picture of subject #base64#'
-          x-abyss-privacy:
-            attributeClass: id
-            action: remove
-            matchPattern:
-            maskPattern:
-            generalizationLevel:
         totallogincount:
           type: integer
           format: int32
@@ -929,21 +905,9 @@ components:
           type: string
           readOnly: true
           description: 'Secondary primary key. Used in front end messages for security reasons.'
-          x-abyss-privacy:
-            attributeClass: id
-            action: remove
-            pattern:
-            maskPattern:
-            generalizationLevel:
         organizationid:
           type: string
           description: 'FK ID of Organization'
-          x-abyss-privacy:
-            attributeClass: qid
-            action: mask
-            pattern:
-            maskPattern:
-            generalizationLevel:
         organization:
           type: string
           readOnly: true
@@ -1001,12 +965,6 @@ components:
           type: string
           format: byte
           description: 'Picture of subject #base64#'
-          x-abyss-privacy:
-            attributeClass: id
-            action: remove
-            matchPattern:
-            maskPattern:
-            generalizationLevel:
         totallogincount:
           type: integer
           format: int32
