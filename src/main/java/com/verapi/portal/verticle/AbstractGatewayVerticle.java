@@ -218,6 +218,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     private Single<HttpServer> createHttpServer(Router router, String serverHost, int serverPort, Boolean isSSL) {
         logger.trace("---createHttpServer invoked");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
+                //.setMaxChunkSize(8192) //TODO: Http Chunked Serving
                 .setLogActivity(Config.getInstance().getConfigJsonObject()
                         .getBoolean((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_LOG_HTTP_ACTIVITY : Constants.HTTP_GATEWAY_SERVER_LOG_HTTP_ACTIVITY))
                 .setAcceptBacklog(Config.getInstance().getConfigJsonObject()
@@ -429,6 +430,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }
 
         HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions()
+                //.setUseAlpn(true).setAlpnVersions().setHttp2MaxPoolSize() //TODO: Support Http/2
                 .setSsl("https".equals(serverURL.getProtocol()))
                 .setTrustAll(false) //TODO: re-engineering for parametric trust certificate of api
                 .setVerifyHost(true)); //TODO: re-engineering for parametric trust certificate of api
@@ -444,6 +446,8 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         HttpClientRequest request = httpClient
                 .request(abyssHttpRequest.context.request().method(), requestOptions);
         request.headers().setAll(abyssHttpRequest.context.request().headers());
+        request.setChunked(true);
+        request.setTimeout(30000);
         return request
                 .toFlowable()
                 .doOnSubscribe(subscription -> request.end());
@@ -704,6 +708,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                         //logger.trace("httpClientResponse subcribe data: {}", data);
                                         //////routingContext.response().write(data);
                                         routingContext.response().headers().setAll(request.headers());
+                                        routingContext.response().setChunked(true); //TODO: Http Chunked Serving per request
                                         routingContext.response()
                                                 .putHeader("Content-Type", "application/json; charset=utf-8")
                                                 .write(data);
