@@ -218,6 +218,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     private Single<HttpServer> createHttpServer(Router router, String serverHost, int serverPort, Boolean isSSL) {
         logger.trace("---createHttpServer invoked");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
+                //.setMaxChunkSize(8192) //TODO: Http Chunked Serving
                 .setLogActivity(Config.getInstance().getConfigJsonObject()
                         .getBoolean((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_LOG_HTTP_ACTIVITY : Constants.HTTP_GATEWAY_SERVER_LOG_HTTP_ACTIVITY))
                 .setAcceptBacklog(Config.getInstance().getConfigJsonObject()
@@ -246,6 +247,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                 .onBackpressureDrop(req -> req.response().setStatusCode(HttpResponseStatus.SERVICE_UNAVAILABLE.code()).end())
                 .observeOn(RxHelper.scheduler(vertx.getDelegate()))
                 .subscribe(req -> {
+                    //req.response().setChunked(true); //TODO: Http Chunked Serving
                     req.resume();
                     router.accept(req);
                 });
@@ -444,6 +446,8 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         HttpClientRequest request = httpClient
                 .request(abyssHttpRequest.context.request().method(), requestOptions);
         request.headers().setAll(abyssHttpRequest.context.request().headers());
+        request.setChunked(true);
+        request.setTimeout(30000);
         return request
                 .toFlowable()
                 .doOnSubscribe(subscription -> request.end());
