@@ -5,16 +5,16 @@ servers:
 - url: 'http://192.168.10.46:38083/abyss/oapi'
 - url: '/abyss/oapi'
 info:
-  description: 'Abyss platform APIs'
-  version: '1.0.0'
-  title: 'Abyss'
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
   termsOfService: 'https://apiportal.com/terms/'
   contact:
-    email: 'info@apiportal.com'
-    name: 'Abyss'
+    email: info@apiportal.com
+    name: Abyss
     url: 'https://apiportal.com'
   license:
-    name: 'Abyss 1.0'
+    name: Abyss 1.0
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
 - name: Messages
@@ -27,6 +27,11 @@ tags:
     url: 'https://apiportal.com'
     description: 'Find out more'
   description: 'Abyss plaftorm APIs : Message crud operations'
+- name: Subject-Messages
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Messages by Subject crud operations'
 paths:
   /messages:
     get:
@@ -96,6 +101,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfMessage'
+      parameters: []
     put:
       tags:
       - Messages
@@ -123,6 +129,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfMessageObject'
+      parameters: []
     delete:
       tags:
       - Messages
@@ -144,7 +151,8 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /messages/{uuid}:
+      parameters: []
+  '/messages/{uuid}':
     get:
       tags:
       - Message
@@ -241,8 +249,34 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  '/messages/subject/':
+    get:
+      tags:
+      - Subject-Messages
+      summary: 'Get Messages by Subject uuid'
+      description: 'Provide an uuid of Subject owning the messages to be get'
+      operationId: getMessagesOfSubject
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
-  description: 'See Abyss example'
+  description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'
 components:
   schemas:
@@ -274,7 +308,7 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: 'uuid of the record'
+          description: uuid of the record
         status:
           type: integer
           readOnly: true
@@ -289,10 +323,12 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: 'Secondary primary key. Used in front end messages for security reasons.'
+          description: >-
+            Secondary primary key. Used in front end messages for security
+            reasons.
         organizationid:
           type: string
-          description: 'Id of Organization'
+          description: Id of Organization
         created:
           type: string
           readOnly: true
@@ -314,44 +350,85 @@ components:
           description: 'ID of Subject that reads, creates, updates or deletes'
         messagetypeid:
           type: string
-          description: 'FK ID of Message Type'
+          description: FK ID of Message Type
         parentmessageid:
           type: string
-          description: 'Parent Message Id. New message is null. Reply messages not null.'
-        sendersubjectid:
+          description: Parent Message Id. New message is null. Reply messages not null.
+        ownersubjectid:
           type: string
-          description: 'FK ID of Sender Subject Id'
-        receiversubjectid:
+          description: FK ID of Subject owning the message
+        conversationid:
+          type: integer
+          description: Identifier of the conversation chain
+        folder:
           type: string
-          description: 'FK ID of Receiver Subject Id'
+          description: 'Folder that the message resides in. INBOX, SENT, DRAFT.'
+        sender:
+          type: object
+          description: Sender Subject
+          properties:
+            subjectid:
+              type: string
+            organizationid:
+              type: string
+            organizationname:
+              type: string
+            subjecttypeid:
+              type: string
+            displayname:
+              type: string
+            picture:
+              type: string
+        receiver:
+          type: object
+          description: Receiver Subject
+          properties:
+            subjectid:
+              type: string
+            organizationid:
+              type: string
+            organizationname:
+              type: string
+            subjecttypeid:
+              type: string
+            displayname:
+              type: string
+            picture:
+              type: string
         subject:
           type: string
-          description: 'Message Subject'
+          description: Message Subject
+        bodycontenttype:
+          type: string
+          description: Content Type of Message Body
         body:
           type: string
-          description: 'Message Body stored as Markdown format'
+          description: Message Body stored as Markdown format
         priority:
           type: string
           description: 'High, Normal, Low Importance'
         isstarred:
           type: boolean
-          description: 'Is the message starred'
+          description: Is the message starred
         isread:
           type: boolean
-          description: 'Is Message Read'
+          description: Is Message Read
         sentat:
           type: string
-          description: 'Message Sent Timestamp'
+          description: Message Sent Timestamp
         readat:
           type: string
-          description: 'Message Read Timestamp'
+          description: Message Read Timestamp
+        istrashed:
+          type: boolean
+          description: Is Message Trashed
   requestBodies:
     Message:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Message'
-      description: 'Message object that needs to be added or updated'
+      description: Message object that needs to be added or updated
       required: true
     ListOfMessage:
       content:
@@ -360,7 +437,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Message'
-      description: 'Message array that needs to be added'
+      description: Message array that needs to be added
       required: true
     ListOfMessageObject:
       content:
@@ -368,33 +445,27 @@ components:
           schema:
             type: object
             additionalProperties: true
-      description:  'list of Message objects that needs to be updated, each additional property name should be the uuid of coresponding Message record'
+      description: >-
+        list of Message objects that needs to be updated, each additional
+        property name should be the uuid of coresponding Message record
       required: true
   responses:
     '200':
-      description: 'Successful operation'
+      description: Successful operation
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Message'
-    '200-ListOfMessage':
-      description: 'A Message array'
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/Message'
     '201':
-      description: 'New Message resource has been created'
+      description: New Message resource has been created
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Message'
     '204':
-      description: 'The Message resource was successfully deleted'
+      description: The Message resource was successfully deleted
     '207':
-      description: 'Multi Status for bulk operation'
+      description: Multi Status for bulk operation
       content:
         application/json:
           schema:
@@ -402,61 +473,71 @@ components:
             items:
               $ref: '#/components/schemas/MultiStatus'
     '304':
-      description: 'Not Modified – The client can use cached data'
+      description: Not Modified – The client can use cached data
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Message'
     '400':
-      description: 'Invalid UUID supplied'
+      description: Invalid UUID supplied
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '401':
-      description: 'Authorization information is missing or invalid'
+      description: Authorization information is missing or invalid
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '403':
-      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
+      description: >-
+        Forbidden – The server understood the request, but is refusing it or the
+        access is not allowed
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '404':
-      description: 'Not found – There is no resource behind the URI'
+      description: Not found – There is no resource behind the URI
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '405':
-      description: 'Method not allowed'
+      description: Method not allowed
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '422':
-      description: 'Unprocessable Entity – server cannot process the request'
+      description: Unprocessable Entity – server cannot process the request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '429':
-      description: 'Too many request(rate limiting)'
+      description: Too many request(rate limiting)
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '500':
-      description: 'Internal server error'
+      description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    200-ListOfMessage:
+      description: A Message array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Message'
     default:
-      description: 'error'
+      description: error
       content:
         application/json:
           schema:
@@ -469,7 +550,7 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: 'The number of items to skip before starting to collect the result set'
+      description: The number of items to skip before starting to collect the result set
     limitParam:
       in: query
       name: limit
@@ -479,7 +560,7 @@ components:
         minimum: 1
         maximum: 50
         default: 20
-      description: 'The numbers of items to return'
+      description: The numbers of items to return
   securitySchemes:
     abyssCookieAuth:
       $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'

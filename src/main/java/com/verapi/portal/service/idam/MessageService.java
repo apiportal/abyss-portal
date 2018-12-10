@@ -34,6 +34,10 @@ import java.util.UUID;
 public class MessageService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
 
+    private Integer senderRecordId;
+    private Integer conversationId = null;
+    private JsonObject senderJson;
+
     public MessageService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
@@ -47,27 +51,67 @@ public class MessageService extends AbstractService<UpdateResult> {
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
+                .flatMap(jsonObj -> {
+                    conversationId = jsonObj.getInteger("conversationid");
+                    senderJson = jsonObj;
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("messagetypeid"))
-                            .add(jsonObj.getString("parentmessageid"))
-                            .add(jsonObj.getString("sendersubjectid"))
-                            .add(jsonObj.getString("receiversubjectid"))
+                            .add(jsonObj.getString("parentmessageid")) //TODO: Change parent for receiver???
+                            .add(jsonObj.getString("ownersubjectid")); //TODO: Change owner for receiver
+                    if (conversationId>0) { //if zero-->nullify then get new id from sequence
+                        insertParam.add(jsonObj.getInteger("conversationid")); //TODO: Add sender's conversation id for receiver
+                    }
+                    insertParam
+                            .add(jsonObj.getString("folder")) //TODO: Change folder for receiver
+                            .add(jsonObj.getJsonObject("sender").encode())
+                            .add(jsonObj.getJsonObject("receiver").encode())
                             .add(jsonObj.getString("subject"))
+                            .add(jsonObj.getString("bodycontenttype"))
                             .add(jsonObj.getString("body"))
-                            .add(jsonObj.getString("priority"))
-                            .add(jsonObj.getBoolean("isstarred"));
+                            .add(jsonObj.getString("priority"));
+                            //.add(jsonObj.getBoolean("isstarred"))
                             //.add(jsonObj.getBoolean("isread"))
                             //.add(jsonObj.getInstant("sentat"))
-                            //.add(jsonObj.getInstant("readat"));
-                    return insert(insertParam, SQL_INSERT).toObservable();
+                            //.add(jsonObj.getInstant("readat"))
+                            //.add(jsonObj.getBoolean("istrashed"));
+                    return insert(insertParam, conversationId>0 ? SQL_INSERT : SQL_INSERT_NEW_CONVERSATION).toObservable();
                 })
                 .flatMap(insertResult -> {
                     if (insertResult.getThrowable() == null) {
-                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
+                        if (conversationId==0) {
+                            conversationId = insertResult.getUpdateResult().getKeys().getInteger(11);
+                        }
+                        senderRecordId = insertResult.getUpdateResult().getKeys().getInteger(0);
+
+                        JsonArray insertReceiverParam = new JsonArray()
+                                .add(senderJson.getJsonObject("receiver").getString("organizationid")) //Receiver Org
+                                .add(senderJson.getString("crudsubjectid"))
+                                .add(senderJson.getString("messagetypeid"))
+                                .add(senderJson.getString("parentmessageid")) //TODO: Change parent for receiver???
+                                .add(senderJson.getJsonObject("receiver").getString("subjectid")) //Change owner for receiver
+                                .add(conversationId) //Add sender's conversation id for receiver
+                                .add("Inbox") //Change folder for receiver
+                                .add(senderJson.getJsonObject("sender").encode())
+                                .add(senderJson.getJsonObject("receiver").encode())
+                                .add(senderJson.getString("subject"))
+                                .add(senderJson.getString("bodycontenttype"))
+                                .add(senderJson.getString("body"))
+                                .add(senderJson.getString("priority"));
+                                //.add(senderJson.getBoolean("isstarred"))
+                                //.add(jsonObj.getBoolean("isread"))
+                                //.add(jsonObj.getInstant("sentat"))
+                                //.add(jsonObj.getInstant("readat"))
+                                //.add(jsonObj.getBoolean("istrashed"));
+                        return insert(insertReceiverParam, SQL_INSERT).toObservable();
+                    } else {
+                        return Observable.just(insertResult);
+                    }
+                })
+                .flatMap(insertResult -> {
+                    if (insertResult.getThrowable() == null) {
+                        return findById(senderRecordId, SQL_FIND_BY_ID)
                                 .onErrorResumeNext(ex -> {
                                     insertResult.setThrowable(ex);
                                     return Single.just(insertResult.getResultSet()); //TODO: insertResult.throwable kayıp mı?
@@ -114,15 +158,20 @@ public class MessageService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("messagetypeid"))
                 .add(updateRecord.getString("parentmessageid"))
-                .add(updateRecord.getString("sendersubjectid"))
-                .add(updateRecord.getString("receiversubjectid"))
+                .add(updateRecord.getString("ownersubjectid"))
+                .add(updateRecord.getInteger("conversationid"))
+                .add(updateRecord.getString("folder"))
+                .add(updateRecord.getJsonObject("sender").encode())
+                .add(updateRecord.getJsonObject("receiver").encode())
                 .add(updateRecord.getString("subject"))
+                .add(updateRecord.getString("bodycontenttype"))
                 .add(updateRecord.getString("body"))
                 .add(updateRecord.getString("priority"))
                 .add(updateRecord.getBoolean("isstarred"))
                 .add(updateRecord.getBoolean("isread"))
                 .add(updateRecord.getInstant("sentat"))
                 .add(updateRecord.getInstant("readat"))
+                .add(updateRecord.getBoolean("istrashed"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -142,15 +191,20 @@ public class MessageService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("messagetypeid"))
                             .add(jsonObj.getString("parentmessageid"))
-                            .add(jsonObj.getString("sendersubjectid"))
-                            .add(jsonObj.getString("receiversubjectid"))
+                            .add(jsonObj.getString("ownersubjectid"))
+                            .add(jsonObj.getInteger("conversationid"))
+                            .add(jsonObj.getString("folder"))
+                            .add(jsonObj.getJsonObject("sender").encode())
+                            .add(jsonObj.getJsonObject("receiver").encode())
                             .add(jsonObj.getString("subject"))
+                            .add(jsonObj.getString("bodycontenttype"))
                             .add(jsonObj.getString("body"))
                             .add(jsonObj.getString("priority"))
                             .add(jsonObj.getBoolean("isstarred"))
                             .add(jsonObj.getBoolean("isread"))
                             .add(jsonObj.getInstant("sentat"))
                             .add(jsonObj.getInstant("readat"))
+                            .add(jsonObj.getBoolean("istrashed"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -238,9 +292,18 @@ public class MessageService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, sendersubjectid, receiversubjectid, \n" +
-            "subject, body, priority, isstarred, isread, sentat, readat)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid),\n" +
+    private static final String SQL_INSERT = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, \n" +
+            "ownersubjectid, conversationid, folder, sender, receiver, \n" +
+            "subject, bodycontenttype, body, priority, isread, sentat, readat)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
+            "CAST(? AS uuid), ?, ?, ?::JSON, ?::JSON,\n" +
+            "?, ?, ?, ?, false, now(), null)";
+
+    private static final String SQL_INSERT_NEW_CONVERSATION = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, \n" +
+            "ownersubjectid, folder, sender, receiver, \n" +
+            "subject, bodycontenttype, body, priority, isread, sentat, readat)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
+            "CAST(? AS uuid), ?, ?::JSON, ?::JSON,\n" +
             "?, ?, ?, ?, false, now(), null)";
 
     private static final String SQL_DELETE = "update message\n" +
@@ -258,33 +321,43 @@ public class MessageService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  messagetypeid,\n" +
             "  parentmessageid,\n" +
-            "  sendersubjectid,\n" +
-            "  receiversubjectid,\n" +
+            "  ownersubjectid, \n" +
+            "  conversationid, \n" +
+            "  folder, \n" +
+            "  sender::JSON,\n" +
+            "  receiver::JSON,\n" +
             "  subject,\n" +
+            "  bodycontenttype,\n" +
             "  body,\n" +
             "  priority,\n" +
             "  isstarred,\n" +
             "  isread,\n" +
             "  sentat,\n" +
-            "  readat\n" +
+            "  readat,\n" +
+            "  istrashed\n" +
             "from message\n";
 
     private static final String SQL_UPDATE = "UPDATE message\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , messagetypeid      = CAST(? AS uuid)\n" +
-            "  , parentmessageid      = CAST(? AS uuid)\n" +
-            "  , sendersubjectid      = CAST(? AS uuid)\n" +
-            "  , receiversubjectid      = CAST(? AS uuid)\n" +
-            "  , subject      = ?\n" +
-            "  , body      = ?\n" +
-            "  , priority      = ?\n" +
-            "  , isstarred      = ?\n" +
-            "  , isread      = ?\n" +
-            "  , sentat      = ?\n" +
-            "  , readat      = ?\n";
+            "  , updated           = now()\n" +
+            "  , crudsubjectid     = CAST(? AS uuid)\n" +
+            "  , messagetypeid     = CAST(? AS uuid)\n" +
+            "  , parentmessageid   = CAST(? AS uuid)\n" +
+            "  , ownersubjectid    = CAST(? AS uuid)\n" +
+            "  , conversationid    = ?\n" +
+            "  , folder            = ?\n" +
+            "  , sender            = ?::JSON\n" +
+            "  , receiver          = ?::JSON\n" +
+            "  , subject           = ?\n" +
+            "  , bodycontenttype   = ?\n" +
+            "  , body              = ?\n" +
+            "  , priority          = ?\n" +
+            "  , isstarred         = ?\n" +
+            "  , isread            = ?\n" +
+            "  , sentat            = ?\n" +
+            "  , readat            = ?\n" +
+            "  , istrashed         = ?";
 
     private static final String SQL_AND = "and\n";
 
@@ -299,6 +372,10 @@ public class MessageService extends AbstractService<UpdateResult> {
     private static final String SQL_CONDITION_NAME_LIKE = "lower(subject) like lower(?)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by subject\n";
+
+    private static final String SQL_ORDERBY_CONVERSATION_AND_SENTAT = "order by conversationid desc, sentat desc\n";
+
+    private static final String SQL_CONDITION_SUBJECT_UUID_IS = "ownersubjectid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
 
@@ -315,6 +392,10 @@ public class MessageService extends AbstractService<UpdateResult> {
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    public static final String SQL_FIND_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_UUID_IS +
+                                                    SQL_AND + SQL_CONDITION_ONLY_NOTDELETED +
+                                                    SQL_ORDERBY_CONVERSATION_AND_SENTAT;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

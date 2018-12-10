@@ -191,7 +191,9 @@ public class ForgotPasswordController extends PortalAbstractController {
                     showTrxResult(routingContext, logger, 200, "Reset Password Code is sent to your email address!", "Please check spam folder also...", "Please click the link inside the mail");
                 }, t -> {
                     logger.error("Forgot Password Error", t);
-                    showTrxResult(routingContext, logger, 401, "Error in Forgot Password Occured!", t.getLocalizedMessage(), "");
+                    //Due to OWASP regulations same output should be given even if error occured.
+                    showTrxResult(routingContext, logger, 200, "Reset Password Code is sent to your email address!", "Please check spam folder also...", "Please click the link inside the mail");
+                    //showTrxResult(routingContext, logger, 401, "Error in Forgot Password Occured!", t.getLocalizedMessage(), "");
                 }
         );
 

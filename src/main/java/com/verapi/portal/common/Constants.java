@@ -209,11 +209,17 @@ public class Constants {
     public static final String JSONB_COLUMN_API_OPENAPIDOCUMENT = "openapidocument";
     public static final String JSONB_COLUMN_API_EXTENDEDDOCUMENT = "extendeddocument";
     public static final String JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES = "directoryattributes";
+    public static final String JSONB_COLUMN_SUBJECT_DIRECTORY_TYPE_ATTRIBUTE_TEMPLATE = "attributetemplate";
     public static final String JSONB_COLUMN_POLICY_POLICYINSTANCE = "policyinstance";
     public static final String JSONB_COLUMN_LICENSE_LICENSEDOCUMENT = "licensedocument";
     public static final String JSONB_COLUMN_POLICY_TYPE_TEMPLATE = "template";
     public static final String JSONB_COLUMN_ACCESS_MANAGER_TYPE_TEMPLATE = "attributetemplate";
     public static final String JSONB_COLUMN_ACCESS_MANAGER_ATTRIBUTES = "accessmanagerattributes";
+    public static final String JSONB_COLUMN_MESSAGE_RECEIVER = "receiver";
+    public static final String JSONB_COLUMN_MESSAGE_SENDER = "sender";
+
+    public static final String NESTED_COLUMN_USER_GROUPS = "groups";
+    public static final String NESTED_COLUMN_USER_PERMISSIONS = "permissions";
 
     public static final int ONE_MINUTE_IN_SECONDS = 60;
     public static final int ONE_HOUR_IN_SECONDS = 3600;
@@ -221,6 +227,14 @@ public class Constants {
 
     public static final String AUTH_ABYSS_GATEWAY_COOKIE_NAME = "abyss-gateway-session";
     public static final String AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME = "abyss-gateway-api-access-token"; //spinal case recommended
+
+    public static final String AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME = "abyss.login.organization.name";
+    public static final String AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME = "abyss.login.organization.uuid";
+    public static final String AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME = "abyss.session";
+    public static final String AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME = "abyss.principal.uuid";
+    public static final String AUTH_ABYSS_PORTAL_PRINCIPAL_COOKIE_NAME = "abyss_principal";
+    public static final String AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME = "user.uuid";
+    public static final String AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME = "username";
 
     /*
     # enums

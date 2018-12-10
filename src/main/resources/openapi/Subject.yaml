@@ -6,7 +6,7 @@ servers:
 - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
-  version: '1.0.0'
+  version: '1.0.1'
   title: 'Abyss'
   termsOfService: 'https://apiportal.com/terms/'
   contact:
@@ -42,6 +42,16 @@ tags:
     url: 'https://apiportal.com'
     description: 'Find out more'
   description: 'Abyss plaftorm APIs : Groups crud operations'
+- name: USERSwithGROUPS
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : Users with Groups Composite GET operations'
+- name: USERwithGROUPS
+  externalDocs:
+    url: 'https://apiportal.com'
+    description: 'Find out more'
+  description: 'Abyss plaftorm APIs : User with Groups Composite GET operations'
 - name: Password Management
   externalDocs:
     url: 'https://apiportal.com'
@@ -609,6 +619,80 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  '/subjects/users/with-groups':
+    get:
+      tags:
+      - USERSwithGROUPS
+      summary: 'Get list of users with groups'
+      description: 'Returns list of users with groups'
+      operationId: getUsersWithGroups
+      parameters:
+      - name: byname
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search users which names exact match'
+      - name: likename
+        in: query
+        required: false
+        schema:
+          type: string
+        description: 'search users which names begin with'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectWithGroups'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  '/subjects/users/{uuid}/with-groups-and-permissions':
+    get:
+      tags:
+      - USERwithGROUPS
+      summary: 'Get user with groups and permissions'
+      description: 'Returns user with groups and permissions'
+      operationId: getUserWithGroupsAndPermissions
+      parameters:
+      - name: uuid
+        in: path
+        description: 'uuid of Subject that need to be get'
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SubjectWithGroupAndPermission'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
   /subjects/{uuid}/changepassword:
     put:
       tags:
@@ -814,6 +898,190 @@ components:
         description:
           type: string
           description: 'Description of subject'
+    SubjectWithGroups:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
+        organizationid:
+          type: string
+          description: 'FK ID of Organization'
+        organization:
+          type: string
+          readOnly: true
+          description: 'Name of Organization'
+        created:
+          type: string
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
+        updated:
+          type: string
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
+        deleted:
+          type: string
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
+        isactivated:
+          type: boolean
+          readOnly: true
+          description: 'Is user activated after signup by validating secondary verification mechanism #readOnly#'
+        subjecttypeid:
+          type: string
+          description: 'Id of Subject Type'
+        subjectname:
+          type: string
+          description: 'Username of user that is going to be used as credential'
+        firstname:
+          type: string
+          description: 'First name of user'
+        lastname:
+          type: string
+          description: 'Surname of user'
+        displayname:
+          type: string
+          description: 'Display name or alias of user'
+        email:
+          type: string
+          format: email
+          description: 'Main contact email of user #email#'
+        secondaryemail:
+          type: string
+          format: email
+          description: 'Secondary email of user for recovering account etc. #email#'
+        effectivestartdate:
+          type: string
+          description: 'Effective start date time of user that he or she can start using the platform'
+        effectiveenddate:
+          type: string
+          description: 'Effective end date time of user that he or she can use the platform until'
+        picture:
+          type: string
+          format: byte
+          description: 'Picture of subject #base64#'
+        totallogincount:
+          type: integer
+          format: int32
+          readOnly: true
+          description: 'Total Login Count of Subject #readOnly#'
+        failedlogincount:
+          type: integer
+          format: int32
+          readOnly: true
+          description: 'Failed Login Count of Subject #readOnly#'
+        invalidpasswordattemptcount:
+          type: integer
+          format: int32
+          readOnly: true
+          description: 'Invalid Password Attempt Count of Subject #readOnly#'
+        ispasswordchangerequired:
+          type: boolean
+          readOnly: true
+          description: 'Does subject have to change password #readOnly#'
+        passwordexpiresat:
+          type: string
+          readOnly: true
+          description: 'Password expire date time. After this time subject must change password is still logon else should reset password to get a new one. #readOnly#'
+        lastloginat:
+          type: string
+          readOnly: true
+          description: 'Last login date time of subject #readOnly#'
+        lastpasswordchangeat:
+          type: string
+          readOnly: true
+          description: 'Last password change date time #readOnly#'
+        lastauthenticatedat:
+          type: string
+          readOnly: true
+          description: 'Last successful authentication date time #readOnly#'
+        lastfailedloginat:
+          type: string
+          readOnly: true
+          description: 'Last failed login attempt date time #readOnly#'
+        subjectdirectoryid:
+          type: string
+          description: 'FK ID of Subject Directory'
+        subjectdirectory:
+          type: string
+          description: 'Name of Subject Directory'
+        islocked:
+          type: boolean
+          description: 'Is Subject Locked / Disabled'
+        issandbox:
+          type: boolean
+          description: 'Is Subject Sandbox'
+        url:
+          type: string
+          description: 'Url / Web Site Address of Subject (User or APP)'
+        isrestrictedtoprocessing:
+          type: boolean
+          description: 'Is Subject Data Restricted to Processing - GDPR Compliance'
+        description:
+          type: string
+          description: 'Description of subject'
+        groups:
+          type: object
+          properties:
+            uuid:
+              type: string
+              readOnly: true
+              description: 'Secondary primary key. Used in front end messages for security reasons.'
+            isdeleted:
+              type: boolean
+              readOnly: true
+              description: 'Is record logically deleted #readOnly#'
+            displayname:
+              type: string
+              description: 'Display name or alias of group'
+            description:
+              type: string
+              description: 'Description of group'
+    SubjectWithGroupsAndPermissions:
+      allOf:
+      - $ref: '#/components/schemas/SubjectWithGroups'
+      - type: object
+        properties:
+          permissions:
+            type: object
+            properties:
+              uuid:
+                type: string
+                readOnly: true
+                description: 'Secondary primary key. Used in front end messages for security reasons.'
+              isdeleted:
+                type: boolean
+                readOnly: true
+                description: 'Is record logically deleted #readOnly#'
+              permission:
+                type: string
+                readOnly: true
+                description: 'Permission of the subject'
+              description:
+                type: string
+                readOnly: true
+                description: 'Description of permission'
+              subjectid:
+                type: string
+                readOnly: true
+                description: 'ID of Subject owning the permission'
+              resourceid:
+                type: string
+                readOnly: true
+                description: 'ID of Resource that the permission is permitted to act upon'
+              resourceactionid:
+                type: string
+                readOnly: true
+                description: 'ID of Resource Action that the permission is given'
+              isactive:
+                type: boolean
+                readOnly: true
+                description: 'Is the permission active #readOnly#'
     SubjectChangePassword:
       type: object
       properties:
@@ -871,6 +1139,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Subject'
+    '200-SubjectWithGroupAndPermission':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SubjectWithGroupsAndPermissions'
     '200-ListOfSubject':
       description: 'A Subject array'
       content:
@@ -879,6 +1153,14 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Subject'
+    '200-ListOfSubjectWithGroups':
+      description: 'A Subject with groups array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SubjectWithGroups'
     '201':
       description: 'New Subject resource has been created'
       content:

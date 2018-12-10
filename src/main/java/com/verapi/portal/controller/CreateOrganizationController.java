@@ -61,7 +61,7 @@ public class CreateOrganizationController extends PortalAbstractController {
         logger.trace("Received description:" + description);
         logger.trace("Received url:" + url);
 
-        String userUuid = routingContext.session().get("user.uuid");
+        String userUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
         OrganizationService organizationService = new OrganizationService(routingContext.vertx());
 
@@ -108,12 +108,12 @@ public class CreateOrganizationController extends PortalAbstractController {
                         String userLoginOrganizationName = URLEncoder.encode(name, "UTF-8");
                         String userLoginOrganizationUUID = URLEncoder.encode(organizationUuid, "UTF-8");
 
-                        routingContext.session().put("user.login.organization.name", userLoginOrganizationName);
-                        routingContext.session().put("user.login.organization.uuid", userLoginOrganizationUUID);
+                        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName);
+                        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID);
 
-                        routingContext.addCookie(Cookie.cookie("abyss.login.organization.name", userLoginOrganizationName));
-//                                .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
-                        routingContext.addCookie(Cookie.cookie("abyss.login.organization.uuid", userLoginOrganizationUUID));
+                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName));
+//                                .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60)); //TODO: Remove Cookie at Session Timeout
+                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID));
 //                                .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                         redirect(routingContext, Constants.ABYSS_ROOT + "/index");

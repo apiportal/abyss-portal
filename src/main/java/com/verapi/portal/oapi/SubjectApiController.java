@@ -31,12 +31,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(SubjectApiController.class);
+
+    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
+        add(Constants.NESTED_COLUMN_USER_GROUPS);
+        add(Constants.NESTED_COLUMN_USER_PERMISSIONS);
+    }};
+
 
 /*
     private final SwaggerRequestResponseValidator validator = SwaggerRequestResponseValidator
@@ -56,15 +64,19 @@ public class SubjectApiController extends AbstractApiController {
     }
 
     void getEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        getEntities(routingContext, null, apiFilterQuery);
+    }
+
+    void getEntities(RoutingContext routingContext, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) {
         try {
-            getEntities(routingContext, SubjectService.class, null, apiFilterQuery);
+            getEntities(routingContext, SubjectService.class, jsonColumns, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
-
+    
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
@@ -208,6 +220,22 @@ public class SubjectApiController extends AbstractApiController {
         }
     }
 
+    void getSubject(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntity(routingContext,
+                    SubjectService.class,
+                    jsonbColumnsList,
+                    apiFilterQuery);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
     @AbyssApiOperationHandler
     public void updateSubject(RoutingContext routingContext) {
 
@@ -302,6 +330,17 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updatePasswordOfSubject(RoutingContext routingContext) {
         execServiceMethod(routingContext, "changePassword");
+    }
+
+    @AbyssApiOperationHandler
+    public void getUsersWithGroups(RoutingContext routingContext) {
+        getEntities(routingContext, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USERS_WITH_GROUPS));
+    }
+
+    @AbyssApiOperationHandler
+    public void getUserWithGroupsAndPermissions(RoutingContext routingContext) {
+        getSubject(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USER_WITH_GROUPS_AND_PERMISSIONS)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
 }

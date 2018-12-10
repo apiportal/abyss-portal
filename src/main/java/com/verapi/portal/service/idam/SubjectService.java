@@ -497,4 +497,43 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
+
+    public static final String FILTER_USERS_WITH_GROUPS = "SELECT s.uuid, s.organizationid, o.name, s.created, s.updated, s.deleted, s.isdeleted, s.isactivated, s.subjecttypeid,\n" +
+            "       s.subjectname, s.firstname, s.lastname, s.displayname, s.email, s.secondaryemail, s.effectivestartdate, s.effectiveenddate,\n" +
+            "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
+            "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
+            "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
+            "       COALESCE((select json_agg(\n" +
+            "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
+            "                   )\n" +
+            "        from subject g\n" +
+            "                  join subject_membership m on m.subjectgroupid = g.uuid\n" +
+            "        where s.uuid = m.subjectid), '[]') as groups\n" +
+            "from subject s\n" +
+            "       inner join organization o on (s.organizationid = o.uuid)\n" +
+            "       inner join subject_directory d on (s.subjectdirectoryid = d.uuid)\n" + SQL_WHERE + SQL_CONDITION_IS_USER;
+
+    public static final String FILTER_USER_WITH_GROUPS_AND_PERMISSIONS = "SELECT s.uuid, s.organizationid, o.name, s.created, s.updated, s.deleted, s.isdeleted, s.isactivated, s.subjecttypeid,\n" +
+            "       s.subjectname, s.firstname, s.lastname, s.displayname, s.email, s.secondaryemail, s.effectivestartdate, s.effectiveenddate,\n" +
+            "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
+            "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
+            "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
+            "       COALESCE((select json_agg(\n" +
+            "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
+            "                   )\n" +
+            "        from subject g\n" +
+            "                  join subject_membership m on m.subjectgroupid = g.uuid\n" +
+            "        where s.uuid = m.subjectid), '[]') as groups,\n" +
+            "       COALESCE((select json_agg(\n" +
+            "                 (SELECT x FROM (SELECT p.uuid, p.isdeleted, p.permission, p.description, p.subjectid, p.resourceid, p.resourceactionid, p.isactive) AS x)\n" +
+            "               )\n" +
+            "           from subject_permission p\n" +
+            "       join subject_permission p2 on p2.subjectid = s.uuid\n" +
+            "          ), '[]') as permissions\n" +
+            "from subject s\n" +
+            "inner join organization o on (s.organizationid = o.uuid)\n" +
+            "inner join subject_directory d on (s.subjectdirectoryid = d.uuid)\n" +
+            SQL_WHERE +
+            "s." + SQL_CONDITION_UUID_IS;
+
 }

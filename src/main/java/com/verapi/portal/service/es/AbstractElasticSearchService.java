@@ -19,6 +19,7 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -79,7 +80,7 @@ public abstract class AbstractElasticSearchService {
         try {
             //request.source(sourceMap.getMap(), XContentType.JSON);
             request.source(sourceMap.encode(), XContentType.JSON);
-            client.indexAsync(request, listener);
+            client.indexAsync(request, RequestOptions.DEFAULT, listener);
         } catch (Exception e) {
             logger.error("indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), sourceMap);
         }

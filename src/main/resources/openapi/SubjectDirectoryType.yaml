@@ -318,6 +318,9 @@ components:
         description:
           type: string
           description: 'Description of Directory Type'
+        attributetemplate:
+          type: object
+          description: 'Directory Attributes Template. #jsonb#'
   requestBodies:
     SubjectDirectoryType:
       content:

@@ -301,10 +301,10 @@ public abstract class AbstractApiController implements IApiController {
                                     logger.trace("abyssHttpBasicAuthSecurityHandler() subjectService.findBySubjectName replied successfully " + resp.encodePrettily());
                                     User user = authResult.result();
                                     String userUUID = resp.getString("uuid");
-                                    user.principal().put("user.uuid", userUUID);
+                                    user.principal().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
                                     routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
-                                    routingContext.session().put("user.uuid", userUUID);
-                                    routingContext.addCookie(Cookie.cookie("abyss.principal.uuid", userUUID)); //TODO: Remove for OWASP
+                                    routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
+                                    routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID)); //TODO: Remove for OWASP
 //                                            .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
                                     logger.trace("Logged in user: " + user.principal().encodePrettily());
                                     routingContext.put("username", user.principal().getString("username"));
@@ -458,7 +458,11 @@ public abstract class AbstractApiController implements IApiController {
                                     if (eachRow.getString(i) == null) {
                                         row.put(resp.getColumnNames().get(i), new JsonObject());
                                     } else {
-                                        row.put(resp.getColumnNames().get(i), new JsonObject(eachRow.getString(i)));
+                                        if (eachRow.getString(i).startsWith("[")) {
+                                            row.put(resp.getColumnNames().get(i), new JsonArray(eachRow.getString(i)));
+                                        } else {
+                                            row.put(resp.getColumnNames().get(i), new JsonObject(eachRow.getString(i)));
+                                        }
                                     }
                                 } else {
                                     row.put(resp.getColumnNames().get(i), eachRow.getValue(i));
