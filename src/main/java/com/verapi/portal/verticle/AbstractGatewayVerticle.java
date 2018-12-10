@@ -431,6 +431,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }
 
         HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions()
+                //.setUseAlpn(true).setAlpnVersions().setHttp2MaxPoolSize() //TODO: Support Http/2
                 .setSsl("https".equals(serverURL.getProtocol()))
                 .setTrustAll(false) //TODO: re-engineering for parametric trust certificate of api
                 .setVerifyHost(true)); //TODO: re-engineering for parametric trust certificate of api
