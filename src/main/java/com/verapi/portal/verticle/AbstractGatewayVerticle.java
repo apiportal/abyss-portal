@@ -247,7 +247,6 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                 .onBackpressureDrop(req -> req.response().setStatusCode(HttpResponseStatus.SERVICE_UNAVAILABLE.code()).end())
                 .observeOn(RxHelper.scheduler(vertx.getDelegate()))
                 .subscribe(req -> {
-                    //req.response().setChunked(true); //TODO: Http Chunked Serving
                     req.resume();
                     router.accept(req);
                 });
@@ -709,6 +708,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                         //logger.trace("httpClientResponse subcribe data: {}", data);
                                         //////routingContext.response().write(data);
                                         routingContext.response().headers().setAll(request.headers());
+                                        routingContext.response().setChunked(true); //TODO: Http Chunked Serving per request
                                         routingContext.response()
                                                 .putHeader("Content-Type", "application/json; charset=utf-8")
                                                 .write(data);
