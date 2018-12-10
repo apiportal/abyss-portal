@@ -29,6 +29,8 @@ import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -38,6 +40,7 @@ public abstract class AbstractService<T> implements IService<T> {
 
     protected Vertx vertx;
     protected JDBCClient jdbcClient;
+    protected DatabaseMetaData databaseMetaData;
     private AbyssJDBCService abyssJDBCService;
     protected static ElasticSearchService elasticSearchService = new ElasticSearchService();
 
@@ -66,9 +69,19 @@ public abstract class AbstractService<T> implements IService<T> {
                 .put("user", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_NAME))
                 .put("password", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBUSER_PASSWORD))
                 .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE))
-                .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_IDLE_TIME));
+                .put("max_idle_time", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_IDLE_TIME));
 
         this.jdbcClient = JDBCClient.createShared(vertx, jdbcConfig, Constants.API_DATA_SOURCE_SERVICE);
+
+        /*return jdbcClient.rxGetConnection()
+                .flatMap(sqlConnection -> {
+                    java.sql.Connection con = sqlConnection.getDelegate().unwrap();
+                    databaseMetaData = con.getMetaData();
+                    con.close();
+                    logger.trace("AbstractService - Got database metadata successfully: {} {}",
+                            databaseMetaData.getDatabaseProductName(), databaseMetaData.getDatabaseProductVersion());
+                    return Single.just(jdbcClient);
+                });*/
 
         return Single.just(jdbcClient);
 
@@ -190,6 +203,22 @@ public abstract class AbstractService<T> implements IService<T> {
     }
 
     private Single<ResultSet> rxQueryWithParams(String sql, JsonArray params) {
+/*
+        java.sql.ResultSet tableMetaDataResultSet = null;
+        try {
+            tableMetaDataResultSet = databaseMetaData.getColumns("", "abyss", "api", "");
+            try {
+                while (tableMetaDataResultSet.next()) {
+                    logger.debug("metadata:: table name:{} column name:{}, data type:{}"
+                            , tableMetaDataResultSet.getString("TABLE_NAME"), tableMetaDataResultSet.getString("COLUMN_NAME"), tableMetaDataResultSet.getString("DATA_TYPE"));
+                }
+            } finally {
+                tableMetaDataResultSet.close();
+            }
+        } catch (SQLException e) {
+            logger.error("an error occurred while getting columns metada of API table. {}", (Object) e.getStackTrace());
+        }
+*/
         return jdbcClient
                 .rxGetConnection().flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))

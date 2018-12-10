@@ -14,6 +14,7 @@ package com.verapi.portal.common;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.io.SerializedString;
+
 /**
  *
  * @author Rob Winch
@@ -35,6 +36,10 @@ public class OwaspCharacterEscapes extends CharacterEscapes {
     @Override
     public SerializableString getEscapeSequence(int ch) {
         String unicode = String.format("\\u%04x", ch);
+
+       // ***** System.out.print("\\u"+Integer.toHexString(0x10000 | ch).substring(1).toUpperCase());
+
+
         return new SerializedString(unicode);
     }
 

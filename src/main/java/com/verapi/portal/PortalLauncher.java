@@ -136,7 +136,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             }
         });
         try {
-            future.get(10, TimeUnit.SECONDS);
+            future.get(60, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error(e.getLocalizedMessage());
             vertx.close();

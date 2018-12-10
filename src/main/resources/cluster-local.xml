@@ -165,6 +165,10 @@
     -->
     <merge-policy>com.hazelcast.map.merge.LatestUpdateMapMergePolicy</merge-policy>
 
+    <near-cache name="__vertx.haInfo">
+      <eviction eviction-policy="LFU" max-size-policy="ENTRY_COUNT" size="10"/>
+    </near-cache>
+
   </map>
 
   <!-- Used internally in Vert.x to implement async locks -->

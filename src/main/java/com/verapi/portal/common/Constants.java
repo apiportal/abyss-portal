@@ -83,6 +83,7 @@ public class Constants {
     public static final String PORTAL_JDBC_URL = "portal.jdbc.url";
     public static final String PORTAL_JDBC_DRIVER_CLASS = "portal.jdbc.driver.class";
     public static final String PORTAL_DBUSER_NAME = "portal.dbuser.name";
+    public static final String PORTAL_DBSCHEMA_NAME = "portal.dbschema.name";
     public static final String PORTAL_DBUSER_PASSWORD = "portal.dbuser.password";
     public static final String PORTAL_DBCONN_MAX_POOL_SIZE = "portal.dbconn.max.pool.size";
     public static final String PORTAL_DBCONN_MAX_IDLE_TIME = "portal.dbconn.max.idle.time";
@@ -254,6 +255,30 @@ public class Constants {
         public String toString() {
             return desc;
         }
+    }
 
+    public enum PgDatabaseMetaData {
+        TABLE_NAME("TABLE_NAME"),
+        COLUMN_NAME("COLUMN_NAME"),
+        DATA_TYPE("DATA_TYPE"),
+        TYPE_NAME("TYPE_NAME"),
+        COLUMN_SIZE("COLUMN_SIZE"),
+        DECIMAL_DIGITS("DECIMAL_DIGITS"),
+        NULLABLE("NULLABLE"),
+        REMARKS("REMARKS"),
+        COLUMN_DEF("COLUMN_DEF"),
+        IS_NULLABLE("IS_NULLABLE"),
+        IS_AUTOINCREMENT("IS_AUTOINCREMENT");
+
+        private final String desc;
+
+        PgDatabaseMetaData(String desc) {
+            this.desc = desc;
+        }
+
+        @Override
+        public String toString() {
+            return desc;
+        }
     }
 }

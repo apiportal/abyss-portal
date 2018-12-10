@@ -26,10 +26,6 @@
         "originaldocument": {
           "enabled": false
         },
-        "openapidocument": {
-          "type": "nested",
-          "enabled": false
-        },
         "extendeddocument": {
           "type": "nested",
           "enabled": false

@@ -11,6 +11,8 @@
 
 package com.verapi.portal.verticle;
 
+import com.verapi.portal.common.AbyssDatabaseMetadata;
+import com.verapi.portal.common.AbyssDatabaseMetadataDiscovery;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
@@ -33,7 +35,11 @@ import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public abstract class AbyssAbstractVerticle extends AbstractVerticle {
@@ -126,6 +132,66 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                     this.jdbcClient = jdbcClient1;
                     logger.trace("AbyssAbstractVerticle - Got jdbcClient successfully - " + jdbcClient1.toString());
                     return Single.just(jdbcClient1);
+                });
+    }
+
+    Single<JDBCClient> loadAbyssDatabaseMetadata(JDBCClient jdbcClient) throws SQLException {
+        logger.info("loading database metadata for database schema:{}", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBSCHEMA_NAME));
+        return jdbcClient.rxGetConnection()
+                .flatMap(sqlConnection -> {
+                    try (java.sql.Connection con = sqlConnection.getDelegate().unwrap()) {
+                        DatabaseMetaData databaseMetaData = con.getMetaData();
+                        try (java.sql.ResultSet tablesResultSet = databaseMetaData.getTables(null
+                                , Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBSCHEMA_NAME)
+                                , null
+                                , new String[]{"TABLE"})) {
+                            while (tablesResultSet.next()) {
+                                logger.debug("table metadata:: TABLE_CAT:{}\tTABLE_SCHEM:{}\tTABLE_NAME:{}\tTABLE_TYPE:{}"
+                                        , tablesResultSet.getString("table_cat")
+                                        , tablesResultSet.getString("table_schem")
+                                        , tablesResultSet.getString("table_name")
+                                        , tablesResultSet.getString("table_type"));
+                                try (java.sql.ResultSet tableMetaDataResultSet = databaseMetaData.getColumns(tablesResultSet.getString("table_cat")
+                                        , tablesResultSet.getString("table_schem")
+                                        , tablesResultSet.getString("table_name")
+                                        , null)) {
+                                    List<AbyssDatabaseMetadata> abyssDatabaseMetadataList = new ArrayList<>();
+                                    while (tableMetaDataResultSet.next()) {
+                                        AbyssDatabaseMetadata abyssDatabaseMetadata = new AbyssDatabaseMetadata(
+                                                tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.COLUMN_NAME.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.DATA_TYPE.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.TYPE_NAME.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.COLUMN_SIZE.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.DECIMAL_DIGITS.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.NULLABLE.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.REMARKS.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.COLUMN_DEF.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.IS_NULLABLE.toString())
+                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.IS_AUTOINCREMENT.toString())
+                                        );
+                                        abyssDatabaseMetadataList.add(abyssDatabaseMetadata);
+                                    }
+                                    AbyssDatabaseMetadataDiscovery.getInstance().addTableMetada(tablesResultSet.getString("table_name"), abyssDatabaseMetadataList);
+                                }
+                            }
+                            /*logger.debug("column metadata::{}", new ObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false).writerWithDefaultPrettyPrinter().writeValueAsString(AbyssDatabaseMetadataDiscovery.getInstance().getAbyssDatabaseMetadataMap()));
+                            logger.debug("api table -select all- query: {}", Select.select()
+                                    .selectAll()
+                                    .from("api")
+                                    .where("1=1")
+                                    .and()
+                                    .where("uuid", Predicate.Operator.EQUAL_TO, "123")
+                                    .toQueryString());
+                            logger.debug("api table -select all- query: {}", Select.select()
+                                    .selectAll()
+                                    .from("subject")
+                                    .where("1=1")
+                                    .and()
+                                    .where("uuid", Predicate.Operator.EQUAL_TO, "123")
+                                    .toQueryString());*/
+                        }
+                    }
+                    return Single.just(jdbcClient);
                 });
     }
 

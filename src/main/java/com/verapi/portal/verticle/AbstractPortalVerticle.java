@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 
 public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
@@ -45,6 +46,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
         Disposable disposable
                 =
                 initializeJdbcClient(Constants.PORTAL_DATA_SOURCE_SERVICE)
+                        .flatMap(this::loadAbyssDatabaseMetadata)
                         .flatMap(jdbcClient1 -> createRouters())
                         .flatMap(this::enableCorsSupport)
                         .flatMap(abyssRouter -> configureRouter())
