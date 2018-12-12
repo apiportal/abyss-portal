@@ -11,8 +11,8 @@
 
 package com.verapi.portal.verticle;
 
-import com.verapi.portal.common.AbyssDatabaseMetadata;
-import com.verapi.portal.common.AbyssDatabaseMetadataDiscovery;
+import com.verapi.abyss.sql.builder.AbyssDatabaseMetadata;
+import com.verapi.abyss.sql.builder.AbyssDatabaseMetadataDiscovery;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;

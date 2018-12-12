@@ -11,6 +11,8 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.sql.builder.Select;
+import com.verapi.abyss.sql.builder.Table;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
@@ -264,7 +266,7 @@ public class ApiService extends AbstractService<UpdateResult> {
     }
 
     public Single<ResultSet> findAll() {
-        return findAll(SQL_SELECT);
+        return findAll(SQL_SELECT2);
     }
 
     public Single<ResultSet> findAll(ApiFilterQuery apiFilterQuery) {
@@ -300,6 +302,11 @@ public class ApiService extends AbstractService<UpdateResult> {
             "set\n" +
             "  deleted     = now()\n" +
             "  , isdeleted = true\n";
+
+    private static final String SQL_SELECT2 = Select.select()
+            .selectAll()
+            .from(new Table("API"))
+            .toQueryString();
 
     private static final String SQL_SELECT = "select\n" +
             "  api.uuid,\n" +
@@ -413,15 +420,15 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_GROUP_IS = "apigroupid = CAST(? AS uuid)\n";
 
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_ID = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_ID_IS;
 
-    public static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    public static final String SQL_FIND_BY_UUID = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_NAME_IS;
 
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
-    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_FIND_ALL_PROXIES = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
 
@@ -433,25 +440,25 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE_BUSINESS_API_BY_UUID = SQL_UPDATE_BUSINESS_API + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
-    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+    public static final String FILTER_BY_SUBJECT = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
 
-    public static final String FILTER_BY_BUSINESS_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI;
+    public static final String FILTER_BY_BUSINESS_API = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_IS_BUSINESSAPI;
 
-    public static final String FILTER_BY_PROXY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
+    public static final String FILTER_BY_PROXY_API = SQL_SELECT2 + SQL_WHERE + SQL_CONDITION_IS_PROXYAPI;
 
-    public static final String FILTER_BY_SUBJECT_AND_TAG = SQL_SELECT + ", api__api_tag\n" +
+    public static final String FILTER_BY_SUBJECT_AND_TAG = SQL_SELECT2 + ", api__api_tag\n" +
             SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
             SQL_AND + SQL_CONDITION_TAG_IS;
 
-    public static final String FILTER_BY_SUBJECT_AND_CATEGORY = SQL_SELECT + ", api__api_category\n" +
+    public static final String FILTER_BY_SUBJECT_AND_CATEGORY = SQL_SELECT2 + ", api__api_category\n" +
             SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
             SQL_AND + SQL_CONDITION_CATEGORY_IS;
 
-    public static final String FILTER_BY_SUBJECT_AND_GROUP = SQL_SELECT + ", api__api_group\n" +
+    public static final String FILTER_BY_SUBJECT_AND_GROUP = SQL_SELECT2 + ", api__api_group\n" +
             SQL_WHERE + "api.uuid = apiid\n" + SQL_AND + SQL_CONDITION_SUBJECT_IS +
             SQL_AND + SQL_CONDITION_GROUP_IS;
 
-    public static final String FILTER_APIS_SHARED_WITH_SUBJECT = SQL_SELECT + ", subject_permission, resource\n" +
+    public static final String FILTER_APIS_SHARED_WITH_SUBJECT = SQL_SELECT2 + ", subject_permission, resource\n" +
             SQL_WHERE + "subject_permission.subjectid = CAST(? AS uuid) and\n" +
             "subject_permission.resourceid = resource.uuid and\n" +
             "resource.resourcerefid = api.uuid and\n" +
@@ -459,7 +466,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "(subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_VIEW_API + "' AS uuid) OR\n" +
             "subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_EDIT_API + "' AS uuid))";
 
-    public static final String FILTER_APIS_SHARED_BY_SUBJECT = SQL_SELECT + ", subject_permission, resource\n" +
+    public static final String FILTER_APIS_SHARED_BY_SUBJECT = SQL_SELECT2 + ", subject_permission, resource\n" +
             SQL_WHERE + "api.subjectid = CAST(? AS uuid) and\n" +
             "api.uuid = resource.resourcerefid and\n" +
             "resource.uuid = subject_permission.resourceid and\n" +
