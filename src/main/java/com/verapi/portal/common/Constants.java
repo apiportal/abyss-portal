@@ -257,7 +257,7 @@ public class Constants {
         }
     }
 
-    public enum PgDatabaseMetaData {
+    /*public enum PgDatabaseMetaData {
         TABLE_NAME("TABLE_NAME"),
         COLUMN_NAME("COLUMN_NAME"),
         DATA_TYPE("DATA_TYPE"),
@@ -280,5 +280,5 @@ public class Constants {
         public String toString() {
             return desc;
         }
-    }
+    }*/
 }

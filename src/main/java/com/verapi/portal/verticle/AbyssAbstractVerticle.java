@@ -11,8 +11,9 @@
 
 package com.verapi.portal.verticle;
 
-import com.verapi.abyss.sql.builder.AbyssDatabaseMetadata;
-import com.verapi.abyss.sql.builder.AbyssDatabaseMetadataDiscovery;
+import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadata;
+import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadataDiscovery;
+import com.verapi.abyss.sql.builder.metadata.PgDatabaseMetadata.PgDatabaseMetaData;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
@@ -158,16 +159,16 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                                     List<AbyssDatabaseMetadata> abyssDatabaseMetadataList = new ArrayList<>();
                                     while (tableMetaDataResultSet.next()) {
                                         AbyssDatabaseMetadata abyssDatabaseMetadata = new AbyssDatabaseMetadata(
-                                                tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.COLUMN_NAME.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.DATA_TYPE.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.TYPE_NAME.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.COLUMN_SIZE.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.DECIMAL_DIGITS.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.NULLABLE.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.REMARKS.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.COLUMN_DEF.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.IS_NULLABLE.toString())
-                                                , tableMetaDataResultSet.getString(Constants.PgDatabaseMetaData.IS_AUTOINCREMENT.toString())
+                                                tableMetaDataResultSet.getString(PgDatabaseMetaData.COLUMN_NAME.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.DATA_TYPE.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.TYPE_NAME.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.COLUMN_SIZE.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.DECIMAL_DIGITS.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.NULLABLE.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.REMARKS.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.COLUMN_DEF.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.IS_NULLABLE.toString())
+                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.IS_AUTOINCREMENT.toString())
                                         );
                                         abyssDatabaseMetadataList.add(abyssDatabaseMetadata);
                                     }
@@ -284,7 +285,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         allowHeaders.add("accept");
         allowHeaders.add("Cookie");
         // CORS support
-        router.route().handler(CorsHandler.create("http(s)?:\\/\\/(.+\\.)?(192\\.168\\..*|apiportal\\.com|local\\.abyss\\.com)(:\\d{1,5})?$")
+        router.route().handler(CorsHandler.create("http(s)?:\\/\\/(.+\\.)?(192\\.168\\..*|apiportal\\.com|local\\.abyss\\.com|localhost)(:\\d{1,5})?$")
                 .allowCredentials(true)
                 .allowedHeaders(allowHeaders)
                 .allowedMethod(HttpMethod.GET)
