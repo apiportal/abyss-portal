@@ -161,6 +161,8 @@ public class Constants {
     public static final String ES_SERVER_URL = "es.server.url";
     public static final String ES_SERVER_API_BULK_URL = "es.server.api.bulk.url";
 
+    public static final String HTTP_BIN_URL = "http.bin.url";
+
     public static final String VERTICLE_TYPE_PORTAL = "verticle.type.portal";
     public static final String VERTICLE_TYPE_API = "verticle.type.api";
 
