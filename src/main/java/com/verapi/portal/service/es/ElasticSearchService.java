@@ -38,7 +38,7 @@ public class ElasticSearchService extends AbstractElasticSearchService {
 
     public void indexDocument(RoutingContext routingContext, String type, JsonObject source) {
         logger.trace("indexDocument() invoked");
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM");
         String index = type + "-" + f.format(new Date());
         indexDocument(routingContext, index, type, source);
     }
