@@ -50,7 +50,7 @@
         <sleepTime>250</sleepTime> <!-- optional (in ms, default 250) -->
         <rawJsonMessage>false</rawJsonMessage> <!-- optional (default false) -->
         <includeMdc>false</includeMdc> <!-- optional (default false) -->
-        <maxMessageSize>100</maxMessageSize> <!-- optional (default -1 -->
+        <maxMessageSize>-1</maxMessageSize> <!-- optional (default -1 -->
         <authentication class="com.internetitem.logback.elasticsearch.config.BasicAuthentication"/> <!-- optional -->
         <properties>
             <property>
