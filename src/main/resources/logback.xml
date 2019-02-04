@@ -36,7 +36,7 @@
         </encoder>
 
         <url>${es.server.api.bulk.url}</url>
-        <index>logs-%date{yyyy-MM-dd}</index>
+        <index>logs-%date{yyyy-MM}</index>
         <type>logback</type>
         <!--<loggerName>es-logger</loggerName>--> <!-- optional -->
         <!--<errorLoggerName>es-error-logger</errorLoggerName>--> <!-- optional -->
@@ -50,7 +50,7 @@
         <sleepTime>250</sleepTime> <!-- optional (in ms, default 250) -->
         <rawJsonMessage>false</rawJsonMessage> <!-- optional (default false) -->
         <includeMdc>false</includeMdc> <!-- optional (default false) -->
-        <maxMessageSize>100</maxMessageSize> <!-- optional (default -1 -->
+        <maxMessageSize>-1</maxMessageSize> <!-- optional (default -1 -->
         <authentication class="com.internetitem.logback.elasticsearch.config.BasicAuthentication"/> <!-- optional -->
         <properties>
             <property>
@@ -102,20 +102,27 @@
     </appender>
 
     <logger name="com.verapi" level="TRACE">
+        <appender-ref ref="ASYNC_FILE"/>
         <appender-ref ref="ASYNC_STDOUT"/>
         <appender-ref ref="ASYNC_ELASTIC"/>
     </logger>
 
     <logger name="org.thymeleaf.TemplateEngine.CONFIG" level="WARN">
         <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="ASYNC_STDOUT"/>
+        <appender-ref ref="ASYNC_ELASTIC"/>
     </logger>
 
     <logger name="com.hazelcast" level="WARN">
         <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="ASYNC_STDOUT"/>
+        <appender-ref ref="ASYNC_ELASTIC"/>
     </logger>
 
     <root level="WARN">
         <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="ASYNC_STDOUT"/>
+        <appender-ref ref="ASYNC_ELASTIC"/>
     </root>
 
     <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
