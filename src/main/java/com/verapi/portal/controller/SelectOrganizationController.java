@@ -11,7 +11,6 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -38,21 +37,21 @@ public class SelectOrganizationController extends PortalAbstractController {
     public void defaultGetHandler(RoutingContext routingContext) {
         logger.trace("SelectOrganizationController.defaultGetHandler invoked...");
 
-        logger.trace("userOrganizationList: {}", (JsonArray)routingContext.session().get("userOrganizationArray"));
+        logger.trace("userOrganizationList: {}", (JsonArray) routingContext.session().get("userOrganizationArray"));
 
         class OrganizationTuple {
             public String uuid;
             public String name;
 
-            public OrganizationTuple (String uuid, String name) {
+            public OrganizationTuple(String uuid, String name) {
                 this.uuid = uuid;
-                this.name=name;
+                this.name = name;
             }
         }
 
         ArrayList<OrganizationTuple> orgs = new ArrayList<OrganizationTuple>();
 
-        JsonArray jsonArray = (JsonArray)routingContext.session().get("userOrganizationArray");
+        JsonArray jsonArray = (JsonArray) routingContext.session().get("userOrganizationArray");
 
         jsonArray.forEach(o -> {
             JsonObject j = (JsonObject) o;
@@ -63,7 +62,9 @@ public class SelectOrganizationController extends PortalAbstractController {
 
         routingContext.put("userOrganizationArray", orgs);
 
-        renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
+        JsonObject context = new JsonObject().put("userOrganizationArray", orgs);
+
+        renderTemplate(routingContext, context, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
@@ -75,7 +76,7 @@ public class SelectOrganizationController extends PortalAbstractController {
 
         String[] values = compositeValue.split("\\|");
         logger.trace("values:" + values[0] + "," + values[1]);
-        if ((values!= null) && (values.length==2)) {
+        if ((values != null) && (values.length == 2)) {
 
             try {
                 //Url Encode for cookie compliance

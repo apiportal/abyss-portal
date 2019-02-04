@@ -31,14 +31,22 @@ public class ElasticSearchService extends AbstractElasticSearchService {
     public void indexDocument(String index, String type, JsonObject source) {
         indexDocument(null, index, type, source);
     }
+
     public void indexDocument(RoutingContext routingContext, String index, String type, JsonObject source) {
         logger.trace("indexDocument() invoked");
-        super.indexDocument(routingContext, index, type, UUID.randomUUID().toString(), source);
+        UUID uuid = UUID.randomUUID();
+        super.indexDocument(routingContext, index, type, uuid.toString(), source);
+        try {
+            if (CassandraService2.getInstance(routingContext) != null)
+                CassandraService2.getInstance(routingContext).indexDocument(type, uuid, source);
+        } catch (Exception e) {
+            logger.error("Cassandra indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), source);
+        }
     }
 
     public void indexDocument(RoutingContext routingContext, String type, JsonObject source) {
         logger.trace("indexDocument() invoked");
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM");
         String index = type + "-" + f.format(new Date());
         indexDocument(routingContext, index, type, source);
     }

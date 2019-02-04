@@ -11,8 +11,7 @@
 
 package com.verapi.portal.oapi;
 
-import com.verapi.portal.common.Constants;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.SubjectActivationService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -24,13 +23,9 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Objects;
-
-import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
 @AbyssApiController(apiSpec = "/openapi/SubjectActivation.yaml")
 public class SubjectActivationApiController extends AbstractApiController {
@@ -50,7 +45,7 @@ public class SubjectActivationApiController extends AbstractApiController {
     public void getSubjectActivations(RoutingContext routingContext) {
         try {
             getEntities(routingContext, SubjectActivationService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

@@ -86,7 +86,6 @@
     </reporting>
 
     <modules>
-        <!--<module>../abyss-sql-builder</module>-->
     </modules>
 
     <dependencyManagement>
@@ -156,6 +155,10 @@
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
+            <artifactId>vertx-config-consul</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
             <artifactId>vertx-auth-common</artifactId>
         </dependency>
         <dependency>
@@ -205,6 +208,18 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-api-contract</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-cassandra-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-extras</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.jpountz.lz4</groupId>
+            <artifactId>lz4</artifactId>
         </dependency>
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
@@ -365,6 +380,17 @@
             <artifactId>abyss-sql-builder</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.verapi.abyss</groupId>
+            <artifactId>abyss-logger</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.verapi.abyss</groupId>
+            <artifactId>abyss-exception</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
 
 
         <!--         <dependency> -->

@@ -27,9 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Date;
 
 public abstract class AbstractElasticSearchService {
     private static Logger logger = LoggerFactory.getLogger(AbstractElasticSearchService.class);
@@ -55,11 +53,13 @@ public abstract class AbstractElasticSearchService {
         @Override
         public void onResponse(IndexResponse indexResponse) {
             logger.trace("listener onResponse : {}", indexResponse);
+            //close();
         }
 
         @Override
         public void onFailure(Exception e) {
             logger.error("listener onFailure : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+            //close();
         }
     };
 
@@ -84,6 +84,10 @@ public abstract class AbstractElasticSearchService {
         } catch (Exception e) {
             logger.error("indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), sourceMap);
         }
+
+        //log into Cassandra
+        //1. creating Rxified Cassandra client
+
 
     }
 }

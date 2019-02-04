@@ -11,7 +11,7 @@
 
 package com.verapi.portal.oapi;
 
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ApiLicenseService;
 import io.vertx.core.json.JsonArray;
@@ -24,6 +24,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
@@ -46,7 +47,7 @@ public class ApiLicenseApiController extends AbstractApiController {
     public void getApiLicenses(RoutingContext routingContext) {
         try {
             getEntities(routingContext, ApiLicenseService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -155,7 +156,7 @@ public class ApiLicenseApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiLicenseService.SQL_LIST_API_LICENSES)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -174,7 +175,7 @@ public class ApiLicenseApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiLicenseService.SQL_LIST_LICENSE_APIS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

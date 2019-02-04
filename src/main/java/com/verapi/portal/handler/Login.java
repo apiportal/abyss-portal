@@ -1,16 +1,14 @@
 package com.verapi.portal.handler;
 
+import com.verapi.portal.common.Constants;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.AuthProvider;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-
-import com.verapi.portal.common.Constants;
 
 public class Login implements Handler<RoutingContext> {
 
@@ -57,18 +55,18 @@ public class Login implements Handler<RoutingContext> {
 
         Boolean isUserActivated = routingContext.session().get("isUserActivated");
         if (isUserActivated == null) {
-        	isUserActivated = new Boolean(false);
+            isUserActivated = Boolean.FALSE;
         }
         routingContext.session().put("isUserActivated", false);
-        
+
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
         //configureThymeleafEngine(engine);
 
-        
+
         routingContext.put("isUserActivated", isUserActivated);
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/", "login.html", res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_LOGIN, res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());

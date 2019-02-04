@@ -23,6 +23,7 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.HttpVersion;
 import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.http.StreamPriority;
 import io.vertx.core.net.NetSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.web.RoutingContext;
@@ -77,6 +78,11 @@ public class RestRouterHttpServerRequest implements HttpServerRequest {
     public HttpServerRequest resume() {
         request.resume();
         return this;
+    }
+
+    @Override
+    public HttpServerRequest fetch(long amount) {
+        return null;
     }
 
     @Override
@@ -156,6 +162,11 @@ public class RestRouterHttpServerRequest implements HttpServerRequest {
     }
 
     @Override
+    public long bytesRead() {
+        return 0;
+    }
+
+    @Override
     public MultiMap headers() {
         return request.headers();
     }
@@ -213,6 +224,11 @@ public class RestRouterHttpServerRequest implements HttpServerRequest {
     @Override
     public HttpConnection connection() {
         return request.connection();
+    }
+
+    @Override
+    public HttpServerRequest streamPriorityHandler(Handler<StreamPriority> handler) {
+        return null;
     }
 
     @Override

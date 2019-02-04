@@ -11,11 +11,11 @@
 
 package com.verapi.portal.service;
 
+import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
-import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.es.ElasticSearchService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.UUID;
 

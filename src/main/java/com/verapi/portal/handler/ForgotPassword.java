@@ -12,7 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,11 +162,11 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
         logger.info("ForgotPasswordController.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         // we define a hardcoded title for our application
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/", "forgot-password.html", res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_FORGOT_PASSWORD, res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());

@@ -16,7 +16,7 @@ import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
-import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
+import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;

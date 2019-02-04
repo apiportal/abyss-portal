@@ -11,11 +11,9 @@
 
 package com.verapi.portal.oapi;
 
-import com.verapi.portal.common.Constants;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ApiApiTagService;
-import com.verapi.portal.service.idam.ApiTagService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -26,13 +24,9 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Objects;
-
-import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
 @AbyssApiController(apiSpec = "/openapi/ApiApiTag.yaml")
 public class ApiApiTagApiController extends AbstractApiController {
@@ -53,7 +47,7 @@ public class ApiApiTagApiController extends AbstractApiController {
     public void getApiApiTags(RoutingContext routingContext) {
         try {
             getEntities(routingContext, ApiApiTagService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -162,7 +156,7 @@ public class ApiApiTagApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiTagService.SQL_LIST_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -181,7 +175,7 @@ public class ApiApiTagApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiTagService.SQL_LIST_SUBJECT_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -200,7 +194,7 @@ public class ApiApiTagApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiTagService.SQL_LIST_SUBJECT_BUSINESS_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -219,7 +213,7 @@ public class ApiApiTagApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiTagService.SQL_LIST_SUBJECT_PROXY_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -238,7 +232,7 @@ public class ApiApiTagApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiTagService.SQL_API_API_TAGS_BY_API_AND_TAG)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")).add(routingContext.pathParam("taguuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

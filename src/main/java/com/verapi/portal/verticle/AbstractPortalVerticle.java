@@ -12,6 +12,7 @@
 package com.verapi.portal.verticle;
 
 
+import com.verapi.abyss.logger.handler.rx.LoggerHandler;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
@@ -33,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
 
 public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
@@ -63,6 +63,8 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
     private Single<Router> configureRouter() {
         logger.trace("AbstractPortalVerticle.configureRouter() invoked");
+        verticleRouter.route().handler(LoggerHandler.create(true));
+        verticleRouter.route().handler(LoggerHandler.create());
         verticleRouter.route().handler(ResponseTimeHandler.create());
 
         verticleRouter.route("/logout").handler(context -> {

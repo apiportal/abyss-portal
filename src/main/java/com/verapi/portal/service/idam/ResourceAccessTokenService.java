@@ -11,13 +11,13 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
-import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;

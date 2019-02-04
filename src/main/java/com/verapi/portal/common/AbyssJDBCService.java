@@ -75,7 +75,7 @@ public class AbyssJDBCService {
 
 ///***************
         return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", dataSourceName))
-                .flatMap(record1 -> {
+                .flatMapSingle(record1 -> {
                     logger.trace("AbyssJDBCService.getJDBCServiceObject() getServiceDiscovery().rxGetRecord for " + dataSourceName + ", record = " + record1.toJson().encodePrettily());
                     JDBCClient jdbcClient = JDBCClient.createShared(vertx, record1.getMetadata(), dataSourceName);
                     logger.trace("AbyssJDBCService.getJDBCServiceObject() JDBCClient.createShared for " + dataSourceName + " jdbcClient = " + jdbcClient);
