@@ -24,3 +24,5 @@ abyssjdbc.log.2.lck
 abyssjdbc.log.lck
 abyssjdbc.log*
 /GitExtensions.settings
+/abyss-portal.iml
+/.gitmodules
