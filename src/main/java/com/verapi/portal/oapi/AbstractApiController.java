@@ -14,17 +14,17 @@ package com.verapi.portal.oapi;
 //import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 
 import com.google.json.JsonSanitizer;
+import com.verapi.abyss.exception.AbyssApiException;
+import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.NoDataFoundException;
+import com.verapi.abyss.exception.NotFound404Exception;
+import com.verapi.abyss.exception.UnAuthorized401Exception;
+import com.verapi.abyss.exception.UnProcessableEntity422Exception;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
-import com.verapi.portal.oapi.exception.AbyssApiException;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
-import com.verapi.portal.oapi.exception.NoDataFoundException;
-import com.verapi.portal.oapi.exception.NotFound404Exception;
-import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
-import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
-import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.es.ElasticSearchService;
@@ -48,8 +48,10 @@ import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -93,18 +95,18 @@ public abstract class AbstractApiController implements IApiController {
                             if (method.getAnnotation(AbyssApiOperationHandler.class) != null) {
                                 logger.trace("adding OpenAPI handler for the class {} and the method {}", getClass().getName(), method.getName());
 
+                                // Add a failure handler
+                                factory.addFailureHandlerByOperationId(method.getName(), this::failureHandler);
+
                                 // Now you can use the factory to mount map endpoints to Vert.x handlers
                                 factory.addHandlerByOperationId(method.getName(), routingContext -> {
                                     try {
                                         getClass().getDeclaredMethod(method.getName(), RoutingContext.class).invoke(this, routingContext);
                                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                                        logger.error(e.getLocalizedMessage());
-                                        logger.error(Arrays.toString(e.getStackTrace()));
+                                        logger.error("{}.{} invocation error: {} \n stack trace: {}", getClass().getName(), method.getName(), e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
+                                        throwApiException(routingContext, InternalServerError500Exception.class, e);
                                     }
                                 });
-
-                                // Add a failure handler
-                                factory.addFailureHandlerByOperationId(method.getName(), this::failureHandler);
                             }
                         }
 
@@ -163,6 +165,11 @@ public abstract class AbstractApiController implements IApiController {
         throwApiException(routingContext, clazz, userMessage, null, null, null);
     }
 
+    public <T> void throwApiException(RoutingContext routingContext, Class<T> clazz, Exception e) {
+        logger.trace("throwApiException(RoutingContext routingContext, Class<T> clazz, Exception e) is starting");
+        throwApiException(routingContext, clazz, e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()), null, null);
+    }
+
     public <T> void throwApiException(RoutingContext routingContext, Class<T> clazz, String userMessage, String detailedMessage) {
         throwApiException(routingContext, clazz, userMessage, detailedMessage, null, null);
     }
@@ -194,17 +201,23 @@ public abstract class AbstractApiController implements IApiController {
             abyssApiException = (AbyssApiException) clazz.getConstructor(ApiSchemaError.class).newInstance(apiSchemaError);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             abyssApiException = new InternalServerError500Exception(apiSchemaError);
-            logger.error(e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+            logger.error("Error occured dusing AbyssApiException instance constructing error:{} \n stack trace:{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
         }
         routingContext.fail(abyssApiException);
     }
 
     public void failureHandler(RoutingContext routingContext) {
-        logger.trace("failureHandler invoked; " + routingContext.failure().getLocalizedMessage());
-        logger.trace("failureHandler invoked; " + Arrays.toString(routingContext.failure().getStackTrace()));
+        Throwable failure;
+        if (routingContext.failure() == null)
+            failure = new InternalServerError500Exception("Routing Context Failure is null!");
+        else
+            failure = routingContext.failure();
+
+        logger.trace("failureHandler invoked; error: {} \n stack trace: {} "
+                , routingContext.failure().getLocalizedMessage()
+                , Arrays.toString(routingContext.failure().getStackTrace()));
 
         // This is the failure handler
-        Throwable failure = routingContext.failure();
         if (failure instanceof ValidationException)
             // Handle Validation Exception
             routingContext.response()
@@ -583,21 +596,21 @@ public abstract class AbstractApiController implements IApiController {
     }
 
 
-    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, UnsupportedEncodingException {
         getEntities(routingContext, clazz, null, new ApiFilterQuery());
     }
 
-    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, UnsupportedEncodingException {
         getEntities(routingContext, clazz, jsonColumns, new ApiFilterQuery());
     }
 
-    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, UnsupportedEncodingException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         String filterByNameParameter = null;
         String filterLikeNameParameter = null;
         if (!routingContext.queryParams().isEmpty()) {
             if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).isEmpty()) {
-                filterByNameParameter = routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0);
+                filterByNameParameter = URLDecoder.decode(routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0), "UTF-8");
             }
             if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).isEmpty()) {
                 if (filterByNameParameter != null && !filterByNameParameter.isEmpty())

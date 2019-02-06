@@ -9,10 +9,9 @@ import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +67,8 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
                                     return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
                                 }
 
-                                if (!(row.getString("token_type","").equals(Constants.ACTIVATION_TOKEN))) {
-                                    logger.error("Received Token Type does not match: " +  row.getString("token_type","NULL"));
+                                if (!(row.getString("token_type", "").equals(Constants.ACTIVATION_TOKEN))) {
+                                    logger.error("Received Token Type does not match: " + row.getString("token_type", "NULL"));
                                     return Single.error(new Exception("Right token does not exist in our records. Please request a new token."));
                                 }
 
@@ -103,8 +102,8 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
                             }
                         })
                         .flatMap(row -> {
-                            logger.info("Activate Account - Updating Subject with id:[" + row.getInteger("subject_id") + "] -> " + row.encodePrettily());
-                            return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET " +
+                                    logger.info("Activate Account - Updating Subject with id:[" + row.getInteger("subject_id") + "] -> " + row.encodePrettily());
+                                    return resConn.rxUpdateWithParams("UPDATE portalschema.subject SET " +
                                                     "updated = now()," +
                                                     "crud_subject_id = ?," +
                                                     "is_activated = true" +
@@ -169,15 +168,14 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
 
         ).subscribe(result -> {
                     logger.info("Subscription to ActivateAccount successful:" + result);
-                    generateResponse(routingContext, logger, 200, "Activation Successful!", "Welcome to API Portal.", "", "" );
+                    generateResponse(routingContext, logger, 200, "Activation Successful!", "Welcome to API Portal.", "", "");
                     //TODO: Send email to user
                 }, t -> {
                     logger.error("ActivateAccount Error", t);
-                    generateResponse(routingContext, logger, 401, "Activation Failed!", t.getLocalizedMessage(), "", "" );
+                    generateResponse(routingContext, logger, 401, "Activation Failed!", t.getLocalizedMessage(), "", "");
 
                 }
         );
-
 
 
         //TODO: Different action for different tokens and paths
@@ -206,13 +204,20 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
 
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         routingContext.put("full.name", fullName);
         routingContext.put("url.login", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL));
         routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+
+        //after vert.x 3.6, ThymeleafTemplateEngine render requires a JsonObject instead of RoutingContext
+        //so we prepare a JsonObject
+        JsonObject templateContext = new JsonObject()
+                .put("full.name", fullName)
+                .put("url.login", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL))
+                .put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/email/", "welcome.html", res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_WELCOME, res -> {
             if (res.succeeded()) {
                 //routingContext.response().putHeader("Content-Type", "text/html");
                 //routingContext.response().end(res.result());

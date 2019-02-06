@@ -11,7 +11,7 @@
 
 package com.verapi.portal.oapi;
 
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ApiGroupService;
 import io.vertx.core.json.JsonArray;
@@ -24,6 +24,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
@@ -46,7 +47,7 @@ public class ApiGroupApiController extends AbstractApiController {
     public void getApiGroups(RoutingContext routingContext) {
         try {
             getEntities(routingContext, ApiGroupService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -155,7 +156,7 @@ public class ApiGroupApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiGroupService.SQL_FIND_BY_SUBJECTID)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

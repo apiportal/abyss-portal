@@ -102,6 +102,7 @@
     </appender>
 
     <logger name="com.verapi" level="TRACE">
+        <appender-ref ref="ASYNC_FILE"/>
         <appender-ref ref="ASYNC_STDOUT"/>
         <appender-ref ref="ASYNC_ELASTIC"/>
     </logger>
@@ -110,18 +111,21 @@
         <appender-ref ref="ASYNC_FILE"/>
         <appender-ref ref="ASYNC_ELASTIC"/>
         <appender-ref ref="ASYNC_STDOUT"/>
+        <appender-ref ref="ASYNC_ELASTIC"/>
     </logger>
 
     <logger name="com.hazelcast" level="WARN">
         <appender-ref ref="ASYNC_FILE"/>
         <appender-ref ref="ASYNC_ELASTIC"/>
         <appender-ref ref="ASYNC_STDOUT"/>
+        <appender-ref ref="ASYNC_ELASTIC"/>
     </logger>
 
     <root level="WARN">
         <appender-ref ref="ASYNC_FILE"/>
         <appender-ref ref="ASYNC_ELASTIC"/>
         <appender-ref ref="ASYNC_STDOUT"/>
+        <appender-ref ref="ASYNC_ELASTIC"/>
     </root>
 
     <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>

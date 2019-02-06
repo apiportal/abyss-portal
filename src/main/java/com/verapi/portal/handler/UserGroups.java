@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +67,8 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
         ).subscribe(result -> {
                     logger.info("Subscription to UserGroups successfull:" + result);
                     JsonObject groupsResult = new JsonObject();
-                    groupsResult.put("groupList",result.toJson().getValue("rows"));
-                    groupsResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",30).put("currentPage",1).put("last",true).put("first",true).put("sort","ASC GROUP NAME");
+                    groupsResult.put("groupList", result.toJson().getValue("rows"));
+                    groupsResult.put("totalPages", 1).put("totalItems", result.getNumRows()).put("pageSize", 30).put("currentPage", 1).put("last", true).put("first", true).put("sort", "ASC GROUP NAME");
                     routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(groupsResult.toString(), "UTF-8");
                 }, t -> {
                     logger.error("UserGroups Error", t);
@@ -79,17 +79,16 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
     }
 
 
-
     public void pageRender(RoutingContext routingContext) {
         logger.info("UserGroups.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/", "user-groups.html", res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_USERGROUPS, res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());
@@ -103,12 +102,12 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
         logger.info("UserGroups.dirPageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/", "user-directories.html", res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_USERDIRECTORIES, res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());

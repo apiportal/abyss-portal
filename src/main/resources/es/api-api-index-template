@@ -6,7 +6,7 @@
     "index": {
       "mapping": {
         "total_fields": {
-          "limit": "10000"
+          "limit": "15000"
         },
         "nested_fields": {
           "limit": "5"

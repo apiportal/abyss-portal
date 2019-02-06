@@ -11,15 +11,15 @@
 
 package com.verapi.portal.verticle;
 
+import com.verapi.abyss.exception.AbyssApiException;
+import com.verapi.abyss.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.NotFound404Exception;
+import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
-import com.verapi.portal.oapi.exception.AbyssApiException;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
-import com.verapi.portal.oapi.exception.NotFound404Exception;
-import com.verapi.portal.oapi.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.idam.AuthenticationService;
 import com.verapi.portal.service.idam.AuthorizationService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -136,7 +136,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         //Handler which adds a header `x-response-time` in the response of matching requests containing the time taken in ms to process the request.
         router.route().handler(ResponseTimeHandler.create());
 
-        router.route().failureHandler(this::failureHandler);
+        //router.route().failureHandler(this::failureHandler);
 
         //router.route(Constants.ABYSS_GATEWAY_ROOT + "/:apiUUID/:apiPath").handler(this::routingContextHandler);
         router.route(Constants.ABYSS_GATEWAY_ROOT).handler(this::routingContextHandler);
@@ -329,7 +329,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         logger.trace("---testEchoHttpService invoked");
         return Completable.fromSingle(
                 AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", Constants.ECHO_HTTP_SERVICE))
-                        .flatMap(record -> {
+                        .flatMapSingle(record -> {
                             ServiceReference serviceReference = AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().getReference(record);
                             try {
                                 //WebClient webClient = serviceReference.getAs(WebClient.class);
@@ -378,7 +378,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
     Single<AbyssServiceReference> lookupHttpService(String serviceName) {
         return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", serviceName))
-                .flatMap(record -> {
+                .flatMapSingle(record -> {
                     ServiceReference serviceReference = AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().getReference(record);
                     HttpClient httpClient = serviceReference.getAs(io.vertx.reactivex.core.http.HttpClient.class);
                     return Single.just(new AbyssServiceReference(serviceReference, httpClient));

@@ -12,7 +12,7 @@
 package com.verapi.portal.oapi;
 
 //import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.SubjectService;
 import com.verapi.portal.service.idam.SubjectServiceOld;
 import io.reactivex.Single;
@@ -27,12 +27,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Objects;
-
-import static com.verapi.portal.common.Util.encodeFileToBase64Binary;
 
 //@AbyssApiController(apiSpec = "/openapi/SubjectGroupPermission.yaml")
 public class SubjectsGroupsPermissionsApiController extends AbstractApiController {

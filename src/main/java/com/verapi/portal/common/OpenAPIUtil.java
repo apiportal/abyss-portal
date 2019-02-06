@@ -13,7 +13,7 @@ package com.verapi.portal.common;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.verapi.portal.oapi.exception.UnProcessableEntity422Exception;
+import com.verapi.abyss.exception.UnProcessableEntity422Exception;
 import io.reactivex.Single;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.ObjectMapperFactory;

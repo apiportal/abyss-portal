@@ -11,12 +11,12 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.NoDataFoundException;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
-import com.verapi.portal.oapi.exception.NoDataFoundException;
-import com.verapi.portal.oapi.schema.ApiSchemaError;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -77,6 +77,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.containsKey("isactivated") ? jsonObj.getBoolean("isactivated") : false)
                             .add(jsonObj.getString("subjecttypeid"))
                             .add(jsonObj.getString("subjectname"))
                             .add(jsonObj.getString("firstname"))
@@ -155,6 +156,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
         JsonArray updateParams = new JsonArray()
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.containsKey("isactivated") ? updateRecord.getBoolean("isactivated") : false)
                 .add(updateRecord.getString("subjecttypeid"))
                 .add(updateRecord.getString("subjectname"))
                 .add(updateRecord.getString("firstname"))
@@ -203,6 +205,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     JsonArray updateParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.containsKey("isactivated") ? jsonObj.getBoolean("isactivated") : false)
                             .add(jsonObj.getString("subjecttypeid"))
                             .add(jsonObj.getString("subjectname"))
                             .add(jsonObj.getString("firstname"))
@@ -370,11 +373,11 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
+    private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, isactivated, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
             "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
             "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing, description)\n" +
             "values\n" +
-            "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
+            "  (CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
             "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
             "   CAST(? AS uuid), ?, ?, ?, ?, ?)";
 
@@ -423,6 +426,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , isactivated      = ?\n" +
             "  , updated               = now()\n" +
             "  , subjecttypeid      = CAST(? AS uuid)\n" +
             "  , subjectname       = ?\n" +

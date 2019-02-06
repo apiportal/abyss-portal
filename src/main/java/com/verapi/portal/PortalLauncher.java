@@ -205,6 +205,33 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         });
         */
 
+        // TODO: Complete Consul Configuration
+/*
+        ConfigStoreOptions consulConfigStore = new ConfigStoreOptions()
+                .setType("consul")
+                .setFormat("json")
+                .setConfig(new JsonObject()
+                        .put("host", "localhost")
+                        .put("port", 8500)
+                  //      .put("prefix", "abyss")
+                );
+        ConfigRetriever consulConfigRetriever = ConfigRetriever.create(vertx,
+                new ConfigRetrieverOptions().addStore(consulConfigStore));
+
+        consulConfigRetriever.getConfig(ar -> {
+            if (ar.failed()) {
+                future.completeExceptionally(ar.cause());
+                logger.error("afterStartingVertx consulConfigRetriever getConfig failed " + ar.cause());
+            } else {
+                Config.getInstance().setConfig(ar.result());
+                logger.warn("consulConfigRetriever loaded\n{}", ar.result().encodePrettily());
+                logger.warn("consulConfigRetriever loaded\n{}", ar.result());
+                logger.warn("consulConfigRetriever loaded\n{}", ar.result().getString("hostProtocol"));
+            }
+        });
+*/
+
+
         //set all loggers' level
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();

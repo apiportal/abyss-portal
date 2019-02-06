@@ -14,11 +14,12 @@ package com.verapi.portal.controller;
 import com.verapi.portal.common.Constants;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +38,21 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
     public abstract void defaultGetHandler(RoutingContext routingContext);
 
     protected void renderTemplate(RoutingContext routingContext, String templateFileName) {
-        renderTemplate(routingContext, templateFileName, 200);
+        renderTemplate(routingContext, new JsonObject(), templateFileName, 200);
     }
 
-    protected void renderTemplate(RoutingContext routingContext, String templateFileName, int statusCode) {
-        final ThymeleafTemplateEngine templateEngine = ThymeleafTemplateEngine.create();
-        templateEngine.render(routingContext, Constants.TEMPLATE_DIR_ROOT, templateFileName, res -> {
+    protected void renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName) {
+        renderTemplate(routingContext, context, templateFileName, 200);
+    }
+
+    protected void renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName, int statusCode) {
+        _renderTemplate(routingContext, context, templateFileName, statusCode);
+    }
+
+    private void _renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName, int statusCode) {
+        final ThymeleafTemplateEngine templateEngine = ThymeleafTemplateEngine.create(routingContext.vertx());
+        //templateEngine.render(routingContext, Constants.TEMPLATE_DIR_ROOT, templateFileName, res -> {
+        templateEngine.render(context, Constants.TEMPLATE_DIR_ROOT + templateFileName, res -> {
             if (res.succeeded()) {
                 responseHTML(routingContext, res.result(), statusCode);
                 logger.trace("renderTemplate using " + templateFileName + " finished successfully");

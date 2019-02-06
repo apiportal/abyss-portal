@@ -79,6 +79,18 @@ public class Constants {
     public static final String HTTP_STATUSCODE = "http.statusCode";
     public static final String HTML_FAILURE = "failure.html";
     public static final String HTML_SUCCESS = "success.html";
+    public static final String HTML_SIGNUP = "signup.html";
+    public static final String HTML_ACTIVATE = "activate.html";
+    public static final String HTML_USERGROUPS = "user-groups.html";
+    public static final String HTML_USERDIRECTORIES = "user-directories.html";
+    public static final String HTML_LOGIN = "login.html";
+    public static final String HTML_USERS = "users.html";
+    public static final String HTML_WELCOME = "welcome.html";
+    public static final String HTML_FORGOTPASSWORD = "forgotpassword.html";
+    public static final String HTML_FORGOT_PASSWORD = "forgot-password.html";
+    public static final String HTML_RESETPASSWORD = "resetpassword.html";
+    public static final String HTML_CHANGE_PASSWORD = "change-password.html";
+    public static final String HTML_INDEX = "index.html";
 
     public static final String PORTAL_JDBC_URL = "portal.jdbc.url";
     public static final String PORTAL_JDBC_DRIVER_CLASS = "portal.jdbc.driver.class";
@@ -97,7 +109,7 @@ public class Constants {
     public static final String ECHO_HTTP_SERVICE = "echo-http-service";
 
     public static final String TEMPLATE_DIR_ROOT = "webroot/";
-    static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT + "email/";
+    public static final String TEMPLATE_DIR_EMAIL = TEMPLATE_DIR_ROOT + "email/";
     public static final String TEMPLATE_SUFFIX = ".html";
 
 

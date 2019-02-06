@@ -14,7 +14,7 @@ import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,12 +219,12 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
         logger.info("Signup.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/", "signup.html", res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_SIGNUP, res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());
@@ -239,13 +239,20 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         routingContext.put("url.activation", activationUrl);
         routingContext.put("text.activation", activationText);
         routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+
+        JsonObject templateContext = new JsonObject()
+                .put("url.activation", activationUrl)
+                .put("text.activation", activationText)
+                .put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+
+
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/email/", "activate.html", res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_ACTIVATE, res -> {
             if (res.succeeded()) {
                 //routingContext.response().putHeader("Content-Type", "text/html");
                 //routingContext.response().end(res.result());

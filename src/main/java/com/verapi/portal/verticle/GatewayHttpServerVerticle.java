@@ -61,7 +61,12 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                 .subscribe(() -> {
                             logger.trace("started");
                             super.start(startFuture);
-                            loadAllProxyApis().subscribe();
+                            loadAllProxyApis().subscribe(() -> {
+                                        logger.trace("loadAllProxyApis completed successfully");
+                                    }
+                                    , throwable -> {
+                                        logger.error("loadAllProxyApis error:{} \n stack trace:{}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                    });
                         }
                         , throwable -> {
                             logger.error("[subscribe]start error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
@@ -225,7 +230,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                         .getServiceDiscovery()
                         .rxPublish(record)
                         .toObservable()))
-                .doOnError(throwable -> logger.error("loadAllProxyApis error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                .doOnError(throwable -> logger.error("loadAllProxyApis() error: {} \n stack trace: {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
                 //.andThen(super.loadAllProxyApis())
                 .doFinally(() -> {
                     String mountPoint;

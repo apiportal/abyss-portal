@@ -23,34 +23,25 @@ import com.verapi.portal.handler.Signup;
 import com.verapi.portal.handler.UserGroups;
 import com.verapi.portal.handler.Users;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
-import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.web.handler.LoggerFormat;
+import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.ext.web.handler.LoggerFormat;
-import io.vertx.reactivex.ext.web.handler.CSRFHandler;
-import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
+import io.vertx.reactivex.ext.web.handler.*;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
-import io.vertx.reactivex.ext.web.handler.BodyHandler;
-import io.vertx.reactivex.ext.web.handler.CookieHandler;
-import io.vertx.reactivex.ext.web.handler.LoggerHandler;
-import io.vertx.reactivex.ext.web.handler.SessionHandler;
-import io.vertx.reactivex.ext.web.handler.UserSessionHandler;
-import io.vertx.reactivex.ext.web.handler.RedirectAuthHandler;
-import io.vertx.reactivex.ext.web.handler.StaticHandler;
-import io.vertx.reactivex.ext.web.handler.AuthHandler;
-import io.vertx.servicediscovery.Record;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
 import io.vertx.reactivex.servicediscovery.types.JDBCDataSource;
+import io.vertx.servicediscovery.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,7 +181,6 @@ public class MainVerticle extends AbstractVerticle {
             router.get("/user-directories").handler(userGroups::dirPageRender).failureHandler(this::failureHandler);
 
             //TEST - router.get("/my-apis").handler(userGroups::apiPageRender).failureHandler(this::failureHandler);
-
 
 
             //install authHandler for all routes where authentication is required
@@ -348,7 +338,7 @@ public class MainVerticle extends AbstractVerticle {
         logger.info("pGenericHttpStatusCodeHandler - status code: " + statusCode);
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(context.vertx());
         //configureThymeleafEngine(engine);
 
         context.put(Constants.HTTP_STATUSCODE, statusCode);
@@ -356,8 +346,15 @@ public class MainVerticle extends AbstractVerticle {
         context.put(Constants.HTTP_ERRORMESSAGE, context.session().get(Constants.HTTP_ERRORMESSAGE));
         context.put(Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
+        JsonObject templateContext = new JsonObject()
+                .put(Constants.HTTP_STATUSCODE, statusCode)
+                .put(Constants.HTTP_URL, (String) context.session().get(Constants.HTTP_URL))
+                .put(Constants.HTTP_ERRORMESSAGE, (String) context.session().get(Constants.HTTP_ERRORMESSAGE))
+                .put(Constants.CONTEXT_FAILURE_MESSAGE, (String) context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+
+
         String templateFileName;
-        if (statusCode==200) {
+        if (statusCode == 200) {
             templateFileName = Constants.HTML_SUCCESS;
         } else {
             templateFileName = Constants.HTML_FAILURE;
@@ -368,7 +365,7 @@ public class MainVerticle extends AbstractVerticle {
 //        }
 
         // and now delegate to the engine to render it.
-        engine.render(context, "webroot/", templateFileName, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_ROOT + templateFileName, res -> {
             if (res.succeeded()) {
                 context.response().putHeader("Content-Type", "text/html");
                 context.response().setStatusCode(statusCode);
@@ -406,17 +403,18 @@ public class MainVerticle extends AbstractVerticle {
         context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
 //        }
     }
-/*
-    private void configureThymeleafEngine(ThymeleafTemplateEngine engine) {
-        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-        templateResolver.setPrefix(Constants.TEMPLATE_PREFIX);
-        templateResolver.setSuffix(Constants.TEMPLATE_SUFFIX);
-        engine.getThymeleafTemplateEngine().setTemplateResolver(templateResolver);
 
-//        CustomMessageResolver customMessageResolver = new CustomMessageResolver();
-//        engine.getThymeleafTemplateEngine().setMessageResolver(customMessageResolver);
-    }
-*/
+    /*
+        private void configureThymeleafEngine(ThymeleafTemplateEngine engine) {
+            ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+            templateResolver.setPrefix(Constants.TEMPLATE_PREFIX);
+            templateResolver.setSuffix(Constants.TEMPLATE_SUFFIX);
+            engine.getThymeleafTemplateEngine().setTemplateResolver(templateResolver);
+
+    //        CustomMessageResolver customMessageResolver = new CustomMessageResolver();
+    //        engine.getThymeleafTemplateEngine().setMessageResolver(customMessageResolver);
+        }
+    */
     /* (non-Javadoc)
      * @see io.vertx.reactivex.core.AbyssAbstractVerticle#stop()
      */

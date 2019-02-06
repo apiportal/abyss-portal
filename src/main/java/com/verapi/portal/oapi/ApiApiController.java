@@ -12,7 +12,7 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ApiService;
 import com.verapi.portal.service.idam.ApiTagService;
@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class ApiApiController extends AbstractApiController {
     void getEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         try {
             getEntities(routingContext, ApiService.class, jsonbColumnsList, apiFilterQuery);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -251,7 +252,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -367,7 +368,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -408,7 +409,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -448,7 +449,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -467,7 +468,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiTagService.SQL_BUSINESS_API_AGGREGATE_COUNT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -489,7 +490,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("tag"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -511,7 +512,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("category"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -533,7 +534,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("group"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -555,7 +556,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("tag"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -577,7 +578,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("category"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -599,7 +600,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("group"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -619,7 +620,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_APIS_SHARED_WITH_SUBJECT)
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -639,7 +640,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_APIS_SHARED_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

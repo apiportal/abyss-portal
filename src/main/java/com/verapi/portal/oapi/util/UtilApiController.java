@@ -16,7 +16,7 @@ import com.verapi.portal.common.PlatformAPIList;
 import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.AbyssApiController;
 import com.verapi.portal.oapi.AbyssApiOperationHandler;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;

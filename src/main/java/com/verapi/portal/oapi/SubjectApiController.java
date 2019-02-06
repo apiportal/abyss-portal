@@ -12,7 +12,7 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.portal.common.Constants;
-import com.verapi.portal.oapi.exception.InternalServerError500Exception;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.SubjectService;
 import io.vertx.core.json.JsonArray;
@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class SubjectApiController extends AbstractApiController {
     void getEntities(RoutingContext routingContext, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) {
         try {
             getEntities(routingContext, SubjectService.class, jsonColumns, apiFilterQuery);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

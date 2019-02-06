@@ -6,10 +6,9 @@ import io.reactivex.Single;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.templ.ThymeleafTemplateEngine;
+import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,9 +72,9 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
         ).subscribe(result -> {
                     logger.info("Subscription to Users successfull:" + result);
                     JsonObject usersResult = new JsonObject();
-                    usersResult.put("userList",result.toJson().getValue("rows"));
-                    usersResult.put("totalPages",1).put("totalItems",result.getNumRows()).put("pageSize",30).put("currentPage",1).put("last",true).put("first",true).put("sort","ASC SUBJECT NAME");
-                    routingContext.response().putHeader("content-type","application/json; charset=utf-8").end(usersResult.toString(), "UTF-8");
+                    usersResult.put("userList", result.toJson().getValue("rows"));
+                    usersResult.put("totalPages", 1).put("totalItems", result.getNumRows()).put("pageSize", 30).put("currentPage", 1).put("last", true).put("first", true).put("sort", "ASC SUBJECT NAME");
+                    routingContext.response().putHeader("content-type", "application/json; charset=utf-8").end(usersResult.toString(), "UTF-8");
                 }, t -> {
                     logger.error("Users Error", t);
                     generateResponse(routingContext, logger, 401, "Users Handling Error Occured", t.getLocalizedMessage(), "", "");
@@ -85,17 +84,16 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
     }
 
 
-
     public void pageRender(RoutingContext routingContext) {
         logger.info("Users.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
-        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create();
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(routingContext, "webroot/", "users.html", res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_USERS, res -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader("Content-Type", "text/html");
                 routingContext.response().end(res.result());

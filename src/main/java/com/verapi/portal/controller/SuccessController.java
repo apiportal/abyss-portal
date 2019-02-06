@@ -12,6 +12,7 @@
 package com.verapi.portal.controller;
 
 import com.verapi.portal.common.Constants;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -39,7 +40,14 @@ public class SuccessController extends PortalAbstractController {
         routingContext.put(Constants.HTTP_ERRORMESSAGE, routingContext.session().get(Constants.HTTP_ERRORMESSAGE));
         routingContext.put(Constants.CONTEXT_FAILURE_MESSAGE, routingContext.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
-        renderTemplate(routingContext, Controllers.TRX_OK.templateFileName, statusCode);
+        JsonObject templateContext = new JsonObject()
+                .put(Constants.HTTP_STATUSCODE, statusCode)
+                .put(Constants.HTTP_URL, (String) routingContext.session().get(Constants.HTTP_URL))
+                .put(Constants.HTTP_ERRORMESSAGE, (String) routingContext.session().get(Constants.HTTP_ERRORMESSAGE))
+                .put(Constants.CONTEXT_FAILURE_MESSAGE, (String) routingContext.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+
+
+        renderTemplate(routingContext, templateContext, Controllers.TRX_OK.templateFileName, statusCode);
     }
 
     @Override
@@ -54,7 +62,13 @@ public class SuccessController extends PortalAbstractController {
         routingContext.put(Constants.HTTP_ERRORMESSAGE, routingContext.session().get(Constants.HTTP_ERRORMESSAGE));
         routingContext.put(Constants.CONTEXT_FAILURE_MESSAGE, routingContext.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
-        renderTemplate(routingContext, Controllers.TRX_OK.templateFileName, statusCode);
+        JsonObject templateContext = new JsonObject()
+                .put(Constants.HTTP_STATUSCODE, statusCode)
+                .put(Constants.HTTP_URL, (String) routingContext.session().get(Constants.HTTP_URL))
+                .put(Constants.HTTP_ERRORMESSAGE, (String) routingContext.session().get(Constants.HTTP_ERRORMESSAGE))
+                .put(Constants.CONTEXT_FAILURE_MESSAGE, (String) routingContext.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+
+        renderTemplate(routingContext, templateContext, Controllers.TRX_OK.templateFileName, statusCode);
 
         super.handle(routingContext);
 

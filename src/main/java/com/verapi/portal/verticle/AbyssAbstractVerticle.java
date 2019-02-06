@@ -19,7 +19,6 @@ import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.common.Config;
 import com.verapi.portal.common.Constants;
 import com.verapi.portal.controller.FailureController;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
@@ -200,7 +199,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     private Single<Router> configureAbyssRouter() {
 
-        logger.trace("createRouter() running");
+        logger.trace("configureAbyssRouter() running");
 
         //log HTTP requests
         abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
@@ -260,9 +259,11 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         FailureController failureController = new FailureController(jdbcAuth, jdbcClient);
 
-        abyssRouter.routeWithRegex("^" + Constants.ABYSS_ROOT + "/[4|5][0|1]\\d$").handler(failureController).failureHandler(this::failureHandler);
+        //abyssRouter.routeWithRegex("^" + Constants.ABYSS_ROOT + "/[4|5][0|1]\\d$").handler(failureController).failureHandler(this::failureHandler);
+        abyssRouter.routeWithRegex("^" + Constants.ABYSS_ROOT + "/[4|5][0|1]\\d$").handler(failureController);
 
-        abyssRouter.get(Constants.ABYSS_ROOT + "/failure").handler(failureController).failureHandler(this::failureHandler);
+        //abyssRouter.get(Constants.ABYSS_ROOT + "/failure").handler(failureController).failureHandler(this::failureHandler);
+        abyssRouter.get(Constants.ABYSS_ROOT + "/failure").handler(failureController);
 
         //if verticle is Portal type verticle then handle failures with Abyss error pages
         if (verticleType.equals(Constants.VERTICLE_TYPE_PORTAL))
@@ -299,6 +300,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     void failureHandler(RoutingContext context) {
+/*
         logger.trace("failureHandler invoked.. statusCode: " + context.statusCode());
 
         //Use user's session for storage
@@ -315,6 +317,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         logger.trace(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
         context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
+*/
     }
 
     private void globalJavascript(RoutingContext context) {
