@@ -41,8 +41,8 @@ public class ElasticSearchService extends AbstractElasticSearchService {
         Boolean isCassandraLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.CASSANDRA_LOGGER_ENABLED);
         if (isCassandraLoggerEnabled) {
             try {
-                if (CassandraService2.getInstance(routingContext) != null)
-                    CassandraService2.getInstance(routingContext).indexDocument(type, uuid, source);
+                if (CassandraService.getInstance(routingContext) != null)
+                    CassandraService.getInstance(routingContext).indexDocument(type, uuid, source);
             } catch (Exception e) {
                 logger.error("Cassandra indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), source);
             }

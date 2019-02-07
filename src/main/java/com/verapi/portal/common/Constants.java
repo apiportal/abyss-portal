@@ -15,7 +15,7 @@ package com.verapi.portal.common;
 public class Constants {
 
     public static final String ABYSS_BUILD_TIMESTAMP = "abyss.build.timestamp";
-    private static final String ABYSS = "abyss";
+    public static final String ABYSS = "abyss";
     public static final String ABYSS_GW = "abyss-gw";
     public static final String ABYSS_ROOT = "/" + ABYSS;
     public static final String ABYSS_GATEWAY_ROOT = "/" + ABYSS_GW;
@@ -257,6 +257,12 @@ public class Constants {
     public static final String CASSANDRA_DBUSER_NAME = "cassandra.dbuser.name";
     public static final String CASSANDRA_DBUSER_PASSWORD = "cassandra.dbuser.password";
     public static final String CASSANDRA_KEYSPACE = "cassandra.keyspace";
+
+    public static final String INFLUXDB_URI = "influxdb.uri";
+    public static final String INFLUXDB_DBNAME = "influxdb.dbname";
+    public static final String INFLUXDB_DBUSER_NAME = "influxdb.dbuser.name";
+    public static final String INFLUXDB_DBUSER_PASSWORD = "influxdb.dbuser.password";
+
 
     /*
     # enums

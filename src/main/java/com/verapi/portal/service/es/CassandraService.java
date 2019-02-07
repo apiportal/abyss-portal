@@ -13,11 +13,14 @@ package com.verapi.portal.service.es;
 
 import com.datastax.driver.core.HostDistance;
 import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.datastax.driver.extras.codecs.jdk8.InstantCodec;
-import io.reactivex.Single;
+import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import io.vertx.cassandra.CassandraClientOptions;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.cassandra.CassandraClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -32,21 +35,39 @@ public class CassandraService {
 
     private static CassandraService instance = null;
     private CassandraClient cassandraClient;
+    private PreparedStatement preparedStatement;
     private RoutingContext routingContext;
 
+    /**
+     * returns a singleton CassandraService instance
+     *
+     * @param routingContext Vertx instance is associated with this routing context, it is required for {@link io.vertx.cassandra.CassandraClient#createShared(Vertx, CassandraClientOptions)}
+     */
     public static CassandraService getInstance(RoutingContext routingContext) {
         if ((instance == null) && (routingContext != null))
             instance = new CassandraService(routingContext);
         return instance;
     }
 
-    private CassandraService(RoutingContext routingContext) {
-        setRoutingContext(routingContext);
+    /**
+     * Construct new singleton CassandraService instance
+     *
+     * @param routingContext Vertx instance is associated with this routing context, it is required for {@link io.vertx.cassandra.CassandraClient#createShared(Vertx, CassandraClientOptions)}
+     */
 
-        CassandraClientOptions cassandraClientOptions;
-        cassandraClientOptions = new CassandraClientOptions()
-                .addContactPoint("192.168.10.41")
-                .addContactPoint("192.168.10.42");
+
+    private CassandraService(RoutingContext routingContext) {
+        logger.info("initializing Cassandra Service");
+        setRoutingContext(routingContext);
+        String[] cassandraContactPoints = Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_CONTACT_POINTS).split(",");
+
+        CassandraClientOptions cassandraClientOptions = new CassandraClientOptions();
+
+        for (String contactPoint : cassandraContactPoints) {
+            cassandraClientOptions.addContactPoint(contactPoint);
+            logger.info("Cassandra contact point[{}] added", contactPoint);
+        }
+        cassandraClientOptions.setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.CASSANDRA_PORT));
 
         PoolingOptions poolingOptions = new PoolingOptions();
         poolingOptions
@@ -54,6 +75,8 @@ public class CassandraService {
                 .setConnectionsPerHost(HostDistance.REMOTE, 2, 4);
 
         cassandraClientOptions.dataStaxClusterBuilder()
+                .withCredentials(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_DBUSER_NAME)
+                        , Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_DBUSER_PASSWORD))
                 .withLoadBalancingPolicy(new RoundRobinPolicy())
                 .withoutJMXReporting()
                 .withoutMetrics()
@@ -62,36 +85,48 @@ public class CassandraService {
                 .getConfiguration().getCodecRegistry().register(InstantCodec.instance);
 
         CassandraClient cassandraClient = CassandraClient.createShared(getRoutingContext().vertx(), cassandraClientOptions);
-
-        setCassandraClient(cassandraClient);
+        cassandraClient.connect(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_KEYSPACE), event -> {
+            if (event.succeeded()) {
+                logger.info("Cassandra client connected");
+                String insertStatement = "insert into platform_api_log (id, httpmethod, httppath, httpsession, \"index\", remoteaddress, source, timestamp,username)\n" +
+                        "values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                cassandraClient.prepare(insertStatement, prepareResult -> {
+                    if (prepareResult.succeeded()) {
+                        logger.trace("Cassandra client prepared statement");
+                        preparedStatement = prepareResult.result();
+                        setCassandraClient(cassandraClient);
+                    } else {
+                        logger.error("Cassandra client is unable to prepare statement, error: {} \n stack trace:{}", event.cause().getLocalizedMessage());
+                    }
+                });
+            } else {
+                logger.error("Cassandra client is unable to connect, error: {} \n stack trace:{}", event.cause().getLocalizedMessage());
+            }
+        });
     }
 
     public void indexDocument(String index, UUID id, JsonObject source) {
-        String insertStatement = "insert into platform_api_log (id, httpmethod, httppath, httpsession, \"index\", remoteaddress, source, timestamp,username)\n" +
-                "values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        //getCassandraClient()
+        if (cassandraClient == null) {
+            logger.warn("Cassandra client initialization not completed yet");
+            return; //TODO: fix to wait cassandraClient instance creation asynch block
+        }
+
         cassandraClient
-                .rxConnect("verapi_analytics_dev")
-                .andThen(Single.just(getCassandraClient()))
-                .flatMap(cassandraClient1 -> cassandraClient1.rxPrepare(insertStatement))
-                //.andThen(getCassandraClient().rxPrepare(insertStatement))
-                .flatMap(preparedStatement -> getCassandraClient()
-                        .rxExecute(preparedStatement.bind(
-                                id
-                                , getRoutingContext().request().method().toString()
-                                , getRoutingContext().request().path()
-                                , getRoutingContext().session().id()
-                                , index
-                                , getRoutingContext().request().remoteAddress().host()
-                                , source.encode()
-                                , Instant.now()
-                                , getRoutingContext().user().principal().getString("username"))))
-                .doFinally(() -> getCassandraClient().rxDisconnect())
+                .rxExecute(preparedStatement.bind(id
+                        , getRoutingContext().request().method().toString()
+                        , getRoutingContext().request().path()
+                        , getRoutingContext().session().id()
+                        , index
+                        , getRoutingContext().request().remoteAddress().host()
+                        , source.encode()
+                        , Instant.now()
+                        , getRoutingContext().user().principal().getString("username")))
+                .doAfterTerminate(() -> cassandraClient.rxDisconnect())
                 .subscribe(o -> {
                             logger.info("successfully inserted into Cassandra");
                         }
                         , throwable -> {
-                            logger.error("unable to insert into Cassandra: {}", throwable.getLocalizedMessage());
+                            logger.error("unable to insert into Cassandra! error:{} \n stack trace: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                         });
     }
 

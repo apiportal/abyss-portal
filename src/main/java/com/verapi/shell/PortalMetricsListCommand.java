@@ -14,7 +14,6 @@ package com.verapi.shell;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
-import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.ext.shell.command.AnnotatedCommand;
 import io.vertx.ext.shell.command.CommandProcess;
 
@@ -26,10 +25,12 @@ public class PortalMetricsListCommand extends AnnotatedCommand {
 
     @Override
     public void process(CommandProcess commandProcess) {
+/*
         MetricsService metrics = MetricsService.create(commandProcess.vertx());
         metrics.metricsNames().forEach(name -> {
             commandProcess.write(name + "\n");
         });
+*/
         commandProcess.end();
     }
 

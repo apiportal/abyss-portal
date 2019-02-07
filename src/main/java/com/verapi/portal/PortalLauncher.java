@@ -28,8 +28,10 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.impl.launcher.VertxCommandLauncher;
 import io.vertx.core.impl.launcher.VertxLifecycleHooks;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.shell.command.CommandRegistry;
+import io.vertx.micrometer.MicrometerMetricsOptions;
+import io.vertx.micrometer.VertxInfluxDbOptions;
+import io.vertx.micrometer.VertxJmxMetricsOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,6 +90,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     @Override
     public void beforeStartingVertx(VertxOptions vertxOptions) {
         vertxOptions.setHAEnabled(true);
+/*
         vertxOptions.setMetricsOptions(new DropwizardMetricsOptions()
                 .setEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_ENABLED, true))
                 .setJmxEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_JMX_ENABLED, true))
@@ -95,6 +98,22 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 .setJmxDomain(Constants.ABYSS_PORTAL)
                 .setBaseName(Constants.ABYSS_PORTAL)
         );
+*/
+        vertxOptions.setMetricsOptions(new MicrometerMetricsOptions()
+                .setJmxMetricsOptions(new VertxJmxMetricsOptions()
+                        .setStep(10)
+                        .setDomain(Constants.ABYSS)
+                        .setEnabled(true))
+                .setInfluxDbOptions(new VertxInfluxDbOptions()
+                        .setUri(getProperty(Constants.INFLUXDB_URI))
+                        .setDb(getProperty(Constants.INFLUXDB_DBNAME))
+                        .setUserName(getProperty(Constants.INFLUXDB_DBUSER_NAME))
+                        .setPassword(getProperty(Constants.INFLUXDB_DBUSER_PASSWORD)
+                        )
+                        .setEnabled(true)
+                )
+                .setEnabled(true));
+
         logger.trace(vertxOptions.toString());
     }
 
