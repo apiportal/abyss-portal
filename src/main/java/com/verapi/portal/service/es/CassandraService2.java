@@ -17,6 +17,8 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ProtocolOptions;
 import com.datastax.driver.core.policies.RoundRobinPolicy;
 import com.datastax.driver.extras.codecs.jdk8.InstantCodec;
+import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import io.vertx.cassandra.CassandraClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.cassandra.CassandraClient;
@@ -42,12 +44,17 @@ public class CassandraService2 {
     }
 
     private CassandraService2(RoutingContext routingContext) {
+        logger.info("initializing Cassandra Service");
         setRoutingContext(routingContext);
+        String[] cassandraContactPoints = Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_CONTACT_POINTS).split(",");
 
-        CassandraClientOptions cassandraClientOptions;
-        cassandraClientOptions = new CassandraClientOptions()
-                .addContactPoint("192.168.10.41")
-                .addContactPoint("192.168.10.42");
+        CassandraClientOptions cassandraClientOptions = new CassandraClientOptions();
+
+        for (String contactPoint : cassandraContactPoints) {
+            cassandraClientOptions.addContactPoint(contactPoint);
+            logger.info("Cassandra contact point[{}] added", contactPoint);
+        }
+        cassandraClientOptions.setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.CASSANDRA_PORT));
 
         PoolingOptions poolingOptions = new PoolingOptions();
         poolingOptions
@@ -55,6 +62,8 @@ public class CassandraService2 {
                 .setConnectionsPerHost(HostDistance.REMOTE, 2, 4);
 
         cassandraClientOptions.dataStaxClusterBuilder()
+                .withCredentials(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_DBUSER_NAME)
+                        , Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_DBUSER_PASSWORD))
                 .withLoadBalancingPolicy(new RoundRobinPolicy())
                 .withoutJMXReporting()
                 .withoutMetrics()
@@ -63,7 +72,7 @@ public class CassandraService2 {
                 .getConfiguration().getCodecRegistry().register(InstantCodec.instance);
 
         CassandraClient cassandraClient = CassandraClient.createShared(getRoutingContext().vertx(), cassandraClientOptions);
-        cassandraClient.connect("verapi_analytics_dev", event -> {
+        cassandraClient.connect(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_KEYSPACE), event -> {
             if (event.succeeded()) {
                 logger.info("Cassandra client connected");
                 String insertStatement = "insert into platform_api_log (id, httpmethod, httppath, httpsession, \"index\", remoteaddress, source, timestamp,username)\n" +

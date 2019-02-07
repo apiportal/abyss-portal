@@ -11,6 +11,8 @@
 
 package com.verapi.portal.service.es;
 
+import com.verapi.portal.common.Config;
+import com.verapi.portal.common.Constants;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -36,11 +38,14 @@ public class ElasticSearchService extends AbstractElasticSearchService {
         logger.trace("indexDocument() invoked");
         UUID uuid = UUID.randomUUID();
         super.indexDocument(routingContext, index, type, uuid.toString(), source);
-        try {
-            if (CassandraService2.getInstance(routingContext) != null)
-                CassandraService2.getInstance(routingContext).indexDocument(type, uuid, source);
-        } catch (Exception e) {
-            logger.error("Cassandra indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), source);
+        Boolean isCassandraLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.CASSANDRA_LOGGER_ENABLED);
+        if (isCassandraLoggerEnabled) {
+            try {
+                if (CassandraService2.getInstance(routingContext) != null)
+                    CassandraService2.getInstance(routingContext).indexDocument(type, uuid, source);
+            } catch (Exception e) {
+                logger.error("Cassandra indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), source);
+            }
         }
     }
 

@@ -251,6 +251,13 @@ public class Constants {
     public static final String AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME = "user.uuid";
     public static final String AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME = "username";
 
+    public static final String CASSANDRA_LOGGER_ENABLED = "cassandra.logger.enabled";
+    public static final String CASSANDRA_CONTACT_POINTS = "cassandra.contact.points";
+    public static final String CASSANDRA_PORT = "cassandra.port";
+    public static final String CASSANDRA_DBUSER_NAME = "cassandra.dbuser.name";
+    public static final String CASSANDRA_DBUSER_PASSWORD = "cassandra.dbuser.password";
+    public static final String CASSANDRA_KEYSPACE = "cassandra.keyspace";
+
     /*
     # enums
     */
