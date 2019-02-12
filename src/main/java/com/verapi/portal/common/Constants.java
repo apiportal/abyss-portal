@@ -73,10 +73,10 @@ public class Constants {
     public static final String HTTPS_GATEWAY_SSL_TRUSTSTORE_PATH = "";
     public static final String HTTPS_GATEWAY_SSL_TRUSTSTORE_PASSWORD = "";
 
-    public static final String CONTEXT_FAILURE_MESSAGE = "context.failureMessage";
-    public static final String HTTP_ERRORMESSAGE = "http.errorMessage";
-    public static final String HTTP_URL = "http.url";
-    public static final String HTTP_STATUSCODE = "http.statusCode";
+    public static final String CONTEXT_FAILURE_MESSAGE = "context_failureMessage";
+    public static final String HTTP_ERRORMESSAGE = "http_errorMessage";
+    public static final String HTTP_URL = "http_url";
+    public static final String HTTP_STATUSCODE = "http_statusCode";
     public static final String HTML_FAILURE = "failure.html";
     public static final String HTML_SUCCESS = "success.html";
     public static final String HTML_SIGNUP = "signup.html";
@@ -139,6 +139,14 @@ public class Constants {
     public static final String MAIL_BASE_URL = "mail.base.url";
     public static final String MAIL_IMAGE_URL = "mail.image.url";
     public static final String MAIL_LOGIN_URL = "mail.login.url";
+
+    public static final String MAIL_TEMPLATE_IMAGE_URL = "mail_image_url";
+    public static final String MAIL_TEMPLATE_URL_ACTIVATION = "url_activation";
+    public static final String MAIL_TEMPLATE_TEXT_ACTIVATION = "text_activation";
+    public static final String MAIL_TEMPLATE_FULL_NAME = "full_name";
+    public static final String MAIL_TEMPLATE_URL_LOGIN = "url_login";
+    public static final String MAIL_TEMPLATE_URL_RESET_PASSWORD = "url_resetpassword";
+    public static final String MAIL_TEMPLATE_TEXT_RESET_PASSWORD = "text_resetpassword";
 
     public static final String ACTIVATION_SUBJECT = "Activate Your API Portal Account";
     public static final String COGITO_ACTIVATION_SUBJECT = "Activate Your Cogito Account";

@@ -29,14 +29,14 @@ public class MailUtil {
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
-        routingContext.put("url.activation", activationUrl);
-        routingContext.put("text.activation", activationText);
-        routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+        routingContext.put(Constants.MAIL_TEMPLATE_URL_ACTIVATION, activationUrl);
+        routingContext.put(Constants.MAIL_TEMPLATE_TEXT_ACTIVATION, activationText);
+        routingContext.put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         JsonObject templateContext = new JsonObject()
-                .put("url.activation", activationUrl)
-                .put("text.activation", activationText)
-                .put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+                .put(Constants.MAIL_TEMPLATE_URL_ACTIVATION, activationUrl)
+                .put(Constants.MAIL_TEMPLATE_TEXT_ACTIVATION, activationText)
+                .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         // and now delegate to the engine to render it.
         engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_ACTIVATE, res -> {
@@ -58,14 +58,14 @@ public class MailUtil {
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
-        routingContext.put("full.name", fullName);
-        routingContext.put("url.login", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL));
-        routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+        routingContext.put(Constants.MAIL_TEMPLATE_FULL_NAME, fullName);
+        routingContext.put(Constants.MAIL_TEMPLATE_URL_LOGIN, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL));
+        routingContext.put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         JsonObject templateContext = new JsonObject()
-                .put("full.name", fullName)
-                .put("url.login", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL))
-                .put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+                .put(Constants.MAIL_TEMPLATE_FULL_NAME, fullName)
+                .put(Constants.MAIL_TEMPLATE_URL_LOGIN, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL))
+                .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         // and now delegate to the engine to render it.
         engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_WELCOME, res -> {
@@ -87,14 +87,14 @@ public class MailUtil {
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
-        routingContext.put("url.resetpassword", resetpasswordUrl);
-        routingContext.put("text.resetpassword", resetpasswordText);
-        routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+        routingContext.put(Constants.MAIL_TEMPLATE_URL_RESET_PASSWORD, resetpasswordUrl);
+        routingContext.put(Constants.MAIL_TEMPLATE_TEXT_RESET_PASSWORD, resetpasswordText);
+        routingContext.put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         JsonObject templateContext = new JsonObject()
-                .put("url.resetpassword", resetpasswordUrl)
-                .put("text.resetpassword", resetpasswordText)
-                .put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+                .put(Constants.MAIL_TEMPLATE_URL_RESET_PASSWORD, resetpasswordUrl)
+                .put(Constants.MAIL_TEMPLATE_TEXT_RESET_PASSWORD, resetpasswordText)
+                .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         // and now delegate to the engine to render it.
         engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_FORGOTPASSWORD, res -> {
@@ -116,14 +116,14 @@ public class MailUtil {
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
-        routingContext.put("full.name", fullName);
-        routingContext.put("url.login", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL));
-        routingContext.put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+        routingContext.put(Constants.MAIL_TEMPLATE_FULL_NAME, fullName);
+        routingContext.put(Constants.MAIL_TEMPLATE_URL_LOGIN, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL));
+        routingContext.put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         JsonObject templateContext = new JsonObject()
-                .put("full.name", fullName)
-                .put("url.login", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL))
-                .put("mail.image.url", Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+                .put(Constants.MAIL_TEMPLATE_FULL_NAME, fullName)
+                .put(Constants.MAIL_TEMPLATE_URL_LOGIN, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_LOGIN_URL))
+                .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
 
         // and now delegate to the engine to render it.
