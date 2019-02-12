@@ -11,7 +11,9 @@ package com.verapi.portal.common;
 /**
  * @author faik.saglar
  * @author halil.ozkan
+ * @deprecated  As of 12 Feb, replaced by {abyss-common}
  */
+@Deprecated
 public class Constants {
 
     public static final String ABYSS_BUILD_TIMESTAMP = "abyss.build.timestamp";

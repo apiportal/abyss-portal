@@ -11,6 +11,8 @@
 
 package com.verapi.portal.common;
 
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;

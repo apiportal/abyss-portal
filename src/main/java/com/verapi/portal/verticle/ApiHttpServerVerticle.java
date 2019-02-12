@@ -13,8 +13,8 @@ package com.verapi.portal.verticle;
 
 import com.verapi.portal.api.RestRouterHttpServerRequest;
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.ClassAnnotationMatchProcessor;
 import io.reactivex.Single;

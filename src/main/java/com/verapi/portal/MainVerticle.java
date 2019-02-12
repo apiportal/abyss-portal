@@ -11,9 +11,9 @@
 
 package com.verapi.portal;
 
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import com.verapi.portal.common.AbyssServiceDiscovery;
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
 import com.verapi.portal.handler.ActivateAccount;
 import com.verapi.portal.handler.ChangePassword;
 import com.verapi.portal.handler.ForgotPassword;

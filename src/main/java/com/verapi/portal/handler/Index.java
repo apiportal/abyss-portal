@@ -1,6 +1,6 @@
 package com.verapi.portal.handler;
 
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.AuthProvider;

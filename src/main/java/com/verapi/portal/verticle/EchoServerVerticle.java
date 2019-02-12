@@ -11,8 +11,8 @@
 
 package com.verapi.portal.verticle;
 
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import io.vertx.core.Future;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpServer;

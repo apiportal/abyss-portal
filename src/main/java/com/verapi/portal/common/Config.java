@@ -2,6 +2,10 @@ package com.verapi.portal.common;
 
 import io.vertx.core.json.JsonObject;
 
+/**
+ * @deprecated  As of 12 Feb, replaced by {abyss-common}
+ */
+@Deprecated
 public class Config {
 
     public static Config instance = null;

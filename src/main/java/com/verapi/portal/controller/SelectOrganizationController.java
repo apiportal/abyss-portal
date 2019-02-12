@@ -11,7 +11,7 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;

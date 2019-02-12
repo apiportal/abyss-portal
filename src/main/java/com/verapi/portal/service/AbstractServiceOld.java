@@ -12,8 +12,8 @@
 package com.verapi.portal.service;
 
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.Vertx;

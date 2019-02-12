@@ -13,8 +13,8 @@ package com.verapi.portal.controller;
 
 import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
-import com.verapi.portal.common.Config;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import com.verapi.portal.common.MailUtil;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;

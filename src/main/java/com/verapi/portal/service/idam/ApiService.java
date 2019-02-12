@@ -15,7 +15,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.sql.builder.Select;
 import com.verapi.abyss.sql.builder.impl.Table;
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;

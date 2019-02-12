@@ -11,7 +11,7 @@
 
 package com.verapi.portal.service;
 
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

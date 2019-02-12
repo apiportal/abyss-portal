@@ -12,7 +12,7 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.abyss.exception.InternalServerError500Exception;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import com.verapi.portal.service.idam.SubjectDirectoryService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

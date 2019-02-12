@@ -11,6 +11,8 @@
 
 package com.verapi.portal.common;
 
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;

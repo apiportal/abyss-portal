@@ -13,7 +13,7 @@ package com.verapi.portal.service.idam;
 
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;

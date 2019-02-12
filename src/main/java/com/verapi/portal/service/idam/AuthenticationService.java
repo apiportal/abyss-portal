@@ -14,7 +14,7 @@ package com.verapi.portal.service.idam;
 import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.AbstractService;
