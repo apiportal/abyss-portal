@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,44 +17,44 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: SubjectMemberships
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : SubjectMemberships crud operations'
-- name: SubjectMembership
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : SubjectMembership crud operations'
-- name: Subject-Memberships
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Subject''s Memberships crud operations'
+  - name: SubjectMemberships
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : SubjectMemberships crud operations'
+  - name: SubjectMembership
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : SubjectMembership crud operations'
+  - name: Subject-Memberships
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s Memberships crud operations'
 paths:
   /subject-memberships:
     get:
       tags:
-      - SubjectMemberships
+        - SubjectMemberships
       summary: 'Get list of SubjectMemberships'
       description: 'Returns list of SubjectMemberships'
       operationId: getSubjectMemberships
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search SubjectMemberships which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search SubjectMemberships which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectMembership'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - SubjectMemberships
+        - SubjectMemberships
       summary: 'Add a bulk of SubjectMemberships'
       description: 'Provide a list of SubjectMemberships to be inserted'
       operationId: addSubjectMemberships
@@ -103,7 +103,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectMembership'
     put:
       tags:
-      - SubjectMemberships
+        - SubjectMemberships
       summary: 'Update a bulk of SubjectMemberships'
       description: 'Provide a bulk list of  SubjectMemberships to be updated'
       operationId: updateSubjectMemberships
@@ -130,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
     delete:
       tags:
-      - SubjectMemberships
+        - SubjectMemberships
       summary: 'Delete all SubjectMemberships'
       description: 'Deletes all SubjectMemberships'
       operationId: deleteSubjectMemberships
@@ -152,17 +152,17 @@ paths:
   /subject-memberships/{uuid}:
     get:
       tags:
-      - SubjectMembership
+        - SubjectMembership
       summary: 'Get an existing SubjectMembership by uuid'
       description: 'Provide an uuid of SubjectMembership to be get'
       operationId: getSubjectMembership
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of SubjectMembership that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of SubjectMembership that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +184,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - SubjectMembership
+        - SubjectMembership
       summary: 'Update an existing SubjectMembership'
       description: 'Provide an altered SubjectMembership to be updated'
       operationId: updateSubjectMembership
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of SubjectMembership that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of SubjectMembership that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +218,17 @@ paths:
         $ref: '#/components/requestBodies/SubjectMembership'
     delete:
       tags:
-      - SubjectMembership
+        - SubjectMembership
       summary: 'Delete SubjectMembership'
       description: 'Provide an uuid parameter of SubjectMembership to be updated'
       operationId: deleteSubjectMembership
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of SubjectMembership that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of SubjectMembership that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -248,33 +248,33 @@ paths:
           $ref: '#/components/responses/default'
   /subject-memberships/subject/{uuid}:
     parameters:
-    - name: uuid
-      in: path
-      description: 'uuid of Subject'
-      required: true
-      schema:
-        type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
     get:
       tags:
-      - Subject-Memberships
+        - Subject-Memberships
       summary: 'Get list of SubjectMemberships'
       description: 'Returns list of SubjectMemberships'
       operationId: getMembershipsOfSubject
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search SubjectMemberships which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search SubjectMemberships which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectMembership'
@@ -296,7 +296,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - Subject-Memberships
+        - Subject-Memberships
       summary: 'Add a bulk of SubjectMemberships'
       description: 'Provide a list of SubjectMemberships to be inserted'
       operationId: addMembershipsOfSubject
@@ -323,7 +323,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectMembership'
     put:
       tags:
-      - Subject-Memberships
+        - Subject-Memberships
       summary: 'Update a bulk of SubjectMemberships'
       description: 'Provide a bulk list of  SubjectMemberships to be updated'
       operationId: updateMembershipsOfSubject
@@ -350,7 +350,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
     delete:
       tags:
-      - Subject-Memberships
+        - Subject-Memberships
       summary: 'Delete all SubjectMemberships'
       description: 'Deletes all SubjectMemberships'
       operationId: deleteMembershipsOfSubject
@@ -377,8 +377,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -397,7 +397,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -597,9 +597,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

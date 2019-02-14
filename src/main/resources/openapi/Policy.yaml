@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,44 +17,44 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: Policies
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Policies crud operations'
-- name: Policy
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Policy crud operations'
-- name: Subject Policies
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Subject''s Policies crud operations'
+  - name: Policies
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Policies crud operations'
+  - name: Policy
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Policy crud operations'
+  - name: Subject Policies
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s Policies crud operations'
 paths:
   /policies:
     get:
       tags:
-      - Policies
+        - Policies
       summary: 'Get list of Policies'
       description: 'Returns list of Policies'
       operationId: getPolicies
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Policies which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Policies which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Policies which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Policies which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfPolicy'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - Policies
+        - Policies
       summary: 'Add a bulk of Policies'
       description: 'Provide a list of Policies to be inserted'
       operationId: addPolicies
@@ -103,7 +103,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfPolicy'
     put:
       tags:
-      - Policies
+        - Policies
       summary: 'Update a bulk of Policies'
       description: 'Provide a bulk list of  Policies to be updated'
       operationId: updatePolicies
@@ -130,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfPolicyObject'
     delete:
       tags:
-      - Policies
+        - Policies
       summary: 'Delete all Policies'
       description: 'Deletes all Policies'
       operationId: deletePolicies
@@ -152,17 +152,17 @@ paths:
   /policies/{uuid}:
     get:
       tags:
-      - Policy
+        - Policy
       summary: 'Get an existing Policy by uuid'
       description: 'Provide an uuid of Policy to be get'
       operationId: getPolicy
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Policy that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Policy that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +184,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - Policy
+        - Policy
       summary: 'Update an existing Policy'
       description: 'Provide an altered Policy to be updated'
       operationId: updatePolicy
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Policy that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Policy that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +218,17 @@ paths:
         $ref: '#/components/requestBodies/Policy'
     delete:
       tags:
-      - Policy
+        - Policy
       summary: 'Delete Policy'
       description: 'Provide an uuid parameter of Policy to be updated'
       operationId: deletePolicy
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of Policy that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of Policy that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -248,33 +248,33 @@ paths:
           $ref: '#/components/responses/default'
   /policies/subject/{uuid}:
     parameters:
-    - name: uuid
-      in: path
-      description: 'uuid of Subject'
-      required: true
-      schema:
-        type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
     get:
       tags:
-      - Subject Policies
+        - Subject Policies
       summary: 'Get list of Subject''s Policies'
       description: 'Returns list of Subject''s Policies'
       operationId: getPoliciesOfSubject
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Subject''s Policies which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Subject''s Policies which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Policies which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Policies which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfPolicy'
@@ -296,7 +296,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - Subject Policies
+        - Subject Policies
       summary: 'Add a bulk of Subject''s Policies'
       description: 'Provide a list of Subject''s Policies to be inserted'
       operationId: addPoliciesOfSubject
@@ -323,7 +323,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfPolicy'
     put:
       tags:
-      - Subject Policies
+        - Subject Policies
       summary: 'Update a bulk of Subject''s Policies'
       description: 'Provide a bulk list of Subject''s Policies to be updated'
       operationId: updatePoliciesOfSubject
@@ -350,7 +350,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfPolicyObject'
     delete:
       tags:
-      - Subject Policies
+        - Subject Policies
       summary: 'Delete all Subject''s Policies'
       description: 'Deletes all Subject''s Policies'
       operationId: deletePoliciesOfSubject
@@ -377,8 +377,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -397,7 +397,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -606,9 +606,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

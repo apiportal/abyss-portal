@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,39 +17,39 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: PolicyTypes
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : PolicyTypes crud operations'
-- name: PolicyType
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : PolicyType crud operations'
+  - name: PolicyTypes
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : PolicyTypes crud operations'
+  - name: PolicyType
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : PolicyType crud operations'
 paths:
   /policy-types:
     get:
       tags:
-      - PolicyTypes
+        - PolicyTypes
       summary: 'Get list of PolicyTypes'
       description: 'Returns list of PolicyTypes'
       operationId: getPolicyTypes
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search PolicyTypes which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search PolicyTypes which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search PolicyTypes which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search PolicyTypes which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfPolicyType'
@@ -71,7 +71,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - PolicyTypes
+        - PolicyTypes
       summary: 'Add a bulk of PolicyTypes'
       description: 'Provide a list of PolicyTypes to be inserted'
       operationId: addPolicyTypes
@@ -98,7 +98,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfPolicyType'
     put:
       tags:
-      - PolicyTypes
+        - PolicyTypes
       summary: 'Update a bulk of PolicyTypes'
       description: 'Provide a bulk list of  PolicyTypes to be updated'
       operationId: updatePolicyTypes
@@ -125,7 +125,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfPolicyTypeObject'
     delete:
       tags:
-      - PolicyTypes
+        - PolicyTypes
       summary: 'Delete all PolicyTypes'
       description: 'Deletes all PolicyTypes'
       operationId: deletePolicyTypes
@@ -147,17 +147,17 @@ paths:
   /policy-types/{uuid}:
     get:
       tags:
-      - PolicyType
+        - PolicyType
       summary: 'Get an existing PolicyType by uuid'
       description: 'Provide an uuid of PolicyType to be get'
       operationId: getPolicyType
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of PolicyType that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of PolicyType that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -179,17 +179,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - PolicyType
+        - PolicyType
       summary: 'Update an existing PolicyType'
       description: 'Provide an altered PolicyType to be updated'
       operationId: updatePolicyType
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of PolicyType that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of PolicyType that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -213,17 +213,17 @@ paths:
         $ref: '#/components/requestBodies/PolicyType'
     delete:
       tags:
-      - PolicyType
+        - PolicyType
       summary: 'Delete PolicyType'
       description: 'Provide an uuid parameter of PolicyType to be updated'
       operationId: deletePolicyType
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of PolicyType that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of PolicyType that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,8 +249,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -269,7 +269,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -478,9 +478,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []
