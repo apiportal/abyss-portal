@@ -897,7 +897,25 @@ components:
           description: 'Is Subject Data Restricted to Processing - GDPR Compliance'
         description:
           type: string
-          description: 'Description of subject'
+          description: Description of subject
+        distinguishedName:
+          type: string
+          description: Distinguished Name stored in User Directory of the Subject
+        uniqueId:
+          type: string
+          description: Unique ID from User Directory
+        phoneBusiness:
+          type: string
+          description: Business Phone Number
+        phoneHome:
+          type: string
+          description: Home Phone Number
+        phoneMobile:
+          type: string
+          description: Mobile Phone Number
+        phoneExtension:
+          type: string
+          description: Phone Extension Number
     SubjectWithGroups:
       type: object
       properties:
@@ -1024,7 +1042,25 @@ components:
           description: 'Is Subject Data Restricted to Processing - GDPR Compliance'
         description:
           type: string
-          description: 'Description of subject'
+          description: Description of subject
+        distinguishedName:
+          type: string
+          description: Distinguished Name stored in User Directory of the Subject
+        uniqueId:
+          type: string
+          description: Unique ID from User Directory
+        phoneBusiness:
+          type: string
+          description: Business Phone Number
+        phoneHome:
+          type: string
+          description: Home Phone Number
+        phoneMobile:
+          type: string
+          description: Mobile Phone Number
+        phoneExtension:
+          type: string
+          description: Phone Extension Number
         groups:
           type: object
           properties:
