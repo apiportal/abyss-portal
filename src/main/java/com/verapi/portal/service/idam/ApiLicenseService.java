@@ -53,7 +53,8 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("apiid"))
-                            .add(jsonObj.getString("licenseid"));
+                            .add(jsonObj.getString("licenseid"))
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -105,6 +106,7 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("apiid"))
                 .add(updateRecord.getString("licenseid"))
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -124,6 +126,7 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("apiid"))
                             .add(jsonObj.getString("licenseid"))
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -211,8 +214,8 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into api_license (organizationid, crudsubjectid, apiid, licenseid)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid))";
+    private static final String SQL_INSERT = "insert into api_license (organizationid, crudsubjectid, apiid, licenseid, isActive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?)";
 
     private static final String SQL_DELETE = "update api_license\n" +
             "set\n" +
@@ -228,7 +231,8 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
             "  apiid,\n" +
-            "  licenseid\n" +
+            "  licenseid,\n" +
+            "  isactive\n" +
             "from api_license\n";
 
     private static final String SQL_UPDATE = "UPDATE api_license\n" +
@@ -237,7 +241,8 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , apiid      = CAST(? AS uuid)\n" +
-            "  , licenseid      = CAST(? AS uuid)\n";
+            "  , licenseid      = CAST(? AS uuid)\n" +
+            "  , isactive = ?\n";
 
     private static final String SQL_AND = "and\n";
 

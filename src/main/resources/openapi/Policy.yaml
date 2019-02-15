@@ -455,6 +455,9 @@ components:
         typeid:
           type: string
           description: 'FK ID of Policy Type'
+        isActive:
+          type: boolean
+          description: 'Is the policy active or not'
   requestBodies:
     Policy:
       content:

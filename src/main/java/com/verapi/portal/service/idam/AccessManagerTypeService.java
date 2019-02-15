@@ -54,7 +54,8 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("typename"))
                             .add(jsonObj.getString("description"))
-                            .add(jsonObj.getJsonObject("attributetemplate").encode());
+                            .add(jsonObj.getJsonObject("attributetemplate").encode())
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -107,6 +108,7 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
                 .add(((String) updateRecord.getValue("typename")))
                 .add(((String) updateRecord.getValue("description")))
                 .add(updateRecord.getJsonObject("attributetemplate").encode())
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -127,6 +129,7 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
                             .add(((String) jsonObj.getValue("typename")))
                             .add(((String) jsonObj.getValue("description")))
                             .add(jsonObj.getJsonObject("attributetemplate").encode())
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -214,8 +217,8 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into access_manager_type (organizationid, crudsubjectid, typename, description, attributetemplate)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?::JSON)";
+    private static final String SQL_INSERT = "insert into access_manager_type (organizationid, crudsubjectid, typename, description, attributetemplate, isActive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?::JSON, ?)";
 
     private static final String SQL_DELETE = "update access_manager_type\n" +
             "set\n" +
@@ -232,7 +235,8 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  typename,\n" +
             "  description,\n" +
-            "  attributetemplate::JSON\n" +
+            "  attributetemplate::JSON,\n" +
+            "  isactive\n" +
             "from access_manager_type\n";
 
     private static final String SQL_UPDATE = "UPDATE access_manager_type\n" +
@@ -242,7 +246,8 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , typename      = ?\n" +
             "  , description       = ?\n" +
-            "  , attributetemplate       = ?::JSON\n";
+            "  , attributetemplate       = ?::JSON\n" +
+            "  , isactive = ?\n";
 
     private static final String SQL_AND = "and\n";
 

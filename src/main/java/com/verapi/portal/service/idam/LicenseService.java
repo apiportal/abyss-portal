@@ -55,7 +55,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("name"))
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getJsonObject("licensedocument").encode());
+                            .add(jsonObj.getJsonObject("licensedocument").encode())
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -109,6 +110,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("version"))
                 .add(updateRecord.getString("subjectid"))
                 .add(updateRecord.getJsonObject("licensedocument").encode())
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -130,6 +132,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getJsonObject("licensedocument").encode())
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -217,8 +220,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON)";
+    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument, isActive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON, ?)";
 
     private static final String SQL_DELETE = "update license\n" +
             "set\n" +
@@ -236,7 +239,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
             "  name,\n" +
             "  version,\n" +
             "  subjectid,\n" +
-            "  licensedocument::JSON\n" +
+            "  licensedocument::JSON,\n" +
+            "  isactive\n" +
             "from license\n";
 
     private static final String SQL_UPDATE = "UPDATE license\n" +
@@ -247,7 +251,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
             "  , name      = ?\n" +
             "  , version      = ?\n" +
             "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , licensedocument      = ?::JSON\n";
+            "  , licensedocument      = ?::JSON\n" +
+            "  , isactive = ?\n";
 
     private static final String SQL_AND = "and\n";
 

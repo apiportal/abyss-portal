@@ -321,6 +321,9 @@ components:
         attributetemplate:
           type: object
           description: 'Directory Attributes Template. #jsonb#'
+        isActive:
+          type: boolean
+          description: 'Is Subject Directory Type active'
   requestBodies:
     SubjectDirectoryType:
       content:

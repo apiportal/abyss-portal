@@ -487,6 +487,9 @@ components:
           description: 'License of contract. A license is a tailored API access package designed by the Business Admin/API Admin and offered to the app developer. A license includes one or more license terms, each of which can include multiple scopes, giving access to specifically designated operations, and multiple quality of service (QoS) policies, and also one or more legal agreements applicable to the license.
 Terms of Service - QoS, SLA
 Legal'
+        isActive:
+          type: boolean
+          description: 'Is the license active or not'
   requestBodies:
     License:
       content:

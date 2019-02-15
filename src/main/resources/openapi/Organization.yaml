@@ -321,6 +321,13 @@ components:
         url:
           type: string
           description: 'URL / Website of Organization'
+        isActive:
+          type: boolean
+          description: 'Is the organization active or not'
+        picture:
+          type: string
+          format: byte
+          description: 'Picture or Logo of Organization'
   requestBodies:
     Organization:
       content:

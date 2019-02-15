@@ -321,6 +321,9 @@ components:
         attributetemplate:
           type: object
           description: 'Access Manager Attributes Template'
+        isActive:
+          type: boolean
+          description: 'Is the Access Manager Type active'
   requestBodies:
     AccessManagerType:
       content:
