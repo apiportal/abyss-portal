@@ -217,7 +217,7 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into access_manager_type (organizationid, crudsubjectid, typename, description, attributetemplate, isActive)\n" +
+    private static final String SQL_INSERT = "insert into access_manager_type (organizationid, crudsubjectid, typename, description, attributetemplate, isactive)\n" +
             "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?::JSON, ?)";
 
     private static final String SQL_DELETE = "update access_manager_type\n" +

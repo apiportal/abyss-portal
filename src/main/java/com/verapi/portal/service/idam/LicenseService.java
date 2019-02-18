@@ -220,7 +220,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument, isActive)\n" +
+    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument, isactive)\n" +
             "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON, ?)";
 
     private static final String SQL_DELETE = "update license\n" +

@@ -214,7 +214,7 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into api_license (organizationid, crudsubjectid, apiid, licenseid, isActive)\n" +
+    private static final String SQL_INSERT = "insert into api_license (organizationid, crudsubjectid, apiid, licenseid, isactive)\n" +
             "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?)";
 
     private static final String SQL_DELETE = "update api_license\n" +

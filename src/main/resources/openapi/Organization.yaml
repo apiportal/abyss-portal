@@ -321,7 +321,7 @@ components:
         url:
           type: string
           description: 'URL / Website of Organization'
-        isActive:
+        isactive:
           type: boolean
           description: 'Is the organization active or not'
         picture:

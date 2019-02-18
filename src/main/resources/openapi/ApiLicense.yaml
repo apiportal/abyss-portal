@@ -422,7 +422,7 @@ components:
         licenseid:
           type: string
           description: 'FK ID of license'
-        isActive:
+        isactive:
           type: boolean
           description: 'Is the licence active for the API'
   requestBodies:

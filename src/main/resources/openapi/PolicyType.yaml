@@ -327,6 +327,9 @@ components:
         template:
           type: object
           description: 'Template of Policy in Json Format #jsonb#'
+        isactive:
+          type: boolean
+          description: 'Is the policy type active or not'
   requestBodies:
     PolicyType:
       content:

@@ -223,7 +223,7 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into policy_type (organizationid, crudsubjectid, name, description, type, subtype, template, isActive)\n" +
+    private static final String SQL_INSERT = "insert into policy_type (organizationid, crudsubjectid, name, description, type, subtype, template, isactive)\n" +
             "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ? :: JSON, ?)";
 
     private static final String SQL_DELETE = "update policy_type\n" +

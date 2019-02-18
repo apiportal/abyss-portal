@@ -220,7 +220,7 @@ public class OrganizationService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into organization (organizationid, crudsubjectid, name, description, url, isActive, picture)\n" +
+    private static final String SQL_INSERT = "insert into organization (organizationid, crudsubjectid, name, description, url, isactive, picture)\n" +
             "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "update organization\n" +
