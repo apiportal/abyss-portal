@@ -13,6 +13,7 @@ package com.verapi.portal.verticle;
 
 
 import com.verapi.abyss.logger.handler.rx.LoggerHandler;
+import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadataDiscovery;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
@@ -46,7 +47,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
         Disposable disposable
                 =
                 initializeJdbcClient(Constants.PORTAL_DATA_SOURCE_SERVICE)
-                        .flatMap(this::loadAbyssDatabaseMetadata)
+                        .flatMap(jdbcClient -> AbyssDatabaseMetadataDiscovery.getInstance().populateMetaData(jdbcClient))
                         .flatMap(jdbcClient1 -> createRouters())
                         .flatMap(this::enableCorsSupport)
                         .flatMap(abyssRouter -> configureRouter())
