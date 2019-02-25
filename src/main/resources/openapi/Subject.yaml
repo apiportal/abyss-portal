@@ -271,7 +271,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/apps:
+  /subjects/apps/:
     get:
       tags:
         - APPS
@@ -387,7 +387,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/users:
+  /subjects/users/:
     get:
       tags:
         - USERS
@@ -503,7 +503,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/groups:
+  /subjects/groups/:
     get:
       tags:
         - GROUPS
@@ -619,7 +619,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  '/subjects/users/with-groups':
+  '/subjects/users/with-groups/':
     get:
       tags:
         - USERSwithGROUPS
@@ -660,7 +660,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  '/subjects/users/{uuid}/with-groups-and-permissions':
+  '/subjects/users/{uuid}/with-groups-and-permissions/':
     get:
       tags:
         - USERwithGROUPS
@@ -693,7 +693,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/{uuid}/changepassword:
+  /subjects/{uuid}/changepassword/:
     put:
       tags:
         - Password Management
