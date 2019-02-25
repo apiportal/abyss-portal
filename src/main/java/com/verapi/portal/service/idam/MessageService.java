@@ -335,7 +335,8 @@ public class MessageService extends AbstractService<UpdateResult> {
             "  sentat,\n" +
             "  readat,\n" +
             "  istrashed\n" +
-            "from message\n";
+            "from\n" +
+            "message\n";
 
     private static final String SQL_UPDATE = "UPDATE message\n" +
             "SET\n" +
@@ -359,13 +360,6 @@ public class MessageService extends AbstractService<UpdateResult> {
             "  , readat            = ?\n" +
             "  , istrashed         = ?";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(subject) = lower(?)\n";
 

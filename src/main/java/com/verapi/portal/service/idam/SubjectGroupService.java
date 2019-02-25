@@ -248,7 +248,8 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
             "  effectivestartdate,\n" +
             "  effectiveenddate,\n" +
             "  subjectdirectoryid\n" +
-            "from subject_group\n";
+            "from\n" +
+            "subject_group\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_group\n" +
             "SET\n" +
@@ -262,13 +263,6 @@ public class SubjectGroupService extends AbstractService<UpdateResult> {
             "  , effectiveenddate      = ?\n" +
             "  , subjectdirectoryid      = CAST(? AS uuid)\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(groupname) = lower(?)\n";
 

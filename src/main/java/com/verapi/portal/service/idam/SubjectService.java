@@ -450,7 +450,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  phoneBusiness,\n" +
             "  phoneMobile,\n" +
             "  phoneExtension\n" +
-            "from subject\n";
+            "from\n" +
+            "subject\n";
 
     private static final String SQL_UPDATE = "UPDATE subject\n" +
             "SET\n" +
@@ -489,13 +490,6 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , passwordexpiresat    =  now() + ? * interval '1 DAY'\n" +
             "  , lastpasswordchangeat = now()\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(subjectname) = lower(?)\n";
 
@@ -537,7 +531,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
-
+    //TODO: from+CRLF
     public static final String FILTER_USERS_WITH_GROUPS = "SELECT s.uuid, s.organizationid, o.name, s.created, s.updated, s.deleted, s.isdeleted, s.isactivated, s.subjecttypeid,\n" +
             "       s.subjectname, s.firstname, s.lastname, s.displayname, s.email, s.secondaryemail, s.effectivestartdate, s.effectiveenddate,\n" +
             "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
@@ -553,7 +547,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "from subject s\n" +
             "       inner join organization o on (s.organizationid = o.uuid)\n" +
             "       inner join subject_directory d on (s.subjectdirectoryid = d.uuid)\n" + SQL_WHERE + SQL_CONDITION_IS_USER;
-
+    //TODO: from+CRLF
     public static final String FILTER_USER_WITH_GROUPS_AND_PERMISSIONS = "SELECT s.uuid, s.organizationid, o.name, s.created, s.updated, s.deleted, s.isdeleted, s.isactivated, s.subjecttypeid,\n" +
             "       s.subjectname, s.firstname, s.lastname, s.displayname, s.email, s.secondaryemail, s.effectivestartdate, s.effectiveenddate,\n" +
             "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +

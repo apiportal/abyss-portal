@@ -241,7 +241,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
             "  url,\n" +
             "  isactive,\n" +
             "  picture\n" +
-            "from organization\n";
+            "from\n" +
+            "organization\n";
 
     private static final String SQL_UPDATE = "UPDATE organization\n" +
             "SET\n" +
@@ -254,13 +255,6 @@ public class OrganizationService extends AbstractService<UpdateResult> {
             "  , isactive = ?\n" +
             "  , picture = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 

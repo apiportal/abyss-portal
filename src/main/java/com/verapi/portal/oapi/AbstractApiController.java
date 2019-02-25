@@ -621,7 +621,7 @@ public abstract class AbstractApiController implements IApiController {
 
         String finalFilterByNameParameter = filterByNameParameter;
         String finalFilterLikeNameParameter = filterLikeNameParameter;
-        Single<ResultSet> findAllResult = service.initJDBCClient()
+        Single<ResultSet> findAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> {
                     if (apiFilterQuery == null || apiFilterQuery.getFilterQuery().isEmpty()) {
                         if ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) {
@@ -672,7 +672,7 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<ResultSet> findAllResult = service.initJDBCClient()
+        Single<ResultSet> findAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> (apiFilterQuery == null) ? service.findById(UUID.fromString(routingContext.pathParam("uuid"))) : service.findAll(apiFilterQuery));
         subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }

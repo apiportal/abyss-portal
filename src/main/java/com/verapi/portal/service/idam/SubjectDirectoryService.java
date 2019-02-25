@@ -259,7 +259,9 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
             "  directoryattributes,\n" +
             "  lastsyncronizedat,\n" +
             "  lastsyncronizationduration\n" +
-            "from subject_directory\n";
+            "from\n" +
+            "subject_directory\n";
+
     private static final String SQL_UPDATE = "UPDATE subject_directory\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
@@ -274,13 +276,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
             "  , directoryattributes = ?::JSON\n" +
             "  , lastsyncronizedat = ?\n" +
             "  , lastsyncronizationduration = ?\n";
-    private static final String SQL_AND = "and\n";
 
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(directoryname) = lower(?)\n";
 

@@ -233,7 +233,8 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
             "  apiid,\n" +
             "  licenseid,\n" +
             "  isactive\n" +
-            "from api_license\n";
+            "from\n" +
+            "api_license\n";
 
     private static final String SQL_UPDATE = "UPDATE api_license\n" +
             "SET\n" +
@@ -244,13 +245,6 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
             "  , licenseid      = CAST(? AS uuid)\n" +
             "  , isactive = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 

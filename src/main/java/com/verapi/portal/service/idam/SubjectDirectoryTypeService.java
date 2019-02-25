@@ -237,7 +237,8 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
             "  description,\n" +
             "  attributetemplate,\n" +
             "  isactive\n" +
-            "from subject_directory_type\n";
+            "from\n" +
+            "subject_directory_type\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_directory_type\n" +
             "SET\n" +
@@ -249,14 +250,6 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
             "  , attributetemplate = ?::JSON\n" +
             "  , isactive = ?\n";
 
-
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(typename) = lower(?)\n";
 

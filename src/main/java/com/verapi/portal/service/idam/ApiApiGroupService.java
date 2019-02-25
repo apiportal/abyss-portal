@@ -229,7 +229,8 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  apiid,\n" +
             "  apigroupid\n" +
-            "from api__api_group\n";
+            "from\n" +
+            "api__api_group\n";
 
     private static final String SQL_UPDATE = "UPDATE api__api_group\n" +
             "SET\n" +
@@ -239,13 +240,6 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
             "  , apiid      = CAST(? AS uuid)\n" +
             "  , apigroupid      = CAST(? AS uuid)\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
@@ -274,19 +268,24 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
     public static final String SQL_LIST_API_GROUPS = "select\n" +
             "  api_group.uuid,\n" +
             "  api_group.name\n" +
-            "from api__api_group, api_group\n" +
+            "from\n" +
+            "api__api_group\n" +
+            ", api_group\n" +
             "where apiid = CAST(? AS uuid) and apigroupid = api_group.uuid\n";
 
     public static final String SQL_LIST_SUBJECT_API_GROUPS = "select distinct\n" +
             "  api_group.uuid,\n" +
             "  api_group.name\n" +
-            "from api__api_group, api_group, api\n" +
+            "from\n" +
+            "api__api_group\n" +
+            ", api_group, api\n" +
             "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
             "      apigroupid = api_group.uuid\n";
 
     public static final String SQL_API_API_GROUPS_BY_API_AND_GROUP = "select\n" +
             "  id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apigroupid\n" +
-            "from api__api_group\n" +
+            "from\n" +
+            "api__api_group\n" +
             "where apiid = CAST(? AS uuid) and apigroupid = CAST(? AS uuid)\n";
 
     public static final String SQL_LIST_SUBJECT_BUSINESS_API_GROUPS = SQL_LIST_SUBJECT_API_GROUPS + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;

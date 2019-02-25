@@ -229,7 +229,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  subjectid,\n" +
             "  subjectgroupid\n" +
-            "from subject_membership\n";
+            "from\n" +
+            "subject_membership\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_membership\n" +
             "SET\n" +
@@ -239,13 +240,6 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
             "  , subjectid      = CAST(? AS uuid)\n" +
             "  , subjectgroupid      = CAST(? AS uuid)\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "";
 

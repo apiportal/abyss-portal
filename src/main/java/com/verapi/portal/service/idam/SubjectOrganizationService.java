@@ -237,7 +237,8 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
             "  organizationrefid,\n" +
             "  isowner,\n" +
             "  isactive\n" +
-            "from subject_organization\n";
+            "from\n" +
+            "subject_organization\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_organization\n" +
             "SET\n" +
@@ -249,13 +250,6 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
             "  , isowner      = ?\n" +
             "  , isactive      = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "";
 

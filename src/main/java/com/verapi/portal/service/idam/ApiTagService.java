@@ -237,7 +237,8 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  description,\n" +
             "  externaldescription,\n" +
             "  externalurl\n" +
-            "from api_tag\n";
+            "from\n" +
+            "api_tag\n";
 
     private static final String SQL_UPDATE = "UPDATE api_tag\n" +
             "SET\n" +
@@ -249,13 +250,6 @@ public class ApiTagService extends AbstractService<UpdateResult> {
             "  , externaldescription      = ?\n" +
             "  , externalurl      = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
@@ -295,7 +289,9 @@ public class ApiTagService extends AbstractService<UpdateResult> {
 
     private static final String SQL_GROUP_BY = "group by\n";
 
-    private static final String SQL_JOIN_API = "from api_tag t, api a, api__api_tag axt\n" +
+    private static final String SQL_JOIN_API = "from\n" +
+            "api_tag t\n" +
+            ", api a, api__api_tag axt\n" +
             "where t.uuid = axt.apitagid and axt.apiid = a.uuid and a.subjectid = CAST(? AS uuid)\n" +
             "and openapidocument ?? 'servers'\n";
 

@@ -237,7 +237,8 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
             "  description,\n" +
             "  attributetemplate::JSON,\n" +
             "  isactive\n" +
-            "from access_manager_type\n";
+            "from\n" +
+            "access_manager_type\n";
 
     private static final String SQL_UPDATE = "UPDATE access_manager_type\n" +
             "SET\n" +
@@ -249,13 +250,6 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
             "  , attributetemplate       = ?::JSON\n" +
             "  , isactive = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(typename) = lower(?)\n";
 

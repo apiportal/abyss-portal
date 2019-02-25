@@ -341,7 +341,8 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  api.islatestversion,\n" +
             "  api.apioriginid,\n" +
             "  api.apiparentid,\n" +
-            "from api\n";
+            "from\n" +
+            "api\n";
     private static final String SQL_UPDATE = "UPDATE api\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
@@ -398,13 +399,6 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , apioriginid      = CAST(? AS uuid)\n" +
             "  , apiparentid      = CAST(? AS uuid)\n";
 
-    public static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    public static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     public static final String SQL_CONDITION_NAME_IS = "lower(openapidocument -> 'info' ->> 'title') = lower(?)\n";
 

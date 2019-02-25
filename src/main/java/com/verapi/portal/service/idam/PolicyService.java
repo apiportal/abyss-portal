@@ -245,7 +245,8 @@ public class PolicyService extends AbstractService<UpdateResult> {
             "  policyinstance::JSON,\n" +
             "  typeid,\n" +
             "  isactive\n" +
-            "from policy\n";
+            "from\n" +
+            "policy\n";
 
     private static final String SQL_UPDATE = "UPDATE policy\n" +
             "SET\n" +
@@ -259,13 +260,6 @@ public class PolicyService extends AbstractService<UpdateResult> {
             "  , typeid      = CAST(? AS uuid)\n" +
             "  , isactive = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
