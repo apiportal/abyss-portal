@@ -246,29 +246,29 @@ public abstract class AbstractService<T> implements IService<T> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //execute query
-                        //.flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
-                        .flatMap(conn1 -> {
-                            String tableName = getTableNameFromSql(sql).toLowerCase();
-                            logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
-                            boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
-                            boolean isAdmin = false; //TODO: Admin Only
-                            boolean doesContainOrderBy = false; //TODO: Order By Handling
-                            logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
-                            if (organizationUuid == null || isParamTable) {
-                                if (params == null) {
-                                    return conn.rxQuery(sql);
-                                } else {
-                                    return conn.rxQueryWithParams(sql, params);
-                                }
-                            } else {
-
-                                if (params == null) {
-                                    return conn.rxQueryWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
-                                } else {
-                                    return conn.rxQueryWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
-                                }
-                            }
-                        })
+                        .flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
+//                        .flatMap(conn1 -> { //TODO: Improve Organization Filter
+//                            String tableName = getTableNameFromSql(sql).toLowerCase();
+//                            logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+//                            boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+//                            boolean isAdmin = false; //TODO: Admin Only
+//                            boolean doesContainOrderBy = false; //TODO: Order By Handling
+//                            logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+//                            if (organizationUuid == null || isParamTable) {
+//                                if (params == null) {
+//                                    return conn.rxQuery(sql);
+//                                } else {
+//                                    return conn.rxQueryWithParams(sql, params);
+//                                }
+//                            } else {
+//
+//                                if (params == null) {
+//                                    return conn.rxQueryWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
+//                                } else {
+//                                    return conn.rxQueryWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
+//                                }
+//                            }
+//                        })
                         .flatMap(resultSet -> {
                             logger.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
                             logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
