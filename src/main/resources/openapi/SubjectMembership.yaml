@@ -32,6 +32,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Subject''s Memberships crud operations'
+  - name: DIRECTORY FILTERED
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Directory Filtered Memberships crud operations'
 paths:
   /subject-memberships:
     get:
@@ -369,6 +374,54 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /subject-memberships/subject-directory/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        description: 'uuid of Subject Directory'
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - DIRECTORY FILTERED
+      summary: 'Get list of SubjectMemberships under given Subject Directory'
+      description: 'Returns list of SubjectMemberships under given Subject Directory'
+      operationId: getMembershipsUnderDirectory
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectMembership'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -446,6 +499,10 @@ components:
         subjectgroupid:
           type: string
           description: 'FK ID of Subject Group that Subject is member'
+        subjectdirectoryid:
+          type: string
+          description: 'FK ID of Subject Directory'
+          nullable: true
   requestBodies:
     SubjectMembership:
       content:
