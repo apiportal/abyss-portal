@@ -281,7 +281,7 @@ public abstract class AbstractApiController implements IApiController {
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
         //secondly check if the previous security handler's flag is set, if so  then route next
-        if (routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
+        if (routingContext.session().get("abyssCookieAuthSecurityHandler")!=null && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
             routingContext.next();
             return;
         }
@@ -350,7 +350,11 @@ public abstract class AbstractApiController implements IApiController {
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
         //secondly check if the previous security handler's flag is set, if so  then route next
-        if ((routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) || (routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK"))) {
+        if (routingContext.session().get("abyssCookieAuthSecurityHandler") != null && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
+            routingContext.next();
+            return;
+        }
+        if (routingContext.session().get("abyssHttpBasicAuthSecurityHandler") != null && routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK")) {
             routingContext.next();
             return;
         }
@@ -379,7 +383,16 @@ public abstract class AbstractApiController implements IApiController {
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
         //secondly check if the previous security handler's flag is set, if so  then route next
-        if ((routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) || (routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK")) || (routingContext.session().get("abyssApiKeyAuthSecurityHandler").toString().equals("OK"))) {
+        if (routingContext.session().get("abyssCookieAuthSecurityHandler") != null && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
+            routingContext.next();
+            return;
+        }
+        if (routingContext.session().get("abyssHttpBasicAuthSecurityHandler") != null && routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK")) {
+            routingContext.next();
+            return;
+        }
+
+        if (routingContext.session().get("abyssApiKeyAuthSecurityHandler") != null && routingContext.session().get("abyssApiKeyAuthSecurityHandler").toString().equals("OK")) {
             routingContext.next();
             return;
         }

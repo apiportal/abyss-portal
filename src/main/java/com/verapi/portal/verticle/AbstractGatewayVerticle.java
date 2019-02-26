@@ -113,7 +113,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         logger.trace("---configureRouter invoked");
 
         //log HTTP requests
-        router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+        //router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
         // 1: install cookie handler
         //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
@@ -165,7 +165,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         Router subRouter = Router.router(vertx);
 
         //log HTTP requests
-        subRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+        //subRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
         //install body handler
         //A handler which gathers the entire request body and sets it on the RoutingContext

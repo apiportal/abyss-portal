@@ -64,8 +64,8 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
     private Single<Router> configureRouter() {
         logger.trace("AbstractPortalVerticle.configureRouter() invoked");
-        verticleRouter.route().handler(LoggerHandler.create(true));
-        verticleRouter.route().handler(LoggerHandler.create());
+        //verticleRouter.route().handler(LoggerHandler.create(true));
+        //verticleRouter.route().handler(LoggerHandler.create());
         verticleRouter.route().handler(ResponseTimeHandler.create());
 
         verticleRouter.route("/logout").handler(context -> {

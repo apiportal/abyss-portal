@@ -38,15 +38,15 @@ public class ElasticSearchService extends AbstractElasticSearchService {
         logger.trace("indexDocument() invoked");
         UUID uuid = UUID.randomUUID();
         super.indexDocument(routingContext, index, type, uuid.toString(), source);
-        Boolean isCassandraLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.CASSANDRA_LOGGER_ENABLED);
-        if (isCassandraLoggerEnabled) {
-            try {
-                if (CassandraService.getInstance(routingContext) != null)
-                    CassandraService.getInstance(routingContext).indexDocument(type, uuid, source);
-            } catch (Exception e) {
-                logger.error("Cassandra indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), source);
-            }
-        }
+//        Boolean isCassandraLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.CASSANDRA_LOGGER_ENABLED);
+//        if (isCassandraLoggerEnabled) {
+//            try {
+//                if (CassandraService.getInstance(routingContext) != null)
+//                    CassandraService.getInstance(routingContext).indexDocument(type, uuid, source);
+//            } catch (Exception e) {
+//                logger.error("Cassandra indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), source);
+//            }
+//        }
     }
 
     public void indexDocument(RoutingContext routingContext, String type, JsonObject source) {

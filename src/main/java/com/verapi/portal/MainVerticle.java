@@ -120,7 +120,7 @@ public class MainVerticle extends AbstractVerticle {
             Router router = Router.router(vertx);
 
             //log HTTP requests
-            abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+            //abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
             //firstly install cookie handler
             //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
