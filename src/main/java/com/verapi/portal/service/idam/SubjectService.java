@@ -499,6 +499,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     public static final String SQL_CONDITION_IS_GROUP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
 
+    public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
+
     public static final String SQL_CONDITION_IS_NOT_SYSTEM = "subjecttypeid!=CAST('" + Constants.SUBJECT_TYPE_SYSTEM + "' AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by subjectname\n";
@@ -528,6 +530,10 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public static String FILTER_USERS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_USER;
 
     public static String FILTER_GROUPS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_GROUP;
+
+    public static String FILTER_USERS_UNDER_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_USER + SQL_AND + SQL_CONDITION_DIRECTORY;
+
+    public static String FILTER_GROUPS_UNDER_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_GROUP + SQL_AND + SQL_CONDITION_DIRECTORY;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

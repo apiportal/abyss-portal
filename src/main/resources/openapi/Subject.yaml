@@ -42,6 +42,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Groups crud operations'
+  - name: DIRECTORY FILTERED
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Users and Groups under Directory'
   - name: USERSwithGROUPS
     externalDocs:
       url: 'https://apiportal.com'
@@ -126,6 +131,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
         - Subjects
@@ -153,6 +159,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
         - Subjects
@@ -174,7 +181,8 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/{uuid}:
+      parameters: []
+  '/subjects/{uuid}':
     get:
       tags:
         - Subject
@@ -339,6 +347,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
         - APPS
@@ -366,6 +375,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
         - APPS
@@ -455,6 +465,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
         - USERS
@@ -482,6 +493,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
         - USERS
@@ -497,6 +509,53 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  '/subjects/users/subject-directory/{uuid}':
+    get:
+      tags:
+        - DIRECTORY FILTERED
+      summary: Get list of users under given user directory
+      description: Returns list of users under given user directory
+      operationId: getUsersUnderDirectory
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search users which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search users which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - name: uuid
+          in: path
+          description: 'uuid of User Directory filtering users'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubject'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -571,6 +630,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
         - GROUPS
@@ -598,6 +658,7 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
         - GROUPS
@@ -613,6 +674,53 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  '/subjects/groups/subject-directory/{uuid}':
+    get:
+      tags:
+        - DIRECTORY FILTERED
+      summary: Get list of groups under given user directory
+      description: Returns list of groups under given user directory
+      operationId: getGroupsUnderDirectory
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search groups which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search groups which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - name: uuid
+          in: path
+          description: 'uuid of User Directory filtering groups'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubject'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':
@@ -907,15 +1015,19 @@ components:
         phoneBusiness:
           type: string
           description: Business Phone Number
+          nullable: true
         phoneHome:
           type: string
           description: Home Phone Number
+          nullable: true
         phoneMobile:
           type: string
           description: Mobile Phone Number
+          nullable: true
         phoneExtension:
           type: string
           description: Phone Extension Number
+          nullable: true
     SubjectWithGroups:
       type: object
       properties:
@@ -1052,15 +1164,19 @@ components:
         phoneBusiness:
           type: string
           description: Business Phone Number
+          nullable: true
         phoneHome:
           type: string
           description: Home Phone Number
+          nullable: true
         phoneMobile:
           type: string
           description: Mobile Phone Number
+          nullable: true
         phoneExtension:
           type: string
           description: Phone Extension Number
+          nullable: true
         groups:
           type: object
           properties:

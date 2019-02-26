@@ -13,7 +13,7 @@ package com.verapi.portal.oapi;
 
 
 import com.verapi.abyss.exception.InternalServerError500Exception;
-import com.verapi.portal.common.Constants;
+import com.verapi.abyss.common.Constants;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.SubjectService;
 import io.vertx.core.json.JsonArray;
@@ -344,5 +344,18 @@ public class SubjectApiController extends AbstractApiController {
         getSubject(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USER_WITH_GROUPS_AND_PERMISSIONS)
                 .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
+
+    @AbyssApiOperationHandler
+    public void getUsersUnderDirectory(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USERS_UNDER_DIRECTORY)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
+    @AbyssApiOperationHandler
+    public void getGroupsUnderDirectory(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_GROUPS_UNDER_DIRECTORY)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
 
 }
