@@ -52,6 +52,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : API Proxy crud operations'
+  - name: API-Proxies-Under-License
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : API Proxies Under License crud operations'
   - name: Subject-Business-APIs
     externalDocs:
       url: 'https://apiportal.com'
@@ -1145,6 +1150,41 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /apis/proxies/license/{uuid}:
+    get:
+      tags:
+        - API-Proxies-Under-License
+      summary: 'Get API Proxies by License uuid'
+      description: 'Provide an uuid of License to get API Proxies using it'
+      operationId: getApiProxiesUnderLicense
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of License that is going to be used to filter API Proxies'
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApi'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':

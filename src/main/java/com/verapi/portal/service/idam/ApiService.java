@@ -343,6 +343,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  api.apiparentid,\n" +
             "from\n" +
             "api\n";
+
     private static final String SQL_UPDATE = "UPDATE api\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
@@ -472,6 +473,10 @@ public class ApiService extends AbstractService<UpdateResult> {
             "resource.uuid = subject_permission.resourceid and\n" +
             "(subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_VIEW_API + "' AS uuid) OR\n" +
             "subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_EDIT_API + "' AS uuid))";
+
+    public static final String FILTER_BY_LICENSE = SQL_SELECT2 + ", api_license\n" +
+            SQL_WHERE + "api.uuid = api_license.apiid\n" +
+            SQL_AND + "api_license.licenseid = CAST(? AS uuid)\n";
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
