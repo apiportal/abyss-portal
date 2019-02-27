@@ -12,10 +12,10 @@
 package com.verapi.portal.verticle;
 
 
-import com.verapi.abyss.logger.handler.rx.LoggerHandler;
-import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadataDiscovery;
+import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.controller.Controllers;
 import com.verapi.portal.controller.IController;
 import com.verapi.portal.controller.PortalAbstractController;
