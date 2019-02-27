@@ -36,7 +36,7 @@ public class FailureController extends PortalAbstractController {
     @Override
     public void handle(RoutingContext routingContext) {
         Integer statusCode = routingContext.session().get(Constants.HTTP_STATUSCODE);
-        statusCode = statusCode > 0 ? statusCode : 200;
+        statusCode = (statusCode != null) ? (statusCode > 0) ? statusCode : 200 : 200;
 
 
         logger.trace("FailureController.handle invoked - status code: " + statusCode);
@@ -55,7 +55,7 @@ public class FailureController extends PortalAbstractController {
 
         renderTemplate(routingContext, templateContext, Controllers.TRX_NOK.templateFileName, statusCode);
 
-        super.handle(routingContext);
+        super.handle(routingContext); //TODO: bu satır çağrılmalı mı?
     }
 
 }
