@@ -110,7 +110,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                         .setUserName(getProperty(Constants.INFLUXDB_DBUSER_NAME))
                         .setPassword(getProperty(Constants.INFLUXDB_DBUSER_PASSWORD)
                         )
-                        .setEnabled(true)
+                        .setEnabled((getProperty(Constants.INFLUXDB_LOGGER_ENABLED).equals("true")))
                 )
                 .setEnabled(true));
 

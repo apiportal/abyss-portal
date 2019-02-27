@@ -39,33 +39,6 @@ public class ElasticSearchService extends AbstractElasticSearchService {
         UUID uuid = UUID.randomUUID();
         super.indexDocument(routingContext, index, type, uuid.toString(), source);
         Boolean isCassandraLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.CASSANDRA_LOGGER_ENABLED);
-
-        if ((isCassandraLoggerEnabled) && (routingContext != null)) {
-
-/*
-            MessagePlatformApiLog messagePlatformApiLog = new MessagePlatformApiLog(uuid
-                    , routingContext.request().method().toString()
-                    , routingContext.request().path()
-                    , routingContext.session().id()
-                    , type
-                    , routingContext.request().remoteAddress().host()
-                    , source.encode()
-                    , Instant.now()
-                    , routingContext.user().principal().getString("username"));
-
-            DeliveryOptions deliveryOptions = new DeliveryOptions()
-                    .setCodecName(new MessagePlatformApiLogCodec().name())
-                    .setSendTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.EVENTBUS_ADDRESS_PLATFORM_API_LOG_SEND_TIMEOUT));
-
-            routingContext.vertx().eventBus().<MessagePlatformApiLog>send(Constants.EVENTBUS_ADDRESS_PLATFORM_API_LOG, messagePlatformApiLog, deliveryOptions, event -> {
-                if (event.succeeded())
-                    logger.trace("successfully send to Cassandra logger, response:{}", event.result().body().toString());
-                else
-                    logger.error("unable to send to Cassandra Logger, error:{}", event.cause().getLocalizedMessage());
-            });
-*/
-
-        }
     }
 
     public void indexDocument(RoutingContext routingContext, String type, JsonObject source) {

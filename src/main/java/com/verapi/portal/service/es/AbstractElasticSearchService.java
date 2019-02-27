@@ -65,6 +65,10 @@ public abstract class AbstractElasticSearchService {
 
     void indexDocument(RoutingContext routingContext, String index, String type, String id, JsonObject source) {
         logger.trace("indexDocument() invoked");
+        Boolean isESLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ES_LOGGER_ENABLED);
+        if (!isESLoggerEnabled)
+            return;
+
         IndexRequest request = new IndexRequest(index, type, id);
         JsonObject sourceMap = source.copy();
 
@@ -84,10 +88,6 @@ public abstract class AbstractElasticSearchService {
         } catch (Exception e) {
             logger.error("indexDocument error : {} | {} | {}", e.getLocalizedMessage(), e.getStackTrace(), sourceMap);
         }
-
-        //log into Cassandra
-        //1. creating Rxified Cassandra client
-
 
     }
 }
