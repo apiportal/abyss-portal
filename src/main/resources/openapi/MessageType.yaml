@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,39 +17,39 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: MessageTypes
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : MessageTypes crud operations'
-- name: MessageType
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : MessageType crud operations'
+  - name: MessageTypes
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : MessageTypes crud operations'
+  - name: MessageType
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : MessageType crud operations'
 paths:
   /message-types:
     get:
       tags:
-      - MessageTypes
+        - MessageTypes
       summary: 'Get list of MessageTypes'
       description: 'Returns list of MessageTypes'
       operationId: getMessageTypes
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search MessageTypes which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search MessageTypes which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search MessageTypes which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search MessageTypes which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfMessageType'
@@ -71,7 +71,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - MessageTypes
+        - MessageTypes
       summary: 'Add a bulk of MessageTypes'
       description: 'Provide a list of MessageTypes to be inserted'
       operationId: addMessageTypes
@@ -98,7 +98,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfMessageType'
     put:
       tags:
-      - MessageTypes
+        - MessageTypes
       summary: 'Update a bulk of MessageTypes'
       description: 'Provide a bulk list of  MessageTypes to be updated'
       operationId: updateMessageTypes
@@ -125,7 +125,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfMessageTypeObject'
     delete:
       tags:
-      - MessageTypes
+        - MessageTypes
       summary: 'Delete all MessageTypes'
       description: 'Deletes all MessageTypes'
       operationId: deleteMessageTypes
@@ -147,17 +147,17 @@ paths:
   /message-types/{uuid}:
     get:
       tags:
-      - MessageType
+        - MessageType
       summary: 'Get an existing MessageType by uuid'
       description: 'Provide an uuid of MessageType to be get'
       operationId: getMessageType
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of MessageType that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of MessageType that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -179,17 +179,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - MessageType
+        - MessageType
       summary: 'Update an existing MessageType'
       description: 'Provide an altered MessageType to be updated'
       operationId: updateMessageType
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of MessageType that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of MessageType that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -213,17 +213,17 @@ paths:
         $ref: '#/components/requestBodies/MessageType'
     delete:
       tags:
-      - MessageType
+        - MessageType
       summary: 'Delete MessageType'
       description: 'Provide an uuid parameter of MessageType to be updated'
       operationId: deleteMessageType
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of MessageType that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of MessageType that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,8 +249,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -269,7 +269,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -472,9 +472,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

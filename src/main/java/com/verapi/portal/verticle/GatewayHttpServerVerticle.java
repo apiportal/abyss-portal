@@ -12,10 +12,10 @@
 
 package com.verapi.portal.verticle;
 
-import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
-import com.verapi.portal.common.OpenAPIUtil;
+import com.verapi.abyss.common.OpenAPIUtil;
+import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.handler.OpenAPI3ResponseValidationHandlerImpl;
 import com.verapi.portal.oapi.AuthenticationApiController;
 import com.verapi.portal.service.idam.ApiService;
@@ -187,6 +187,11 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         // Now you have to generate the router
                                         Router router = factory.setOptions(factoryOptions).getRouter();
 
+                                        //attach logger handler to generate logs into Cassandra
+                                        //router.route().handler(LoggerHandler.create());
+
+                                        //router.route().handler(BodyHandler.create());
+
                                         //Mount router into main router
                                         gatewayRouter.mountSubRouter(Constants.ABYSS_GATEWAY_ROOT + "/" + apiUUID + "/", router);
 
@@ -206,31 +211,50 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                 });
                                 return Single.just(o);
                             })
-                            .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
+//                            .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
+
+                            .onErrorResumeNext(throwable -> {
+                                logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                return Single.just(new JsonObject());
+                            })
+
                             .doAfterSuccess(swaggerParseResult -> logger.trace("successfully loaded API proxy {}", apiUUID))
                             .toObservable();
                 })
                 .flatMap(o -> {
-                            return Observable.just(new Record()
-                                    .setType("http-endpoint")
-                                    //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
-                                    .setLocation((new HttpLocation()
-                                            .setSsl(false)
-                                            .setHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST))
-                                            .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT))
-                                            .setRoot("/")
-                                            .toJson()))
-                                    .setName(o.getString("uuid"))
-                                    .setMetadata(new JsonObject()
-                                            .put("organization", o.getString("organizationid"))
-                                            .put("apiSpec", o.getString("openapidocument"))));
+                            if (o == null)
+                                return Observable.just(new Record());
+                            else
+                                return Observable.just(new Record()
+                                        .setType("http-endpoint")
+                                        //.setLocation(new JsonObject().put("endpoint", "the-service-address"))
+                                        .setLocation((new HttpLocation()
+                                                .setSsl(false)
+                                                .setHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST))
+                                                .setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT))
+                                                .setRoot("/")
+                                                .toJson()))
+                                        .setName(o.getString("uuid"))
+                                        .setMetadata(new JsonObject()
+                                                .put("organization", o.getString("organizationid"))
+                                                .put("apiSpec", o.getString("openapidocument"))));
                         }
                 )
-                .flatMap(record -> AbyssServiceDiscovery.getInstance(vertx)
-                        .getServiceDiscovery()
-                        .rxPublish(record)
-                        .toObservable()))
-                .doOnError(throwable -> logger.error("loadAllProxyApis() error: {} \n stack trace: {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                .flatMap(record -> {
+                    if (record == null)
+                        return Observable.empty();
+                    else
+                        return AbyssServiceDiscovery.getInstance(vertx)
+                                .getServiceDiscovery()
+                                .rxPublish(record)
+                                .toObservable();
+                })
+                //.doOnError(throwable -> logger.error("loadAllProxyApis() error: {} \n stack trace: {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+
+//                .onErrorResumeNext(Completable::error)
+//                .onErrorResumeNext(throwable -> Completable.fromObservable(Observable.empty()))
+
+
                 //.andThen(super.loadAllProxyApis())
                 .doFinally(() -> {
                     String mountPoint;
@@ -242,7 +266,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     //logger.trace("subRouter route list: {}", subRouter.getRoutes());
                     logger.info("Loading All API proxies stage completed");
                     logger.info("loadAllProxyApis() completed");
-                });
+                }));
     }
 
     private void AddSecurityHandlers(OpenAPI openAPI, List<SecurityRequirement> securityRequirements, OpenAPI3RouterFactory factory) {

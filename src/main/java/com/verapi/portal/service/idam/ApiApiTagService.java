@@ -229,7 +229,8 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  apiid,\n" +
             "  apitagid\n" +
-            "from api__api_tag\n";
+            "from\n" +
+            "api__api_tag\n";
 
     private static final String SQL_UPDATE = "UPDATE api__api_tag\n" +
             "SET\n" +
@@ -239,13 +240,6 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
             "  , apiid      = CAST(? AS uuid)\n" +
             "  , apitagid      = CAST(? AS uuid)\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
@@ -274,19 +268,24 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
     public static final String SQL_LIST_API_TAGS = "select\n" +
             "  api_tag.uuid,\n" +
             "  api_tag.name\n" +
-            "from api__api_tag, api_tag\n" +
+            "from\n" +
+            "api__api_tag\n" +
+            ", api_tag\n" +
             "where apiid = CAST(? AS uuid) and apitagid = api_tag.uuid\n";
 
     public static final String SQL_LIST_SUBJECT_API_TAGS = "select distinct\n" +
             "  api_tag.uuid,\n" +
             "  api_tag.name\n" +
-            "from api__api_tag, api_tag, api\n" +
+            "from\n" +
+            "api__api_tag\n" +
+            ", api_tag, api\n" +
             "where subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
             "      apitagid = api_tag.uuid\n";
 
     public static final String SQL_API_API_TAGS_BY_API_AND_TAG = "select\n" +
             "id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apitagid\n" +
-            "from api__api_tag\n" +
+            "from\n" +
+            "api__api_tag\n" +
             "where apiid = CAST(? AS uuid) and apitagid = CAST(? AS uuid)\n";
 
 

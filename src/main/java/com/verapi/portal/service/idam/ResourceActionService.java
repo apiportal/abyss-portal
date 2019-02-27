@@ -237,7 +237,8 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
             "  description,\n" +
             "  resourcetypeid,\n" +
             "  isactive\n" +
-            "from resource_action\n";
+            "from\n" +
+            "resource_action\n";
 
     private static final String SQL_UPDATE = "UPDATE resource_action\n" +
             "SET\n" +
@@ -249,13 +250,6 @@ public class ResourceActionService extends AbstractService<UpdateResult> {
             "  , resourcetypeid      = CAST(? AS uuid)\n" +
             "  , isactive      = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(actionname) = lower(?)\n";
 

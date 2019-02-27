@@ -258,7 +258,8 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
             "  subject_permission.resourceactionid,\n" +
             "  subject_permission.accessmanagerid,\n" +
             "  subject_permission.isactive\n" +
-            "from subject_permission\n";
+            "from\n" +
+            "subject_permission\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_permission\n" +
             "SET\n" +
@@ -275,13 +276,6 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
             "  , accessmanagerid      = CAST(? AS uuid)\n" +
             "  , isactive      = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(permission) = lower(?)\n";
 

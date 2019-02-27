@@ -229,7 +229,8 @@ public class ApiStateService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  name,\n" +
             "  description\n" +
-            "from api_state\n";
+            "from\n" +
+            "api_state\n";
 
     private static final String SQL_UPDATE = "UPDATE api_state\n" +
             "SET\n" +
@@ -239,13 +240,6 @@ public class ApiStateService extends AbstractService<UpdateResult> {
             "  , name      = ?\n" +
             "  , description      = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 

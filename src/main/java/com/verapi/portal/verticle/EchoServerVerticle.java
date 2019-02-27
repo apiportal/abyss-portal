@@ -14,6 +14,7 @@ package com.verapi.portal.verticle;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.core.http.HttpServerResponse;
@@ -31,10 +32,10 @@ public class EchoServerVerticle extends AbstractVerticle {
         HttpServer server = vertx.createHttpServer();
         server.requestStream().toFlowable().subscribe(req -> {
                     HttpServerResponse resp = req.response();
-                    String contentType = req.getHeader("Content-Type");
+                    String contentType = req.getHeader(HttpHeaders.CONTENT_TYPE);
                     if (contentType != null) {
                         resp.putHeader("abyss-echo-server", "")
-                                .putHeader("Content-Type", contentType);
+                                .putHeader(HttpHeaders.CONTENT_TYPE, contentType);
                     }
                     resp.setChunked(true);
                     req.toFlowable().subscribe(

@@ -54,7 +54,9 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("name"))
                             .add(jsonObj.getString("description"))
-                            .add(jsonObj.getString("url"));
+                            .add(jsonObj.getString("url"))
+                            .add(jsonObj.getBoolean("isactive"))
+                            .add(jsonObj.getValue("picture"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -107,6 +109,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("name"))
                 .add(updateRecord.getString("description"))
                 .add(updateRecord.getString("url"))
+                .add(updateRecord.getBoolean("isactive"))
+                .add(updateRecord.getValue("picture"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -127,6 +131,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("name"))
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getString("url"))
+                            .add(jsonObj.getBoolean("isactive"))
+                            .add(jsonObj.getValue("picture"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -214,8 +220,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into organization (organizationid, crudsubjectid, name, description, url)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?)";
+    private static final String SQL_INSERT = "insert into organization (organizationid, crudsubjectid, name, description, url, isactive, picture)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ?)";
 
     private static final String SQL_DELETE = "update organization\n" +
             "set\n" +
@@ -232,8 +238,11 @@ public class OrganizationService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  name,\n" +
             "  description,\n" +
-            "  url\n" +
-            "from organization\n";
+            "  url,\n" +
+            "  isactive,\n" +
+            "  picture\n" +
+            "from\n" +
+            "organization\n";
 
     private static final String SQL_UPDATE = "UPDATE organization\n" +
             "SET\n" +
@@ -242,15 +251,10 @@ public class OrganizationService extends AbstractService<UpdateResult> {
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , name      = ?\n" +
             "  , description      = ?\n" +
-            "  , url      = ?\n";
+            "  , url      = ?\n" +
+            "  , isactive = ?\n" +
+            "  , picture = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 

@@ -1,60 +1,65 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: /abyss/oapi
 info:
-  description: 'Abyss platform APIs'
-  version: '1.0.0'
-  title: 'Abyss'
+  description: Abyss platform APIs
+  version: 1.0.0
+  title: Abyss
   termsOfService: 'https://apiportal.com/terms/'
   contact:
-    email: 'info@apiportal.com'
-    name: 'Abyss'
+    email: info@apiportal.com
+    name: Abyss
     url: 'https://apiportal.com'
   license:
-    name: 'Abyss 1.0'
+    name: Abyss 1.0
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: SubjectOrganizations
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : SubjectOrganizations crud operations'
-- name: SubjectOrganization
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : SubjectOrganization crud operations'
-- name: Subject-Organizations
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Subject''s Organizations listing operations'
+  - name: SubjectOrganizations
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : SubjectOrganizations crud operations'
+  - name: SubjectOrganization
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : SubjectOrganization crud operations'
+  - name: Subject-Organizations
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : Subject''s Organizations listing operations'
+  - name: Organization-Subjects
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : Organization''s Subjects listing operations'
 paths:
   /subject-organizations:
     get:
       tags:
-      - SubjectOrganizations
-      summary: 'Get list of SubjectOrganizations'
-      description: 'Returns list of SubjectOrganizations'
+        - SubjectOrganizations
+      summary: Get list of SubjectOrganizations
+      description: Returns list of SubjectOrganizations
       operationId: getSubjectOrganizations
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search SubjectOrganizations which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search SubjectOrganizations which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search SubjectOrganizations which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search SubjectOrganizations which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectOrganization'
@@ -76,9 +81,9 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - SubjectOrganizations
-      summary: 'Add a bulk of SubjectOrganizations'
-      description: 'Provide a list of SubjectOrganizations to be inserted'
+        - SubjectOrganizations
+      summary: Add a bulk of SubjectOrganizations
+      description: Provide a list of SubjectOrganizations to be inserted
       operationId: addSubjectOrganizations
       responses:
         '207':
@@ -101,11 +106,12 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectOrganization'
+      parameters: []
     put:
       tags:
-      - SubjectOrganizations
-      summary: 'Update a bulk of SubjectOrganizations'
-      description: 'Provide a bulk list of  SubjectOrganizations to be updated'
+        - SubjectOrganizations
+      summary: Update a bulk of SubjectOrganizations
+      description: Provide a bulk list of  SubjectOrganizations to be updated
       operationId: updateSubjectOrganizations
       responses:
         '207':
@@ -128,11 +134,12 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectOrganizationObject'
+      parameters: []
     delete:
       tags:
-      - SubjectOrganizations
-      summary: 'Delete all SubjectOrganizations'
-      description: 'Deletes all SubjectOrganizations'
+        - SubjectOrganizations
+      summary: Delete all SubjectOrganizations
+      description: Deletes all SubjectOrganizations
       operationId: deleteSubjectOrganizations
       responses:
         '204':
@@ -149,20 +156,21 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subject-organizations/{uuid}:
+      parameters: []
+  '/subject-organizations/{uuid}':
     get:
       tags:
-      - SubjectOrganization
-      summary: 'Get an existing SubjectOrganization by uuid'
-      description: 'Provide an uuid of SubjectOrganization to be get'
+        - SubjectOrganization
+      summary: Get an existing SubjectOrganization by uuid
+      description: Provide an uuid of SubjectOrganization to be get
       operationId: getSubjectOrganization
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of SubjectOrganization that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: uuid of SubjectOrganization that need to be get
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +192,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - SubjectOrganization
-      summary: 'Update an existing SubjectOrganization'
-      description: 'Provide an altered SubjectOrganization to be updated'
+        - SubjectOrganization
+      summary: Update an existing SubjectOrganization
+      description: Provide an altered SubjectOrganization to be updated
       operationId: updateSubjectOrganization
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of SubjectOrganization that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: uuid of SubjectOrganization that need to be updated
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +226,17 @@ paths:
         $ref: '#/components/requestBodies/SubjectOrganization'
     delete:
       tags:
-      - SubjectOrganization
-      summary: 'Delete SubjectOrganization'
-      description: 'Provide an uuid parameter of SubjectOrganization to be updated'
+        - SubjectOrganization
+      summary: Delete SubjectOrganization
+      description: Provide an uuid parameter of SubjectOrganization to be updated
       operationId: deleteSubjectOrganization
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of SubjectOrganization that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: The uuid of SubjectOrganization that needs to be deleted
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -246,34 +254,81 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subject-organizations/subject/{uuid}:
+  '/subject-organizations/subject/{uuid}':
     get:
       tags:
-      - Subject-Organizations
-      summary: 'Get organization list of subject'
-      description: 'Returns organization list of subject'
+        - Subject-Organizations
+      summary: Get organization list of subject
+      description: Returns organization list of subject
       operationId: getOrganizationsOfSubject
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of subject'
-        required: true
-        schema:
-          type: string
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search organizations which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search organizations which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: uuid
+          in: path
+          description: uuid of subject
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search organizations which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search organizations which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectOrganization'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  '/subject-organizations/organization/{uuid}':
+    get:
+      tags:
+        - Organization-Subjects
+      summary: Get subject list of organization
+      description: Returns subject list of organization
+      operationId: getSubjectsOfOrganization
+      parameters:
+        - name: uuid
+          in: path
+          description: uuid of organization
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search subjects which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search subjects which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectOrganization'
@@ -294,15 +349,15 @@ paths:
         default:
           $ref: '#/components/responses/default'
 externalDocs:
-  description: 'See Abyss example'
+  description: See Abyss example
   url: 'https://apiportal.com/apidocs/index.html'
 components:
   schemas:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -321,12 +376,12 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
           readOnly: true
-          description: 'uuid of the record'
+          description: uuid of the record
         status:
           type: integer
           readOnly: true
@@ -341,10 +396,12 @@ components:
         uuid:
           type: string
           readOnly: true
-          description: 'Secondary primary key. Used in front end messages for security reasons.'
+          description: >-
+            Secondary primary key. Used in front end messages for security
+            reasons.
         organizationid:
           type: string
-          description: 'Id of Organization'
+          description: Id of Organization
         created:
           type: string
           readOnly: true
@@ -366,17 +423,23 @@ components:
           description: 'ID of Subject that reads, creates, updates or deletes'
         subjectid:
           type: string
-          description: 'FK ID of Subject'
+          description: FK ID of Subject
         organizationrefid:
           type: string
-          description: 'FK ID of Organization'
+          description: FK ID of Organization
+        isOwner:
+          type: boolean
+          description: 'Is the subject owner of the organization'
+        isActive:
+          type: boolean
+          description: 'Is the subject membership for the organization active'
   requestBodies:
     SubjectOrganization:
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectOrganization'
-      description: 'SubjectOrganization object that needs to be added or updated'
+      description: SubjectOrganization object that needs to be added or updated
       required: true
     ListOfSubjectOrganization:
       content:
@@ -385,7 +448,7 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/SubjectOrganization'
-      description: 'SubjectOrganization array that needs to be added'
+      description: SubjectOrganization array that needs to be added
       required: true
     ListOfSubjectOrganizationObject:
       content:
@@ -393,33 +456,28 @@ components:
           schema:
             type: object
             additionalProperties: true
-      description:  'list of SubjectOrganization objects that needs to be updated, each additional property name should be the uuid of coresponding SubjectOrganization record'
+      description: >-
+        list of SubjectOrganization objects that needs to be updated, each
+        additional property name should be the uuid of coresponding
+        SubjectOrganization record
       required: true
   responses:
     '200':
-      description: 'Successful operation'
+      description: Successful operation
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectOrganization'
-    '200-ListOfSubjectOrganization':
-      description: 'A SubjectOrganization array'
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schemas/SubjectOrganization'
     '201':
-      description: 'New SubjectOrganization resource has been created'
+      description: New SubjectOrganization resource has been created
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectOrganization'
     '204':
-      description: 'The SubjectOrganization resource was successfully deleted'
+      description: The SubjectOrganization resource was successfully deleted
     '207':
-      description: 'Multi Status for bulk operation'
+      description: Multi Status for bulk operation
       content:
         application/json:
           schema:
@@ -427,61 +485,71 @@ components:
             items:
               $ref: '#/components/schemas/MultiStatus'
     '304':
-      description: 'Not Modified – The client can use cached data'
+      description: Not Modified – The client can use cached data
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/SubjectOrganization'
     '400':
-      description: 'Invalid UUID supplied'
+      description: Invalid UUID supplied
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '401':
-      description: 'Authorization information is missing or invalid'
+      description: Authorization information is missing or invalid
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '403':
-      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
+      description: >-
+        Forbidden – The server understood the request, but is refusing it or the
+        access is not allowed
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '404':
-      description: 'Not found – There is no resource behind the URI'
+      description: Not found – There is no resource behind the URI
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '405':
-      description: 'Method not allowed'
+      description: Method not allowed
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '422':
-      description: 'Unprocessable Entity – server cannot process the request'
+      description: Unprocessable Entity – server cannot process the request
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '429':
-      description: 'Too many request(rate limiting)'
+      description: Too many request(rate limiting)
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
     '500':
-      description: 'Internal server error'
+      description: Internal server error
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
+    200-ListOfSubjectOrganization:
+      description: A SubjectOrganization array
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/SubjectOrganization'
     default:
-      description: 'error'
+      description: error
       content:
         application/json:
           schema:
@@ -494,7 +562,7 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: 'The number of items to skip before starting to collect the result set'
+      description: The number of items to skip before starting to collect the result set
     limitParam:
       in: query
       name: limit
@@ -504,7 +572,7 @@ components:
         minimum: 1
         maximum: 50
         default: 20
-      description: 'The numbers of items to return'
+      description: The numbers of items to return
   securitySchemes:
     abyssCookieAuth:
       $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
@@ -517,13 +585,14 @@ components:
     abyssAppAccessTokenAuth:
       $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: >-
+        /openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

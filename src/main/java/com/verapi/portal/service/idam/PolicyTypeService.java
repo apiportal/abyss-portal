@@ -56,7 +56,8 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getString("type"))
                             .add(jsonObj.getString("subtype"))
-                            .add(jsonObj.getJsonObject("template").encode());
+                            .add(jsonObj.getJsonObject("template").encode())
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -111,6 +112,7 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("type"))
                 .add(updateRecord.getString("subtype"))
                 .add(updateRecord.getJsonObject("template").encode())
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -133,6 +135,7 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("type"))
                             .add(jsonObj.getString("subtype"))
                             .add(jsonObj.getJsonObject("template").encode())
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -220,8 +223,8 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into policy_type (organizationid, crudsubjectid, name, description, type, subtype, template)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ? :: JSON)";
+    private static final String SQL_INSERT = "insert into policy_type (organizationid, crudsubjectid, name, description, type, subtype, template, isactive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?, ? :: JSON, ?)";
 
     private static final String SQL_DELETE = "update policy_type\n" +
             "set\n" +
@@ -240,8 +243,10 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
             "  description,\n" +
             "  type,\n" +
             "  subtype,\n" +
-            "  template::JSON\n" +
-            "from policy_type\n";
+            "  template::JSON,\n" +
+            "  isactive\n" +
+            "from\n" +
+            "policy_type\n";
 
     private static final String SQL_UPDATE = "UPDATE policy_type\n" +
             "SET\n" +
@@ -252,15 +257,9 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
             "  , description      = ?\n" +
             "  , type      = ?\n" +
             "  , subtype      = ?\n" +
-            "  , template      = ?::JSON\n";
+            "  , template      = ?::JSON\n" +
+            "  , isactive = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 

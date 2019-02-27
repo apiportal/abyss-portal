@@ -50,7 +50,7 @@ public class PortalVerticle extends AbstractPortalVerticle {
     @Override
     protected void mountControllerRouters() {
         logger.trace("PortalVerticle.mountControllerRouters() invoked");
-        new FastClasspathScanner("com.verapi")
+        new FastClasspathScanner("com.verapi") //TODO: refine scan spec to improve performance
                 //.verbose()
                 .matchClassesWithAnnotation(AbyssController.class, new ClassAnnotationMatchProcessor() {
                     @Override

@@ -164,4 +164,25 @@ public class SubjectMembershipApiController extends AbstractApiController {
     }
 
 
+    @AbyssApiOperationHandler
+    public void getMembershipsUnderDirectory(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    SubjectMembershipService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(SubjectMembershipService.FILTER_BY_DIRECTORY)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+
+
 }

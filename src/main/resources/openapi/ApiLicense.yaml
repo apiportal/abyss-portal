@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,49 +17,49 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: ApiLicenses
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ApiLicenses crud operations'
-- name: ApiLicense
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ApiLicense crud operations'
-- name: Api Licenses
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Api''s Licenses listing operations'
-- name: License APIs
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : License''s APIs listing operations'
+  - name: ApiLicenses
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiLicenses crud operations'
+  - name: ApiLicense
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiLicense crud operations'
+  - name: Api Licenses
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Api''s Licenses listing operations'
+  - name: License APIs
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : License''s APIs listing operations'
 paths:
   /api-licenses:
     get:
       tags:
-      - ApiLicenses
+        - ApiLicenses
       summary: 'Get list of ApiLicenses'
       description: 'Returns list of ApiLicenses'
       operationId: getApiLicenses
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ApiLicenses which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ApiLicenses which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ApiLicenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ApiLicenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiLicense'
@@ -81,7 +81,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - ApiLicenses
+        - ApiLicenses
       summary: 'Add a bulk of ApiLicenses'
       description: 'Provide a list of ApiLicenses to be inserted'
       operationId: addApiLicenses
@@ -108,7 +108,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiLicense'
     put:
       tags:
-      - ApiLicenses
+        - ApiLicenses
       summary: 'Update a bulk of ApiLicenses'
       description: 'Provide a bulk list of  ApiLicenses to be updated'
       operationId: updateApiLicenses
@@ -135,7 +135,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiLicenseObject'
     delete:
       tags:
-      - ApiLicenses
+        - ApiLicenses
       summary: 'Delete all ApiLicenses'
       description: 'Deletes all ApiLicenses'
       operationId: deleteApiLicenses
@@ -157,17 +157,17 @@ paths:
   /api-licenses/{uuid}:
     get:
       tags:
-      - ApiLicense
+        - ApiLicense
       summary: 'Get an existing ApiLicense by uuid'
       description: 'Provide an uuid of ApiLicense to be get'
       operationId: getApiLicense
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ApiLicense that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ApiLicense that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -189,17 +189,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - ApiLicense
+        - ApiLicense
       summary: 'Update an existing ApiLicense'
       description: 'Provide an altered ApiLicense to be updated'
       operationId: updateApiLicense
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ApiLicense that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ApiLicense that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -223,17 +223,17 @@ paths:
         $ref: '#/components/requestBodies/ApiLicense'
     delete:
       tags:
-      - ApiLicense
+        - ApiLicense
       summary: 'Delete ApiLicense'
       description: 'Provide an uuid parameter of ApiLicense to be updated'
       operationId: deleteApiLicense
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of ApiLicense that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of ApiLicense that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -254,31 +254,31 @@ paths:
   /api-licenses/api/{uuid}:
     get:
       tags:
-      - Api Licenses
+        - Api Licenses
       summary: 'Get list of Api''s Licenses'
       description: 'Returns list of Licenses of an API'
       operationId: getLicensesOfApi
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Api'
-        required: true
-        schema:
-          type: string
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Api Licenses which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Api Licenses which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: uuid
+          in: path
+          description: 'uuid of Api'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiLicense'
@@ -301,31 +301,31 @@ paths:
   /api-licenses/license/{uuid}:
     get:
       tags:
-      - License APIs
+        - License APIs
       summary: 'Get list of License''s APIs'
       description: 'Returns list of APIs of an License'
       operationId: getApisOfLicense
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of License'
-        required: true
-        schema:
-          type: string
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Api Licenses which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Api Licenses which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: uuid
+          in: path
+          description: 'uuid of License'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiLicense'
@@ -353,8 +353,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -373,7 +373,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -422,6 +422,9 @@ components:
         licenseid:
           type: string
           description: 'FK ID of license'
+        isactive:
+          type: boolean
+          description: 'Is the licence active for the API'
   requestBodies:
     ApiLicense:
       content:
@@ -573,9 +576,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

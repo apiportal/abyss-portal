@@ -136,7 +136,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         logger.trace("ConfigRetrieverOptions set OK..");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
         logger.trace("ConfigRetriever OK..");
-        CompletableFuture future = new CompletableFuture();
+        CompletableFuture<JsonObject> future = new CompletableFuture<>();
         retriever.getConfig(ar -> {
             if (ar.failed()) {
                 future.completeExceptionally(ar.cause());

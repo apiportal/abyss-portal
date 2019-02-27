@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Deprecated
 public class OpenAPIUtil {
     private static Logger logger = LoggerFactory.getLogger(OpenAPIUtil.class);
 
@@ -80,7 +81,9 @@ public class OpenAPIUtil {
                 logger.trace("openAPIParser OK");
                 return Single.just(swaggerParseResult);
             } else {
-                if (swaggerParseResult.getMessages().size() == 1 && swaggerParseResult.getMessages().get(0).matches("unable to read location")) {
+                if ((swaggerParseResult.getMessages().size() == 1) && (swaggerParseResult.getMessages().get(0) == null))
+                    return Single.just(swaggerParseResult);
+                else if (swaggerParseResult.getMessages().size() == 1 && swaggerParseResult.getMessages().get(0).matches("unable to read location")) {
                     logger.error("openAPIParser error for: {}| {}", data.substring(1, 40), swaggerParseResult.getMessages());
                     return Single.error(RouterFactoryException.createSpecNotExistsException(""));
                 } else {

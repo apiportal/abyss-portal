@@ -11,10 +11,10 @@
 
 package com.verapi.portal.service;
 
-import com.verapi.abyss.exception.ApiSchemaError;
-import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.es.ElasticSearchService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -42,6 +42,21 @@ public abstract class AbstractService<T> implements IService<T> {
     protected DatabaseMetaData databaseMetaData;
     private AbyssJDBCService abyssJDBCService;
     protected static ElasticSearchService elasticSearchService = new ElasticSearchService();
+    protected String organizationUuid;// = Constants.DEFAULT_ORGANIZATION_UUID;
+
+
+    public static final String SQL_AND = "and\n";
+
+    protected static final String SQL_WHERE = "where\n";
+
+    protected static final String SQL_CONDITION_ID_IS = "id = ?\n";
+
+    protected static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
+
+    protected static final String SQL_CONDITION_ORGANIZATION_IS = "organizationid = CAST(? AS uuid)\n";
+
+    protected static final String SQL_FROM = "from\n";
+
 
     public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         this.vertx = vertx;
@@ -104,6 +119,10 @@ public abstract class AbstractService<T> implements IService<T> {
 
     }
 
+    public Single<JDBCClient> initJDBCClient(String organizationUuid) {
+        this.organizationUuid = organizationUuid;
+        return initJDBCClient();
+    }
 
     public Vertx getVertx() {
         return vertx;
@@ -227,6 +246,28 @@ public abstract class AbstractService<T> implements IService<T> {
                         .toSingleDefault(false)
                         //execute query
                         .flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
+//                        .flatMap(conn1 -> { //TODO: Improve Organization Filter
+//                            String tableName = getTableNameFromSql(sql).toLowerCase();
+//                            logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+//                            boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+//                            boolean isAdmin = false; //TODO: Admin Only
+//                            boolean doesContainOrderBy = false; //TODO: Order By Handling
+//                            logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+//                            if (organizationUuid == null || isParamTable) {
+//                                if (params == null) {
+//                                    return conn.rxQuery(sql);
+//                                } else {
+//                                    return conn.rxQueryWithParams(sql, params);
+//                                }
+//                            } else {
+//
+//                                if (params == null) {
+//                                    return conn.rxQueryWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
+//                                } else {
+//                                    return conn.rxQueryWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
+//                                }
+//                            }
+//                        })
                         .flatMap(resultSet -> {
                             logger.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
                             logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
@@ -371,5 +412,27 @@ public abstract class AbstractService<T> implements IService<T> {
                 //throw new Exception("Unknown Aggregation " + this);
             }
         }
+    }
+
+    private static String getTableNameFromSql(String sql) {
+
+        if (sql==null || sql.isEmpty())
+            return "";
+
+        sql = sql.toLowerCase();
+
+        int tableNameStartIndex = sql.indexOf(SQL_FROM)+SQL_FROM.length();
+        if (tableNameStartIndex==-1)
+            return "";
+
+        String tableNameStr = sql.substring(tableNameStartIndex);
+
+        int tableNameEndIndex = tableNameStr.indexOf("\n");
+        if (tableNameEndIndex==-1)
+            return "";
+
+        tableNameStr = tableNameStr.substring(0, tableNameEndIndex).trim();
+
+        return tableNameStr;
     }
 }

@@ -74,7 +74,9 @@ public class CreateOrganizationController extends PortalAbstractController {
                             .put("crudsubjectid", userUuid)
                             .put("name", name)
                             .put("description", description)
-                            .put("url", url)));
+                            .put("url", url)
+                            .put("isactive", true)
+                            .put("picture", "")));
 
                 })
                 .flatMap(jsonObjects -> {
@@ -89,7 +91,9 @@ public class CreateOrganizationController extends PortalAbstractController {
                           .put("organizationid", organizationUuid)
                           .put("crudsubjectid",userUuid)
                           .put("subjectid",userUuid)
-                          .put("organizationrefid", organizationUuid)));
+                          .put("organizationrefid", organizationUuid)
+                          .put("isowner", true)
+                          .put("isactive", true)));
                 })
                 .flatMap(jsonObjects -> {
                     logger.trace("CreateOrganizationController - subjectOrganizationService.insertAll successfull: {}", jsonObjects.get(0).encodePrettily());

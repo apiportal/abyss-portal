@@ -11,16 +11,15 @@
 
 package com.verapi.portal.verticle;
 
-import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadata;
-import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadataDiscovery;
-import com.verapi.abyss.sql.builder.metadata.PgDatabaseMetadata.PgDatabaseMetaData;
-import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.portal.common.BuildProperties;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.logger.handler.rx.LoggerHandler;
+import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.common.BuildProperties;
 import com.verapi.portal.controller.FailureController;
 import io.reactivex.Single;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.web.handler.LoggerFormat;
@@ -35,11 +34,7 @@ import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public abstract class AbyssAbstractVerticle extends AbstractVerticle {
@@ -135,66 +130,6 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                 });
     }
 
-    Single<JDBCClient> loadAbyssDatabaseMetadata(JDBCClient jdbcClient) throws SQLException {
-        logger.info("loading database metadata for database schema:{}", Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBSCHEMA_NAME));
-        return jdbcClient.rxGetConnection()
-                .flatMap(sqlConnection -> {
-                    try (java.sql.Connection con = sqlConnection.getDelegate().unwrap()) {
-                        DatabaseMetaData databaseMetaData = con.getMetaData();
-                        try (java.sql.ResultSet tablesResultSet = databaseMetaData.getTables(null
-                                , Config.getInstance().getConfigJsonObject().getString(Constants.PORTAL_DBSCHEMA_NAME)
-                                , null
-                                , new String[]{"TABLE"})) {
-                            while (tablesResultSet.next()) {
-                                logger.debug("table metadata:: TABLE_CAT:{}\tTABLE_SCHEM:{}\tTABLE_NAME:{}\tTABLE_TYPE:{}"
-                                        , tablesResultSet.getString("table_cat")
-                                        , tablesResultSet.getString("table_schem")
-                                        , tablesResultSet.getString("table_name")
-                                        , tablesResultSet.getString("table_type"));
-                                try (java.sql.ResultSet tableMetaDataResultSet = databaseMetaData.getColumns(tablesResultSet.getString("table_cat")
-                                        , tablesResultSet.getString("table_schem")
-                                        , tablesResultSet.getString("table_name")
-                                        , null)) {
-                                    List<AbyssDatabaseMetadata> abyssDatabaseMetadataList = new ArrayList<>();
-                                    while (tableMetaDataResultSet.next()) {
-                                        AbyssDatabaseMetadata abyssDatabaseMetadata = new AbyssDatabaseMetadata(
-                                                tableMetaDataResultSet.getString(PgDatabaseMetaData.COLUMN_NAME.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.DATA_TYPE.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.TYPE_NAME.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.COLUMN_SIZE.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.DECIMAL_DIGITS.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.NULLABLE.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.REMARKS.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.COLUMN_DEF.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.IS_NULLABLE.toString())
-                                                , tableMetaDataResultSet.getString(PgDatabaseMetaData.IS_AUTOINCREMENT.toString())
-                                        );
-                                        abyssDatabaseMetadataList.add(abyssDatabaseMetadata);
-                                    }
-                                    AbyssDatabaseMetadataDiscovery.getInstance().addTableMetada(tablesResultSet.getString("table_name"), abyssDatabaseMetadataList);
-                                }
-                            }
-                            /*logger.debug("column metadata::{}", new ObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false).writerWithDefaultPrettyPrinter().writeValueAsString(AbyssDatabaseMetadataDiscovery.getInstance().getAbyssDatabaseMetadataMap()));
-                            logger.debug("api table -select all- query: {}", Select.select()
-                                    .selectAll()
-                                    .from("api")
-                                    .where("1=1")
-                                    .and()
-                                    .where("uuid", Predicate.Operator.EQUAL_TO, "123")
-                                    .toQueryString());
-                            logger.debug("api table -select all- query: {}", Select.select()
-                                    .selectAll()
-                                    .from("subject")
-                                    .where("1=1")
-                                    .and()
-                                    .where("uuid", Predicate.Operator.EQUAL_TO, "123")
-                                    .toQueryString());*/
-                        }
-                    }
-                    return Single.just(jdbcClient);
-                });
-    }
-
     protected abstract Single<HttpServer> createHttpServer();
 
     private Single<Router> configureAbyssRouter() {
@@ -202,7 +137,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         logger.trace("configureAbyssRouter() running");
 
         //log HTTP requests
-        abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+        abyssRouter.route().handler(io.vertx.reactivex.ext.web.handler.LoggerHandler.create(LoggerFormat.DEFAULT));
+        //abyssRouter.route().handler(LoggerHandler.create());
 
         //firstly install cookie handler
         //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
@@ -222,6 +158,11 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
         //It requires that the session handler is already present on previous matching routes
         //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
+
+        //fourthly install Cassandra logger
+        Boolean isCassandraLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.CASSANDRA_LOGGER_ENABLED);
+        if (isCassandraLoggerEnabled)
+            abyssRouter.route().handler(LoggerHandler.create());
 
         logger.debug("createRouter() - " + jdbcClient.toString());
         jdbcAuth = JDBCAuth.create(vertx, jdbcClient);
@@ -282,7 +223,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         allowHeaders.add("Access-Control-Allow-Credentials");
         allowHeaders.add("origin");
         allowHeaders.add("Vary : Origin");
-        allowHeaders.add("Content-Type");
+        allowHeaders.add(HttpHeaders.CONTENT_TYPE.toString());
         allowHeaders.add("accept");
         allowHeaders.add("Cookie");
         // CORS support
@@ -332,7 +273,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
                         "var gatewayPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_GATEWAY_SERVER_PORT) + "';\n" +
                         "var httpBinUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_BIN_URL) + "';\n" +
                         "var searchAllUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.ES_SERVER_URL) /*+ "/_search"*/ + "';\n";
-        context.response().putHeader("Content-Type", "application/javascript");
+        context.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/javascript");
         context.response().setStatusCode(200);
         context.response().end(filecontent);
     }

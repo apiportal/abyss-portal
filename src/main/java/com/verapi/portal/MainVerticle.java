@@ -24,19 +24,27 @@ import com.verapi.portal.handler.UserGroups;
 import com.verapi.portal.handler.Users;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.handler.*;
+import io.vertx.reactivex.ext.web.handler.AuthHandler;
+import io.vertx.reactivex.ext.web.handler.BodyHandler;
+import io.vertx.reactivex.ext.web.handler.CSRFHandler;
+import io.vertx.reactivex.ext.web.handler.CookieHandler;
+import io.vertx.reactivex.ext.web.handler.RedirectAuthHandler;
+import io.vertx.reactivex.ext.web.handler.SessionHandler;
+import io.vertx.reactivex.ext.web.handler.StaticHandler;
+import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
+import io.vertx.reactivex.ext.web.handler.UserSessionHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
@@ -120,7 +128,7 @@ public class MainVerticle extends AbstractVerticle {
             Router router = Router.router(vertx);
 
             //log HTTP requests
-            abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+            //abyssRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
             //firstly install cookie handler
             //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
@@ -367,7 +375,7 @@ public class MainVerticle extends AbstractVerticle {
         // and now delegate to the engine to render it.
         engine.render(templateContext, Constants.TEMPLATE_DIR_ROOT + templateFileName, res -> {
             if (res.succeeded()) {
-                context.response().putHeader("Content-Type", "text/html");
+                context.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 context.response().setStatusCode(statusCode);
                 context.response().end(res.result());
             } else {

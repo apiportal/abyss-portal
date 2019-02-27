@@ -11,16 +11,17 @@
 
 package com.verapi.portal.verticle;
 
-import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.common.OwaspCharacterEscapes;
 import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.AbyssApiController;
-import com.verapi.portal.common.OwaspCharacterEscapes;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.vertx.core.Future;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.Json;
@@ -60,7 +61,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
-                .requestHandler(abyssRouter::accept)
+                .requestHandler(abyssRouter)
                 //.requestHandler(verticleRouter::accept)
                 .rxListen(serverPort, verticleHost);
     }
@@ -99,7 +100,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
         allowHeaders.add("Access-Control-Allow-Credentials");
         allowHeaders.add("origin");
         allowHeaders.add("Vary : Origin");
-        allowHeaders.add("Content-Type");
+        allowHeaders.add(HttpHeaders.CONTENT_TYPE.toString());
         allowHeaders.add("accept");
         allowHeaders.add("Cookie");
         // CORS support

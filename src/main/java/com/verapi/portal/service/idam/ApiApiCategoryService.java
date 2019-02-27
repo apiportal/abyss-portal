@@ -229,7 +229,8 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  apiid,\n" +
             "  apicategoryid\n" +
-            "from api__api_category\n";
+            "from\n" +
+            "api__api_category\n";
 
     private static final String SQL_UPDATE = "UPDATE api__api_category\n" +
             "SET\n" +
@@ -239,13 +240,6 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
             "  , apiid      = CAST(? AS uuid)\n" +
             "  , apicategoryid      = CAST(? AS uuid)\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 
@@ -274,19 +268,24 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
     public static final String SQL_LIST_API_CATEGORIES = "select\n" +
             "  api_category.uuid,\n" +
             "  api_category.name\n" +
-            "from api__api_category, api_category\n" +
+            "from\n" +
+            "api__api_category\n" +
+            ", api_category\n" +
             "where apiid = CAST(? AS uuid) and apicategoryid = api_category.uuid\n";
 
     public static final String SQL_LIST_SUBJECT_API_CATEGORIES = "select distinct\n" +
             "  api_category.uuid,\n" +
             "  api_category.name\n" +
-            "from api__api_category, api_category, api\n" +
+            "from\n" +
+            "api__api_category\n" +
+            ", api_category, api\n" +
             "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
             "      apicategoryid = api_category.uuid\n";
 
     public static final String SQL_API_API_CATEGORIES_BY_API_AND_CATEGORY = "select\n" +
             "  id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apicategoryid\n" +
-            "from api__api_category\n" +
+            "from\n" +
+            "api__api_category\n" +
             "where apiid = CAST(? AS uuid) and apicategoryid = CAST(? AS uuid)\n";
 
     public static final String SQL_LIST_SUBJECT_BUSINESS_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;

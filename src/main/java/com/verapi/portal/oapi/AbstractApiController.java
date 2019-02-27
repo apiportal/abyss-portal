@@ -14,6 +14,7 @@ package com.verapi.portal.oapi;
 //import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 
 import com.google.json.JsonSanitizer;
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.exception.InternalServerError500Exception;
@@ -23,7 +24,6 @@ import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.abyss.exception.UnProcessableEntity422Exception;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
-import com.verapi.abyss.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
@@ -32,6 +32,7 @@ import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.swagger.parser.util.ClasspathHelper;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -131,6 +132,8 @@ public abstract class AbstractApiController implements IApiController {
                         // Now you have to generate the router
                         Router router = factory.setOptions(factoryOptions).getRouter();
 
+//                        router.route().handler(this::logHandler);
+
                         //Mount router into main router
                         abyssRouter.mountSubRouter(mountPoint, router);
 
@@ -214,28 +217,32 @@ public abstract class AbstractApiController implements IApiController {
             failure = routingContext.failure();
 
         logger.trace("failureHandler invoked; error: {} \n stack trace: {} "
-                , routingContext.failure().getLocalizedMessage()
-                , Arrays.toString(routingContext.failure().getStackTrace()));
+                , failure.getLocalizedMessage()
+                , failure.getStackTrace());
 
+        if (routingContext.response().ended()) {
+            //routingContext.next();
+            return;
+        }
         // This is the failure handler
         if (failure instanceof ValidationException)
             // Handle Validation Exception
             routingContext.response()
-                    .putHeader("Content-Type", "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.UNPROCESSABLE_ENTITY.code())
                     .setStatusMessage(HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase() + " " + ((ValidationException) failure).type().name() + " " + failure.getLocalizedMessage())
                     .end();
         else if (failure instanceof AbyssApiException)
             //Handle Abyss Api Exception
             routingContext.response()
-                    .putHeader("Content-Type", "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getApiError().getCode())
                     .setStatusMessage(((AbyssApiException) failure).getApiError().getUsermessage())
                     .end(JsonSanitizer.sanitize(((AbyssApiException) failure).getApiError().toJson().toString()), "UTF-8");
         else
             // Handle other exception
             routingContext.response()
-                    .putHeader("Content-Type", "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .setStatusMessage("Exception thrown! " + failure.getLocalizedMessage())
                     .end(JsonSanitizer.sanitize(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -281,7 +288,7 @@ public abstract class AbstractApiController implements IApiController {
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
         //secondly check if the previous security handler's flag is set, if so  then route next
-        if (routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
+        if (routingContext.session().get("abyssCookieAuthSecurityHandler")!=null && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
             routingContext.next();
             return;
         }
@@ -350,7 +357,11 @@ public abstract class AbstractApiController implements IApiController {
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
         //secondly check if the previous security handler's flag is set, if so  then route next
-        if ((routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) || (routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK"))) {
+        if (routingContext.session().get("abyssCookieAuthSecurityHandler") != null && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
+            routingContext.next();
+            return;
+        }
+        if (routingContext.session().get("abyssHttpBasicAuthSecurityHandler") != null && routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK")) {
             routingContext.next();
             return;
         }
@@ -379,7 +390,16 @@ public abstract class AbstractApiController implements IApiController {
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
         //secondly check if the previous security handler's flag is set, if so  then route next
-        if ((routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) || (routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK")) || (routingContext.session().get("abyssApiKeyAuthSecurityHandler").toString().equals("OK"))) {
+        if (routingContext.session().get("abyssCookieAuthSecurityHandler") != null && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
+            routingContext.next();
+            return;
+        }
+        if (routingContext.session().get("abyssHttpBasicAuthSecurityHandler") != null && routingContext.session().get("abyssHttpBasicAuthSecurityHandler").toString().equals("OK")) {
+            routingContext.next();
+            return;
+        }
+
+        if (routingContext.session().get("abyssApiKeyAuthSecurityHandler") != null && routingContext.session().get("abyssApiKeyAuthSecurityHandler").toString().equals("OK")) {
             routingContext.next();
             return;
         }
@@ -414,10 +434,10 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponseStatusOnly(RoutingContext routingContext, Single<CompositeResult> updateResultSingle, int httpResponseStatus) {
         updateResultSingle.subscribe(resp -> {
                     routingContext.response()
-                            .putHeader("Content-Type", "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end();
-                    logger.trace("replied successfully");
+//                    logger.trace("replied successfully");
                 },
                 throwable -> {
                     processException(routingContext, throwable);
@@ -430,10 +450,10 @@ public abstract class AbstractApiController implements IApiController {
                         elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", jsonObject);
                     });
                     routingContext.response()
-                            .putHeader("Content-Type", "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end();
-                    logger.trace("replied successfully");
+//                    logger.trace("replied successfully");
                 },
                 throwable -> {
                     processException(routingContext, throwable);
@@ -443,10 +463,10 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponseStatusOnlyList(RoutingContext routingContext, Single<List<UpdateResult>> updateResultListSingle, int httpResponseStatus) {
         updateResultListSingle.subscribe(resp -> {
                     routingContext.response()
-                            .putHeader("Content-Type", "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end();
-                    logger.trace("replied successfully");
+//                    logger.trace("replied successfully");
                 },
                 throwable -> {
                     processException(routingContext, throwable);
@@ -488,10 +508,10 @@ public abstract class AbstractApiController implements IApiController {
                         elasticSearchService.indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api", (JsonObject) arrayItem);
                     });
                     routingContext.response()
-                            .putHeader("Content-Type", "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end(JsonSanitizer.sanitize(arr.encode()), "UTF-8");
-                    logger.trace("replied successfully " + arr.encodePrettily());
+//                    logger.trace("replied successfully " + arr.encodePrettily());
                 },
                 throwable -> {
                     processException(routingContext, throwable);
@@ -501,10 +521,10 @@ public abstract class AbstractApiController implements IApiController {
     protected void subscribeAndResponseBulk(RoutingContext routingContext, Single<JsonArray> jsonArraySingle, int httpResponseStatus) {
         jsonArraySingle.subscribe(resp -> {
                     routingContext.response()
-                            .putHeader("Content-Type", "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                             .setStatusCode(httpResponseStatus)
                             .end(JsonSanitizer.sanitize(resp.encode()), "UTF-8");
-                    logger.trace("replied successfully " + resp.encodePrettily());
+//                    logger.trace("replied successfully " + resp.encodePrettily());
                 },
                 throwable -> {
                     processException(routingContext, throwable);
@@ -558,10 +578,10 @@ public abstract class AbstractApiController implements IApiController {
                                         ((JsonObject) arrayItem).getJsonObject("response"));
                             });
                             routingContext.response()
-                                    .putHeader("Content-Type", "application/json; charset=utf-8")
+                                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                                     .setStatusCode(httpResponseStatus)
                                     .end(JsonSanitizer.sanitize(arr.encode()), "UTF-8");
-                            logger.trace("replied successfully " + arr.encodePrettily());
+//                            logger.trace("replied successfully " + arr.encodePrettily());
                         },
                         throwable -> {
                             processException(routingContext, throwable);
@@ -570,10 +590,10 @@ public abstract class AbstractApiController implements IApiController {
 
     protected void subscribeAndResponse(RoutingContext routingContext, JsonArray response, int httpResponseStatus) {
         routingContext.response()
-                .putHeader("Content-Type", "application/json; charset=utf-8")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                 .setStatusCode(httpResponseStatus)
                 .end(JsonSanitizer.sanitize(response.encode()), "UTF-8");
-        logger.trace("replied successfully");
+//        logger.trace("replied successfully");
     }
 
     protected void subscribeAndResponseJsonObject(RoutingContext routingContext, Single<JsonObject> response, int httpResponseStatus) {
@@ -586,10 +606,10 @@ public abstract class AbstractApiController implements IApiController {
                     this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
                     jsonObject);
             routingContext.response()
-                    .putHeader("Content-Type", "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(httpResponseStatus)
                     .end((onlyStatus) ? null : JsonSanitizer.sanitize(jsonObject.encode()));
-            logger.trace("replied successfully");
+//            logger.trace("replied successfully");
         }, throwable -> {
             processException(routingContext, throwable);
         });
@@ -621,7 +641,7 @@ public abstract class AbstractApiController implements IApiController {
 
         String finalFilterByNameParameter = filterByNameParameter;
         String finalFilterLikeNameParameter = filterLikeNameParameter;
-        Single<ResultSet> findAllResult = service.initJDBCClient()
+        Single<ResultSet> findAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> {
                     if (apiFilterQuery == null || apiFilterQuery.getFilterQuery().isEmpty()) {
                         if ((finalFilterByNameParameter == null) && (finalFilterLikeNameParameter == null)) {
@@ -672,7 +692,7 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void getEntity(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<ResultSet> findAllResult = service.initJDBCClient()
+        Single<ResultSet> findAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> (apiFilterQuery == null) ? service.findById(UUID.fromString(routingContext.pathParam("uuid"))) : service.findAll(apiFilterQuery));
         subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }
@@ -773,7 +793,18 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponse(routingContext, funcResult, jsonColumns, HttpResponseStatus.OK.code());
     }
 
+    private void logHandler(RoutingContext routingContext) {
 /*
+        routingContext.request().bodyHandler(event -> {
+        logger.warn("Request BODY handler logging: {}", event);
+        });
+        routingContext.request().endHandler(event -> {
+            logger.warn("Request END handler logging: {}", event);
+        });
+*/
+
+    }
+    /*
     <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, Function<RoutingContext, Single<ResultSet>> func, String method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> funcResult = service.initJDBCClient()

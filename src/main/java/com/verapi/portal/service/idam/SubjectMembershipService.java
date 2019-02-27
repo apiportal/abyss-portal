@@ -211,8 +211,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into subject_membership (organizationid, crudsubjectid, subjectid, subjectgroupid)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
+    private static final String SQL_INSERT = "insert into subject_membership (organizationid, crudsubjectid, subjectid, subjectgroupid, subjectdirectoryid)\n" +
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
 
     private static final String SQL_DELETE = "update subject_membership\n" +
             "set\n" +
@@ -228,8 +228,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
             "  subjectid,\n" +
-            "  subjectgroupid\n" +
-            "from subject_membership\n";
+            "  subjectgroupid,\n" +
+            "  subjectdirectoryid\n" +
+            "from\n" +
+            "subject_membership\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_membership\n" +
             "SET\n" +
@@ -237,21 +239,17 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , subjectgroupid      = CAST(? AS uuid)\n";
+            "  , subjectgroupid      = CAST(? AS uuid)\n" +
+            "  , subjectdirectoryid      = CAST(? AS uuid)\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "";
 
     private static final String SQL_CONDITION_NAME_LIKE = "";
 
     private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
+
+    public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 
@@ -272,6 +270,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+
+    public static final String FILTER_BY_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_DIRECTORY;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

@@ -2,6 +2,7 @@ package com.verapi.portal.handler;
 
 import com.verapi.abyss.common.Constants;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.AuthProvider;
 import io.vertx.reactivex.ext.auth.User;
@@ -68,7 +69,7 @@ public class Login implements Handler<RoutingContext> {
         // and now delegate to the engine to render it.
         engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_LOGIN, res -> {
             if (res.succeeded()) {
-                routingContext.response().putHeader("Content-Type", "text/html");
+                routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 routingContext.response().end(res.result());
             } else {
                 routingContext.fail(res.cause());

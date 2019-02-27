@@ -1,12 +1,13 @@
 package com.verapi.portal.handler;
 
-import com.verapi.key.generate.impl.Token;
-import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.key.generate.impl.Token;
+import com.verapi.key.model.AuthenticationInfo;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -226,7 +227,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
         // and now delegate to the engine to render it.
         engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_SIGNUP, res -> {
             if (res.succeeded()) {
-                routingContext.response().putHeader("Content-Type", "text/html");
+                routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 routingContext.response().end(res.result());
             } else {
                 routingContext.fail(res.cause());
@@ -254,7 +255,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
         // and now delegate to the engine to render it.
         engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_ACTIVATE, res -> {
             if (res.succeeded()) {
-                //routingContext.response().putHeader("Content-Type", "text/html");
+                //routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 //routingContext.response().end(res.result());
 
                 this.htmlString = res.result().toString("UTF-8");

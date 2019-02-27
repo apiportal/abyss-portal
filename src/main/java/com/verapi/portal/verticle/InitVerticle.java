@@ -14,9 +14,10 @@ package com.verapi.portal.verticle;
 //import io.reactivex.Single;
 //import io.reactivex.disposables.Disposable;
 
-import io.vertx.reactivex.core.AbstractVerticle;
+import com.verapi.abyss.cassandra.impl.verticle.CassandraLoggerVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.reactivex.core.AbstractVerticle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class InitVerticle extends AbstractVerticle {
                 .flatMap(id -> vertx.rxDeployVerticle(OpenApiServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(EchoServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(GatewayHttpServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
+                .flatMap(id -> vertx.rxDeployVerticle(CassandraLoggerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .subscribe(id -> {
                     logger.info(System.getProperty("abyss-jar.name") + " InitVerticle : All verticles successfully deployed");
                     super.start(startFuture);

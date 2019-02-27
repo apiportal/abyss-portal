@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,44 +17,44 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: Licenses
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Licenses crud operations'
-- name: License
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : License crud operations'
-- name: Subject Licenses
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Subject''s Licenses crud operations'
+  - name: Licenses
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Licenses crud operations'
+  - name: License
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : License crud operations'
+  - name: Subject Licenses
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject''s Licenses crud operations'
 paths:
   /licenses:
     get:
       tags:
-      - Licenses
+        - Licenses
       summary: 'Get list of Licenses'
       description: 'Returns list of Licenses'
       operationId: getLicenses
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Licenses which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Licenses which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfLicense'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - Licenses
+        - Licenses
       summary: 'Add a bulk of Licenses'
       description: 'Provide a list of Licenses to be inserted'
       operationId: addLicenses
@@ -103,7 +103,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfLicense'
     put:
       tags:
-      - Licenses
+        - Licenses
       summary: 'Update a bulk of Licenses'
       description: 'Provide a bulk list of  Licenses to be updated'
       operationId: updateLicenses
@@ -130,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfLicenseObject'
     delete:
       tags:
-      - Licenses
+        - Licenses
       summary: 'Delete all Licenses'
       description: 'Deletes all Licenses'
       operationId: deleteLicenses
@@ -152,17 +152,17 @@ paths:
   /licenses/{uuid}:
     get:
       tags:
-      - License
+        - License
       summary: 'Get an existing License by uuid'
       description: 'Provide an uuid of License to be get'
       operationId: getLicense
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of License that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of License that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +184,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - License
+        - License
       summary: 'Update an existing License'
       description: 'Provide an altered License to be updated'
       operationId: updateLicense
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of License that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of License that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +218,17 @@ paths:
         $ref: '#/components/requestBodies/License'
     delete:
       tags:
-      - License
+        - License
       summary: 'Delete License'
       description: 'Provide an uuid parameter of License to be updated'
       operationId: deleteLicense
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of License that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of License that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -248,33 +248,33 @@ paths:
           $ref: '#/components/responses/default'
   /licenses/subject/{uuid}:
     parameters:
-    - name: uuid
-      in: path
-      description: 'uuid of Subject'
-      required: true
-      schema:
-        type: string
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
     get:
       tags:
-      - Subject Licenses
+        - Subject Licenses
       summary: 'Get list of Subject''s Licenses'
       description: 'Returns list of Subject''s Licenses'
       operationId: getLicensesOfSubject
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Subject''s Licenses which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Subject''s Licenses which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfLicense'
@@ -296,7 +296,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - Subject Licenses
+        - Subject Licenses
       summary: 'Add a bulk of Subject''s Licenses'
       description: 'Provide a list of Subject''s Licenses to be inserted'
       operationId: addLicensesOfSubject
@@ -323,7 +323,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfLicense'
     put:
       tags:
-      - Subject Licenses
+        - Subject Licenses
       summary: 'Update a bulk of Subject''s Licenses'
       description: 'Provide a bulk list of Subject''s Licenses to be updated'
       operationId: updateLicensesOfSubject
@@ -350,7 +350,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfLicenseObject'
     delete:
       tags:
-      - Subject Licenses
+        - Subject Licenses
       summary: 'Delete all Subject''s Licenses'
       description: 'Deletes all Subject''s Licenses'
       operationId: deleteLicensesOfSubject
@@ -410,8 +410,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -430,7 +430,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -487,6 +487,9 @@ components:
           description: 'License of contract. A license is a tailored API access package designed by the Business Admin/API Admin and offered to the app developer. A license includes one or more license terms, each of which can include multiple scopes, giving access to specifically designated operations, and multiple quality of service (QoS) policies, and also one or more legal agreements applicable to the license.
 Terms of Service - QoS, SLA
 Legal'
+        isactive:
+          type: boolean
+          description: 'Is the license active or not'
   requestBodies:
     License:
       content:
@@ -638,9 +641,9 @@ Legal'
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

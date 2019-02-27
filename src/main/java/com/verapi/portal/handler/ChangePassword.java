@@ -5,6 +5,7 @@ import com.verapi.abyss.common.Constants;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -135,7 +136,7 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
         // delegate to the engine to render it.
         engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_CHANGE_PASSWORD, res -> {
             if (res.succeeded()) {
-                routingContext.response().putHeader("Content-Type", "text/html");
+                routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 routingContext.response().end(res.result());
             } else {
                 routingContext.fail(res.cause());

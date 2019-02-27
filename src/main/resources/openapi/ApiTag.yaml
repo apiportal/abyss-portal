@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,39 +17,39 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: ApiTags
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ApiTags crud operations'
-- name: ApiTag
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ApiTag crud operations'
+  - name: ApiTags
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiTags crud operations'
+  - name: ApiTag
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ApiTag crud operations'
 paths:
   /api-tags:
     get:
       tags:
-      - ApiTags
+        - ApiTags
       summary: 'Get list of ApiTags'
       description: 'Returns list of ApiTags'
       operationId: getApiTags
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ApiTags which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ApiTags which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ApiTags which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ApiTags which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfApiTag'
@@ -71,7 +71,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - ApiTags
+        - ApiTags
       summary: 'Add a bulk of ApiTags'
       description: 'Provide a list of ApiTags to be inserted'
       operationId: addApiTags
@@ -98,7 +98,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiTag'
     put:
       tags:
-      - ApiTags
+        - ApiTags
       summary: 'Update a bulk of ApiTags'
       description: 'Provide a bulk list of  ApiTags to be updated'
       operationId: updateApiTags
@@ -125,7 +125,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfApiTagObject'
     delete:
       tags:
-      - ApiTags
+        - ApiTags
       summary: 'Delete all ApiTags'
       description: 'Deletes all ApiTags'
       operationId: deleteApiTags
@@ -147,17 +147,17 @@ paths:
   /api-tags/{uuid}:
     get:
       tags:
-      - ApiTag
+        - ApiTag
       summary: 'Get an existing ApiTag by uuid'
       description: 'Provide an uuid of ApiTag to be get'
       operationId: getApiTag
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ApiTag that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ApiTag that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -179,17 +179,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - ApiTag
+        - ApiTag
       summary: 'Update an existing ApiTag'
       description: 'Provide an altered ApiTag to be updated'
       operationId: updateApiTag
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ApiTag that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ApiTag that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -213,17 +213,17 @@ paths:
         $ref: '#/components/requestBodies/ApiTag'
     delete:
       tags:
-      - ApiTag
+        - ApiTag
       summary: 'Delete ApiTag'
       description: 'Provide an uuid parameter of ApiTag to be updated'
       operationId: deleteApiTag
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of ApiTag that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of ApiTag that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,8 +249,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -269,7 +269,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -475,9 +475,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

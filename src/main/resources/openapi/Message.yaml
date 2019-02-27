@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: Abyss platform APIs
   version: 1.0.0
@@ -17,44 +17,44 @@ info:
     name: Abyss 1.0
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: Messages
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Messages crud operations'
-- name: Message
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Message crud operations'
-- name: Subject-Messages
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Messages by Subject crud operations'
+  - name: Messages
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Messages crud operations'
+  - name: Message
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Message crud operations'
+  - name: Subject-Messages
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Messages by Subject crud operations'
 paths:
   /messages:
     get:
       tags:
-      - Messages
+        - Messages
       summary: 'Get list of Messages'
       description: 'Returns list of Messages'
       operationId: getMessages
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Messages which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Messages which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Messages which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Messages which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfMessage'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - Messages
+        - Messages
       summary: 'Add a bulk of Messages'
       description: 'Provide a list of Messages to be inserted'
       operationId: addMessages
@@ -104,7 +104,7 @@ paths:
       parameters: []
     put:
       tags:
-      - Messages
+        - Messages
       summary: 'Update a bulk of Messages'
       description: 'Provide a bulk list of  Messages to be updated'
       operationId: updateMessages
@@ -132,7 +132,7 @@ paths:
       parameters: []
     delete:
       tags:
-      - Messages
+        - Messages
       summary: 'Delete all Messages'
       description: 'Deletes all Messages'
       operationId: deleteMessages
@@ -155,17 +155,17 @@ paths:
   '/messages/{uuid}':
     get:
       tags:
-      - Message
+        - Message
       summary: 'Get an existing Message by uuid'
       description: 'Provide an uuid of Message to be get'
       operationId: getMessage
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Message that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Message that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -187,17 +187,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - Message
+        - Message
       summary: 'Update an existing Message'
       description: 'Provide an altered Message to be updated'
       operationId: updateMessage
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Message that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Message that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -221,17 +221,17 @@ paths:
         $ref: '#/components/requestBodies/Message'
     delete:
       tags:
-      - Message
+        - Message
       summary: 'Delete Message'
       description: 'Provide an uuid parameter of Message to be updated'
       operationId: deleteMessage
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of Message that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of Message that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -252,7 +252,7 @@ paths:
   '/messages/subject/':
     get:
       tags:
-      - Subject-Messages
+        - Subject-Messages
       summary: 'Get Messages by Subject uuid'
       description: 'Provide an uuid of Subject owning the messages to be get'
       operationId: getMessagesOfSubject
@@ -283,8 +283,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -303,7 +303,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -577,9 +577,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

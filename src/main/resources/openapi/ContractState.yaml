@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,39 +17,39 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: ContractStates
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ContractStates crud operations'
-- name: ContractState
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ContractState crud operations'
+  - name: ContractStates
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ContractStates crud operations'
+  - name: ContractState
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ContractState crud operations'
 paths:
   /contract-states:
     get:
       tags:
-      - ContractStates
+        - ContractStates
       summary: 'Get list of ContractStates'
       description: 'Returns list of ContractStates'
       operationId: getContractStates
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ContractStates which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ContractStates which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ContractStates which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ContractStates which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfContractState'
@@ -71,7 +71,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - ContractStates
+        - ContractStates
       summary: 'Add a bulk of ContractStates'
       description: 'Provide a list of ContractStates to be inserted'
       operationId: addContractStates
@@ -98,7 +98,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfContractState'
     put:
       tags:
-      - ContractStates
+        - ContractStates
       summary: 'Update a bulk of ContractStates'
       description: 'Provide a bulk list of  ContractStates to be updated'
       operationId: updateContractStates
@@ -125,7 +125,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfContractStateObject'
     delete:
       tags:
-      - ContractStates
+        - ContractStates
       summary: 'Delete all ContractStates'
       description: 'Deletes all ContractStates'
       operationId: deleteContractStates
@@ -147,17 +147,17 @@ paths:
   /contract-states/{uuid}:
     get:
       tags:
-      - ContractState
+        - ContractState
       summary: 'Get an existing ContractState by uuid'
       description: 'Provide an uuid of ContractState to be get'
       operationId: getContractState
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ContractState that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ContractState that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -179,17 +179,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - ContractState
+        - ContractState
       summary: 'Update an existing ContractState'
       description: 'Provide an altered ContractState to be updated'
       operationId: updateContractState
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ContractState that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ContractState that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -213,17 +213,17 @@ paths:
         $ref: '#/components/requestBodies/ContractState'
     delete:
       tags:
-      - ContractState
+        - ContractState
       summary: 'Delete ContractState'
       description: 'Provide an uuid parameter of ContractState to be updated'
       operationId: deleteContractState
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of ContractState that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of ContractState that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,8 +249,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -269,7 +269,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -469,9 +469,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

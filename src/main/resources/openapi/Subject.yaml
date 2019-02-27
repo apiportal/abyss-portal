@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.1'
@@ -17,69 +17,74 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: Subjects
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Subjects crud operations'
-- name: Subject
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Subject crud operations'
-- name: APPS
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : APPs crud operations'
-- name: USERS
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Users crud operations'
-- name: GROUPS
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Groups crud operations'
-- name: USERSwithGROUPS
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Users with Groups Composite GET operations'
-- name: USERwithGROUPS
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : User with Groups Composite GET operations'
-- name: Password Management
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : Password Management crud operations'
+  - name: Subjects
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subjects crud operations'
+  - name: Subject
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subject crud operations'
+  - name: APPS
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : APPs crud operations'
+  - name: USERS
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Users crud operations'
+  - name: GROUPS
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Groups crud operations'
+  - name: DIRECTORY FILTERED
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Users and Groups under Directory'
+  - name: USERSwithGROUPS
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Users with Groups Composite GET operations'
+  - name: USERwithGROUPS
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : User with Groups Composite GET operations'
+  - name: Password Management
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Password Management crud operations'
 paths:
   /subjects:
     get:
       tags:
-      - Subjects
+        - Subjects
       summary: 'Get list of Subjects'
       description: 'Returns list of Subjects'
       operationId: getSubjects
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Subjects which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search Subjects which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subjects which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subjects which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubject'
@@ -101,7 +106,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - Subjects
+        - Subjects
       summary: 'Add a bulk of Subjects'
       description: 'Provide a list of Subjects to be inserted'
       operationId: addSubjects
@@ -126,9 +131,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
-      - Subjects
+        - Subjects
       summary: 'Update a bulk of Subjects'
       description: 'Provide a bulk list of  Subjects to be updated'
       operationId: updateSubjects
@@ -153,9 +159,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
-      - Subjects
+        - Subjects
       summary: 'Delete all Subjects'
       description: 'Deletes all Subjects'
       operationId: deleteSubjects
@@ -174,20 +181,21 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/{uuid}:
+      parameters: []
+  '/subjects/{uuid}':
     get:
       tags:
-      - Subject
+        - Subject
       summary: 'Get an existing Subject by uuid'
       description: 'Provide an uuid of Subject to be get'
       operationId: getSubject
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Subject that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -209,17 +217,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - Subject
+        - Subject
       summary: 'Update an existing Subject'
       description: 'Provide an altered Subject to be updated'
       operationId: updateSubject
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Subject that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -243,17 +251,17 @@ paths:
         $ref: '#/components/requestBodies/Subject'
     delete:
       tags:
-      - Subject
+        - Subject
       summary: 'Delete Subject'
       description: 'Provide an uuid parameter of Subject to be updated'
       operationId: deleteSubject
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of Subject that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of Subject that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -271,28 +279,28 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/apps:
+  /subjects/apps/:
     get:
       tags:
-      - APPS
+        - APPS
       summary: 'Get list of APPs'
       description: 'Returns list of APPs'
       operationId: getApps
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search APPs which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search APPs which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search APPs which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search APPs which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubject'
@@ -314,7 +322,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - APPS
+        - APPS
       summary: 'Add a bulk of APPs'
       description: 'Provide a list of APPs to be inserted'
       operationId: addApps
@@ -339,9 +347,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
-      - APPS
+        - APPS
       summary: 'Update a bulk of APPs'
       description: 'Provide a bulk list of APPs to be updated'
       operationId: updateApps
@@ -366,9 +375,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
-      - APPS
+        - APPS
       summary: 'Delete all APPs'
       description: 'Deletes all APPs'
       operationId: deleteApps
@@ -387,28 +397,28 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/users:
+  /subjects/users/:
     get:
       tags:
-      - USERS
+        - USERS
       summary: 'Get list of users'
       description: 'Returns list of users'
       operationId: getUsers
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search users which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search users which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search users which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search users which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubject'
@@ -430,7 +440,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - USERS
+        - USERS
       summary: 'Add a bulk of users'
       description: 'Provide a list of users to be inserted'
       operationId: addUsers
@@ -455,9 +465,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
-      - USERS
+        - USERS
       summary: 'Update a bulk of users'
       description: 'Provide a bulk list of users to be updated'
       operationId: updateUsers
@@ -482,9 +493,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
-      - USERS
+        - USERS
       summary: 'Delete all users'
       description: 'Deletes all users'
       operationId: deleteUsers
@@ -503,28 +515,75 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/groups:
+  '/subjects/users/subject-directory/{uuid}':
     get:
       tags:
-      - GROUPS
+        - DIRECTORY FILTERED
+      summary: Get list of users under given user directory
+      description: Returns list of users under given user directory
+      operationId: getUsersUnderDirectory
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search users which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search users which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - name: uuid
+          in: path
+          description: 'uuid of User Directory filtering users'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubject'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /subjects/groups/:
+    get:
+      tags:
+        - GROUPS
       summary: 'Get list of groups'
       description: 'Returns list of groups'
       operationId: getGroups
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search groups which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search groups which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search groups which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search groups which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubject'
@@ -546,7 +605,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - GROUPS
+        - GROUPS
       summary: 'Add a bulk of groups'
       description: 'Provide a list of groups to be inserted'
       operationId: addGroups
@@ -571,9 +630,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
     put:
       tags:
-      - GROUPS
+        - GROUPS
       summary: 'Update a bulk of groups'
       description: 'Provide a bulk list of groups to be updated'
       operationId: updateGroups
@@ -598,9 +658,10 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
     delete:
       tags:
-      - GROUPS
+        - GROUPS
       summary: 'Delete all groups'
       description: 'Deletes all groups'
       operationId: deleteGroups
@@ -619,28 +680,75 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  '/subjects/users/with-groups':
+  '/subjects/groups/subject-directory/{uuid}':
     get:
       tags:
-      - USERSwithGROUPS
+        - DIRECTORY FILTERED
+      summary: Get list of groups under given user directory
+      description: Returns list of groups under given user directory
+      operationId: getGroupsUnderDirectory
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search groups which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search groups which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - name: uuid
+          in: path
+          description: 'uuid of User Directory filtering groups'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubject'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  '/subjects/users/with-groups/':
+    get:
+      tags:
+        - USERSwithGROUPS
       summary: 'Get list of users with groups'
       description: 'Returns list of users with groups'
       operationId: getUsersWithGroups
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search users which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search users which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search users which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search users which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfSubjectWithGroups'
@@ -660,20 +768,20 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  '/subjects/users/{uuid}/with-groups-and-permissions':
+  '/subjects/users/{uuid}/with-groups-and-permissions/':
     get:
       tags:
-      - USERwithGROUPS
+        - USERwithGROUPS
       summary: 'Get user with groups and permissions'
       description: 'Returns user with groups and permissions'
       operationId: getUserWithGroupsAndPermissions
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Subject that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200-SubjectWithGroupAndPermission'
@@ -693,20 +801,20 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /subjects/{uuid}/changepassword:
+  /subjects/{uuid}/changepassword/:
     put:
       tags:
-      - Password Management
+        - Password Management
       summary: 'Update an existing Subject''s password'
       description: 'Provide old and new passwords to be updated'
       operationId: updatePasswordOfSubject
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of Subject that need to be changed its password'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be changed its password'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -736,8 +844,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -756,7 +864,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -897,7 +1005,29 @@ components:
           description: 'Is Subject Data Restricted to Processing - GDPR Compliance'
         description:
           type: string
-          description: 'Description of subject'
+          description: Description of subject
+        distinguishedName:
+          type: string
+          description: Distinguished Name stored in User Directory of the Subject
+        uniqueId:
+          type: string
+          description: Unique ID from User Directory
+        phoneBusiness:
+          type: string
+          description: Business Phone Number
+          nullable: true
+        phoneHome:
+          type: string
+          description: Home Phone Number
+          nullable: true
+        phoneMobile:
+          type: string
+          description: Mobile Phone Number
+          nullable: true
+        phoneExtension:
+          type: string
+          description: Phone Extension Number
+          nullable: true
     SubjectWithGroups:
       type: object
       properties:
@@ -1024,7 +1154,29 @@ components:
           description: 'Is Subject Data Restricted to Processing - GDPR Compliance'
         description:
           type: string
-          description: 'Description of subject'
+          description: Description of subject
+        distinguishedName:
+          type: string
+          description: Distinguished Name stored in User Directory of the Subject
+        uniqueId:
+          type: string
+          description: Unique ID from User Directory
+        phoneBusiness:
+          type: string
+          description: Business Phone Number
+          nullable: true
+        phoneHome:
+          type: string
+          description: Home Phone Number
+          nullable: true
+        phoneMobile:
+          type: string
+          description: Mobile Phone Number
+          nullable: true
+        phoneExtension:
+          type: string
+          description: Phone Extension Number
+          nullable: true
         groups:
           type: object
           properties:
@@ -1044,44 +1196,44 @@ components:
               description: 'Description of group'
     SubjectWithGroupsAndPermissions:
       allOf:
-      - $ref: '#/components/schemas/SubjectWithGroups'
-      - type: object
-        properties:
-          permissions:
-            type: object
-            properties:
-              uuid:
-                type: string
-                readOnly: true
-                description: 'Secondary primary key. Used in front end messages for security reasons.'
-              isdeleted:
-                type: boolean
-                readOnly: true
-                description: 'Is record logically deleted #readOnly#'
-              permission:
-                type: string
-                readOnly: true
-                description: 'Permission of the subject'
-              description:
-                type: string
-                readOnly: true
-                description: 'Description of permission'
-              subjectid:
-                type: string
-                readOnly: true
-                description: 'ID of Subject owning the permission'
-              resourceid:
-                type: string
-                readOnly: true
-                description: 'ID of Resource that the permission is permitted to act upon'
-              resourceactionid:
-                type: string
-                readOnly: true
-                description: 'ID of Resource Action that the permission is given'
-              isactive:
-                type: boolean
-                readOnly: true
-                description: 'Is the permission active #readOnly#'
+        - $ref: '#/components/schemas/SubjectWithGroups'
+        - type: object
+          properties:
+            permissions:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  readOnly: true
+                  description: 'Secondary primary key. Used in front end messages for security reasons.'
+                isdeleted:
+                  type: boolean
+                  readOnly: true
+                  description: 'Is record logically deleted #readOnly#'
+                permission:
+                  type: string
+                  readOnly: true
+                  description: 'Permission of the subject'
+                description:
+                  type: string
+                  readOnly: true
+                  description: 'Description of permission'
+                subjectid:
+                  type: string
+                  readOnly: true
+                  description: 'ID of Subject owning the permission'
+                resourceid:
+                  type: string
+                  readOnly: true
+                  description: 'ID of Resource that the permission is permitted to act upon'
+                resourceactionid:
+                  type: string
+                  readOnly: true
+                  description: 'ID of Resource Action that the permission is given'
+                isactive:
+                  type: boolean
+                  readOnly: true
+                  description: 'Is the permission active #readOnly#'
     SubjectChangePassword:
       type: object
       properties:
@@ -1272,9 +1424,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

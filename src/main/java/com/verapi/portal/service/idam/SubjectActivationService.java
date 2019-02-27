@@ -249,7 +249,8 @@ public class SubjectActivationService extends AbstractService<UpdateResult> {
             "  email,\n" +
             "  nonce,\n" +
             "  userdata\n" +
-            "from subject_activation\n";
+            "from\n" +
+            "subject_activation\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_activation\n" +
             "SET\n" +
@@ -264,13 +265,6 @@ public class SubjectActivationService extends AbstractService<UpdateResult> {
             "  , nonce    = ?\n" +
             "  , userdata = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(userdata) = lower(?)\n";
 

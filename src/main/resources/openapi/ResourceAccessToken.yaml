@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
-- url: 'http://192.168.21.99:38083/abyss/oapi'
-- url: 'http://192.168.21.139:38083/abyss/oapi'
-- url: 'http://192.168.10.46:38083/abyss/oapi'
-- url: '/abyss/oapi'
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
 info:
   description: 'Abyss platform APIs'
   version: '1.0.0'
@@ -17,44 +17,44 @@ info:
     name: 'Abyss 1.0'
     url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
 tags:
-- name: ResourceAccessTokens
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ResourceAccessTokens crud operations'
-- name: ResourceAccessToken
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ResourceAccessToken crud operations'
-- name: ResourceAccessTokenBySubjectPermission
-  externalDocs:
-    url: 'https://apiportal.com'
-    description: 'Find out more'
-  description: 'Abyss plaftorm APIs : ResourceAccessTokens crud operations'
+  - name: ResourceAccessTokens
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ResourceAccessTokens crud operations'
+  - name: ResourceAccessToken
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ResourceAccessToken crud operations'
+  - name: ResourceAccessTokenBySubjectPermission
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : ResourceAccessTokens crud operations'
 paths:
   /resource-access-tokens:
     get:
       tags:
-      - ResourceAccessTokens
+        - ResourceAccessTokens
       summary: 'Get list of ResourceAccessTokens'
       description: 'Returns list of ResourceAccessTokens'
       operationId: getResourceAccessTokens
       parameters:
-      - name: byname
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ResourceAccessTokens which names exact match'
-      - name: likename
-        in: query
-        required: false
-        schema:
-          type: string
-        description: 'search ResourceAccessTokens which names begin with'
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ResourceAccessTokens which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search ResourceAccessTokens which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           $ref: '#/components/responses/200-ListOfResourceAccessToken'
@@ -76,7 +76,7 @@ paths:
           $ref: '#/components/responses/default'
     post:
       tags:
-      - ResourceAccessTokens
+        - ResourceAccessTokens
       summary: 'Add a bulk of ResourceAccessTokens'
       description: 'Provide a list of ResourceAccessTokens to be inserted'
       operationId: addResourceAccessTokens
@@ -103,7 +103,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfResourceAccessToken'
     put:
       tags:
-      - ResourceAccessTokens
+        - ResourceAccessTokens
       summary: 'Update a bulk of ResourceAccessTokens'
       description: 'Provide a bulk list of  ResourceAccessTokens to be updated'
       operationId: updateResourceAccessTokens
@@ -130,7 +130,7 @@ paths:
         $ref: '#/components/requestBodies/ListOfResourceAccessTokenObject'
     delete:
       tags:
-      - ResourceAccessTokens
+        - ResourceAccessTokens
       summary: 'Delete all ResourceAccessTokens'
       description: 'Deletes all ResourceAccessTokens'
       operationId: deleteResourceAccessTokens
@@ -152,17 +152,17 @@ paths:
   /resource-access-tokens/{uuid}:
     get:
       tags:
-      - ResourceAccessToken
+        - ResourceAccessToken
       summary: 'Get an existing ResourceAccessToken by uuid'
       description: 'Provide an uuid of ResourceAccessToken to be get'
       operationId: getResourceAccessToken
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ResourceAccessToken that need to be get'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ResourceAccessToken that need to be get'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -184,17 +184,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - ResourceAccessToken
+        - ResourceAccessToken
       summary: 'Update an existing ResourceAccessToken'
       description: 'Provide an altered ResourceAccessToken to be updated'
       operationId: updateResourceAccessToken
       parameters:
-      - name: uuid
-        in: path
-        description: 'uuid of ResourceAccessToken that need to be updated'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'uuid of ResourceAccessToken that need to be updated'
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -218,17 +218,17 @@ paths:
         $ref: '#/components/requestBodies/ResourceAccessToken'
     delete:
       tags:
-      - ResourceAccessToken
+        - ResourceAccessToken
       summary: 'Delete ResourceAccessToken'
       description: 'Provide an uuid parameter of ResourceAccessToken to be updated'
       operationId: deleteResourceAccessToken
       parameters:
-      - name: uuid
-        in: path
-        description: 'The uuid of ResourceAccessToken that needs to be deleted'
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: 'The uuid of ResourceAccessToken that needs to be deleted'
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -249,19 +249,19 @@ paths:
   /resource-access-tokens/subject-permission/{uuid}:
     get:
       tags:
-      - ResourceAccessTokenBySubjectPermission
+        - ResourceAccessTokenBySubjectPermission
       summary: Get an existing ResourceAccessToken by SubjectPermission id
       description: Provide an uuid of SubjectPermission for ResourceAccessToken to be get
       operationId: getResourceAccessTokenBySubjectPermission
       parameters:
-      - name: uuid
-        in: path
-        description: >-
-          uuid of SubjectPermission for ResourceAccessToken that need to be
-          get
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: >-
+            uuid of SubjectPermission for ResourceAccessToken that need to be
+            get
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -283,17 +283,17 @@ paths:
           $ref: '#/components/responses/default'
     put:
       tags:
-      - ResourceAccessTokenBySubjectPermission
+        - ResourceAccessTokenBySubjectPermission
       summary: Update an existing ResourceAccessToken by SubjectPermission
       description: Provide an altered ResourceAccessToken to be updated
       operationId: updateResourceAccessTokenBySubjectPermission
       parameters:
-      - name: uuid
-        in: path
-        description: uuid of SubjectPermission for ResourceAccessToken that need to be updated
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: uuid of SubjectPermission for ResourceAccessToken that need to be updated
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/200'
@@ -317,17 +317,17 @@ paths:
         $ref: '#/components/requestBodies/ResourceAccessToken'
     delete:
       tags:
-      - ResourceAccessTokenBySubjectPermission
+        - ResourceAccessTokenBySubjectPermission
       summary: Delete ResourceAccessToken
       description: Provide an uuid parameter of SubjectPermission for ResourceAccessToken to be updated
       operationId: deleteResourceAccessTokenBySubjectPermission
       parameters:
-      - name: uuid
-        in: path
-        description: The uuid of SubjectPermission for ResourceAccessToken that needs to be deleted
-        required: true
-        schema:
-          type: string
+        - name: uuid
+          in: path
+          description: The uuid of SubjectPermission for ResourceAccessToken that needs to be deleted
+          required: true
+          schema:
+            type: string
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -353,8 +353,8 @@ components:
     Error:
       type: object
       required:
-      - code
-      - usermessage
+        - code
+        - usermessage
       properties:
         code:
           type: integer
@@ -373,7 +373,7 @@ components:
     MultiStatus:
       type: object
       required:
-      - uuid
+        - uuid
       properties:
         uuid:
           type: string
@@ -587,9 +587,9 @@ components:
   links: {}
   callbacks: {}
 security:
-- abyssCookieAuth: []
-- abyssHttpBasicAuth: []
-- abyssApiKeyAuth: []
-- abyssJWTBearerAuth: []
-- abyssAppAccessTokenAuth: []
-- abyssAppAccessTokenCookieAuth: []
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []

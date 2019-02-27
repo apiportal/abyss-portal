@@ -219,7 +219,7 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
         // and now delegate to the engine to render it.
         engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_WELCOME, res -> {
             if (res.succeeded()) {
-                //routingContext.response().putHeader("Content-Type", "text/html");
+                //routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 //routingContext.response().end(res.result());
 
                 this.htmlString = res.result().toString("UTF-8");

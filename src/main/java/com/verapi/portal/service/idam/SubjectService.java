@@ -95,7 +95,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getString("url"))
                             .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
-                            .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "");
+                            .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "")
+                            .add(jsonObj.getString("distinguishedName"))
+                            .add(jsonObj.getString("uniqueId"))
+                            .add(jsonObj.getString("phoneBusiness"))
+                            .add(jsonObj.getString("phoneHome"))
+                            .add(jsonObj.getString("phoneMobile"))
+                            .add(jsonObj.getString("phoneExtension"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -177,6 +183,12 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("url"))
                 .add(updateRecord.containsKey("isrestrictedtoprocessing") ? updateRecord.getBoolean("isrestrictedtoprocessing") : false)
                 .add(updateRecord.containsKey("description") ? updateRecord.getString("description") : "")
+                .add(updateRecord.getString("distinguishedName"))
+                .add(updateRecord.getString("uniqueId"))
+                .add(updateRecord.getString("phoneBusiness"))
+                .add(updateRecord.getString("phoneHome"))
+                .add(updateRecord.getString("phoneMobile"))
+                .add(updateRecord.getString("phoneExtension"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -226,6 +238,12 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("url"))
                             .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
                             .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "")
+                            .add(jsonObj.getString("distinguishedName"))
+                            .add(jsonObj.getString("uniqueId"))
+                            .add(jsonObj.getString("phoneBusiness"))
+                            .add(jsonObj.getString("phoneHome"))
+                            .add(jsonObj.getString("phoneMobile"))
+                            .add(jsonObj.getString("phoneExtension"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -375,11 +393,17 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, isactivated, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
             "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
-            "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing, description)\n" +
+            "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing, description,\n" +
+            "                     distinguishedName, uniqueId, phoneBusiness, phoneHome, phoneMobile, phoneExtension)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
             "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
-            "   CAST(? AS uuid), ?, ?, ?, ?, ?)";
+            "   CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
+            "   ?, ?, ?, ?, ?, ?)";
+
+
+
+
 
     private static final String SQL_DELETE = "update subject\n" +
             "set\n" +
@@ -419,8 +443,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  issandbox,\n" +
             "  url,\n" +
             "  isrestrictedtoprocessing,\n" +
-            "  description\n" +
-            "from subject\n";
+            "  description,\n" +
+            "  distinguishedName,\n" +
+            "  uniqueId,\n" +
+            "  phoneHome,\n" +
+            "  phoneBusiness,\n" +
+            "  phoneMobile,\n" +
+            "  phoneExtension\n" +
+            "from\n" +
+            "subject\n";
 
     private static final String SQL_UPDATE = "UPDATE subject\n" +
             "SET\n" +
@@ -443,7 +474,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , issandbox = ?\n" +
             "  , url = ?\n" +
             "  , isrestrictedtoprocessing = ?\n" +
-            "  , description = ?\n";
+            "  , description = ?\n" +
+            "  , distinguishedName = ?\n" +
+            "  , uniqueId = ?\n" +
+            "  , phoneHome = ?\n" +
+            "  , phoneBusiness = ?\n" +
+            "  , phoneMobile = ?\n" +
+            "  , phoneExtension = ?\n";
 
     private static final String SQL_CHANGE_PASSWORD = "update subject\n" +
             "set updated              = now()\n" +
@@ -453,13 +490,6 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , passwordexpiresat    =  now() + ? * interval '1 DAY'\n" +
             "  , lastpasswordchangeat = now()\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(subjectname) = lower(?)\n";
 
@@ -468,6 +498,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public static final String SQL_CONDITION_IS_USER = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n";
 
     public static final String SQL_CONDITION_IS_GROUP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
+
+    public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
 
     public static final String SQL_CONDITION_IS_NOT_SYSTEM = "subjecttypeid!=CAST('" + Constants.SUBJECT_TYPE_SYSTEM + "' AS uuid)\n";
 
@@ -499,14 +531,19 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     public static String FILTER_GROUPS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_GROUP;
 
+    public static String FILTER_USERS_UNDER_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_USER + SQL_AND + SQL_CONDITION_DIRECTORY;
+
+    public static String FILTER_GROUPS_UNDER_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_GROUP + SQL_AND + SQL_CONDITION_DIRECTORY;
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
-
+    //TODO: from+CRLF
     public static final String FILTER_USERS_WITH_GROUPS = "SELECT s.uuid, s.organizationid, o.name, s.created, s.updated, s.deleted, s.isdeleted, s.isactivated, s.subjecttypeid,\n" +
             "       s.subjectname, s.firstname, s.lastname, s.displayname, s.email, s.secondaryemail, s.effectivestartdate, s.effectiveenddate,\n" +
             "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
             "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
             "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
+            "       s.distinguishedName, s.uniqueId, s.phoneBusiness, s.phoneHome, s.phoneMobile, s.phoneExtension,\n" +
             "       COALESCE((select json_agg(\n" +
             "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
             "                   )\n" +
@@ -516,12 +553,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "from subject s\n" +
             "       inner join organization o on (s.organizationid = o.uuid)\n" +
             "       inner join subject_directory d on (s.subjectdirectoryid = d.uuid)\n" + SQL_WHERE + SQL_CONDITION_IS_USER;
-
+    //TODO: from+CRLF
     public static final String FILTER_USER_WITH_GROUPS_AND_PERMISSIONS = "SELECT s.uuid, s.organizationid, o.name, s.created, s.updated, s.deleted, s.isdeleted, s.isactivated, s.subjecttypeid,\n" +
             "       s.subjectname, s.firstname, s.lastname, s.displayname, s.email, s.secondaryemail, s.effectivestartdate, s.effectiveenddate,\n" +
             "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
             "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
             "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
+            "       s.distinguishedName, s.uniqueId, s.phoneBusiness, s.phoneHome, s.phoneMobile, s.phoneExtension,\n" +
             "       COALESCE((select json_agg(\n" +
             "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
             "                   )\n" +

@@ -13,6 +13,7 @@ package com.verapi.portal.controller;
 
 import com.verapi.abyss.common.Constants;
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.buffer.Buffer;
@@ -69,7 +70,7 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
 
     private void responseHTML(RoutingContext routingContext, Buffer chunk, int statusCode) {
         routingContext.response()
-                .putHeader("content-type", "text/html; charset=utf-8")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
                 .setStatusCode(statusCode)
                 .end(chunk);
     }
@@ -81,7 +82,7 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
 
     private void responseJSON(RoutingContext routingContext, Object chunk) {
         routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                 .end(Json.encode(chunk));
     }
 

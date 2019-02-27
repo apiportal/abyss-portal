@@ -271,7 +271,8 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
             "  token,\n" +
             "  expiredate,\n" +
             "  isactive\n" +
-            "from resource_access_token\n";
+            "from\n" +
+            "resource_access_token\n";
 
     private static final String SQL_SELECT_ALL = "select\n" +
             "  uuid,\n" +
@@ -289,7 +290,8 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
             "  nonce,\n" +
             "  userdata,\n" +
             "  isactive\n" +
-            "from resource_access_token\n";
+            "from\n" +
+            "resource_access_token\n";
 
     private static final String SQL_UPDATE = "UPDATE resource_access_token\n" +
             "SET\n" +
@@ -301,13 +303,6 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
             "  , resourcerefid      = CAST(? AS uuid)\n" +
             "  , isactive      = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(token) = lower(?)\n";
 

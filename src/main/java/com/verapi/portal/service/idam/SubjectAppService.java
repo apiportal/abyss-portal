@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@Deprecated
 public class SubjectAppService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(SubjectAppService.class);
 
@@ -229,7 +230,8 @@ public class SubjectAppService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  subjectid,\n" +
             "  appid\n" +
-            "from subject_app\n";
+            "from\n" +
+            "subject_app\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_app\n" +
             "SET\n" +
@@ -239,13 +241,6 @@ public class SubjectAppService extends AbstractService<UpdateResult> {
             "  , subjectid      = CAST(? AS uuid)\n" +
             "  , appid      = CAST(? AS uuid)\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
 

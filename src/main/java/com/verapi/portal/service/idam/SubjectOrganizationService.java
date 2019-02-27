@@ -53,7 +53,9 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getString("organizationrefid"));
+                            .add(jsonObj.getString("organizationrefid"))
+                            .add(jsonObj.getBoolean("isowner"))
+                            .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -105,6 +107,8 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("subjectid"))
                 .add(updateRecord.getString("organizationrefid"))
+                .add(updateRecord.getBoolean("isowner"))
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -124,6 +128,8 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("organizationrefid"))
+                            .add(jsonObj.getBoolean("isowner"))
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -211,8 +217,8 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into subject_organization (organizationid, crudsubjectid, subjectid, organizationrefid)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid))";
+    private static final String SQL_INSERT = "insert into subject_organization (organizationid, crudsubjectid, subjectid, organizationrefid, isowner, isactive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, ?)";
 
     private static final String SQL_DELETE = "update subject_organization\n" +
             "set\n" +
@@ -228,8 +234,11 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
             "  isdeleted,\n" +
             "  crudsubjectid,\n" +
             "  subjectid,\n" +
-            "  organizationrefid\n" +
-            "from subject_organization\n";
+            "  organizationrefid,\n" +
+            "  isowner,\n" +
+            "  isactive\n" +
+            "from\n" +
+            "subject_organization\n";
 
     private static final String SQL_UPDATE = "UPDATE subject_organization\n" +
             "SET\n" +
@@ -237,21 +246,18 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
             "  , updated               = now()\n" +
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , organizationrefid      = CAST(? AS uuid)\n";
+            "  , organizationrefid      = CAST(? AS uuid)\n" +
+            "  , isowner      = ?\n" +
+            "  , isactive      = ?\n";
 
-    private static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    private static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_NAME_IS = "";
 
     private static final String SQL_CONDITION_NAME_LIKE = "";
 
     private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
+
+    private static final String SQL_CONDITION_ORGANIZATION_IS = "organizationrefid = CAST(? AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 
@@ -272,6 +278,8 @@ public class SubjectOrganizationService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+
+    public static final String FILTER_BY_ORGANIZATION = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

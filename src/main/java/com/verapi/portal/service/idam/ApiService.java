@@ -71,12 +71,13 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
-                            //.add(jsonObj.getString("apioriginuuid")) //TODO: whenever API versioning implemented then this field will be mandatory for new API versions
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getBoolean("islive"))
                             .add(jsonObj.getBoolean("isdefaultversion"))
-                            .add(jsonObj.getBoolean("islatestversion"));
+                            .add(jsonObj.getBoolean("islatestversion"))
+                            .add(jsonObj.getString("apioriginid"))
+                            .add(jsonObj.getString("apiparentid"));
 
                     return insert(insertParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_INSERT : SQL_INSERT_BUSINESS_API).toObservable();
                 })
@@ -143,12 +144,13 @@ public class ApiService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("color"))
                 .add(updateRecord.getInstant("deployed"))
                 .add(updateRecord.getString("changelog"))
-                //.add(updateRecord.getString("apioriginuuid"))
                 .add(updateRecord.getString("version"))
                 .add(updateRecord.getBoolean("issandbox"))
                 .add(updateRecord.getBoolean("islive"))
                 .add(updateRecord.getBoolean("isdefaultversion"))
                 .add(updateRecord.getBoolean("islatestversion"))
+                .add(updateRecord.getString("apioriginid"))
+                .add(updateRecord.getString("apiparentid"))
                 .add(uuid.toString());
         return update(updateParams, (updateRecord.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID);
     }
@@ -179,12 +181,13 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("color"))
                             .add(jsonObj.getInstant("deployed"))
                             .add(jsonObj.getString("changelog"))
-                            //.add(jsonObj.getString("apioriginuuid"))
                             .add(jsonObj.getString("version"))
                             .add(jsonObj.getBoolean("issandbox"))
                             .add(jsonObj.getBoolean("islive"))
                             .add(jsonObj.getBoolean("isdefaultversion"))
                             .add(jsonObj.getBoolean("islatestversion"))
+                            .add(jsonObj.getString("apioriginid"))
+                            .add(jsonObj.getString("apiparentid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID).toObservable();
                 })
@@ -284,19 +287,19 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     private static final String SQL_INSERT = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion,\n" +
             "                 languageformat, originaldocument, openapidocument, extendeddocument, businessapiid, image, color, deployed, changelog,\n" +
-            "                 version, issandbox, islive, isdefaultversion, islatestversion)\n" +
+            "                 version, issandbox, islive, isdefaultversion, islatestversion, apioriginid, apiparentid)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
             "                    ?, ?, ?::JSON, ?::JSON, CAST(? AS uuid), ?, ?, ?, ?,\n" +
-            "                             ?, ?, ?, ?, ?);";
+            "                             ?, ?, ?, ?, ?, CAST(? AS uuid), CAST(? AS uuid));";
 
     private static final String SQL_INSERT_BUSINESS_API = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion,\n" +
             "                 languageformat, originaldocument, openapidocument, extendeddocument, image, color, deployed, changelog,\n" +
-            "                 version, issandbox, islive, isdefaultversion, islatestversion)\n" +
+            "                 version, issandbox, islive, isdefaultversion, islatestversion, apioriginid, apiparentid)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
             "                    ?, ?, ?::JSON, ?::JSON, ?, ?, ?, ?,\n" +
-            "                             ?, ?, ?, ?, ?);";
+            "                             ?, ?, ?, ?, ?, CAST(? AS uuid), CAST(? AS uuid));";
 
     private static final String SQL_DELETE = "update api\n" +
             "set\n" +
@@ -331,13 +334,16 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  api.color,\n" +
             "  api.deployed,\n" +
             "  api.changelog,\n" +
-            "  api.apioriginuuid,\n" +
             "  api.version,\n" +
             "  api.issandbox,\n" +
             "  api.islive,\n" +
             "  api.isdefaultversion,\n" +
-            "  api.islatestversion\n" +
-            "from api\n";
+            "  api.islatestversion,\n" +
+            "  api.apioriginid,\n" +
+            "  api.apiparentid,\n" +
+            "from\n" +
+            "api\n";
+
     private static final String SQL_UPDATE = "UPDATE api\n" +
             "SET\n" +
             "  organizationid      = CAST(? AS uuid)\n" +
@@ -358,12 +364,13 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , color      = ?\n" +
             "  , deployed      = ?\n" +
             "  , changelog      = ?\n" +
-            //"  , apioriginuuid      = CAST(? AS uuid)\n" +
             "  , version      = ?\n" +
             "  , issandbox      = ?\n" +
             "  , islive      = ?\n" +
             "  , isdefaultversion      = ?\n" +
-            "  , islatestversion      = ?\n";
+            "  , islatestversion      = ?\n" +
+            "  , apioriginid      = CAST(? AS uuid)\n" +
+            "  , apiparentid      = CAST(? AS uuid)\n";
 
     private static final String SQL_UPDATE_BUSINESS_API = "UPDATE api\n" +
             "SET\n" +
@@ -385,20 +392,14 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  , color      = ?\n" +
             "  , deployed      = ?\n" +
             "  , changelog      = ?\n" +
-            //"  , apioriginuuid      = CAST(? AS uuid)\n" +
             "  , version      = ?\n" +
             "  , issandbox      = ?\n" +
             "  , islive      = ?\n" +
             "  , isdefaultversion      = ?\n" +
-            "  , islatestversion      = ?\n";
+            "  , islatestversion      = ?\n" +
+            "  , apioriginid      = CAST(? AS uuid)\n" +
+            "  , apiparentid      = CAST(? AS uuid)\n";
 
-    public static final String SQL_AND = "and\n";
-
-    private static final String SQL_WHERE = "where\n";
-
-    private static final String SQL_CONDITION_ID_IS = "id = ?\n";
-
-    public static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
 
     public static final String SQL_CONDITION_NAME_IS = "lower(openapidocument -> 'info' ->> 'title') = lower(?)\n";
 
@@ -472,6 +473,10 @@ public class ApiService extends AbstractService<UpdateResult> {
             "resource.uuid = subject_permission.resourceid and\n" +
             "(subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_VIEW_API + "' AS uuid) OR\n" +
             "subject_permission.resourceactionid = CAST('" + Constants.RESOURCE_ACTION_EDIT_API + "' AS uuid))";
+
+    public static final String FILTER_BY_LICENSE = SQL_SELECT2 + ", api_license\n" +
+            SQL_WHERE + "api.uuid = api_license.apiid\n" +
+            SQL_AND + "api_license.licenseid = CAST(? AS uuid)\n";
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

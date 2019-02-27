@@ -11,14 +11,14 @@
 
 package com.verapi.portal.verticle;
 
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
-import com.verapi.abyss.common.Config;
-import com.verapi.abyss.common.Constants;
 import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.service.idam.AuthenticationService;
 import com.verapi.portal.service.idam.AuthorizationService;
@@ -30,6 +30,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.RequestOptions;
@@ -38,7 +39,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.web.api.validation.ValidationException;
-import io.vertx.ext.web.handler.LoggerFormat;
 import io.vertx.reactivex.RxHelper;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpClient;
@@ -54,7 +54,6 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.handler.BodyHandler;
 import io.vertx.reactivex.ext.web.handler.CookieHandler;
 import io.vertx.reactivex.ext.web.handler.CorsHandler;
-import io.vertx.reactivex.ext.web.handler.LoggerHandler;
 import io.vertx.reactivex.ext.web.handler.ResponseTimeHandler;
 import io.vertx.reactivex.ext.web.handler.SessionHandler;
 import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
@@ -113,7 +112,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         logger.trace("---configureRouter invoked");
 
         //log HTTP requests
-        router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+        //router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
         // 1: install cookie handler
         //A handler which decodes cookies from the request, makes them available in the RoutingContext and writes them back in the response
@@ -165,7 +164,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         Router subRouter = Router.router(vertx);
 
         //log HTTP requests
-        subRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
+        //subRouter.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
 
         //install body handler
         //A handler which gathers the entire request body and sets it on the RoutingContext
@@ -268,7 +267,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         allowHeaders.add("Access-Control-Allow-Credentials");
         allowHeaders.add("origin");
         allowHeaders.add("Vary : Origin");
-        allowHeaders.add("Content-Type");
+        allowHeaders.add(HttpHeaders.CONTENT_TYPE.toString());
         allowHeaders.add("accept");
         allowHeaders.add("Cookie");
         // CORS support
@@ -342,7 +341,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                             resp.handler(buf -> logger.trace("status:{} response:{}", resp.statusCode(), buf.toString("UTF-8")));
                                         })
                                         .setChunked(true)
-                                        .putHeader("Content-Type", "text/plain")
+                                        .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
                                         .write("hello").end();
                             } finally {
                                 AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().release(serviceReference);
@@ -581,21 +580,21 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         if (failure instanceof ValidationException)
             // Handle Validation Exception
             routingContext.response()
-                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.UNPROCESSABLE_ENTITY.code())
                     .setStatusMessage(HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase() + " " + ((ValidationException) failure).type().name() + " " + failure.getLocalizedMessage())
                     .end();
         else if (failure instanceof AbyssApiException)
             //Handle Abyss Api Exception
             routingContext.response()
-                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getHttpResponseStatus().code())
                     .setStatusMessage(((AbyssApiException) failure).getHttpResponseStatus().reasonPhrase())
                     .end(((AbyssApiException) failure).getApiError().toJson().toString(), "UTF-8");
         else
             // Handle other exception
             routingContext.response()
-                    .putHeader("content-type", "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(routingContext.statusCode())
                     .setStatusMessage(failure.getLocalizedMessage())
                     .end();
@@ -688,7 +687,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                         logger.trace("httpClientResponse statusCode: {} | statusMessage: {}", httpClientResponse.statusCode(), httpClientResponse.statusMessage());
                                         routingContext.response()
                                                 .setStatusCode(httpClientResponse.statusCode())
-                                                .putHeader("Content-Type", "application/json; charset=utf-8");
+                                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
                                         return httpClientResponse.toFlowable();
                                     })
                                     .doFinally(() -> {
@@ -703,7 +702,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                         routingContext.response().headers().setAll(request.headers());
                                         routingContext.response().setChunked(true); //TODO: Http Chunked Serving per request
                                         routingContext.response()
-                                                .putHeader("Content-Type", "application/json; charset=utf-8")
+                                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                                                 .write(data);
                                         //routingContext.next();
                                     }, throwable -> {

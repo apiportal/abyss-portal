@@ -25,6 +25,8 @@ public interface IService<T> {
 
     Single<JDBCClient> initJDBCClient();
 
+    Single<JDBCClient> initJDBCClient(String organizationUuid);
+
     Single<List<JsonObject>> insertAll(JsonArray insertRecords);
 
     Single<CompositeResult> update(UUID uuid, JsonObject updateRecord);

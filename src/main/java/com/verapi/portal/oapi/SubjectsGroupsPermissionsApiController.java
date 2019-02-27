@@ -12,10 +12,12 @@
 package com.verapi.portal.oapi;
 
 //import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
+
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.SubjectService;
 import com.verapi.portal.service.idam.SubjectServiceOld;
 import io.reactivex.Single;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -68,7 +70,7 @@ public class SubjectsGroupsPermissionsApiController extends AbstractApiControlle
                     //jsonArray.add(resp.toJson().getValue("rows"));
 
                     routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                             .setStatusCode(200)
                             .end(jsonArray.encodePrettily(), "UTF-8");
 
@@ -109,7 +111,7 @@ public class SubjectsGroupsPermissionsApiController extends AbstractApiControlle
                 });
         insertResult.subscribe(resp -> {
                     routingContext.response()
-                            .putHeader("content-type", "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                             .setStatusCode(201)
                             .end(resp.getRows().get(0).encode(), "UTF-8");
                     logger.trace(methodName + " replied successfully " + resp.toJson().encodePrettily());
@@ -150,7 +152,7 @@ public class SubjectsGroupsPermissionsApiController extends AbstractApiControlle
 */
 
         routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                 .setStatusCode(200)
                 .end(subjects.toString(), "UTF-8");
 
@@ -184,7 +186,7 @@ public class SubjectsGroupsPermissionsApiController extends AbstractApiControlle
 */
 
         routingContext.response()
-                .putHeader("content-type", "application/json; charset=utf-8")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                 .setStatusCode(200)
                 .end(subjects.toString(), "UTF-8");
 

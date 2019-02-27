@@ -12,10 +12,10 @@
 package com.verapi.portal.verticle;
 
 
-import com.verapi.abyss.logger.handler.rx.LoggerHandler;
-import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadataDiscovery;
+import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.controller.Controllers;
 import com.verapi.portal.controller.IController;
 import com.verapi.portal.controller.PortalAbstractController;
@@ -46,7 +46,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
         Disposable disposable
                 =
                 initializeJdbcClient(Constants.PORTAL_DATA_SOURCE_SERVICE)
-                        .flatMap(this::loadAbyssDatabaseMetadata)
+                        .flatMap(jdbcClient -> AbyssDatabaseMetadataDiscovery.getInstance().populateMetaData(jdbcClient))
                         .flatMap(jdbcClient1 -> createRouters())
                         .flatMap(this::enableCorsSupport)
                         .flatMap(abyssRouter -> configureRouter())
@@ -63,8 +63,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
     private Single<Router> configureRouter() {
         logger.trace("AbstractPortalVerticle.configureRouter() invoked");
-        verticleRouter.route().handler(LoggerHandler.create(true));
-        verticleRouter.route().handler(LoggerHandler.create());
+        //verticleRouter.route().handler(LoggerHandler.create());
         verticleRouter.route().handler(ResponseTimeHandler.create());
 
         verticleRouter.route("/logout").handler(context -> {
@@ -149,7 +148,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
-                .requestHandler(abyssRouter::accept)
+                .requestHandler(abyssRouter)
                 .rxListen(serverPort, verticleHost);
     }
 

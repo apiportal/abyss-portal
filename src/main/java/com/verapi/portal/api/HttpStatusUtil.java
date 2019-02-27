@@ -11,6 +11,7 @@
 
 package com.verapi.portal.api;
 
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
@@ -32,7 +33,7 @@ public class HttpStatusUtil {
      */
     protected void ok(RoutingContext context, String content) {
         context.response().setStatusCode(200)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(content);
     }
 
@@ -53,7 +54,7 @@ public class HttpStatusUtil {
      */
     protected void created(RoutingContext context, String content) {
         context.response().setStatusCode(201)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(content);
     }
 
@@ -74,7 +75,7 @@ public class HttpStatusUtil {
      */
     protected void badRequest(RoutingContext context, Throwable ex) {
         context.response().setStatusCode(400)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(new JsonObject().put("error", ex.getMessage()).encodePrettily());
     }
 
@@ -85,7 +86,7 @@ public class HttpStatusUtil {
      */
     protected void badRequest(RoutingContext context) {
         context.response().setStatusCode(400)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(new JsonObject().put("error", "bad_request").encodePrettily());
     }
 
@@ -96,7 +97,7 @@ public class HttpStatusUtil {
      */
     protected void notFound(RoutingContext context) {
         context.response().setStatusCode(404)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(new JsonObject().put("message", "not_found").encodePrettily());
     }
 
@@ -108,7 +109,7 @@ public class HttpStatusUtil {
      */
     protected void internalError(RoutingContext context, Throwable ex) {
         context.response().setStatusCode(500)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(new JsonObject().put("error", ex.getMessage()).encodePrettily());
     }
 
@@ -120,7 +121,7 @@ public class HttpStatusUtil {
      */
     protected void internalError(RoutingContext context, String cause) {
         context.response().setStatusCode(500)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(new JsonObject().put("error", cause).encodePrettily());
     }
 
@@ -141,7 +142,7 @@ public class HttpStatusUtil {
      */
     protected void serviceUnavailable(RoutingContext context, Throwable ex) {
         context.response().setStatusCode(503)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(new JsonObject().put("error", ex.getMessage()).encodePrettily());
     }
 
@@ -153,7 +154,7 @@ public class HttpStatusUtil {
      */
     protected void serviceUnavailable(RoutingContext context, String cause) {
         context.response().setStatusCode(503)
-                .putHeader("content-type", "application/json")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .end(new JsonObject().put("error", cause).encodePrettily());
     }
 
