@@ -312,10 +312,21 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
     public static final String SQL_LIST_SUBJECT_API_SUBSCRIPTIONS = SQL_SELECT + ", resource\n" +
             SQL_WHERE + "subject_permission.subjectid = CAST(? AS uuid) and subject_permission.resourceid = resource.uuid and\n" +
             "resource.resourcetypeid = CAST('" + Constants.RESOURCE_TYPE_API + "' AS uuid)\n";
+    
     public static final String SQL_LIST_SUBSCRIPTIONS_TO_MY_APIS = SQL_SELECT + ", resource, api\n" +
             SQL_WHERE + "api.subjectid = CAST(? AS uuid) and\n" +
             "api.uuid = resource.resourcerefid and\n" +
             "subject_permission.resourceid = resource.uuid and\n" +
             "resource.resourcetypeid = CAST('" + Constants.RESOURCE_TYPE_API + "' AS uuid)\n";
+
+    public static final String SQL_CHECK_PERMISSION_OF_SUBJECT_IN_ORGANIZATION =
+            "select s.displayname, s.subjectname, o.name, p.organizationid, p.permission, r.resourcename, rt.type, r.resourcerefid, ra.actionname\n" +
+            "from\n" +
+            "subject_permission\n p, resource r, resource_action ra, subject s, resource_type rt, organization o\n" +
+            "where p.organizationid = o.uuid and p.organizationid = CAST(? AS uuid)\n" +
+            "and p.subjectid = s.uuid and s.uuid = CAST(? AS uuid)\n" +
+            "and r.resourcetypeid = rt.uuid and rt.uuid = '41bfd648-308e-401f-a1ce-9dbbf4e56eb6'\n" + // --OPERATION ID RESOURCE TYPE
+            "and p.resourceid = r.uuid and (r.resourcename = ?)\n" +
+            "and p.resourceactionid = ra.uuid and ra.uuid = 'cf52d8fc-591f-42dc-be1b-13983086f64d'\n"; // --INVOKE OPERATION ACTION
 
 }

@@ -16,6 +16,7 @@ package com.verapi.portal.oapi;
 import com.google.json.JsonSanitizer;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
 import com.verapi.abyss.exception.NotFound404Exception;
@@ -28,10 +29,13 @@ import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.es.ElasticSearchService;
+import com.verapi.portal.service.idam.AuthorizationService;
+import com.verapi.portal.service.idam.SubjectPermissionService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.swagger.parser.util.ClasspathHelper;
+import io.swagger.v3.oas.models.Operation;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -98,9 +102,13 @@ public abstract class AbstractApiController implements IApiController {
                                 // Add a failure handler
                                 factory.addFailureHandlerByOperationId(method.getName(), this::failureHandler);
 
+                                //Authorization Handler
+                                factory.addHandlerByOperationId(method.getName(), this::abyssPathAuthorizationHandler);
+
                                 // Now you can use the factory to mount map endpoints to Vert.x handlers
                                 factory.addHandlerByOperationId(method.getName(), routingContext -> {
                                     try {
+                                        //TODO: Try to Insert to DB all operationIDs of all API Proxies to Resource -> INSERT ... ON CONFLICT DO NOTHING/UPDATE   |   method.getName() IS EQUAL TO openAPI Operation ID
                                         getClass().getDeclaredMethod(method.getName(), RoutingContext.class).invoke(this, routingContext);
                                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                                         logger.error("{}.{} invocation error: {} \n stack trace: {}", getClass().getName(), method.getName(), e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
@@ -127,7 +135,8 @@ public abstract class AbstractApiController implements IApiController {
                         RouterFactoryOptions factoryOptions = new RouterFactoryOptions()
                                 .setMountValidationFailureHandler(true) // Disable mounting of dedicated validation failure handler
                                 .setMountResponseContentTypeHandler(true) // Mount ResponseContentTypeHandler automatically
-                                .setMountNotImplementedHandler(true);
+                                .setMountNotImplementedHandler(true)
+                                .setOperationModelKey("openApiOperation");
                         // Now you have to generate the router
                         Router router = factory.setOptions(factoryOptions).getRouter();
 
@@ -201,7 +210,7 @@ public abstract class AbstractApiController implements IApiController {
             abyssApiException = (AbyssApiException) clazz.getConstructor(ApiSchemaError.class).newInstance(apiSchemaError);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             abyssApiException = new InternalServerError500Exception(apiSchemaError);
-            logger.error("Error occured dusing AbyssApiException instance constructing error:{} \n stack trace:{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
+            logger.error("Error occurred during AbyssApiException instance constructing error:{} \n stack trace:{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
         }
         routingContext.fail(abyssApiException);
     }
@@ -327,7 +336,7 @@ public abstract class AbstractApiController implements IApiController {
                                     routingContext.next();
                                 },
                                 throwable -> {
-                                    logger.error("LoginController.handle() subjectService.findBySubjectName replied error : ", Arrays.toString(throwable.getStackTrace()));
+                                    logger.error("LoginController.handle() subjectService.findBySubjectName replied error : {}\n{}", throwable.getLocalizedMessage(), Arrays.toString(throwable.getStackTrace()));
                                     throwApiException(routingContext, UnAuthorized401Exception.class);
                                 });
                     } catch (Exception e) {
@@ -410,6 +419,80 @@ public abstract class AbstractApiController implements IApiController {
         //if authorized then set this security handler's flag and route next
         routingContext.session().put(methodName, "OK");
         routingContext.next();
+    }
+
+
+    private void abyssPathAuthorizationHandler(RoutingContext routingContext) {
+        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        //logger.trace(methodName + " invoked");
+
+        String organizationUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String userUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        String operationId = ((Operation) routingContext.data().get("openApiOperation")).getOperationId();
+
+        logger.trace("abyssPathAuthorizationHandler invoked,\n" +
+                        "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
+                        "[{}]\n[{}]\n[{}]\n[{}]\n[{}]\n\n" +
+                        "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
+                        "[{}]\n[{}]\n[{}]\n",
+                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME),  //user.uuid
+                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME),
+                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME),    //organization.uuid
+                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME),
+
+                //Path
+                routingContext.normalisedPath(),
+                routingContext.currentRoute().getPath(),
+                routingContext.request().path(),
+                routingContext.request().absoluteURI(),
+                routingContext.request().method().name(),   //Action
+
+                routingContext.request().host(),
+                routingContext.request().remoteAddress().host(),
+                routingContext.request().remoteAddress().port(),
+                routingContext.request().remoteAddress().path(),
+
+                routingContext.data().keySet(),
+                routingContext.session().data().keySet(),
+                ((Operation) routingContext.data().get("openApiOperation")).getOperationId());  //Operation
+
+
+        //TODO: TEST
+
+        try {
+            SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+
+            ApiFilterQuery apiFilterQuery = new ApiFilterQuery()
+                    .setFilterQuery(SubjectPermissionService.SQL_CHECK_PERMISSION_OF_SUBJECT_IN_ORGANIZATION)
+                    .setFilterQueryParams(new JsonArray().add(organizationUuid).add(userUuid).add(operationId));
+
+            Single<JsonObject> permissionResponse = subjectPermissionService.initJDBCClient()
+                    .flatMap(jdbcClient -> subjectPermissionService.findAll(apiFilterQuery))
+                    .flatMap(result -> {
+                        if (result.getNumRows()>0) {
+                            logger.trace("# of permissions: [{}]\n[{}]\n", result.getNumRows(), result.toJson().encodePrettily());
+                            return Single.just(result.getRows().get(0));
+                        } else {
+                            return Single.error(new Forbidden403Exception("abyssPathAuthorizationHandler failed - no permission for org:[" + organizationUuid + "] user:[" + userUuid + "] operation:[" + operationId + "]"));
+                        }
+                    });
+
+            permissionResponse.subscribe(resp -> {
+                        logger.trace("abyssPathAuthorizationHandler() subjectPermissionService.findAll replied successfully " + resp.encodePrettily());
+
+                        //if authorized then set this security handler's flag and route next
+                        routingContext.next();
+                    },
+                    throwable -> {
+                        logger.error("abyssPathAuthorizationHandler() subjectPermissionService.findAll replied error : {}\n{}", throwable.getLocalizedMessage(), Arrays.toString(throwable.getStackTrace()));
+                        throwApiException(routingContext, Forbidden403Exception.class);
+                    });
+        } catch (Exception e) {
+            logger.error("abyssPathAuthorizationHandler() subjectPermissionService.findAll error : ", Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, Forbidden403Exception.class);
+        }
+
+        //TODO: ???? routingContext.fail(new Forbidden403Exception("abyssPathAuthorizationHandler failed"));
     }
 
     private void processException(RoutingContext routingContext, Throwable throwable) {
