@@ -612,7 +612,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }
         String requestUriPath = routingContext.request().path();
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
-        String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36, requestUriPath.length());
+        String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36);
         logger.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
         logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
         JsonObject validationReport = routingContext.get("validationreport");
@@ -768,14 +768,23 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         logger.trace("---genericAuthorizationHandler invoked");
         String requestUriPath = routingContext.request().path();
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
-        String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36, requestUriPath.length());
+        String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36);
         logger.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
         logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
         JsonObject validationReport = routingContext.get("validationreport");
 
         AuthorizationService authorizationService = new AuthorizationService(vertx);
         if (authorizationService.authorize(UUID.fromString(validationReport.getString("apiuuid")), UUID.fromString(requestedApi)))
+            //If (Consumed API is protected by Abyss Access Manager)
+            //  Check if subject & organization is received in header request
+            //      Permission Check(subject, organization, resource, action)
+            //      If Permission GRANTED
             routingContext.next();
+            //      Else
+            //          Fail
+            //  Else
+            //      Fail
+            //End If
         else
             routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
 
