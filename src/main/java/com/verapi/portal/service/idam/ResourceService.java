@@ -44,6 +44,16 @@ public class ResourceService extends AbstractService<UpdateResult> {
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
+        return insertAllWithSql(insertRecords, SQL_INSERT);
+    }
+
+    public Single<List<JsonObject>> insertAllWithConflict(JsonArray insertRecords) {
+        logger.trace("---insertAllWithConflict invoked");
+        return insertAllWithSql(insertRecords, SQL_INSERT_WITH_CONFLICT);
+    }
+
+    public Single<List<JsonObject>> insertAllWithSql(JsonArray insertRecords, String sql) {
+        logger.trace("---insertAllWithSql invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -57,7 +67,7 @@ public class ResourceService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getString("resourcerefid"))
                             .add(jsonObj.getBoolean("isactive"));
-                    return insert(insertParam, SQL_INSERT).toObservable();
+                    return insert(insertParam, sql).toObservable();
                 })
                 .flatMap(insertResult -> {
                     if (insertResult.getThrowable() == null) {
@@ -293,6 +303,9 @@ public class ResourceService extends AbstractService<UpdateResult> {
     public static final String FILTER_BY_RESOURCETYPE = SQL_SELECT + SQL_WHERE + SQL_CONDITION_RESOURCETYPEID_IS;
 
     public static final String FILTER_BY_ORGANIZATION = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ORGANIZATIONID_IS;
+
+    //INSERT ... ON CONFLICT DO NOTHING/UPDATE
+    public static final String SQL_INSERT_WITH_CONFLICT = SQL_INSERT + "ON CONFLICT DO NOTHING";
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

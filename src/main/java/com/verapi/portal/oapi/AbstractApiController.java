@@ -29,7 +29,7 @@ import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.es.ElasticSearchService;
-import com.verapi.portal.service.idam.AuthorizationService;
+import com.verapi.portal.service.idam.ResourceService;
 import com.verapi.portal.service.idam.SubjectPermissionService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -95,26 +95,50 @@ public abstract class AbstractApiController implements IApiController {
                         OpenAPI3RouterFactory factory = ar.result();
 
                         Method[] methods = this.getClass().getMethods();
+                        String classCanonicalName = this.getClass().getCanonicalName();
+
+
                         for (Method method : methods) {
                             if (method.getAnnotation(AbyssApiOperationHandler.class) != null) {
                                 logger.trace("adding OpenAPI handler for the class {} and the method {}", getClass().getName(), method.getName());
 
+                                final String  methodName = method.getName();
+
                                 // Add a failure handler
-                                factory.addFailureHandlerByOperationId(method.getName(), this::failureHandler);
+                                factory.addFailureHandlerByOperationId(methodName, this::failureHandler);
 
                                 //Authorization Handler
-                                factory.addHandlerByOperationId(method.getName(), this::abyssPathAuthorizationHandler);
+                                factory.addHandlerByOperationId(methodName, this::abyssPathAuthorizationHandler);
 
                                 // Now you can use the factory to mount map endpoints to Vert.x handlers
-                                factory.addHandlerByOperationId(method.getName(), routingContext -> {
+                                factory.addHandlerByOperationId(methodName, routingContext -> {
                                     try {
-                                        //TODO: Try to Insert to DB all operationIDs of all API Proxies to Resource -> INSERT ... ON CONFLICT DO NOTHING/UPDATE   |   method.getName() IS EQUAL TO openAPI Operation ID
-                                        getClass().getDeclaredMethod(method.getName(), RoutingContext.class).invoke(this, routingContext);
+                                        getClass().getDeclaredMethod(methodName, RoutingContext.class).invoke(this, routingContext);
                                     } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                                         logger.error("{}.{} invocation error: {} \n stack trace: {}", getClass().getName(), method.getName(), e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
                                         throwApiException(routingContext, InternalServerError500Exception.class, e);
                                     }
                                 });
+
+                                //TODO: Try to Insert to DB all operationIDs of all API Proxies to Resource -> INSERT ... ON CONFLICT DO NOTHING/UPDATE   |   method.getName() IS EQUAL TO openAPI Operation ID
+                                ResourceService resourceService = new ResourceService(vertx);
+
+                                resourceService.initJDBCClient()
+                                        .flatMap(jdbcClient1 -> { return resourceService.insertAllWithConflict(new JsonArray().add(new JsonObject()
+                                                .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
+                                                .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
+                                                .put("resourcetypeid", Constants.RESOURCE_TYPE_OPENAPI_OPERATION)
+                                                .put("resourcename", methodName)
+                                                .put("description", apiSpec+"-"+classCanonicalName + "-" + methodName)
+                                                .put("resourcerefid", Constants.RESOURCE_TYPE_OPENAPI_OPERATION)
+                                                .put("isactive", true)
+                                        ));
+                                        })
+                                        .subscribe(jsonObjects -> {
+                                            logger.trace("Resource Record {}\n for operation: {} inserted", jsonObjects.get(0).encodePrettily(), methodName);
+                                        }, throwable -> {
+                                            logger.error("Resource Recording error {} | {}: ", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                        });
                             }
                         }
 
