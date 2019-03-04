@@ -17,7 +17,6 @@ import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.handler.OpenAPI3ResponseValidationHandlerImpl;
-import com.verapi.portal.oapi.AuthenticationApiController;
 import com.verapi.portal.service.idam.ApiService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
@@ -198,8 +197,8 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         // if needed then attach UserSessionHandler
                                         if (attachAbyssGatewayUserSessionHandler) {
                                             router.route().handler(UserSessionHandler.create(jdbcAuth));
-                                            AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, router, jdbcAuth);
-                                            logger.info("Loading Platform Authentication API for user API {}", apiUUID);
+                                            //AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, router, jdbcAuth);
+                                            //logger.info("Loading Platform Authentication API for user API {}", apiUUID);
                                         }
 
                                         logger.trace("+++++ {} openapi router route list: {}", apiUUID, router.getRoutes());

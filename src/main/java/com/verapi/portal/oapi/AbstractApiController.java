@@ -15,6 +15,7 @@ package com.verapi.portal.oapi;
 
 import com.google.json.JsonSanitizer;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.exception.InternalServerError500Exception;
@@ -24,7 +25,6 @@ import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.abyss.exception.UnProcessableEntity422Exception;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
-import com.verapi.portal.common.OpenAPIUtil;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.es.ElasticSearchService;
@@ -91,7 +91,7 @@ public abstract class AbstractApiController implements IApiController {
                         logger.trace("OpenAPI3RouterFactory created");
                         OpenAPI3RouterFactory factory = ar.result();
 
-                        Method[] methods = this.getClass().getMethods();
+                        Method[] methods = this.getClass().getDeclaredMethods();
                         for (Method method : methods) {
                             if (method.getAnnotation(AbyssApiOperationHandler.class) != null) {
                                 logger.trace("adding OpenAPI handler for the class {} and the method {}", getClass().getName(), method.getName());
