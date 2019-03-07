@@ -257,7 +257,7 @@ paths:
         - Api Licenses
       summary: 'Get list of Api''s Licenses'
       description: 'Returns list of Licenses of an API'
-      operationId: getLicensesOfApi
+      operationId: getApiLicensesOfApi
       parameters:
         - name: uuid
           in: path

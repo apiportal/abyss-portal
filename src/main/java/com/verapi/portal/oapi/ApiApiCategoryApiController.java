@@ -145,7 +145,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void getApiCategories(RoutingContext routingContext) {
+    public void getApiCategoriesByApi(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 

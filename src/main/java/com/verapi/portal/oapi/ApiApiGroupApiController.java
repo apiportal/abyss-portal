@@ -145,7 +145,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void getApiGroups(RoutingContext routingContext) {
+    public void getApiGroupsByApi(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 
@@ -164,7 +164,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void getApiGroupsOfSubject(RoutingContext routingContext) {
+    public void getApiApiGroupsOfSubject(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 

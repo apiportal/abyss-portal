@@ -296,7 +296,7 @@ paths:
         - ApiCategories
       summary: 'Get api categories list of an API by uuid'
       description: 'Returns api categories list of an API'
-      operationId: getApiCategories
+      operationId: getApiCategoriesByApi
       parameters:
         - name: uuid
           in: path

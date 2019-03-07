@@ -145,7 +145,7 @@ public class ApiLicenseApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void getLicensesOfApi(RoutingContext routingContext) {
+    public void getApiLicensesOfApi(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 

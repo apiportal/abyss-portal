@@ -296,7 +296,7 @@ paths:
         - ApiGroups
       summary: 'Get api group list of an API by uuid'
       description: 'Returns api group list of an API'
-      operationId: getApiGroups
+      operationId: getApiGroupsByApi
       parameters:
         - name: uuid
           in: path
@@ -343,7 +343,7 @@ paths:
         - ApiGroups
       summary: 'Get api group list of a subject by uuid'
       description: 'Returns api group list of a subject'
-      operationId: getApiGroupsOfSubject
+      operationId: getApiApiGroupsOfSubject
       parameters:
         - name: uuid
           in: path

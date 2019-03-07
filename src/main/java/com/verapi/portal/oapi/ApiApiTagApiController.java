@@ -145,7 +145,7 @@ public class ApiApiTagApiController extends AbstractApiController {
     }
 
     @AbyssApiOperationHandler
-    public void getApiTags(RoutingContext routingContext) {
+    public void getApiTagsByApi(RoutingContext routingContext) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
 

@@ -296,7 +296,7 @@ paths:
         - ApiTags
       summary: 'Get api tag list of an API by uuid '
       description: 'Returns api tag list of an API'
-      operationId: getApiTags
+      operationId: getApiTagsByApi
       parameters:
         - name: uuid
           in: path
