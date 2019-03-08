@@ -1006,27 +1006,39 @@ components:
         description:
           type: string
           description: Description of subject
-        distinguishedName:
+        distinguishedname:
           type: string
           description: Distinguished Name stored in User Directory of the Subject
-        uniqueId:
+        uniqueid:
           type: string
           description: Unique ID from User Directory
-        phoneBusiness:
+        phonebusiness:
           type: string
           description: Business Phone Number
           nullable: true
-        phoneHome:
+        phonehome:
           type: string
           description: Home Phone Number
           nullable: true
-        phoneMobile:
+        phonemobile:
           type: string
           description: Mobile Phone Number
           nullable: true
-        phoneExtension:
+        phoneextension:
           type: string
           description: Phone Extension Number
+          nullable: true
+        jobtitle:
+          type: string
+          description: Job Title of Subject
+          nullable: true
+        department:
+          type: string
+          description: Department of Subject
+          nullable: true
+        company:
+          type: string
+          description: Company of Subject
           nullable: true
     SubjectWithGroups:
       type: object
@@ -1155,27 +1167,39 @@ components:
         description:
           type: string
           description: Description of subject
-        distinguishedName:
+        distinguishedname:
           type: string
           description: Distinguished Name stored in User Directory of the Subject
-        uniqueId:
+        uniqueid:
           type: string
           description: Unique ID from User Directory
-        phoneBusiness:
+        phonebusiness:
           type: string
           description: Business Phone Number
           nullable: true
-        phoneHome:
+        phonehome:
           type: string
           description: Home Phone Number
           nullable: true
-        phoneMobile:
+        phonemobile:
           type: string
           description: Mobile Phone Number
           nullable: true
-        phoneExtension:
+        phoneextension:
           type: string
           description: Phone Extension Number
+          nullable: true
+        jobtitle:
+          type: string
+          description: Job Title of Subject
+          nullable: true
+        department:
+          type: string
+          description: Department of Subject
+          nullable: true
+        company:
+          type: string
+          description: Company of Subject
           nullable: true
         groups:
           type: object

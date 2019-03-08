@@ -101,7 +101,10 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.containsKey("phonebusiness") ? jsonObj.getString("phonebusiness") : "")
                             .add(jsonObj.containsKey("phonehome") ? jsonObj.getString("phonehome") : "")
                             .add(jsonObj.containsKey("phonemobile") ? jsonObj.getString("phonemobile") : "")
-                            .add(jsonObj.containsKey("phoneextension") ? jsonObj.getString("phoneextension") : "");
+                            .add(jsonObj.containsKey("phoneextension") ? jsonObj.getString("phoneextension") : "")
+                            .add(jsonObj.containsKey("jobtitle") ? jsonObj.getString("jobtitle") : "")
+                            .add(jsonObj.containsKey("department") ? jsonObj.getString("department") : "")
+                            .add(jsonObj.containsKey("company") ? jsonObj.getString("company") : "");
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -189,6 +192,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.containsKey("phonehome") ? updateRecord.getString("phonehome") : "")
                 .add(updateRecord.containsKey("phonemobile") ? updateRecord.getString("phonemobile") : "")
                 .add(updateRecord.containsKey("phoneextension") ? updateRecord.getString("phoneextension") : "")
+                .add(updateRecord.containsKey("jobtitle") ? updateRecord.getString("jobtitle") : "")
+                .add(updateRecord.containsKey("department") ? updateRecord.getString("department") : "")
+                .add(updateRecord.containsKey("company") ? updateRecord.getString("company") : "")
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -244,6 +250,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.containsKey("phonehome") ? jsonObj.getString("phonehome") : "")
                             .add(jsonObj.containsKey("phonemobile") ? jsonObj.getString("phonemobile") : "")
                             .add(jsonObj.containsKey("phoneextension") ? jsonObj.getString("phoneextension") : "")
+                            .add(jsonObj.containsKey("jobtitle") ? jsonObj.getString("jobtitle") : "")
+                            .add(jsonObj.containsKey("department") ? jsonObj.getString("department") : "")
+                            .add(jsonObj.containsKey("company") ? jsonObj.getString("company") : "")
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -394,15 +403,14 @@ public class SubjectService extends AbstractService<UpdateResult> {
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, isactivated, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
             "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
             "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing, description,\n" +
-            "                     distinguishedname, uniqueid, phonebusiness, phonehome, phonemobile, phoneextension)\n" +
+            "                     distinguishedname, uniqueid, phonebusiness, phonehome, phonemobile, phoneextension,\n" +
+            "                     jobtitle, department, company)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
             "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
             "   CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
-            "   ?, ?, ?, ?, ?, ?)";
-
-
-
+            "   ?, ?, ?, ?, ?, ?,\n" +
+            "   ?, ?, ?)";
 
 
     private static final String SQL_DELETE = "update subject\n" +
@@ -450,6 +458,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  phonebusiness,\n" +
             "  phonemobile,\n" +
             "  phoneextension\n" +
+            "  jobtitle,\n" +
+            "  department,\n" +
+            "  company\n" +
             "from\n" +
             "subject\n";
 
@@ -480,7 +491,10 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , phonehome = ?\n" +
             "  , phonebusiness = ?\n" +
             "  , phonemobile = ?\n" +
-            "  , phoneextension = ?\n";
+            "  , phoneextension = ?\n" +
+            "  , jobtitle = ?\n" +
+            "  , department = ?\n" +
+            "  , company = ?\n";
 
     private static final String SQL_CHANGE_PASSWORD = "update subject\n" +
             "set updated              = now()\n" +
@@ -544,6 +558,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
             "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
             "       s.distinguishedname, s.uniqueid, s.phonebusiness, s.phonehome, s.phonemobile, s.phoneextension,\n" +
+            "       s.jobtitle, s.department, s.company,\n" +
             "       COALESCE((select json_agg(\n" +
             "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
             "                   )\n" +
@@ -560,6 +575,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
             "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
             "       s.distinguishedname, s.uniqueid, s.phonebusiness, s.phonehome, s.phonemobile, s.phoneextension,\n" +
+            "       s.jobtitle, s.department, s.company,\n" +
             "       COALESCE((select json_agg(\n" +
             "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
             "                   )\n" +
