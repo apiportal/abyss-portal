@@ -193,8 +193,8 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         // if needed then attach UserSessionHandler
                                         if (attachAbyssGatewayUserSessionHandler) {
                                             router.route().handler(UserSessionHandler.create(jdbcAuth));
-                                            AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, router, jdbcAuth);
-                                            logger.info("Loading Platform Authentication API for user API {}", apiUUID);
+                                            //AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, router, jdbcAuth);
+                                            //logger.info("Loading Platform Authentication API for user API {}", apiUUID);
                                         }
 
                                         logger.trace("+++++ {} openapi router route list: {}", apiUUID, router.getRoutes());

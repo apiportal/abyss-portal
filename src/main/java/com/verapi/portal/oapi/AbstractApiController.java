@@ -36,6 +36,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.v3.oas.models.Operation;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -94,9 +95,8 @@ public abstract class AbstractApiController implements IApiController {
                         logger.trace("OpenAPI3RouterFactory created");
                         OpenAPI3RouterFactory factory = ar.result();
 
-                        Method[] methods = this.getClass().getMethods();
+                        Method[] methods = this.getClass().getDeclaredMethods();
                         String classCanonicalName = this.getClass().getCanonicalName();
-
 
                         for (Method method : methods) {
                             if (method.getAnnotation(AbyssApiOperationHandler.class) != null) {
@@ -135,7 +135,11 @@ public abstract class AbstractApiController implements IApiController {
                                         ));
                                         })
                                         .subscribe(jsonObjects -> {
-                                            logger.trace("Resource Record {}\n for operation: {} inserted", jsonObjects.get(0).encodePrettily(), methodName);
+                                            if (jsonObjects.isEmpty()) {
+                                                logger.trace("Resource Record exists for operation: {}", methodName);
+                                            } else {
+                                                logger.trace("Resource Record {}\n for operation: {} inserted", jsonObjects.get(0).encodePrettily(), methodName);
+                                            }
                                         }, throwable -> {
                                             logger.error("Resource Recording error {} | {}: ", throwable.getLocalizedMessage(), throwable.getStackTrace());
                                         });

@@ -165,7 +165,7 @@ public abstract class AbstractService<T> implements IService<T> {
                                 //       .onErrorReturnItem(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1)))
                                 //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
                                 .flatMap(resultSet -> {
-                                    if (resultSet.getUpdated() == 0) {
+                                    if (resultSet.getUpdated() == 0 && !sql.contains("ON CONFLICT DO NOTHING")) {
                                         logger.error("unable to process sql with parameters");
                                         logger.error("unable to process sql {} with parameters {}", sql, params);
                                         //return Observable.error(new Exception("unable to process sql with parameters"));
