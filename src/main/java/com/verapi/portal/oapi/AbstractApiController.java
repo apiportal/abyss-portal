@@ -31,6 +31,7 @@ import com.verapi.portal.service.es.ElasticSearchService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
+import io.reactivex.exceptions.CompositeException;
 import io.swagger.parser.util.ClasspathHelper;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
@@ -420,9 +421,21 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void processException(RoutingContext routingContext, Throwable throwable) {
+        if (throwable instanceof CompositeException) {
+            for (Throwable t: ((CompositeException) throwable).getExceptions()) {
+                if (t instanceof UnAuthorized401Exception) {
+                    logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                    throwApiException(routingContext, UnAuthorized401Exception.class, throwable.getLocalizedMessage());
+                }
+            }
+        }
+
         if (throwable instanceof NoDataFoundException)
             throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-        else if (throwable instanceof UnProcessableEntity422Exception) {
+        else if (throwable instanceof UnAuthorized401Exception) {
+            logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+            throwApiException(routingContext, UnAuthorized401Exception.class, throwable.getLocalizedMessage());
+        } else if (throwable instanceof UnProcessableEntity422Exception) {
             logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
             throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
         } else {
