@@ -11,10 +11,14 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Constants;
+import com.verapi.portal.common.MailUtil;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.AbstractService;
@@ -22,8 +26,12 @@ import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.AuthProvider;
+import io.vertx.ext.auth.jdbc.impl.JDBCUser;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.ext.web.api.RequestParameters;
@@ -36,12 +44,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class AuthenticationService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
@@ -230,6 +241,221 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
         return Single.just(new JsonObject().put("username", username)
                 .put("sessionid", sessionid));
+    }
+
+    public Single<JsonObject> signup(RoutingContext routingContext, JDBCAuth authProvider) {
+        logger.trace("signup invoked");
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject signupForm = requestParameters.body().getJsonObject();
+
+        String firstname = signupForm.getString("firstname");
+        String lastname = signupForm.getString("lastname");
+        String username = signupForm.getString("username");
+        String email = signupForm.getString("email");
+        String password = signupForm.getString("password");
+        //TODO: should password consistency check be performed @FE or @BE or BOTH?
+        String password2 = signupForm.getString("password2");
+        Boolean isAgreedToTerms = signupForm.getBoolean("isAgreedToTerms");
+
+        //TODO: OWASP Validate & Truncate the Fields that are going to be stored
+
+        logger.trace("Received firstname:" + firstname);
+        logger.trace("Received lastname:" + lastname);
+        logger.trace("Received user:" + username);
+        logger.trace("Received email:" + email);
+        logger.trace("Received pass:" + password);
+        logger.trace("Received pass2:" + password2);
+        logger.trace("Received isAgreedToTerms:" + isAgreedToTerms);
+
+        class SignUpUser implements io.vertx.ext.auth.User {
+
+            private String username;
+            private JsonObject principal;
+
+            SignUpUser(String username) {
+                this.username = username;
+            }
+
+
+            @Override
+            public io.vertx.ext.auth.User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
+                return null;
+            }
+
+            @Override
+            public io.vertx.ext.auth.User clearCache() {
+                return null;
+            }
+
+            @Override
+            public JsonObject principal() {
+                if (principal == null) {
+                    principal = new JsonObject().put("username", username);
+                }
+                return principal;
+            }
+
+            @Override
+            public void setAuthProvider(AuthProvider authProvider) {
+
+            }
+        }
+
+        class SignupMetadata {
+            private String subjectUUID;
+            private AuthenticationInfo authInfo;
+
+            private SubjectService subjectService = new SubjectService(routingContext.vertx());
+            private SubjectActivationService subjectActivationService = new SubjectActivationService(routingContext.vertx());
+
+            SignupMetadata() {
+            }
+        }
+
+        SignupMetadata signupMetadata = new SignupMetadata();
+
+        return signupMetadata.subjectService.initJDBCClient()
+                .flatMap(jdbcClient1 -> signupMetadata.subjectService.findByName(username)
+                )
+                .flatMap(resultSet -> {
+                    logger.trace(resultSet.toJson().encodePrettily());
+
+                    routingContext.setUser(new User(new SignUpUser(username)));
+
+                    if (resultSet.getNumRows() > 0) {
+                        logger.trace("user found: " + resultSet.toJson().encodePrettily());
+                        signupMetadata.subjectUUID = resultSet.getRows(true).get(0).getString("uuid");
+
+                        if (resultSet.getRows(true).get(0).getBoolean("isactivated")) {
+                            return Single.error(new Forbidden403Exception("Username already exists / Username already taken", true)); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
+                        } else {
+                            //TODO: Cancel previous activation - Is it really required.
+                            logger.trace("Username already exists but NOT activated, create and send new activation record..."); //Skip user creation
+                            return Single.just(resultSet);
+                        }
+                    } else {
+                        logger.trace("user NOT found, creating user and activation records...");
+
+                        String salt = authProvider.generateSalt();
+                        String hash = authProvider.computeHash(password, salt);
+
+                        // save user to the database
+                        JsonObject userRecord = new JsonObject();
+                            userRecord
+                                .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
+                                .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
+                                .put("isactivated", false)
+                                .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
+                                .put("subjectname", username)
+                                .put("firstname", firstname)
+                                .put("lastname", lastname)
+                                .put("displayname", firstname + " " + lastname)
+                                .put("email", email)
+                                .put("effectivestartdate", Instant.now())
+                                .put("effectiveenddate", Instant.now().plus(Config.getInstance().getConfigJsonObject().getInteger(Constants.PASSWORD_EXPIRATION_DAYS), DAYS))
+                                .put("password", hash)
+                                .put("passwordsalt", salt)
+                                .put("picture", "")
+                                .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
+                                .put("islocked", false)
+                                .put("issandbox", false)
+                                .put("url", "");
+
+                        return signupMetadata.subjectService.insertAll(new JsonArray().add(userRecord))
+                                .flatMap(jsonObjects -> {
+                                    if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                                        return Single.just(new UpdateResult(jsonObjects.size(),
+                                                new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
+                                    } else {
+                                        if (!jsonObjects.isEmpty()) {
+                                            ApiSchemaError apiSchemaError = (ApiSchemaError)jsonObjects.get(0).getValue("error");
+                                            return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
+                                        } else {
+                                            return Single.error(new RuntimeException("User could not be created during signup"));
+                                        }
+                                    }
+                                });
+                    }
+                })
+                .flatMap(updateResult -> {
+                    if (updateResult instanceof UpdateResult) {
+                        signupMetadata.subjectUUID = ((UpdateResult) updateResult).getKeys().getString(0);
+                        logger.trace("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | String Key @pos=1 (subjectUUID):" + signupMetadata.subjectUUID);
+                    } else if (updateResult instanceof ResultSet) {
+                        logger.trace("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | subjectUUID:" + signupMetadata.subjectUUID);
+                    }
+
+                    //Generate and Persist Activation Token
+                    Token tokenGenerator = new Token();
+                    try {
+                        signupMetadata.authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                email,
+                                routingContext.vertx().getDelegate());
+                        logger.trace("activation token is created successfully: " + signupMetadata.authInfo.getToken());
+                    } catch (UnsupportedEncodingException e) {
+                        logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                        return Single.error(new RuntimeException("activation token could not be generated"));
+                    }
+
+                    return signupMetadata.subjectActivationService.initJDBCClient();
+                })
+                .flatMap(jdbcClient1 -> {
+                    JsonObject userActivationRecord = new JsonObject();
+                    userActivationRecord
+                            .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
+                            .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
+                            .put("subjectid", signupMetadata.subjectUUID)
+                            .put("expiredate", signupMetadata.authInfo.getExpireDate())
+                            .put("token", signupMetadata.authInfo.getToken())
+                            .put("tokentype", Constants.ACTIVATION_TOKEN)
+                            .put("email", email)
+                            .put("nonce", signupMetadata.authInfo.getNonce())
+                            .put("userdata", signupMetadata.authInfo.getUserData());
+
+                    return signupMetadata.subjectActivationService.insertAll(new JsonArray().add(userActivationRecord))
+                            .flatMap(jsonObjects -> {
+                                if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                                    return Single.just(new UpdateResult(jsonObjects.size(),
+                                            new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
+                                } else {
+                                    if (!jsonObjects.isEmpty()) {
+                                        ApiSchemaError apiSchemaError = (ApiSchemaError)jsonObjects.get(0).getValue("error");
+                                        return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
+                                    } else {
+                                        return Single.error(new RuntimeException("User Activation could not be created during signup"));
+                                    }
+                                }
+                            });
+                })
+                .flatMap(updateResult -> {
+                    JsonObject json = new JsonObject();
+                    json.put(Constants.EB_MSG_TOKEN, signupMetadata.authInfo.getToken());
+                    json.put(Constants.EB_MSG_TO_EMAIL, email);
+                    json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
+                    json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderActivationMailBody(routingContext,
+                            Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + signupMetadata.authInfo.getToken(),
+                            Constants.ACTIVATION_TEXT));
+
+                    logger.trace("User activation mail is rendered successfully");
+
+                    //logger.trace("User activation mail is sent to Mail Verticle over Event Bus");
+                    return routingContext.vertx().eventBus().<JsonObject>rxSend(Constants.ABYSS_MAIL_CLIENT, json);
+                })
+                .flatMap(jsonObjectMessage -> {
+                    logger.trace("Activation Mailing Event Bus Result:" + jsonObjectMessage.isSend() + " | Result:" + jsonObjectMessage.body().encodePrettily());
+
+                    return Single.just(new ApiSchemaError()
+                            .setCode(HttpResponseStatus.CREATED.code())
+                            .setUsermessage("Activation Code is sent to your email address")
+                            .setInternalmessage("")
+                            .setDetails("Please check spam folder also...")
+                            .setRecommendation("Please check spam folder also...")
+                            //.setMoreinfo(new URL(""))
+                            .toJson());
+                });
     }
 
     private Single<JsonObject> rxValidateToken(String token) {

@@ -18,6 +18,7 @@ import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
 import com.verapi.abyss.exception.NotFound404Exception;
@@ -435,6 +436,9 @@ public abstract class AbstractApiController implements IApiController {
         else if (throwable instanceof UnAuthorized401Exception) {
             logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
             throwApiException(routingContext, UnAuthorized401Exception.class, throwable.getLocalizedMessage());
+        } else if (throwable instanceof Forbidden403Exception) {
+            logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+            throwApiException(routingContext, Forbidden403Exception.class, throwable.getLocalizedMessage());
         } else if (throwable instanceof UnProcessableEntity422Exception) {
             logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
             throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());

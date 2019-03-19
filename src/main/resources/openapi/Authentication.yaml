@@ -22,6 +22,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Authentication operations'
+  - name: Signup
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Signup operations'
 paths:
   /abyss-session:
     post:
@@ -82,6 +87,34 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /signup:
+    post:
+      tags:
+        - Signup
+      summary: 'User SignUp'
+      description: 'SignUp to use the platform'
+      operationId: signup
+      responses:
+        '201':
+          $ref: '#/components/responses/201-SignUp'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/SignUpForm'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -122,6 +155,34 @@ components:
           type: string
           readOnly: true
           description: 'authenticated session id'
+    SignUpInfo:
+      type: object
+      properties:
+        firstname:
+          type: string
+          description: 'Abyss platform first name'
+        lastname:
+          type: string
+          description: 'Abyss platform last name'
+        username:
+          type: string
+          description: 'Abyss platform user name'
+        email:
+          type: string
+          description: 'Abyss platform email'
+        password:
+          type: string
+          format: password
+          writeOnly: true
+          description: 'password'
+        password2:
+          type: string
+          format: password
+          writeOnly: true
+          description: 'password2'
+        isAgreedToTerms:
+          type: boolean
+          description: 'Is Agreed to Terms of Service of the Abyss Platform'
   requestBodies:
     Credentials:
       content:
@@ -129,6 +190,13 @@ components:
           schema:
             $ref: '#/components/schemas/Credentials'
       description: 'ResourceAccessToken object that needs to be added or updated'
+      required: true
+    SignUpForm:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SignUpInfo'
+      description: 'Sign Up object that needs to be added'
       required: true
   responses:
     '200':
@@ -143,6 +211,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Credentials'
+    '201-SignUp':
+      description: 'Signup request has been created'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     '204':
       description: 'The session was successfully deleted'
     '400':

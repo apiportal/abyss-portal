@@ -66,6 +66,20 @@ public class AuthenticationApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void signup(RoutingContext routingContext) {
+        try {
+            logger.trace("signup invoked");
+            AuthenticationService authenticationService = new AuthenticationService(vertx);
+            subscribeAndResponseJsonObject(routingContext, authenticationService.signup(routingContext, authProvider), HttpResponseStatus.OK.code());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+
     //@AbyssApiOperationHandler //TODO: enable and define inside YAML
     public void validateToken(RoutingContext routingContext) {
         try {
