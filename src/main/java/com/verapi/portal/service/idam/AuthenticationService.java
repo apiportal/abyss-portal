@@ -60,6 +60,41 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     private String userUUID;
     private String temporaryOrganizationName;
 
+    class SignUpUser implements io.vertx.ext.auth.User {
+
+        private String username;
+        private JsonObject principal;
+
+        SignUpUser(String username) {
+            this.username = username;
+        }
+
+        @Override
+        public io.vertx.ext.auth.User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
+            return null;
+        }
+
+        @Override
+        public io.vertx.ext.auth.User clearCache() {
+            return null;
+        }
+
+        @Override
+        public JsonObject principal() {
+            if (principal == null) {
+                principal = new JsonObject().put("username", username);
+            }
+            return principal;
+        }
+
+        @Override
+        public void setAuthProvider(AuthProvider authProvider) {
+
+        }
+    }
+
+
+
     public AuthenticationService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
@@ -222,14 +257,14 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     }
 
     public Single<JsonObject> logout(RoutingContext routingContext) {
-        logger.trace("logout invoked");
+        logger.error("logout invoked for sessionid in path: {}, in header: {}, session context: {}", routingContext.pathParam("sessionid"), routingContext.request().headers().get("Cookie"), routingContext.session().id());
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
         // We get an user JSON object validated by Vert.x Open API validator
-        JsonObject requestBody = requestParameters.body().getJsonObject();
+        //JsonObject requestBody = requestParameters.body().getJsonObject();
 
-        if (!Objects.equals(requestBody.getString("sessionid"), routingContext.session().id()))
+        if (!Objects.equals(routingContext.pathParam("sessionid"), routingContext.session().id()))
             return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
 
         String username = routingContext.user().principal().getString("username");
@@ -238,6 +273,9 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
         routingContext.user().clearCache();
         routingContext.clearUser();
         routingContext.removeCookie(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
+        routingContext.session().destroy();
+
+        routingContext.setUser(new User(new SignUpUser("logout."+username)));
 
         return Single.just(new JsonObject().put("username", username)
                 .put("sessionid", sessionid));
@@ -269,40 +307,6 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
         logger.trace("Received pass:" + password);
         logger.trace("Received pass2:" + password2);
         logger.trace("Received isAgreedToTerms:" + isAgreedToTerms);
-
-        class SignUpUser implements io.vertx.ext.auth.User {
-
-            private String username;
-            private JsonObject principal;
-
-            SignUpUser(String username) {
-                this.username = username;
-            }
-
-
-            @Override
-            public io.vertx.ext.auth.User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-                return null;
-            }
-
-            @Override
-            public io.vertx.ext.auth.User clearCache() {
-                return null;
-            }
-
-            @Override
-            public JsonObject principal() {
-                if (principal == null) {
-                    principal = new JsonObject().put("username", username);
-                }
-                return principal;
-            }
-
-            @Override
-            public void setAuthProvider(AuthProvider authProvider) {
-
-            }
-        }
 
         class SignupMetadata {
             private String subjectUUID;
@@ -456,6 +460,18 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                             //.setMoreinfo(new URL(""))
                             .toJson());
                 });
+    }
+
+    public Single<JsonObject> forgotPassword(RoutingContext routingContext) {
+        return Single.just(new JsonObject());
+    }
+
+    public Single<JsonObject> checkResetPasswordToken(RoutingContext routingContext) {
+        return Single.just(new JsonObject());
+    }
+
+    public Single<JsonObject> resetPassword(RoutingContext routingContext) {
+        return Single.just(new JsonObject());
     }
 
     private Single<JsonObject> rxValidateToken(String token) {

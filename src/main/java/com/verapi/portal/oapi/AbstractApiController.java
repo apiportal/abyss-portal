@@ -18,6 +18,7 @@ import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.BadRequest400Exception;
 import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
@@ -425,8 +426,16 @@ public abstract class AbstractApiController implements IApiController {
         if (throwable instanceof CompositeException) {
             for (Throwable t: ((CompositeException) throwable).getExceptions()) {
                 if (t instanceof UnAuthorized401Exception) {
-                    logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
-                    throwApiException(routingContext, UnAuthorized401Exception.class, throwable.getLocalizedMessage());
+                    logger.error("response has errors: {} | {}", t.getCause().getLocalizedMessage(), throwable.getStackTrace());
+                    throwApiException(routingContext, UnAuthorized401Exception.class, t.getCause().getLocalizedMessage());
+                }
+                if (t instanceof BadRequest400Exception) {
+                    logger.error("response has errors: {} | {}", t.getCause().getLocalizedMessage(), throwable.getStackTrace());
+                    throwApiException(routingContext, BadRequest400Exception.class, t.getCause().getLocalizedMessage());
+                }
+                if (t instanceof Forbidden403Exception) {
+                    logger.error("response has errors: {} | {}", t.getCause().getLocalizedMessage(), throwable.getStackTrace());
+                    throwApiException(routingContext, Forbidden403Exception.class, t.getCause().getLocalizedMessage());
                 }
             }
         }
@@ -625,7 +634,7 @@ public abstract class AbstractApiController implements IApiController {
             routingContext.response()
                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(httpResponseStatus)
-                    .end((onlyStatus) ? null : JsonSanitizer.sanitize(jsonObject.encode()));
+                    .end((onlyStatus) ? "." : JsonSanitizer.sanitize(jsonObject.encode()));
 //            logger.trace("replied successfully");
         }, throwable -> {
             processException(routingContext, throwable);

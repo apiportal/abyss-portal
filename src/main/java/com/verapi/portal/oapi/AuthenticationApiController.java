@@ -58,7 +58,7 @@ public class AuthenticationApiController extends AbstractApiController {
         try {
             logger.trace("logout invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
-            subscribeAndResponseJsonObject(routingContext, authenticationService.logout(routingContext), HttpResponseStatus.OK.code(), true);
+            subscribeAndResponseJsonObject(routingContext, authenticationService.logout(routingContext), HttpResponseStatus.OK.code(), false);
         } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
