@@ -101,7 +101,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 */
         vertxOptions.setMetricsOptions(new MicrometerMetricsOptions()
                 .setJmxMetricsOptions(new VertxJmxMetricsOptions()
-                        .setStep(10)
+                        .setStep(Integer.valueOf(getProperty(Constants.VERTX_JMX_METRICS_PERIOD_IN_SECONDS))) //10
                         .setDomain(Constants.ABYSS)
                         .setEnabled(true))
                 .setInfluxDbOptions(new VertxInfluxDbOptions()
