@@ -529,6 +529,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
 
+    public static final String SQL_FIND_BY_NAME_ONLY_NOTDELETED = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_IS_NOT_SYSTEM + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;

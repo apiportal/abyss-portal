@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Signup operations'
+  - name: Forgot Password
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Forgot Password operations'
 paths:
   /abyss-session:
     post:
@@ -115,6 +120,95 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/SignUpForm'
+  /forgot-password:
+    post:
+      tags:
+        - Forgot Password
+      summary: 'User Forgot Password Request'
+      description: 'SignUp to use the platform'
+      operationId: forgotPassword
+      responses:
+        '200':
+          $ref: '#/components/responses/200-Generic'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ForgotPasswordForm'
+  /reset-password:
+    get:
+      tags:
+        - Forgot Password
+      summary: 'User Reset Password Token Check'
+      description: 'Checks Reset Password Token'
+      operationId: checkResetPasswordToken
+      parameters:
+        - name: v
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Reset password token
+      responses:
+        '200':
+          $ref: '#/components/responses/200-Generic'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - Forgot Password
+      summary: 'User Reset Password Request'
+      description: 'Resets User Password to use the platform'
+      operationId: resetPassword
+      responses:
+        '200':
+          $ref: '#/components/responses/200-Generic'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ResetPasswordForm'
+
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -183,6 +277,34 @@ components:
         isAgreedToTerms:
           type: boolean
           description: 'Is Agreed to Terms of Service of the Abyss Platform'
+    ForgotPasswordInfo:
+      type: object
+      properties:
+        username:
+          type: string
+          description: 'Abyss platform user name'
+    ResetPasswordCheck:
+      type: object
+      properties:
+        token:
+          type: string
+          description: 'Abyss platform reset password token'
+    ResetPasswordInfo:
+      type: object
+      properties:
+        token:
+          type: string
+          description: 'Abyss platform reset password token'
+        newPassword:
+          type: string
+          format: password
+          writeOnly: true
+          description: 'new password'
+        confirmPassword:
+          type: string
+          format: password
+          writeOnly: true
+          description: 'confirm password'
   requestBodies:
     Credentials:
       content:
@@ -196,7 +318,28 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SignUpInfo'
-      description: 'Sign Up object that needs to be added'
+      description: 'Sign Up request object'
+      required: true
+    ForgotPasswordForm:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForgotPasswordInfo'
+      description: 'Forgot Password request object'
+      required: true
+    ResetPasswordCheckForm:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResetPasswordCheck'
+      description: 'Reset Password request object'
+      required: true
+    ResetPasswordForm:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResetPasswordInfo'
+      description: 'Reset Password request object'
       required: true
   responses:
     '200':
@@ -205,6 +348,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Credentials'
+    '200-Generic':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
     '201':
       description: 'New sessison has been created'
       content:

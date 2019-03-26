@@ -74,7 +74,11 @@ public abstract class AbstractElasticSearchService {
 
         sourceMap.put("@timestamp", Instant.now());
         if (routingContext != null) {
-            sourceMap.put("@username", routingContext.user().principal().getString("username"));
+            if (routingContext.user()==null || routingContext.user().principal()==null || !routingContext.user().principal().containsKey("username")) {
+                sourceMap.put("@username", "no_user");
+            } else {
+                sourceMap.put("@username", routingContext.user().principal().getString("username"));
+            }
             sourceMap.put("@remoteaddress", routingContext.request().remoteAddress().host());
             sourceMap.put("@httpmethod", routingContext.request().method().toString());
             sourceMap.put("@httppath", routingContext.request().path());

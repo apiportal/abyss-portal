@@ -463,7 +463,181 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     }
 
     public Single<JsonObject> forgotPassword(RoutingContext routingContext) {
-        return Single.just(new JsonObject());
+        logger.trace("forgotPassword invoked");
+
+        String username = routingContext.getBodyAsJson().getString("username");
+        logger.trace("forgotPassword - Received username:" + username);
+        //TODO: OWASP Validate
+
+        class ForgotPasswordMetadata {
+            private String subjectUUID;
+            private String email;
+            private String displayName;
+            private JsonObject subjectRow;
+            private AuthenticationInfo authInfo;
+
+            private SubjectService subjectService = new SubjectService(routingContext.vertx());
+            private SubjectActivationService subjectActivationService = new SubjectActivationService(routingContext.vertx());
+
+            ForgotPasswordMetadata() {
+            }
+        }
+
+        ForgotPasswordMetadata forgotPasswordMetadata = new ForgotPasswordMetadata();
+
+        return forgotPasswordMetadata.subjectService.initJDBCClient()
+                .flatMap(jdbcClient1 -> forgotPasswordMetadata.subjectService
+                        .findAll(new ApiFilterQuery()
+                                .setFilterQuery(SubjectService.SQL_FIND_BY_NAME_ONLY_NOTDELETED)
+                                .setFilterQueryParams(new JsonArray().add(username))
+                        )
+                )
+                .flatMap(resultSet -> {
+                    logger.trace(resultSet.toJson().encodePrettily());
+
+                    int numOfRows = resultSet.getNumRows();
+                    if (numOfRows == 0) {
+                        logger.error("forgotPassword - username NOT found...");
+                        return Single.error(new Exception("Username not found in our records"));
+                    } else if (numOfRows == 1) {
+                        JsonObject row = resultSet.getRows(true).get(0);
+                        if (!row.getBoolean("isactivated") && row.getInstant("created").equals(row.getInstant("updated"))) { //TODO ???
+                            logger.error("forgotPassword - account connected to username is NOT activated");
+                            return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
+                        } else {
+                            forgotPasswordMetadata.subjectUUID = row.getString("uuid");
+                            forgotPasswordMetadata.email = row.getString("email");
+                            forgotPasswordMetadata.displayName = row.getString("displayname");
+                            forgotPasswordMetadata.subjectRow = row;
+                            logger.trace("forgotPassword - Activated or old account found:[" + forgotPasswordMetadata.subjectUUID + "]. Email:[" + forgotPasswordMetadata.email + "] Display Name:[" + forgotPasswordMetadata.displayName + "] Reset password token is going to be created...");
+
+                            //Generate and Persist Reset Password Token
+                            Token tokenGenerator = new Token();
+                            try {
+                                forgotPasswordMetadata.authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.renewal.password.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                        username,
+                                        routingContext.vertx().getDelegate());
+                                logger.trace("forgotPassword - Reset Password token is created successfully: " + forgotPasswordMetadata.authInfo.getToken());
+                            } catch (UnsupportedEncodingException e) {
+                                logger.error("forgotPassword - Reset Password tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                                return Single.error(new Exception("Reset Password token could not be generated"));
+                            }
+
+                            return forgotPasswordMetadata.subjectActivationService.initJDBCClient();
+                        }
+                    } else {
+                        logger.error("forgotPassword - email is connected to multiple accounts [" + numOfRows + "]");
+                        return Single.error(new Exception("This email is connected to multiple accounts. Please correct the other accounts by getting help from administration of your organization and try again."));
+                    }
+                 })
+                .flatMap(jdbcClient1 -> {
+                    JsonObject resetPasswordRecord = new JsonObject();
+                    resetPasswordRecord
+                            .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
+                            .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
+                            .put("subjectid", forgotPasswordMetadata.subjectUUID)
+                            .put("expiredate", forgotPasswordMetadata.authInfo.getExpireDate())
+                            .put("token", forgotPasswordMetadata.authInfo.getToken())
+                            .put("tokentype", Constants.RESET_PASSWORD_TOKEN)
+                            .put("email", forgotPasswordMetadata.email)
+                            .put("nonce", forgotPasswordMetadata.authInfo.getNonce())
+                            .put("userdata", forgotPasswordMetadata.authInfo.getUserData());
+
+                    return forgotPasswordMetadata.subjectActivationService.insertAll(new JsonArray().add(resetPasswordRecord))
+                            .flatMap(jsonObjects -> {
+                                if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                                    return Single.just(new UpdateResult(jsonObjects.size(),
+                                            new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
+                                } else {
+                                    if (!jsonObjects.isEmpty()) {
+                                        ApiSchemaError apiSchemaError = (ApiSchemaError)jsonObjects.get(0).getValue("error");
+                                        logger.trace("forgotPassword - " + apiSchemaError.getUsermessage());
+                                        return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
+                                    } else {
+                                        logger.trace("forgotPassword - Password Reset Token could not be created during forgot password");
+                                        return Single.error(new RuntimeException("Password Reset Token could not be created during forgot password"));
+                                    }
+                                }
+                            });
+                })
+                .flatMap(updateResult -> {
+                    logger.trace("forgotPassword - Deactivating Subject with id:[" + forgotPasswordMetadata.subjectUUID + "] -> " + updateResult.getKeys().encodePrettily());
+                    if (updateResult.getUpdated() == 1) {
+                        JsonObject updateJson = new JsonObject()
+                            .put("organizationid", forgotPasswordMetadata.subjectRow.getString("organizationid"))
+                            .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
+                            .put("isactivated", false)
+                            .put("subjecttypeid", forgotPasswordMetadata.subjectRow.getString("subjecttypeid"))
+                            .put("subjectname", forgotPasswordMetadata.subjectRow.getString("subjectname"))
+                            .put("firstname", forgotPasswordMetadata.subjectRow.getString("firstname"))
+                            .put("lastname", forgotPasswordMetadata.subjectRow.getString("lastname"))
+                            .put("displayname", forgotPasswordMetadata.subjectRow.getString("displayname"))
+                            .put("email", forgotPasswordMetadata.subjectRow.getString("email"))
+                            .put("secondaryemail", forgotPasswordMetadata.subjectRow.getString("secondaryemail"))
+                            .put("effectivestartdate", forgotPasswordMetadata.subjectRow.getInstant("effectivestartdate"))
+                            .put("effectiveenddate", forgotPasswordMetadata.subjectRow.getInstant("effectiveenddate"))
+                            .put("picture", forgotPasswordMetadata.subjectRow.getValue("picture"))
+                            .put("subjectdirectoryid", forgotPasswordMetadata.subjectRow.getString("subjectdirectoryid"))
+                            .put("islocked", forgotPasswordMetadata.subjectRow.getBoolean("islocked"))
+                            .put("issandbox", forgotPasswordMetadata.subjectRow.getBoolean("issandbox"))
+                            .put("url", forgotPasswordMetadata.subjectRow.getString("url"));
+
+                        return forgotPasswordMetadata.subjectService.update(UUID.fromString(forgotPasswordMetadata.subjectUUID), updateJson)
+                                .flatMap(compositeResult -> {
+                                    if (compositeResult.getThrowable() == null) {
+                                        return Single.just(compositeResult.getUpdateResult());
+                                    } else {
+                                        logger.trace("forgotPassword - " + compositeResult.getThrowable());
+                                        return Single.error(compositeResult.getThrowable());
+                                    }
+                                });
+                    } else {
+                        return Single.error(new Exception("forgotPassword - Activation Insert Error Occurred"));
+                    }
+                })
+                .flatMap(updateResult -> {
+                    if (updateResult.getUpdated() == 1) {
+                        logger.trace("forgotPassword - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
+                        return Single.just(updateResult);
+                    } else {
+                        logger.trace("forgotPassword - Activation Update Error Occurred");
+                        return Single.error(new Exception("Activation Update Error Occurred"));
+                    }
+                })
+                .flatMap(updateResult -> {
+                    JsonObject json = new JsonObject();
+                    json.put(Constants.EB_MSG_TOKEN, forgotPasswordMetadata.authInfo.getToken());
+                    json.put(Constants.EB_MSG_TO_EMAIL, forgotPasswordMetadata.email);
+                    json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.RESET_PASSWORD_TOKEN);
+                    json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderActivationMailBody(routingContext,
+                            Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.RESET_PASSWORD_PATH + "/?v=" + forgotPasswordMetadata.authInfo.getToken(),
+                            Constants.RESET_PASSWORD_TEXT));
+
+                    logger.trace("Forgot Password mail is rendered successfully");
+
+                    //logger.trace("User activation mail is sent to Mail Verticle over Event Bus");
+                    return routingContext.vertx().eventBus().<JsonObject>rxSend(Constants.ABYSS_MAIL_CLIENT, json);
+                })
+                .flatMap(jsonObjectMessage -> {
+                    logger.trace("Forgot Password Mailing Event Bus Result:" + jsonObjectMessage.isSend() + " | Result:" + jsonObjectMessage.body().encodePrettily());
+
+                    return Single.just(new ApiSchemaError()
+                            .setCode(HttpResponseStatus.OK.code())
+                            .setUsermessage("Reset Password Code is sent to your email address!")
+                            .setInternalmessage("")
+                            .setDetails("Please check spam folder also...")
+                            .setRecommendation("Please click the link inside the mail")
+                            //.setMoreinfo(new URL(""))
+                            .toJson());
+                })
+                .onErrorResumeNext(Single.just(new ApiSchemaError()
+                        .setCode(HttpResponseStatus.OK.code())
+                        .setUsermessage("Reset Password Code is sent to your email address!")
+                        .setInternalmessage("")
+                        .setDetails("Please check spam folder also...")
+                        .setRecommendation("Please click the link inside the mail")
+                        //.setMoreinfo(new URL(""))
+                        .toJson()));
     }
 
     public Single<JsonObject> checkResetPasswordToken(RoutingContext routingContext) {

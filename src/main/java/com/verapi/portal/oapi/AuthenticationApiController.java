@@ -79,6 +79,45 @@ public class AuthenticationApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void forgotPassword(RoutingContext routingContext) {
+        try {
+            logger.trace("forgotPassword invoked");
+            AuthenticationService authenticationService = new AuthenticationService(vertx);
+            subscribeAndResponseJsonObject(routingContext, authenticationService.forgotPassword(routingContext), HttpResponseStatus.OK.code());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void checkResetPasswordToken(RoutingContext routingContext) {
+        try {
+            logger.trace("checkResetPasswordToken invoked");
+            AuthenticationService authenticationService = new AuthenticationService(vertx);
+            subscribeAndResponseJsonObject(routingContext, authenticationService.checkResetPasswordToken(routingContext), HttpResponseStatus.OK.code());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void resetPassword(RoutingContext routingContext) {
+        try {
+            logger.trace("resetPassword invoked");
+            AuthenticationService authenticationService = new AuthenticationService(vertx);
+            subscribeAndResponseJsonObject(routingContext, authenticationService.resetPassword(routingContext), HttpResponseStatus.OK.code());
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 
     //@AbyssApiOperationHandler //TODO: enable and define inside YAML
     public void validateToken(RoutingContext routingContext) {
