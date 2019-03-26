@@ -53,7 +53,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getString("subjectgroupid"));
+                            .add(jsonObj.getString("subjectgroupid"))
+                            .add(jsonObj.getString("subjectdirectoryid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -105,6 +106,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("subjectid"))
                 .add(updateRecord.getString("subjectgroupid"))
+                .add(updateRecord.getString("subjectdirectoryid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -124,6 +126,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("subjectgroupid"))
+                            .add(jsonObj.getString("subjectdirectoryid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
