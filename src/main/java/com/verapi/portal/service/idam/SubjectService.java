@@ -96,12 +96,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("url"))
                             .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
                             .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "")
-                            .add(jsonObj.getString("distinguishedName"))
-                            .add(jsonObj.getString("uniqueId"))
-                            .add(jsonObj.getString("phoneBusiness"))
-                            .add(jsonObj.getString("phoneHome"))
-                            .add(jsonObj.getString("phoneMobile"))
-                            .add(jsonObj.getString("phoneExtension"));
+                            .add(jsonObj.containsKey("distinguishedname") ? jsonObj.getString("distinguishedname") : "")
+                            .add(jsonObj.containsKey("uniqueid") ? jsonObj.getString("uniqueid") : "")
+                            .add(jsonObj.containsKey("phonebusiness") ? jsonObj.getString("phonebusiness") : "")
+                            .add(jsonObj.containsKey("phonehome") ? jsonObj.getString("phonehome") : "")
+                            .add(jsonObj.containsKey("phonemobile") ? jsonObj.getString("phonemobile") : "")
+                            .add(jsonObj.containsKey("phoneextension") ? jsonObj.getString("phoneextension") : "")
+                            .add(jsonObj.containsKey("jobtitle") ? jsonObj.getString("jobtitle") : "")
+                            .add(jsonObj.containsKey("department") ? jsonObj.getString("department") : "")
+                            .add(jsonObj.containsKey("company") ? jsonObj.getString("company") : "");
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -183,12 +186,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("url"))
                 .add(updateRecord.containsKey("isrestrictedtoprocessing") ? updateRecord.getBoolean("isrestrictedtoprocessing") : false)
                 .add(updateRecord.containsKey("description") ? updateRecord.getString("description") : "")
-                .add(updateRecord.getString("distinguishedName"))
-                .add(updateRecord.getString("uniqueId"))
-                .add(updateRecord.getString("phoneBusiness"))
-                .add(updateRecord.getString("phoneHome"))
-                .add(updateRecord.getString("phoneMobile"))
-                .add(updateRecord.getString("phoneExtension"))
+                .add(updateRecord.containsKey("distinguishedname") ? updateRecord.getString("distinguishedname") : "")
+                .add(updateRecord.containsKey("uniqueid") ? updateRecord.getString("uniqueid") : "")
+                .add(updateRecord.containsKey("phonebusiness") ? updateRecord.getString("phonebusiness") : "")
+                .add(updateRecord.containsKey("phonehome") ? updateRecord.getString("phonehome") : "")
+                .add(updateRecord.containsKey("phonemobile") ? updateRecord.getString("phonemobile") : "")
+                .add(updateRecord.containsKey("phoneextension") ? updateRecord.getString("phoneextension") : "")
+                .add(updateRecord.containsKey("jobtitle") ? updateRecord.getString("jobtitle") : "")
+                .add(updateRecord.containsKey("department") ? updateRecord.getString("department") : "")
+                .add(updateRecord.containsKey("company") ? updateRecord.getString("company") : "")
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -238,12 +244,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("url"))
                             .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
                             .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "")
-                            .add(jsonObj.getString("distinguishedName"))
-                            .add(jsonObj.getString("uniqueId"))
-                            .add(jsonObj.getString("phoneBusiness"))
-                            .add(jsonObj.getString("phoneHome"))
-                            .add(jsonObj.getString("phoneMobile"))
-                            .add(jsonObj.getString("phoneExtension"))
+                            .add(jsonObj.containsKey("distinguishedname") ? jsonObj.getString("distinguishedname") : "")
+                            .add(jsonObj.containsKey("uniqueid") ? jsonObj.getString("uniqueid") : "")
+                            .add(jsonObj.containsKey("phonebusiness") ? jsonObj.getString("phonebusiness") : "")
+                            .add(jsonObj.containsKey("phonehome") ? jsonObj.getString("phonehome") : "")
+                            .add(jsonObj.containsKey("phonemobile") ? jsonObj.getString("phonemobile") : "")
+                            .add(jsonObj.containsKey("phoneextension") ? jsonObj.getString("phoneextension") : "")
+                            .add(jsonObj.containsKey("jobtitle") ? jsonObj.getString("jobtitle") : "")
+                            .add(jsonObj.containsKey("department") ? jsonObj.getString("department") : "")
+                            .add(jsonObj.containsKey("company") ? jsonObj.getString("company") : "")
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -394,15 +403,14 @@ public class SubjectService extends AbstractService<UpdateResult> {
     private static final String SQL_INSERT = "insert into subject (organizationid, crudsubjectid, isactivated, subjecttypeid, subjectname, firstname, lastname, displayname, email,\n" +
             "                     secondaryemail, effectivestartdate, effectiveenddate, password, passwordsalt, picture,\n" +
             "                     subjectdirectoryid, islocked, issandbox, url, isrestrictedtoprocessing, description,\n" +
-            "                     distinguishedName, uniqueId, phoneBusiness, phoneHome, phoneMobile, phoneExtension)\n" +
+            "                     distinguishedname, uniqueid, phonebusiness, phonehome, phonemobile, phoneextension,\n" +
+            "                     jobtitle, department, company)\n" +
             "values\n" +
             "  (CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
             "                    ?, coalesce(?, now()), ?, ?, ?, ?,\n" +
             "   CAST(? AS uuid), ?, ?, ?, ?, ?,\n" +
-            "   ?, ?, ?, ?, ?, ?)";
-
-
-
+            "   ?, ?, ?, ?, ?, ?,\n" +
+            "   ?, ?, ?)";
 
 
     private static final String SQL_DELETE = "update subject\n" +
@@ -444,12 +452,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  url,\n" +
             "  isrestrictedtoprocessing,\n" +
             "  description,\n" +
-            "  distinguishedName,\n" +
-            "  uniqueId,\n" +
-            "  phoneHome,\n" +
-            "  phoneBusiness,\n" +
-            "  phoneMobile,\n" +
-            "  phoneExtension\n" +
+            "  distinguishedname,\n" +
+            "  uniqueid,\n" +
+            "  phonehome,\n" +
+            "  phonebusiness,\n" +
+            "  phonemobile,\n" +
+            "  phoneextension\n" +
+            "  jobtitle,\n" +
+            "  department,\n" +
+            "  company\n" +
             "from\n" +
             "subject\n";
 
@@ -475,12 +486,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , url = ?\n" +
             "  , isrestrictedtoprocessing = ?\n" +
             "  , description = ?\n" +
-            "  , distinguishedName = ?\n" +
-            "  , uniqueId = ?\n" +
-            "  , phoneHome = ?\n" +
-            "  , phoneBusiness = ?\n" +
-            "  , phoneMobile = ?\n" +
-            "  , phoneExtension = ?\n";
+            "  , distinguishedname = ?\n" +
+            "  , uniqueid = ?\n" +
+            "  , phonehome = ?\n" +
+            "  , phonebusiness = ?\n" +
+            "  , phonemobile = ?\n" +
+            "  , phoneextension = ?\n" +
+            "  , jobtitle = ?\n" +
+            "  , department = ?\n" +
+            "  , company = ?\n";
 
     private static final String SQL_CHANGE_PASSWORD = "update subject\n" +
             "set updated              = now()\n" +
@@ -515,6 +529,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
 
+    public static final String SQL_FIND_BY_NAME_ONLY_NOTDELETED = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
+
     private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
 
     private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_IS_NOT_SYSTEM + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
@@ -543,7 +559,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
             "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
             "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
-            "       s.distinguishedName, s.uniqueId, s.phoneBusiness, s.phoneHome, s.phoneMobile, s.phoneExtension,\n" +
+            "       s.distinguishedname, s.uniqueid, s.phonebusiness, s.phonehome, s.phonemobile, s.phoneextension,\n" +
+            "       s.jobtitle, s.department, s.company,\n" +
             "       COALESCE((select json_agg(\n" +
             "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
             "                   )\n" +
@@ -559,7 +576,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
             "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, d.directoryname,\n" +
             "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
-            "       s.distinguishedName, s.uniqueId, s.phoneBusiness, s.phoneHome, s.phoneMobile, s.phoneExtension,\n" +
+            "       s.distinguishedname, s.uniqueid, s.phonebusiness, s.phonehome, s.phonemobile, s.phoneextension,\n" +
+            "       s.jobtitle, s.department, s.company,\n" +
             "       COALESCE((select json_agg(\n" +
             "                    json_build_object('uuid', g.uuid, 'isdeleted', g.isdeleted, 'displayname', g.displayname, 'description', g.description)\n" +
             "                   )\n" +

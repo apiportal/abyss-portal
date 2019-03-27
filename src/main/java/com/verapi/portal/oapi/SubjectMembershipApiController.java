@@ -163,6 +163,39 @@ public class SubjectMembershipApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getMembershipsOfGroup(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    SubjectMembershipService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(SubjectMembershipService.FILTER_BY_GROUP)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteMembershipsOfGroup(RoutingContext routingContext) {
+        try {
+            deleteEntities(routingContext,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(SubjectMembershipService.SQL_DELETE_GROUPS)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
 
     @AbyssApiOperationHandler
     public void getMembershipsUnderDirectory(RoutingContext routingContext) {

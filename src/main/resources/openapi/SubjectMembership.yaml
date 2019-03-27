@@ -32,6 +32,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Subject''s Memberships crud operations'
+  - name: Group-Memberships
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Group''s Memberships crud operations'
   - name: DIRECTORY FILTERED
     externalDocs:
       url: 'https://apiportal.com'
@@ -359,6 +364,75 @@ paths:
       summary: 'Delete all SubjectMemberships'
       description: 'Deletes all SubjectMemberships'
       operationId: deleteMembershipsOfSubject
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /subject-memberships/group/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        description: 'uuid of Group'
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Group-Memberships
+      summary: 'Get list of GroupMemberships'
+      description: 'Returns list of GroupMemberships'
+      operationId: getMembershipsOfGroup
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search SubjectMemberships which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectMembership'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    delete:
+      tags:
+        - Group-Memberships
+      summary: 'Delete all GroupMemberships'
+      description: 'Deletes all GroupMemberships'
+      operationId: deleteMembershipsOfGroup
       responses:
         '204':
           $ref: '#/components/responses/204'

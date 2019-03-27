@@ -53,7 +53,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("organizationid"))
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getString("subjectgroupid"));
+                            .add(jsonObj.getString("subjectgroupid"))
+                            .add(jsonObj.getString("subjectdirectoryid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -105,6 +106,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.getString("subjectid"))
                 .add(updateRecord.getString("subjectgroupid"))
+                .add(updateRecord.getString("subjectdirectoryid"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -124,6 +126,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("subjectgroupid"))
+                            .add(jsonObj.getString("subjectdirectoryid"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -249,6 +252,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
 
+    private static final String SQL_CONDITION_GROUP_IS = "subjectgroupid = CAST(? AS uuid)\n";
+
     public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
@@ -270,6 +275,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+
+    public static final String FILTER_BY_GROUP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_GROUP_IS;
+
+    public static final String SQL_DELETE_GROUPS = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_GROUP_IS;
 
     public static final String FILTER_BY_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_DIRECTORY;
 

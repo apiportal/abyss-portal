@@ -16,6 +16,7 @@ package com.verapi.portal.oapi;
 import com.google.json.JsonSanitizer;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.BadRequest400Exception;
 import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
@@ -34,6 +35,7 @@ import com.verapi.portal.service.idam.SubjectPermissionService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
+import io.reactivex.exceptions.CompositeException;
 import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.v3.oas.models.Operation;
 import io.vertx.core.http.HttpHeaders;
@@ -524,9 +526,32 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void processException(RoutingContext routingContext, Throwable throwable) {
+        if (throwable instanceof CompositeException) {
+            for (Throwable t: ((CompositeException) throwable).getExceptions()) {
+                if (t instanceof UnAuthorized401Exception) {
+                    logger.error("response has errors: {} | {}", t.getCause().getLocalizedMessage(), throwable.getStackTrace());
+                    throwApiException(routingContext, UnAuthorized401Exception.class, t.getCause().getLocalizedMessage());
+                }
+                if (t instanceof BadRequest400Exception) {
+                    logger.error("response has errors: {} | {}", t.getCause().getLocalizedMessage(), throwable.getStackTrace());
+                    throwApiException(routingContext, BadRequest400Exception.class, t.getCause().getLocalizedMessage());
+                }
+                if (t instanceof Forbidden403Exception) {
+                    logger.error("response has errors: {} | {}", t.getCause().getLocalizedMessage(), throwable.getStackTrace());
+                    throwApiException(routingContext, Forbidden403Exception.class, t.getCause().getLocalizedMessage());
+                }
+            }
+        }
+
         if (throwable instanceof NoDataFoundException)
             throwApiException(routingContext, NotFound404Exception.class, throwable.getLocalizedMessage());
-        else if (throwable instanceof UnProcessableEntity422Exception) {
+        else if (throwable instanceof UnAuthorized401Exception) {
+            logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+            throwApiException(routingContext, UnAuthorized401Exception.class, throwable.getLocalizedMessage());
+        } else if (throwable instanceof Forbidden403Exception) {
+            logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+            throwApiException(routingContext, Forbidden403Exception.class, throwable.getLocalizedMessage());
+        } else if (throwable instanceof UnProcessableEntity422Exception) {
             logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
             throwApiException(routingContext, UnProcessableEntity422Exception.class, throwable.getLocalizedMessage());
         } else {
@@ -712,7 +737,7 @@ public abstract class AbstractApiController implements IApiController {
             routingContext.response()
                     .putHeader("Content-Type", "application/json; charset=utf-8")
                     .setStatusCode(httpResponseStatus)
-                    .end((onlyStatus) ? null : JsonSanitizer.sanitize(jsonObject.encode()));
+                    .end((onlyStatus) ? "." : JsonSanitizer.sanitize(jsonObject.encode()));
             logger.trace("replied successfully");
         }, throwable -> {
             processException(routingContext, throwable);

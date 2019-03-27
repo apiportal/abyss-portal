@@ -17,6 +17,7 @@ import com.verapi.portal.common.BuildProperties;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
 import com.verapi.portal.controller.FailureController;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
@@ -237,24 +238,25 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     }
 
     void failureHandler(RoutingContext context) {
-/*
-        logger.trace("failureHandler invoked.. statusCode: " + context.statusCode());
+        if (verticleType.equals(Constants.VERTICLE_TYPE_PORTAL)) {
 
-        //Use user's session for storage
-        context.session().put(Constants.HTTP_STATUSCODE, context.statusCode());
-        logger.trace(Constants.HTTP_STATUSCODE + " is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
+            logger.trace("VERTICLE_TYPE_PORTAL failureHandler invoked.. statusCode: " + context.statusCode());
 
-        context.session().put(Constants.HTTP_URL, context.request().path());
-        logger.trace(Constants.HTTP_URL + " is put in context session:" + context.session().get(Constants.HTTP_URL));
+            //Use user's session for storage
+            context.session().put(Constants.HTTP_STATUSCODE, context.statusCode());
+            logger.trace(Constants.HTTP_STATUSCODE + " is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
 
-        context.session().put(Constants.HTTP_ERRORMESSAGE, context.statusCode() > 0 ? HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase() : "0");
-        logger.trace(Constants.HTTP_ERRORMESSAGE + " is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
+            context.session().put(Constants.HTTP_URL, context.request().path());
+            logger.trace(Constants.HTTP_URL + " is put in context session:" + context.session().get(Constants.HTTP_URL));
 
-        context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
-        logger.trace(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+            context.session().put(Constants.HTTP_ERRORMESSAGE, context.statusCode() > 0 ? HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase() : "0");
+            logger.trace(Constants.HTTP_ERRORMESSAGE + " is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
 
-        context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
-*/
+            context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
+            logger.trace(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+
+            context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
+        }
     }
 
     private void globalJavascript(RoutingContext context) {
