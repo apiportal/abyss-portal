@@ -151,7 +151,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     routingContext.session().destroy();
                     routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME, loginMetadata.user.principal().getString("username"));
                     routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID); //XXX
-                    routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID)); //TODO: Remove for OWASP Compliance
+                    routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID).setPath("/")); //TODO: Remove for OWASP Compliance
                     //.setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                     logger.debug("Logged in user: " + loginMetadata.user.principal().encodePrettily());
@@ -250,7 +250,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         logger.trace("LoginController.handle() findByIdResult.subscribe result: {}", jsonArray);
                         routingContext.session().put("userOrganizationArray", jsonArray);
 
-                        return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id()));
+                        return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id()).put("principalid", userUUID));
                     }
 
                 });

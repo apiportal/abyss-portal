@@ -249,6 +249,10 @@ components:
           type: string
           readOnly: true
           description: 'authenticated session id'
+        principalid:
+          type: string
+          readOnly: true
+          description: 'authenticated principal id'
     SignUpInfo:
       type: object
       properties:
