@@ -1009,9 +1009,11 @@ components:
         distinguishedname:
           type: string
           description: Distinguished Name stored in User Directory of the Subject
+          nullable: true
         uniqueid:
           type: string
           description: Unique ID from User Directory
+          nullable: true
         phonebusiness:
           type: string
           description: Business Phone Number
@@ -1170,9 +1172,11 @@ components:
         distinguishedname:
           type: string
           description: Distinguished Name stored in User Directory of the Subject
+          nullable: true
         uniqueid:
           type: string
           description: Unique ID from User Directory
+          nullable: true
         phonebusiness:
           type: string
           description: Business Phone Number
