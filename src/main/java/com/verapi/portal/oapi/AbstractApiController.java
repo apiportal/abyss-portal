@@ -38,7 +38,6 @@ import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.swagger.parser.util.ClasspathHelper;
 import io.swagger.v3.oas.models.Operation;
-import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -451,14 +450,24 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.next();
     }
 
-
     private void abyssPathAuthorizationHandler(RoutingContext routingContext) {
         String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
         //logger.trace(methodName + " invoked");
 
-        String organizationUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
-        String userUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        String organizationUuidTemp = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        if (organizationUuidTemp == null || organizationUuidTemp.isEmpty()) {
+            organizationUuidTemp = Constants.DEFAULT_ORGANIZATION_UUID;
+        }
+        String organizationUuid = organizationUuidTemp;
+
+        String userUuidTemp = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        if (userUuidTemp == null || userUuidTemp.isEmpty()) {
+            userUuidTemp = Constants.PLATFORM_GUEST_USER_UUID;
+        }
+        String userUuid = userUuidTemp;
+
         String operationId = ((Operation) routingContext.data().get("openApiOperation")).getOperationId();
+
 
         logger.trace("abyssPathAuthorizationHandler invoked,\n" +
                         "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
@@ -490,40 +499,48 @@ public abstract class AbstractApiController implements IApiController {
         //TODO: TEST
 
         try {
-            SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+            if ("login".equals(operationId)) {
+                logger.trace("abyssPathAuthorizationHandler() operationId: " + operationId);
 
-            ApiFilterQuery apiFilterQuery = new ApiFilterQuery()
-                    .setFilterQuery(SubjectPermissionService.SQL_CHECK_PERMISSION_OF_SUBJECT_IN_ORGANIZATION)
-                    .setFilterQueryParams(new JsonArray().add(organizationUuid).add(userUuid).add(operationId));
+                //if authorized then set this security handler's flag and route next
+                routingContext.next();
+            } else {
+                SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
 
-            Single<JsonObject> permissionResponse = subjectPermissionService.initJDBCClient()
-                    .flatMap(jdbcClient -> subjectPermissionService.findAll(apiFilterQuery))
-                    .flatMap(result -> {
-                        if (result.getNumRows()>0) {
-                            logger.trace("# of permissions: [{}]\n[{}]\n", result.getNumRows(), result.toJson().encodePrettily());
-                            return Single.just(result.getRows().get(0));
-                        } else {
-                            return Single.error(new Forbidden403Exception("abyssPathAuthorizationHandler failed - no permission for org:[" + organizationUuid + "] user:[" + userUuid + "] operation:[" + operationId + "]"));
-                        }
-                    });
+                ApiFilterQuery apiFilterQuery = new ApiFilterQuery()
+                        .setFilterQuery(SubjectPermissionService.SQL_CHECK_ROLE_BASED_PERMISSION_OF_SUBJECT_IN_ORGANIZATION)
+                        .setFilterQueryParams(new JsonArray().add(organizationUuid).add(userUuid).add(operationId));
 
-            permissionResponse.subscribe(resp -> {
-                        logger.trace("abyssPathAuthorizationHandler() subjectPermissionService.findAll replied successfully " + resp.encodePrettily());
+                Single<JsonObject> permissionResponse = subjectPermissionService.initJDBCClient()
+                        .flatMap(jdbcClient -> subjectPermissionService.findAll(apiFilterQuery))
+                        .flatMap(result -> {
+                            if (result.getNumRows() > 0) {
+                                logger.trace("# of permissions: [{}]\n[{}]\n", result.getNumRows(), result.toJson().encodePrettily());
+                                return Single.just(result.getRows().get(0));
+                            } else {
+                                return Single.error(new Forbidden403Exception("abyssPathAuthorizationHandler failed - no permission for org:[" + organizationUuid + "] user:[" + userUuid + "] operation:[" + operationId + "]"));
+                            }
+                        });
 
-                        //if authorized then set this security handler's flag and route next
-                        routingContext.next();
-                    },
-                    throwable -> {
-                        logger.error("abyssPathAuthorizationHandler() subjectPermissionService.findAll replied error : {}\n{}", throwable.getLocalizedMessage(), Arrays.toString(throwable.getStackTrace()));
-                        throwApiException(routingContext, Forbidden403Exception.class);
-                    });
-        } catch (Exception e) {
-            logger.error("abyssPathAuthorizationHandler() subjectPermissionService.findAll error : ", Arrays.toString(e.getStackTrace()));
+                permissionResponse.subscribe(resp -> {
+                            logger.trace("abyssPathAuthorizationHandler() subjectPermissionService.findAll replied successfully " + resp.encodePrettily());
+
+                            //if authorized then set this security handler's flag and route next
+                            routingContext.next();
+                        },
+                        throwable -> {
+                            logger.error("abyssPathAuthorizationHandler() subjectPermissionService.findAll replied error : {}\n{}", throwable.getLocalizedMessage(), Arrays.toString(throwable.getStackTrace()));
+                            throwApiException(routingContext, Forbidden403Exception.class);
+                        });
+            }
+        } catch(Exception e){
+            logger.error("abyssPathAuthorizationHandler() subjectPermissionService.findAll error : {}\n{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, Forbidden403Exception.class);
         }
 
         //TODO: ???? routingContext.fail(new Forbidden403Exception("abyssPathAuthorizationHandler failed"));
     }
+
 
     private void processException(RoutingContext routingContext, Throwable throwable) {
         if (throwable instanceof CompositeException) {
