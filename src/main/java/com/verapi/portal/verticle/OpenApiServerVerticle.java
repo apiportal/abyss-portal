@@ -99,7 +99,6 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
         allowHeaders.add("Access-Control-Allow-Origin");
         allowHeaders.add("Access-Control-Allow-Credentials");
         allowHeaders.add("origin");
-        allowHeaders.add("Vary : Origin");
         allowHeaders.add(HttpHeaders.CONTENT_TYPE.toString());
         allowHeaders.add("accept");
         allowHeaders.add("Cookie");

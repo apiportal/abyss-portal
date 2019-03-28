@@ -605,6 +605,8 @@ public abstract class AbstractApiController implements IApiController {
                             });
                             routingContext.response()
                                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                                    .putHeader("Vary", "Origin")
+                                    .putHeader("Access-Control-Allow-Credentials", "true")
                                     .setStatusCode(httpResponseStatus)
                                     .end(JsonSanitizer.sanitize(arr.encode()), "UTF-8");
 //                            logger.trace("replied successfully " + arr.encodePrettily());
@@ -617,6 +619,8 @@ public abstract class AbstractApiController implements IApiController {
     protected void subscribeAndResponse(RoutingContext routingContext, JsonArray response, int httpResponseStatus) {
         routingContext.response()
                 .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                .putHeader("Vary", "Origin")
+                .putHeader("Access-Control-Allow-Credentials", "true")
                 .setStatusCode(httpResponseStatus)
                 .end(JsonSanitizer.sanitize(response.encode()), "UTF-8");
 //        logger.trace("replied successfully");
@@ -633,6 +637,8 @@ public abstract class AbstractApiController implements IApiController {
                     jsonObject);
             routingContext.response()
                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                    .putHeader("Vary", "Origin")
+                    .putHeader("Access-Control-Allow-Credentials", "true")
                     .setStatusCode(httpResponseStatus)
                     .end((onlyStatus) ? "." : JsonSanitizer.sanitize(jsonObject.encode()));
 //            logger.trace("replied successfully");
