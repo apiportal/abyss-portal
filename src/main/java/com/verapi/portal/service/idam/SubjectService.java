@@ -12,6 +12,7 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
@@ -375,7 +376,12 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     if (findByIdResultSet.getNumRows() == 0)
                         return Single.error(new NoDataFoundException("The specified subject does not exist"));
                     else
-                        return Single.just(findByIdResultSet);
+                        if (findByIdResultSet.getRows().get(0).getString("organizationid")==organizationUuid) {
+                            return Single.just(findByIdResultSet);
+                        } else {
+                            return Single.error(new Forbidden403Exception("Organization incorrect. Please use your organization."));
+                        }
+
                 })
                 .flatMap(resultSet -> {
                     return jdbcAuth.rxAuthenticate(new JsonObject()

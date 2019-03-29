@@ -58,6 +58,8 @@ public abstract class AbstractService<T> implements IService<T> {
 
     protected static final String SQL_FROM = "from\n";
 
+    protected static final String SQL_UPDATE = "update ";
+
 
     public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         this.vertx = vertx;
@@ -157,13 +159,37 @@ public abstract class AbstractService<T> implements IService<T> {
                                 .toSingleDefault(false)
                                 //.toObservable()
                                 //execute query
-                                .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql)
-                                        //.onErrorReturnItem(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1))
-                                        //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
-                                        :
-                                        conn.rxUpdateWithParams(sql, params))
-                                //       .onErrorReturnItem(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1)))
-                                //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
+//                                .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql)
+//                                        //.onErrorReturnItem(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1))
+//                                        //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
+//                                        :
+//                                        conn.rxUpdateWithParams(sql, params))
+//                                //       .onErrorReturnItem(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1)))
+//                                //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
+
+                                .flatMap(conn1 -> { //TODO: Improve Organization Filter
+                                    String tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
+                                    logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+                                    boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                                    boolean isAdmin = false; //TODO: Admin Only
+                                    boolean doesContainOrderBy = false; //TODO: Order By Handling
+                                    logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+                                    if (organizationUuid == null || isParamTable) {
+                                        if (params == null) {
+                                            return conn.rxUpdate(sql);
+                                        } else {
+                                            return conn.rxUpdateWithParams(sql, params);
+                                        }
+                                    } else {
+                                        logger.trace("Current organizationUuid: {}", organizationUuid);
+                                        if (params == null) {
+                                            return conn.rxUpdateWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
+                                        } else {
+                                            return conn.rxUpdateWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
+                                        }
+                                    }
+                                })
+
                                 .flatMap(resultSet -> {
                                     if (resultSet.getUpdated() == 0 && !sql.contains("ON CONFLICT DO NOTHING")) {
                                         logger.error("unable to process sql with parameters");
@@ -246,29 +272,29 @@ public abstract class AbstractService<T> implements IService<T> {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //execute query
-                        .flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
-//                        .flatMap(conn1 -> { //TODO: Improve Organization Filter
-//                            String tableName = getTableNameFromSql(sql).toLowerCase();
-//                            logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
-//                            boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
-//                            boolean isAdmin = false; //TODO: Admin Only
-//                            boolean doesContainOrderBy = false; //TODO: Order By Handling
-//                            logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
-//                            if (organizationUuid == null || isParamTable) {
-//                                if (params == null) {
-//                                    return conn.rxQuery(sql);
-//                                } else {
-//                                    return conn.rxQueryWithParams(sql, params);
-//                                }
-//                            } else {
-//
-//                                if (params == null) {
-//                                    return conn.rxQueryWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
-//                                } else {
-//                                    return conn.rxQueryWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
-//                                }
-//                            }
-//                        })
+                        //.flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
+                        .flatMap(conn1 -> { //TODO: Improve Organization Filter
+                            String tableName = getTableNameFromSql(sql).toLowerCase();
+                            logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+                            boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                            boolean isAdmin = false; //TODO: Admin Only
+                            boolean doesContainOrderBy = false; //TODO: Order By Handling
+                            logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+                            if (organizationUuid == null || isParamTable) {
+                                if (params == null) {
+                                    return conn.rxQuery(sql);
+                                } else {
+                                    return conn.rxQueryWithParams(sql, params);
+                                }
+                            } else {
+                                logger.trace("Current organizationUuid: {}", organizationUuid);
+                                if (params == null) {
+                                    return conn.rxQueryWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
+                                } else {
+                                    return conn.rxQueryWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
+                                }
+                            }
+                        })
                         .flatMap(resultSet -> {
                             logger.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
                             logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
@@ -436,4 +462,27 @@ public abstract class AbstractService<T> implements IService<T> {
 
         return tableNameStr;
     }
+
+    private static String getTableNameFromSqlForUpdate(String sql) {
+
+        if (sql==null || sql.isEmpty())
+            return "";
+
+        sql = sql.toLowerCase();
+
+        int tableNameStartIndex = sql.indexOf(SQL_UPDATE)+SQL_UPDATE.length();
+        if (tableNameStartIndex==-1)
+            return "";
+
+        String tableNameStr = sql.substring(tableNameStartIndex);
+
+        int tableNameEndIndex = tableNameStr.indexOf("\n");
+        if (tableNameEndIndex==-1)
+            return "";
+
+        tableNameStr = tableNameStr.substring(0, tableNameEndIndex).trim();
+
+        return tableNameStr;
+    }
+
 }

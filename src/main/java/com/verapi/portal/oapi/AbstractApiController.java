@@ -863,7 +863,7 @@ public abstract class AbstractApiController implements IApiController {
     <T extends IService> void addEntities(RoutingContext routingContext, Class<T> clazz, JsonArray requestBody, List<String> jsonColumns) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         logger.trace("---addEntities invoked");
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<List<JsonObject>> insertAllResult = service.initJDBCClient()
+        Single<List<JsonObject>> insertAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.insertAll(requestBody));
         subscribeAndResponseBulkList(routingContext, insertAllResult, jsonColumns, HttpResponseStatus.MULTI_STATUS.code());
     }
@@ -878,7 +878,7 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void updateEntities(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<List<JsonObject>> updateAllResult = service.initJDBCClient()
+        Single<List<JsonObject>> updateAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.updateAll(requestBody)); //TODO: an overloaded version of updateAll() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
         subscribeAndResponseBulkList(routingContext, updateAllResult, jsonColumns, HttpResponseStatus.MULTI_STATUS.code());
     }
@@ -893,7 +893,7 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void updateEntity(RoutingContext routingContext, Class<T> clazz, JsonObject requestBody, List<String> jsonColumns, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<ResultSet> updateAllResult = service.initJDBCClient()
+        Single<ResultSet> updateAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody)) //TODO:  an overloaded version of update() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
                 .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
                 .flatMap(resultSet -> {
@@ -911,7 +911,7 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<CompositeResult> deleteAllResult = service.initJDBCClient()
+        Single<CompositeResult> deleteAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.deleteAll(apiFilterQuery));
         subscribeAndResponseStatusOnly(routingContext, deleteAllResult, HttpResponseStatus.NO_CONTENT.code());
     }
@@ -927,7 +927,7 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<ResultSet> deleteResult = service.initJDBCClient()
+        Single<ResultSet> deleteResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))))
                 .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
                 .flatMap(resultSet -> {
@@ -941,7 +941,7 @@ public abstract class AbstractApiController implements IApiController {
 
     <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, String method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
-        Single<ResultSet> funcResult = service.initJDBCClient()
+        Single<ResultSet> funcResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)) //TODO: access control
                 .flatMap(jdbcClient -> (Single<ResultSet>) service.getClass().getDeclaredMethod(method, RoutingContext.class, JDBCAuth.class).invoke(service, routingContext, authProvider))
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0) {
