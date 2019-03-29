@@ -312,10 +312,33 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
     public static final String SQL_LIST_SUBJECT_API_SUBSCRIPTIONS = SQL_SELECT + ", resource\n" +
             SQL_WHERE + "subject_permission.subjectid = CAST(? AS uuid) and subject_permission.resourceid = resource.uuid and\n" +
             "resource.resourcetypeid = CAST('" + Constants.RESOURCE_TYPE_API + "' AS uuid)\n";
+    
     public static final String SQL_LIST_SUBSCRIPTIONS_TO_MY_APIS = SQL_SELECT + ", resource, api\n" +
             SQL_WHERE + "api.subjectid = CAST(? AS uuid) and\n" +
             "api.uuid = resource.resourcerefid and\n" +
             "subject_permission.resourceid = resource.uuid and\n" +
             "resource.resourcetypeid = CAST('" + Constants.RESOURCE_TYPE_API + "' AS uuid)\n";
+
+    public static final String SQL_CHECK_PERMISSION_OF_SUBJECT_IN_ORGANIZATION =
+            "select s.displayname, s.subjectname, o.name, p.organizationid, p.permission, r.resourcename, rt.type, r.resourcerefid, ra.actionname\n" +
+            "from\n" +
+            "subject_permission\n p, resource r, resource_action ra, subject s, resource_type rt, organization o\n" +
+            "where p.organizationid = o.uuid and p.organizationid = CAST(? AS uuid)\n" +
+            "and p.subjectid = s.uuid and s.uuid = CAST(? AS uuid)\n" +
+            "and r.resourcetypeid = rt.uuid and rt.uuid = '41bfd648-308e-401f-a1ce-9dbbf4e56eb6'\n" + // --OPERATION ID RESOURCE TYPE
+            "and p.resourceid = r.uuid and (r.resourcename = ?)\n" +
+            "and p.resourceactionid = ra.uuid and ra.uuid = 'cf52d8fc-591f-42dc-be1b-13983086f64d'\n"; // --INVOKE OPERATION ACTION
+
+    public static final String SQL_CHECK_ROLE_BASED_PERMISSION_OF_SUBJECT_IN_ORGANIZATION =
+            "select o.name, p.organizationid, p.permission, r.resourcename, rt.\"type\", r.resourcerefid, ra.actionname, s.subjectname\n" +
+            "from\n" +
+            "subject_permission\n p, resource r, resource_action ra, resource_type rt, organization o, subject_membership sm, subject s\n" +
+            "where p.organizationid = o.uuid and p.organizationid in (CAST(? AS uuid), '3c65fafc-8f3a-4243-9c4e-2821aa32d293'::uuid) and o.isactive = true and p.isactive = true\n" +
+            "and p.subjectid = sm.subjectgroupid and sm.subjectid = CAST(? AS uuid) and sm.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'::uuid and sm.subjecttypeid2 = 'bb76f638-632d-41f8-9511-9865091701f9'::uuid and sm.isactive = true\n" +
+            "and r.resourcetypeid = rt.uuid and rt.uuid = '41bfd648-308e-401f-a1ce-9dbbf4e56eb6'::uuid and rt.isactive = true\n" + // --OPERATION ID RESOURCE TYPE
+            "and p.resourceid = r.uuid and (r.resourcename = ?) and r.isactive = true\n" +
+            "and p.resourceactionid = ra.uuid and ra.uuid = 'cf52d8fc-591f-42dc-be1b-13983086f64d'::uuid and ra.isactive = true\n" +// --INVOKE OPERATION ACTION
+            "and s.subjecttypeid = 'bb76f638-632d-41f8-9511-9865091701f9'::uuid and s.uuid = sm.subjectgroupid and s.isactivated = true and s.islocked = false and s.isdeleted = false";
+            //TODO: Check effective-date-start-end
 
 }

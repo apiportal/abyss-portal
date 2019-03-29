@@ -44,6 +44,16 @@ public class ResourceService extends AbstractService<UpdateResult> {
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
+        return insertAllWithSql(insertRecords, SQL_INSERT);
+    }
+
+    public Single<List<JsonObject>> insertAllWithConflict(JsonArray insertRecords) {
+        logger.trace("---insertAllWithConflict invoked");
+        return insertAllWithSql(insertRecords, SQL_INSERT_WITH_CONFLICT);
+    }
+
+    public Single<List<JsonObject>> insertAllWithSql(JsonArray insertRecords, String sql) {
+        logger.trace("---insertAllWithSql invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -57,17 +67,21 @@ public class ResourceService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("description"))
                             .add(jsonObj.getString("resourcerefid"))
                             .add(jsonObj.getBoolean("isactive"));
-                    return insert(insertParam, SQL_INSERT).toObservable();
+                    return insert(insertParam, sql).toObservable();
                 })
                 .flatMap(insertResult -> {
                     if (insertResult.getThrowable() == null) {
-                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .onErrorResumeNext(ex -> {
-                                    insertResult.setThrowable(ex);
-                                    return Single.just(insertResult.getResultSet()); //TODO: insertResult.throwable kayıp mı?
-                                })
-                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)))
-                                .toObservable();
+                        if (insertResult.getResultSet() != null && insertResult.getResultSet().getNumRows()>0) {
+                            return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
+                                    .onErrorResumeNext(ex -> {
+                                        insertResult.setThrowable(ex);
+                                        return Single.just(insertResult.getResultSet()); //TODO: insertResult.throwable kayıp mı?
+                                    })
+                                    .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)))
+                                    .toObservable();
+                        } else {
+                            return Observable.just(insertResult);
+                        }
                     } else {
                         return Observable.just(insertResult);
                     }
@@ -89,13 +103,15 @@ public class ResourceService extends AbstractService<UpdateResult> {
                                         .toJson());
                     } else {
                         logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
-                        JsonArray arr = new JsonArray();
-                        result.getResultSet().getRows().forEach(arr::add);
-                        recordStatus
-                                .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                        if (result.getResultSet() != null) {
+                            JsonArray arr = new JsonArray();
+                            result.getResultSet().getRows().forEach(arr::add);
+                            recordStatus
+                                    .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
+                                    .put("status", HttpResponseStatus.CREATED.code())
+                                    .put("response", arr.getJsonObject(0))
+                                    .put("error", new ApiSchemaError().toJson());
+                        }
                     }
                     return Observable.just(recordStatus);
                 })
@@ -293,6 +309,9 @@ public class ResourceService extends AbstractService<UpdateResult> {
     public static final String FILTER_BY_RESOURCETYPE = SQL_SELECT + SQL_WHERE + SQL_CONDITION_RESOURCETYPEID_IS;
 
     public static final String FILTER_BY_ORGANIZATION = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ORGANIZATIONID_IS;
+
+    //INSERT ... ON CONFLICT DO NOTHING/UPDATE
+    public static final String SQL_INSERT_WITH_CONFLICT = SQL_INSERT + "\nON CONFLICT DO NOTHING\n";
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
