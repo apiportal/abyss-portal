@@ -145,7 +145,8 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
                 .setUseAlpn(true)
 */
                 .setCompressionSupported(Config.getInstance().getConfigJsonObject().getBoolean(Constants.HTTP_SERVER_ENABLE_COMPRESSION_SUPPORT))
-                .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY));
+                .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY))
+                .setAcceptBacklog(1000000);
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
                 .requestHandler(abyssRouter)

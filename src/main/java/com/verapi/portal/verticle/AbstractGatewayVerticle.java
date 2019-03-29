@@ -218,7 +218,8 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                 .setCompressionSupported(Config.getInstance().getConfigJsonObject()
                         .getBoolean((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_ENABLE_COMPRESSION_SUPPORT : Constants.HTTP_GATEWAY_SERVER_ENABLE_COMPRESSION_SUPPORT))
                 .setIdleTimeout(Config.getInstance().getConfigJsonObject()
-                        .getInteger((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_IDLE_TIMEOUT : Constants.HTTP_GATEWAY_SERVER_IDLE_TIMEOUT));
+                        .getInteger((isSSL) ? Constants.HTTPS_GATEWAY_SERVER_IDLE_TIMEOUT : Constants.HTTP_GATEWAY_SERVER_IDLE_TIMEOUT))
+                .setAcceptBacklog(1000000);
         if (isSSL) {
             httpServerOptions.setSsl(true)
                     .setKeyStoreOptions(
