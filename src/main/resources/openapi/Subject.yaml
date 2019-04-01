@@ -1277,9 +1277,6 @@ components:
           type: string
           writeOnly: true
           description: 'confirm new password'
-        crudsubjectid:
-          type: string
-          description: 'ID of Subject that reads, creates, updates or deletes'
   requestBodies:
     Subject:
       content:

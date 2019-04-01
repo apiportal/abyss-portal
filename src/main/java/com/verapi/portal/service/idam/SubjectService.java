@@ -14,6 +14,7 @@ package com.verapi.portal.service.idam;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
+import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
@@ -349,26 +350,26 @@ public class SubjectService extends AbstractService<UpdateResult> {
         String oldPassword = requestBody.getString("oldpassword");
         String newPassword = requestBody.getString("newpassword");
         String confirmPassword = requestBody.getString("confirmpassword");
-        String crudSubjectId = requestBody.getString("crudsubjectid");
+        String crudSubjectId = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
         if (oldPassword == null || oldPassword.isEmpty()) {
             logger.error("oldPassword is null or empty.!");
-            return Single.error(new Throwable("Please enter Old Password field"));
+            return Single.error(new UnAuthorized401Exception("Please enter Old Password field"));
         }
 
         if (newPassword == null || newPassword.isEmpty()) {
             logger.error("newPassword is null or empty");
-            return Single.error(new Throwable("Please enter New Password field"));
+            return Single.error(new UnAuthorized401Exception("Please enter New Password field"));
         }
 
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             logger.warn("confirmPassword is null or empty");
-            return Single.error(new Throwable("Please enter Confirm Password field"));
+            return Single.error(new UnAuthorized401Exception("Please enter Confirm Password field"));
         }
 
         if (!(newPassword.equals(confirmPassword))) {
             logger.warn("newPassword and confirmPassword does not match");
-            return Single.error(new Throwable("New Password and Confirm Password does not match"));
+            return Single.error(new UnAuthorized401Exception("New Password and Confirm Password does not match"));
         }
 
         return findById(subjectUUID)
@@ -376,7 +377,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     if (findByIdResultSet.getNumRows() == 0)
                         return Single.error(new NoDataFoundException("The specified subject does not exist"));
                     else
-                        if (findByIdResultSet.getRows().get(0).getString("organizationid")==organizationUuid) {
+                        if (findByIdResultSet.getRows().get(0).getString("organizationid").equals(organizationUuid)) {
                             return Single.just(findByIdResultSet);
                         } else {
                             return Single.error(new Forbidden403Exception("Organization incorrect. Please use your organization."));
