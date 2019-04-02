@@ -375,8 +375,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                 new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
                                     } else {
                                         if (!jsonObjects.isEmpty()) {
-                                            ApiSchemaError apiSchemaError = (ApiSchemaError)jsonObjects.get(0).getValue("error");
-                                            return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
+                                            logger.trace("Signup insert subject error: {}", jsonObjects.get(0));
+                                            return Single.error(new RuntimeException(jsonObjects.get(0).getJsonObject("error").encode()));
                                         } else {
                                             return Single.error(new RuntimeException("User could not be created during signup"));
                                         }

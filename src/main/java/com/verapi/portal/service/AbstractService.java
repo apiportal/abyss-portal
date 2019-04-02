@@ -58,7 +58,9 @@ public abstract class AbstractService<T> implements IService<T> {
 
     protected static final String SQL_FROM = "from\n";
 
-    protected static final String SQL_UPDATE = "update ";
+    protected static final String SQL_UPDATE_VERB = "update ";
+
+    protected static final String SQL_INSERT_INTO_VERB = "insert into ";
 
 
     public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
@@ -170,7 +172,10 @@ public abstract class AbstractService<T> implements IService<T> {
                                 .flatMap(conn1 -> { //TODO: Improve Organization Filter
                                     String tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
                                     logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
-                                    boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                                    boolean isParamTable = true;
+                                    if (tableName.isEmpty()) {
+                                        isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                                    }
                                     boolean isAdmin = false; //TODO: Admin Only
                                     boolean doesContainOrderBy = false; //TODO: Order By Handling
                                     logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
@@ -470,13 +475,28 @@ public abstract class AbstractService<T> implements IService<T> {
 
         sql = sql.toLowerCase();
 
-        int tableNameStartIndex = sql.indexOf(SQL_UPDATE)+SQL_UPDATE.length();
-        if (tableNameStartIndex==-1)
-            return "";
 
-        String tableNameStr = sql.substring(tableNameStartIndex);
+        int tableNameStartIndex;
+        String tableNameStr;
+        int tableNameEndIndex;
 
-        int tableNameEndIndex = tableNameStr.indexOf("\n");
+        int indexOfSqlUpdateVerb = sql.indexOf(SQL_UPDATE_VERB);
+
+        if (indexOfSqlUpdateVerb==-1) {
+            int indexOfSqlInsertIntoVerb = sql.indexOf(SQL_INSERT_INTO_VERB);
+            if (indexOfSqlInsertIntoVerb==-1) {
+                return "";
+            } else { //Insert Into
+                tableNameStartIndex = indexOfSqlInsertIntoVerb+SQL_INSERT_INTO_VERB.length();
+                tableNameStr = sql.substring(tableNameStartIndex);
+                tableNameEndIndex = tableNameStr.indexOf(" ");
+            }
+        } else { //Update
+            tableNameStartIndex = indexOfSqlUpdateVerb+SQL_UPDATE_VERB.length();
+            tableNameStr = sql.substring(tableNameStartIndex);
+            tableNameEndIndex = tableNameStr.indexOf("\n");
+        }
+
         if (tableNameEndIndex==-1)
             return "";
 
