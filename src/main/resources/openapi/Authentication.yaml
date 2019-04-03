@@ -32,6 +32,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Forgot Password operations'
+  - name: Switch Organization
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Switch Organization operations'
 paths:
   /abyss-session:
     post:
@@ -209,6 +214,34 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/ResetPasswordForm'
 
+  /set-current-organization:
+    put:
+      tags:
+        - Switch Organization
+      summary: 'Set Current Organization of Logged In User'
+      description: 'Set Current Organization of Logged In User'
+      operationId: setCurrentOrganization
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/SwitchOrganizationForm'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -317,6 +350,15 @@ components:
           format: password
           writeOnly: true
           description: 'confirm password'
+    SwitchOrganizationInfo:
+      type: object
+      properties:
+        organizationid:
+          type: string
+          description: 'Abyss platform organization id'
+        organizationname:
+          type: string
+          description: 'Abyss platform organization name'
   requestBodies:
     Credentials:
       content:
@@ -352,6 +394,13 @@ components:
           schema:
             $ref: '#/components/schemas/ResetPasswordInfo'
       description: 'Reset Password request object'
+      required: true
+    SwitchOrganizationForm:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SwitchOrganizationInfo'
+      description: 'Switch Organization request object'
       required: true
   responses:
     '200':

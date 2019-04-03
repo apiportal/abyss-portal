@@ -403,6 +403,14 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 
 
+    public Single<CompositeResult> updateSubjectOrganization(JsonArray jsonArray) {
+        return update(jsonArray, SubjectService.SQL_CHANGE_ORGANIZATION_BY_UUID);
+    }
+
+    public Single<CompositeResult> updateSubjectActivated(JsonArray jsonArray) {
+        return update(jsonArray, SubjectService.SQL_CHANGE_ACTIVATED_BY_UUID);
+    }
+
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
@@ -511,6 +519,16 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "  , passwordexpiresat    =  now() + ? * interval '1 DAY'\n" +
             "  , lastpasswordchangeat = now()\n";
 
+    private static final String SQL_CHANGE_ACTIVATED = "update subject\n" +
+            "set updated              = now()\n" +
+            "  , crudsubjectid        = CAST(? AS uuid)\n" +
+            "  , isactivated             = ?\n";
+
+    private static final String SQL_CHANGE_ORGANIZATION = "update subject\n" +
+            "set updated              = now()\n" +
+            "  , organizationid       = CAST(? AS uuid)\n" +
+            "  , crudsubjectid        = CAST(? AS uuid)\n";
+
 
     private static final String SQL_CONDITION_NAME_IS = "lower(subjectname) = lower(?)\n";
 
@@ -547,6 +565,10 @@ public class SubjectService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_CHANGE_PASSWORD_BY_UUID = SQL_CHANGE_PASSWORD + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    private static final String SQL_CHANGE_ACTIVATED_BY_UUID = SQL_CHANGE_ACTIVATED + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    private static final String SQL_CHANGE_ORGANIZATION_BY_UUID = SQL_CHANGE_ORGANIZATION + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static String FILTER_APPS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_APP;
 

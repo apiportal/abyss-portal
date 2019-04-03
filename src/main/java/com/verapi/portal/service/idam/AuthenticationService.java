@@ -184,6 +184,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                         .put("uuid", resultSet.getRows().get(0).getString("uuid"))
                                                         .put("name", resultSet.getRows().get(0).getString("name"))
                                                         .put("isactive", resultSet.getRows().get(0).getBoolean("isactive")) //TODO:? kontrol sql'de mi olmalı?
+                                                        .put("isdeleted", resultSet.getRows().get(0).getBoolean("isdeleted")) //TODO:? kontrol sql'de mi olmalı?
                                                 );
                                             }).toList();
                                 });
@@ -224,27 +225,37 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 .flatMap(jsonObjects2 -> {
                                     logger.trace("CreateOrganizationController - subjectOrganizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
 
-                                    try {
-                                        //Url Encode for cookie compliance
-                                        String userLoginOrganizationName = URLEncoder.encode(temporaryOrganizationName, "UTF-8");
-                                        String userLoginOrganizationUUID = URLEncoder.encode(organizationUuid, "UTF-8");
+                                    return loginMetadata.subjectService.updateSubjectOrganization(new JsonArray().add(organizationUuid).add(userUUID).add(userUUID));
+                                })
+                                .flatMap(compositeResult -> {
 
-                                        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName);
-                                        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID);
+                                    if (compositeResult.getThrowable()==null) {
+                                        logger.trace("Subject's Organization updated with newly created one successfully");
+                                        try {
+                                            //Url Encode for cookie compliance
+                                            String userLoginOrganizationName = URLEncoder.encode(temporaryOrganizationName, "UTF-8");
+                                            String userLoginOrganizationUUID = URLEncoder.encode(organizationUuid, "UTF-8");
 
-                                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName));
-                                        //.setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60)); //TODO: Remove Cookie at Session Timeout
-                                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID));
-                                        //.setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
+                                            routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName);
+                                            routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID);
 
-                                        return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id())
-                                                .put("principalid", userUUID).put("organizationid", organizationUuid).put("organizationname", temporaryOrganizationName));
+                                            routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName));
+                                            //.setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60)); //TODO: Remove Cookie at Session Timeout
+                                            routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID));
+                                            //.setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
-                                    } catch (UnsupportedEncodingException e) {
-                                        logger.error("SelectOrganizationController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
-                                        throw new RuntimeException(e);
+                                            return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id())
+                                                    .put("principalid", userUUID).put("organizationid", organizationUuid).put("organizationname", temporaryOrganizationName));
+
+                                        } catch (UnsupportedEncodingException e) {
+                                            logger.error("SelectOrganizationController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+                                            throw new RuntimeException(e);
+                                        }
+
+                                    } else {
+                                        logger.trace("Subject's organization could not be updated with newly created one.");
+                                        return Single.error(compositeResult.getThrowable());
                                     }
-
                                 });
                     } else {
                         //Select-organization
@@ -252,14 +263,19 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         logger.trace("LoginController.handle() findByIdResult.subscribe result: {}", jsonArray);
                         routingContext.session().put("userOrganizationArray", jsonArray);
 
-                        organizationUuid = organizationJsonObjects.get(0).getString("uuid");
-                        temporaryOrganizationName = organizationJsonObjects.get(0).getString("name");
+                        for (int i=0; i<organizationJsonObjects.size(); i++) {
+                            if ( (organizationJsonObjects.get(i).getBoolean("isdeleted")==false) && (organizationJsonObjects.get(i).getBoolean("isactive")==true) ) {
+                                organizationUuid = organizationJsonObjects.get(i).getString("uuid");
+                                temporaryOrganizationName = organizationJsonObjects.get(i).getString("name");
+                                break;
+                            }
+                        }
 
                         routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName);
                         routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid);
 
-                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName));
-                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid));
+                        //routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName));
+                        //routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid));
 
                         return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id())
                                 .put("principalid", userUUID).put("organizationid", organizationUuid).put("organizationname", temporaryOrganizationName));
@@ -284,6 +300,12 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
         routingContext.user().clearCache();
         routingContext.clearUser();
+
+        routingContext.removeCookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME);
+        routingContext.removeCookie(Constants.AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME);
+        routingContext.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME);
+        routingContext.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+
         routingContext.removeCookie(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
         routingContext.session().destroy();
 
@@ -658,6 +680,30 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
     public Single<JsonObject> resetPassword(RoutingContext routingContext) {
         return Single.just(new JsonObject());
+    }
+
+    public Single<JsonObject> setCurrentOrganization(RoutingContext routingContext) {
+
+        organizationUuid = routingContext.getBodyAsJson().getString("organizationid");
+        temporaryOrganizationName = routingContext.getBodyAsJson().getString("organizationname");
+        logger.trace("setCurrentOrganization - Received organizationId:" + organizationUuid + " organizationName:" + temporaryOrganizationName);
+
+        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName);
+        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid);
+
+        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName));
+        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid));
+
+        String userName = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME);
+        String userId = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+
+        return Single.just(new JsonObject()
+                .put("username", userName)
+                .put("sessionid", routingContext.session().id())
+                .put("principalid", userId)
+                .put("organizationid", organizationUuid)
+                .put("organizationname", temporaryOrganizationName)
+        );
     }
 
     private Single<JsonObject> rxValidateToken(String token) {
