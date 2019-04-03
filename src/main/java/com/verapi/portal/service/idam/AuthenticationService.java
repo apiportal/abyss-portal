@@ -265,8 +265,9 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                         for (int i=0; i<organizationJsonObjects.size(); i++) {
                             if ( (organizationJsonObjects.get(i).getBoolean("isdeleted")==false) && (organizationJsonObjects.get(i).getBoolean("isactive")==true) ) {
-                                organizationUuid = organizationJsonObjects.get(i).getString("uuid");
-                                temporaryOrganizationName = organizationJsonObjects.get(i).getString("name");
+                                //Url Encode for cookie compliance
+                                organizationUuid = URLEncoder.encode(organizationJsonObjects.get(i).getString("uuid"), "UTF-8");
+                                temporaryOrganizationName = URLEncoder.encode(organizationJsonObjects.get(i).getString("name"), "UTF-8");
                                 break;
                             }
                         }
@@ -274,8 +275,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName);
                         routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid);
 
-                        //routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName));
-                        //routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid));
+                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName));
+                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid));
 
                         return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id())
                                 .put("principalid", userUUID).put("organizationid", organizationUuid).put("organizationname", temporaryOrganizationName));
@@ -683,9 +684,13 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     }
 
     public Single<JsonObject> setCurrentOrganization(RoutingContext routingContext) {
+        logger.trace("setCurrentOrganization invoked");
+        try {
+            organizationUuid = URLEncoder.encode(routingContext.getBodyAsJson().getString("organizationid"), "UTF-8");
+            temporaryOrganizationName = URLEncoder.encode(routingContext.getBodyAsJson().getString("organizationname"), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
 
-        organizationUuid = routingContext.getBodyAsJson().getString("organizationid");
-        temporaryOrganizationName = routingContext.getBodyAsJson().getString("organizationname");
+        }
         logger.trace("setCurrentOrganization - Received organizationId:" + organizationUuid + " organizationName:" + temporaryOrganizationName);
 
         routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName);
