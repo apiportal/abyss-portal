@@ -253,6 +253,14 @@ components:
           type: string
           readOnly: true
           description: 'authenticated principal id'
+        organizationid:
+          type: string
+          readOnly: true
+          description: 'selected organization id'
+        organizationname:
+          type: string
+          readOnly: true
+          description: 'selected organization name'
     SignUpInfo:
       type: object
       properties:

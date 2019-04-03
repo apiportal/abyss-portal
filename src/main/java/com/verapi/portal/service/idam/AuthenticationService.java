@@ -183,14 +183,15 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                 return Observable.just(new JsonObject()
                                                         .put("uuid", resultSet.getRows().get(0).getString("uuid"))
                                                         .put("name", resultSet.getRows().get(0).getString("name"))
+                                                        .put("isactive", resultSet.getRows().get(0).getBoolean("isactive")) //TODO:? kontrol sql'de mi olmalı?
                                                 );
                                             }).toList();
                                 });
                     }
 
                 })
-                .flatMap(jsonObjects -> {
-                    if (jsonObjects.isEmpty()) {
+                .flatMap(organizationJsonObjects -> {
+                    if (organizationJsonObjects.isEmpty()) {
                         //Create-organization
                         return loginMetadata.organizationService.initJDBCClient()
                                 .flatMap(jdbcClient1 -> {
@@ -236,7 +237,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                         routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID));
                                         //.setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
-                                        return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id()));
+                                        return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id())
+                                                .put("principalid", userUUID).put("organizationid", organizationUuid).put("organizationname", temporaryOrganizationName));
 
                                     } catch (UnsupportedEncodingException e) {
                                         logger.error("SelectOrganizationController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
@@ -246,11 +248,21 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 });
                     } else {
                         //Select-organization
-                        JsonArray jsonArray = new JsonArray(jsonObjects);
+                        JsonArray jsonArray = new JsonArray(organizationJsonObjects);
                         logger.trace("LoginController.handle() findByIdResult.subscribe result: {}", jsonArray);
                         routingContext.session().put("userOrganizationArray", jsonArray);
 
-                        return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id()).put("principalid", userUUID));
+                        organizationUuid = organizationJsonObjects.get(0).getString("uuid");
+                        temporaryOrganizationName = organizationJsonObjects.get(0).getString("name");
+
+                        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName);
+                        routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid);
+
+                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, temporaryOrganizationName));
+                        routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, organizationUuid));
+
+                        return Single.just(new JsonObject().put("username", creds.getString("username")).put("sessionid", routingContext.session().id())
+                                .put("principalid", userUUID).put("organizationid", organizationUuid).put("organizationname", temporaryOrganizationName));
                     }
 
                 });
