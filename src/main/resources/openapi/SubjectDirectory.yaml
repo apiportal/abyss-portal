@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : SubjectDirectory crud operations'
+  - name: SubjectDirectorySync
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : SubjectDirectory sync operations'
 paths:
   /subject-directories:
     get:
@@ -235,6 +240,105 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /subject-directories/{uuid}/sync/start:
+    put:
+      tags:
+        - SubjectDirectorySync
+      summary: 'Start syncing of an existing SubjectDirectory'
+      description: 'Start syncing of an existing SubjectDirectory'
+      operationId: startSubjectDirectorySync
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of SubjectDirectory'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /subject-directories/{uuid}/sync/finish:
+    put:
+      tags:
+        - SubjectDirectorySync
+      summary: 'Finish syncing of an existing SubjectDirectory'
+      description: 'Finish syncing of an existing SubjectDirectory'
+      operationId: finishSubjectDirectorySync
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of SubjectDirectory'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /subject-directories/{uuid}/sync/error:
+    put:
+      tags:
+        - SubjectDirectorySync
+      summary: 'Fail syncing of an existing SubjectDirectory'
+      description: 'Fail syncing of an existing SubjectDirectory'
+      operationId: failSubjectDirectorySync
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of SubjectDirectory'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
         '429':
           $ref: '#/components/responses/429'
         '500':

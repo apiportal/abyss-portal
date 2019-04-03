@@ -14,6 +14,7 @@ package com.verapi.portal.oapi;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.common.Constants;
 import com.verapi.portal.service.idam.SubjectDirectoryService;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -149,5 +150,51 @@ public class SubjectDirectoryApiController extends AbstractApiController {
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
+
+    @AbyssApiOperationHandler
+    public void startSubjectDirectorySync(RoutingContext routingContext) {
+
+        try {
+            logger.trace("startSubjectDirectorySync invoked");
+            SubjectDirectoryService subjectDirectoryService = new SubjectDirectoryService(vertx);
+            subscribeAndResponseJsonObject(routingContext, subjectDirectoryService.startSync(routingContext), HttpResponseStatus.OK.code());
+
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void finishSubjectDirectorySync(RoutingContext routingContext) {
+
+        try {
+            logger.trace("finishSubjectDirectorySync invoked");
+            SubjectDirectoryService subjectDirectoryService = new SubjectDirectoryService(vertx);
+            subscribeAndResponseJsonObject(routingContext, subjectDirectoryService.finishSync(routingContext), HttpResponseStatus.OK.code());
+
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void failSubjectDirectorySync(RoutingContext routingContext) {
+
+        try {
+            logger.trace("failSubjectDirectorySync invoked");
+            SubjectDirectoryService subjectDirectoryService = new SubjectDirectoryService(vertx);
+            subscribeAndResponseJsonObject(routingContext, subjectDirectoryService.failSync(routingContext), HttpResponseStatus.OK.code());
+
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 
 }

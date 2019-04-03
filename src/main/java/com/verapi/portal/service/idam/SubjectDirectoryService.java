@@ -11,7 +11,9 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
@@ -23,10 +25,13 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
+import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -231,6 +236,146 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
+
+
+    public Single<JsonObject> startSync(RoutingContext routingContext) {
+        logger.trace("startSync invoked");
+
+        String directoryUuid = routingContext.pathParam("uuid");
+        logger.trace("Received directory uuid:" + directoryUuid);
+
+        return initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .flatMap(jdbcClient1 -> findById(UUID.fromString(directoryUuid)))
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows()>0) {
+                        JsonObject directoryJson = resultSet.getRows().get(0);
+                        JsonObject directoryattributesJson = new JsonObject(directoryJson.getString("directoryattributes"));
+
+                        directoryJson.put("directoryattributes", updateConnectionSettingsSyncValues(directoryattributesJson, "syncing"));
+                        directoryJson.put("updated", Instant.now());
+                        return update(UUID.fromString(directoryUuid), directoryJson);
+                    } else {
+                        logger.trace("Subject Directory not Found");
+                        return Single.error(new NotFound404Exception("Subject Directory not Found"));
+                    }
+                })
+                .flatMap(compositeResult -> {
+                    if (compositeResult.getThrowable()==null) {
+                        logger.trace("Subject Directory state updated as syncing");
+                        return findById(UUID.fromString(directoryUuid));
+                    } else {
+                        logger.error("Error in Subject Directory state update as syncing");
+                        return Single.error(compositeResult.getThrowable());
+                    }
+                })
+                .flatMap(resultSet -> Single.just(resultSet.getRows().get(0)));
+    }
+
+    private JsonObject updateConnectionSettingsSyncValues(JsonObject directoryattributesJson, String syncState) {
+
+        if (syncState == null || syncState.isEmpty()) {
+            logger.error("updateConnectionSettingsSyncValues syncState received null or empty");
+            return directoryattributesJson;
+        }
+
+        if ("idle".equals(syncState) || "syncFailed".equals(syncState)) {
+
+            JsonObject connectionSettingsSync = directoryattributesJson.getJsonObject("connection.settings").getJsonObject("connection.settings.sync");
+            connectionSettingsSync.put("connection.synchronisation.state", syncState);
+            connectionSettingsSync.put("connection.synchronisation.duration.inquiry.previous.asMilliSecond", connectionSettingsSync.getInteger("connection.synchronisation.duration.inquiry.last.asMilliSecond"));
+            connectionSettingsSync.put("connection.synchronisation.duration.write.previous.asMilliSecond", connectionSettingsSync.getInteger("connection.synchronisation.duration.write.last.asMilliSecond"));
+
+            //long duration = Instant.now().compareTo(Instant.ofEpochMilli(connectionSettingsSync.getLong("connection.synchronisation.time.last.asUnixTime")));
+            long duration = Instant.now().toEpochMilli() - connectionSettingsSync.getLong("connection.synchronisation.time.last.asUnixTime");
+            connectionSettingsSync.put("connection.synchronisation.duration.inquiry.last.asMilliSecond", duration);
+            connectionSettingsSync.put("connection.synchronisation.duration.write.last.asMilliSecond", duration);
+
+            directoryattributesJson.getJsonObject("connection.settings").put("connection.settings.sync", connectionSettingsSync);
+
+        } else if ("syncing".equals(syncState)) {
+
+            JsonObject connectionSettingsSync = directoryattributesJson.getJsonObject("connection.settings").getJsonObject("connection.settings.sync");
+            connectionSettingsSync.put("connection.synchronisation.state", syncState);
+            connectionSettingsSync.put("connection.synchronisation.time.previous.asUnixTime", connectionSettingsSync.getInteger("connection.synchronisation.time.last.asUnixTime"));
+            connectionSettingsSync.put("connection.synchronisation.time.last.asUnixTime", Instant.now().toEpochMilli());
+            directoryattributesJson.getJsonObject("connection.settings").put("connection.settings.sync", connectionSettingsSync);
+
+        } else {
+            logger.error("updateConnectionSettingsSyncValues unknown syncState: {} received", syncState);
+        }
+
+        return directoryattributesJson;
+    }
+
+    public Single<JsonObject> finishSync(RoutingContext routingContext) {
+        logger.trace("finishSync invoked");
+
+        String directoryUuid = routingContext.pathParam("uuid");
+        logger.trace("Received directory uuid:" + directoryUuid);
+
+        return initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .flatMap(jdbcClient1 -> findById(UUID.fromString(directoryUuid)))
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows()>0) {
+                        JsonObject directoryJson = resultSet.getRows().get(0);
+                        JsonObject directoryattributesJson = new JsonObject(directoryJson.getString("directoryattributes"));
+
+                        directoryJson.put("directoryattributes", updateConnectionSettingsSyncValues(directoryattributesJson, "idle"));
+                        directoryJson.put("updated", Instant.now());
+                        directoryJson.put("lastsyncronizedat", Instant.now());
+                        return update(UUID.fromString(directoryUuid), directoryJson);
+                    } else {
+                        logger.trace("Subject Directory not Found");
+                        return Single.error(new NotFound404Exception("Subject Directory not Found"));
+                    }
+                })
+                .flatMap(compositeResult -> {
+                    if (compositeResult.getThrowable()==null) {
+                        logger.trace("Subject Directory state updated as syncFailed");
+                        return findById(UUID.fromString(directoryUuid));
+                    } else {
+                        logger.error("Error in Subject Directory state update as syncFailed");
+                        return Single.error(compositeResult.getThrowable());
+                    }
+                })
+                .flatMap(resultSet -> Single.just(resultSet.getRows().get(0)));
+    }
+
+    public Single<JsonObject> failSync(RoutingContext routingContext) {
+        logger.trace("failSync invoked");
+
+        String directoryUuid = routingContext.pathParam("uuid");
+        logger.trace("Received directory uuid:" + directoryUuid);
+
+        return initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .flatMap(jdbcClient1 -> findById(UUID.fromString(directoryUuid)))
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows()>0) {
+                        JsonObject directoryJson = resultSet.getRows().get(0);
+                        JsonObject directoryattributesJson = new JsonObject(directoryJson.getString("directoryattributes"));
+
+                        directoryJson.put("directoryattributes", updateConnectionSettingsSyncValues(directoryattributesJson, "syncFailed"));
+                        directoryJson.put("updated", Instant.now());
+                        directoryJson.put("lastsyncronizedat", Instant.now());
+                        return update(UUID.fromString(directoryUuid), directoryJson);
+                    } else {
+                        logger.trace("Subject Directory not Found");
+                        return Single.error(new NotFound404Exception("Subject Directory not Found"));
+                    }
+                })
+                .flatMap(compositeResult -> {
+                    if (compositeResult.getThrowable()==null) {
+                        logger.trace("Subject Directory state updated as idle");
+                        return findById(UUID.fromString(directoryUuid));
+                    } else {
+                        logger.error("Error in Subject Directory state update as idle");
+                        return Single.error(compositeResult.getThrowable());
+                    }
+                })
+                .flatMap(resultSet -> Single.just(resultSet.getRows().get(0)));
+    }
+
+
 
     private static final String SQL_INSERT = "insert into subject_directory (organizationid, crudsubjectid, directoryname, description, isactive, istemplate,\n" +
             "                               directorytypeid, directorypriorityorder, directoryattributes, lastsyncronizedat, lastsyncronizationduration)\n" +
