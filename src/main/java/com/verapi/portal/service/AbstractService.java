@@ -287,22 +287,30 @@ public abstract class AbstractService<T> implements IService<T> {
                             logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
                             if (organizationUuid == null || isParamTable) {
                                 if (params == null) {
+                                    logger.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
                                     return conn.rxQuery(sql);
                                 } else {
+                                    logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
                                     return conn.rxQueryWithParams(sql, params);
                                 }
                             } else {
                                 logger.trace("Current organizationUuid: {}", organizationUuid);
+                                String sqlWithOrganizationFilter;
+                                JsonArray paramWithOrganizationFilter;
                                 if (params == null) {
-                                    return conn.rxQueryWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
+                                    sqlWithOrganizationFilter = sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS;
+                                    paramWithOrganizationFilter = new JsonArray().add(organizationUuid);
                                 } else {
-                                    return conn.rxQueryWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
+                                    sqlWithOrganizationFilter = sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS;
+                                    paramWithOrganizationFilter = params.add(organizationUuid);
                                 }
+                                logger.trace("{}::rxQueryWithParams Organization Filtered >> sql {} params {}", this.getClass().getName(), sqlWithOrganizationFilter, paramWithOrganizationFilter);
+                                return conn.rxQueryWithParams(sqlWithOrganizationFilter, paramWithOrganizationFilter);
                             }
                         })
                         .flatMap(resultSet -> {
                             logger.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
-                            logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
+
                             return Single.just(resultSet);
                         })
                         // close the connection regardless succeeded or failed
