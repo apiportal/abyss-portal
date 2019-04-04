@@ -42,6 +42,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Groups crud operations'
+  - name: ROLES
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : Roles crud operations'
   - name: DIRECTORY FILTERED
     externalDocs:
       url: 'https://apiportal.com'
@@ -680,6 +685,126 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+      parameters: []
+  /subjects/roles/:
+    get:
+      tags:
+        - ROLES
+      summary: Get list of roles
+      description: Returns list of roles
+      operationId: getRoles
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search roles which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search roles which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubject'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - ROLES
+      summary: Add a bulk of roles
+      description: Provide a list of roles to be inserted
+      operationId: addRoles
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
+    put:
+      tags:
+        - ROLES
+      summary: Update a bulk of roles
+      description: Provide a bulk list of roles to be updated
+      operationId: updateRoles
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
+    delete:
+      tags:
+        - ROLES
+      summary: Delete all roles
+      description: Deletes all roles
+      operationId: deleteRoles
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      parameters: []
   '/subjects/groups/subject-directory/{uuid}':
     get:
       tags:

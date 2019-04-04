@@ -56,6 +56,8 @@ public abstract class AbstractService<T> implements IService<T> {
 
     protected static final String SQL_CONDITION_ORGANIZATION_IS = "organizationid = CAST(? AS uuid)\n";
 
+    protected static final String SQL_CONDITION_ORGANIZATION_INSIDE = "organizationid in (CAST(? AS uuid), '" + Constants.DEFAULT_ORGANIZATION_UUID + "'::uuid)\n";
+
     protected static final String SQL_FROM = "from\n";
 
     protected static final String SQL_UPDATE_VERB = "update ";
@@ -176,22 +178,32 @@ public abstract class AbstractService<T> implements IService<T> {
                                     if (tableName.isEmpty()) {
                                         isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
                                     }
+
                                     boolean isAdmin = false; //TODO: Admin Only
                                     boolean doesContainOrderBy = false; //TODO: Order By Handling
                                     logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+
                                     if (organizationUuid == null || isParamTable) {
                                         if (params == null) {
+                                            logger.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
                                             return conn.rxUpdate(sql);
                                         } else {
+                                            logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
                                             return conn.rxUpdateWithParams(sql, params);
                                         }
                                     } else {
                                         logger.trace("Current organizationUuid: {}", organizationUuid);
+                                        String sqlWithOrganizationFilter;
+                                        JsonArray paramWithOrganizationFilter;
                                         if (params == null) {
-                                            return conn.rxUpdateWithParams(sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS, new JsonArray().add(organizationUuid));
+                                            sqlWithOrganizationFilter = sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS;
+                                            paramWithOrganizationFilter = new JsonArray().add(organizationUuid);
                                         } else {
-                                            return conn.rxUpdateWithParams(sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS, params.add(organizationUuid));
+                                            sqlWithOrganizationFilter = sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS;
+                                            paramWithOrganizationFilter = params.add(organizationUuid);
                                         }
+                                        logger.trace("{}::rxQueryWithParams Organization Filtered >> sql {} params {}", this.getClass().getName(), sqlWithOrganizationFilter, paramWithOrganizationFilter);
+                                        return conn.rxUpdateWithParams(sqlWithOrganizationFilter, paramWithOrganizationFilter);
                                     }
                                 })
 
@@ -282,9 +294,11 @@ public abstract class AbstractService<T> implements IService<T> {
                             String tableName = getTableNameFromSql(sql).toLowerCase();
                             logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
                             boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+
                             boolean isAdmin = false; //TODO: Admin Only
                             boolean doesContainOrderBy = false; //TODO: Order By Handling
                             logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+
                             if (organizationUuid == null || isParamTable) {
                                 if (params == null) {
                                     logger.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
@@ -298,10 +312,10 @@ public abstract class AbstractService<T> implements IService<T> {
                                 String sqlWithOrganizationFilter;
                                 JsonArray paramWithOrganizationFilter;
                                 if (params == null) {
-                                    sqlWithOrganizationFilter = sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS;
+                                    sqlWithOrganizationFilter = sql.contains(SQL_WHERE) ? sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_INSIDE : sql + SQL_WHERE + SQL_CONDITION_ORGANIZATION_INSIDE;
                                     paramWithOrganizationFilter = new JsonArray().add(organizationUuid);
                                 } else {
-                                    sqlWithOrganizationFilter = sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS;
+                                    sqlWithOrganizationFilter = sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_INSIDE;
                                     paramWithOrganizationFilter = params.add(organizationUuid);
                                 }
                                 logger.trace("{}::rxQueryWithParams Organization Filtered >> sql {} params {}", this.getClass().getName(), sqlWithOrganizationFilter, paramWithOrganizationFilter);

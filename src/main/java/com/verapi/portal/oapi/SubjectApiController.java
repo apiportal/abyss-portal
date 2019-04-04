@@ -100,6 +100,7 @@ public class SubjectApiController extends AbstractApiController {
                     (((JsonObject) requestItem).getValue("picture") == null) ||
                     (((JsonObject) requestItem).getValue("picture") == ""))
                 try {
+                    logger.trace("addEntities - adding default avatar");
                     InputStream in = getClass().getResourceAsStream(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
                     StringBuilder sb = new StringBuilder();
@@ -326,6 +327,27 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void deleteGroups(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_GROUP));
+    }
+
+
+    @AbyssApiOperationHandler
+    public void getRoles(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_ROLES));
+    }
+
+    @AbyssApiOperationHandler
+    public void addRoles(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_ROLE));
+    }
+
+    @AbyssApiOperationHandler
+    public void updateRoles(RoutingContext routingContext) {
+        updateEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_ROLE));
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteRoles(RoutingContext routingContext) {
+        deleteEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.SQL_CONDITION_IS_ROLE));
     }
 
 
