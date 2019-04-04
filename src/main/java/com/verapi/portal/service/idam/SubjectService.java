@@ -155,6 +155,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
         if ((!updateRecord.containsKey("picture")) || (updateRecord.getValue("picture") == null)) {
             try {
+                logger.trace("Updating Subject with default avatar");
                 //update default avatar image TODO: later use picture using request message
                 ClassLoader classLoader = getClass().getClassLoader();
                 File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
@@ -176,7 +177,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("email"))
                 .add(updateRecord.containsKey("secondaryemail") ? updateRecord.getString("secondaryemail") : "")
                 .add(updateRecord.getInstant("effectivestartdate"))
-                .add(updateRecord.containsKey("effectiveenddate") ? updateRecord.getInstant("effectiveenddate") : Instant.now().plus(90, DAYS))
+                .add(updateRecord.containsKey("effectiveenddate") ? updateRecord.getInstant("effectiveenddate") : Instant.now().plus(Config.getInstance().getConfigJsonObject().getInteger(Constants.PASSWORD_EXPIRATION_DAYS), DAYS))
 /*
                 .add(updateRecord.getString("password"))
                 .add(updateRecord.getString("passwordsalt"))

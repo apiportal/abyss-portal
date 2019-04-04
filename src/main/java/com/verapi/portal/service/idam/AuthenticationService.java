@@ -620,13 +620,15 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         return forgotPasswordMetadata.subjectService.update(UUID.fromString(forgotPasswordMetadata.subjectUUID), updateJson)
                                 .flatMap(compositeResult -> {
                                     if (compositeResult.getThrowable() == null) {
+                                        logger.trace("forgotPassword - subject {} deactivated", forgotPasswordMetadata.subjectUUID);
                                         return Single.just(compositeResult.getUpdateResult());
                                     } else {
-                                        logger.trace("forgotPassword - " + compositeResult.getThrowable());
+                                        logger.error("forgotPassword - " + compositeResult.getThrowable());
                                         return Single.error(compositeResult.getThrowable());
                                     }
                                 });
                     } else {
+                        logger.error("forgotPassword - Activation Insert Error Occurred");
                         return Single.error(new Exception("forgotPassword - Activation Insert Error Occurred"));
                     }
                 })
@@ -635,11 +637,12 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         logger.trace("forgotPassword - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
                         return Single.just(updateResult);
                     } else {
-                        logger.trace("forgotPassword - Activation Update Error Occurred");
+                        logger.error("forgotPassword - Activation Update Error Occurred");
                         return Single.error(new Exception("Activation Update Error Occurred"));
                     }
                 })
                 .flatMap(updateResult -> {
+                    logger.trace("Rendering Forgot Password mail");
                     JsonObject json = new JsonObject();
                     json.put(Constants.EB_MSG_TOKEN, forgotPasswordMetadata.authInfo.getToken());
                     json.put(Constants.EB_MSG_TO_EMAIL, forgotPasswordMetadata.email);
