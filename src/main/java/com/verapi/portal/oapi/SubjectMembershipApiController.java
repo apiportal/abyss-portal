@@ -11,6 +11,7 @@
 
 package com.verapi.portal.oapi;
 
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.SubjectMembershipService;
@@ -210,6 +211,265 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.FILTER_BY_DIRECTORY)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    //-------------------UserGroupMemberships------------------------
+
+    @AbyssApiOperationHandler
+    public void getUserGroupMemberships(RoutingContext routingContext) {
+        try {
+            getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_GROUP_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void addUserGroupMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON array validated by Vert.x Open API validator
+        JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        requestBody.forEach(requestItem -> {
+            ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_USER);
+            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_GROUP);
+        });
+
+        try {
+            addEntities(routingContext, SubjectMembershipService.class, requestBody);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void updateUserGroupMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        //now it is time to update entities
+        try {
+            updateEntities(routingContext, SubjectMembershipService.class, requestBody,null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_GROUP_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteUserGroupMemberships(RoutingContext routingContext) {
+        try {
+            deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_GROUP_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+
+    //------------------UserRoleMemberships-------------------------
+
+    @AbyssApiOperationHandler
+    public void getUserRoleMemberships(RoutingContext routingContext) {
+        try {
+            getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void addUserRoleMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON array validated by Vert.x Open API validator
+        JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        requestBody.forEach(requestItem -> {
+            ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_USER);
+            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_ROLE);
+        });
+
+        try {
+            addEntities(routingContext, SubjectMembershipService.class, requestBody);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void updateUserRoleMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        //now it is time to update entities
+        try {
+            updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteUserRoleMemberships(RoutingContext routingContext) {
+        try {
+            deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+
+    //-------------------GroupRoleMemberships------------------------
+
+    @AbyssApiOperationHandler
+    public void getGroupRoleMemberships(RoutingContext routingContext) {
+        try {
+            getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_GROUP_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void addGroupRoleMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON array validated by Vert.x Open API validator
+        JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        requestBody.forEach(requestItem -> {
+            ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_GROUP);
+            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_ROLE);
+        });
+
+         try {
+            addEntities(routingContext, SubjectMembershipService.class, requestBody);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void updateGroupRoleMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        //now it is time to update entities
+        try {
+            updateEntities(routingContext, SubjectMembershipService.class, requestBody,null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_GROUP_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteGroupRoleMemberships(RoutingContext routingContext) {
+        try {
+            deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_GROUP_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+
+    //-------------------UserAppMemberships------------------------
+
+    @AbyssApiOperationHandler
+    public void getUserAppMemberships(RoutingContext routingContext) {
+        try {
+            getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_APP_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void addUserAppMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON array validated by Vert.x Open API validator
+        JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        requestBody.forEach(requestItem -> {
+            ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_USER);
+            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_APP);
+        });
+
+        try {
+            addEntities(routingContext, SubjectMembershipService.class, requestBody);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void updateUserAppMemberships(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        //now it is time to update entities
+        try {
+            updateEntities(routingContext, SubjectMembershipService.class, requestBody,null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteUserAppMemberships(RoutingContext routingContext) {
+        try {
+            deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

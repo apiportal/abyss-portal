@@ -42,6 +42,26 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Directory Filtered Memberships crud operations'
+  - name: UserGroupMemberships
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : User Group Memberships crud operations'
+  - name: UserRoleMemberships
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : User Role Memberships crud operations'
+  - name: GroupRoleMemberships
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : Group Role Memberships crud operations'
+  - name: UserAppMemberships
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : User App Memberships crud operations'
 paths:
   /subject-memberships:
     get:
@@ -496,6 +516,482 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /subject-memberships/user-group/:
+    get:
+      tags:
+        - UserGroupMemberships
+      summary: Get list of UserGroupMemberships
+      description: Returns list of UserGroupMemberships
+      operationId: getUserGroupMemberships
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search UserGroupMemberships which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search UserGroupMemberships which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectMembership'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - UserGroupMemberships
+      summary: Add a bulk of UserGroupMemberships
+      description: Provide a list of UserGroupMemberships to be inserted
+      operationId: addUserGroupMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembership'
+      parameters: []
+    put:
+      tags:
+        - UserGroupMemberships
+      summary: Update a bulk of UserGroupMemberships
+      description: Provide a bulk list of  UserGroupMemberships to be updated
+      operationId: updateUserGroupMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
+      parameters: []
+    delete:
+      tags:
+        - UserGroupMemberships
+      summary: Delete all UserGroupMemberships
+      description: Deletes all UserGroupMemberships
+      operationId: deleteUserGroupMemberships
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      parameters: []
+  /subject-memberships/user-role/:
+    get:
+      tags:
+        - UserRoleMemberships
+      summary: Get list of UserRoleMemberships
+      description: Returns list of UserRoleMemberships
+      operationId: getUserRoleMemberships
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search UserRoleMemberships which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search UserRoleMemberships which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectMembership'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - UserRoleMemberships
+      summary: Add a bulk of UserRoleMemberships
+      description: Provide a list of UserRoleMemberships to be inserted
+      operationId: addUserRoleMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembership'
+      parameters: []
+    put:
+      tags:
+        - UserRoleMemberships
+      summary: Update a bulk of UserRoleMemberships
+      description: Provide a bulk list of  UserRoleMemberships to be updated
+      operationId: updateUserRoleMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
+      parameters: []
+    delete:
+      tags:
+        - UserRoleMemberships
+      summary: Delete all UserRoleMemberships
+      description: Deletes all UserRoleMemberships
+      operationId: deleteUserRoleMemberships
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      parameters: []
+  /subject-memberships/group-role/:
+    get:
+      tags:
+        - GroupRoleMemberships
+      summary: Get list of GroupRoleMemberships
+      description: Returns list of GroupRoleMemberships
+      operationId: getGroupRoleMemberships
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search GroupRoleMemberships which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search GroupRoleMemberships which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectMembership'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - GroupRoleMemberships
+      summary: Add a bulk of GroupRoleMemberships
+      description: Provide a list of UserRoleMemberships to be inserted
+      operationId: addGroupRoleMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembership'
+      parameters: []
+    put:
+      tags:
+        - GroupRoleMemberships
+      summary: Update a bulk of GroupRoleMemberships
+      description: Provide a bulk list of  GroupRoleMemberships to be updated
+      operationId: updateGroupRoleMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
+      parameters: []
+    delete:
+      tags:
+        - GroupRoleMemberships
+      summary: Delete all GroupRoleMemberships
+      description: Deletes all GroupRoleMemberships
+      operationId: deleteGroupRoleMemberships
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      parameters: []
+  /subject-memberships/user-app/:
+    get:
+      tags:
+        - UserAppMemberships
+      summary: Get list of UserAppMemberships
+      description: Returns list of UserAppMemberships
+      operationId: getUserAppMemberships
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search UserAppMemberships which names exact match
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: search UserAppMemberships which names begin with
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfSubjectMembership'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - UserAppMemberships
+      summary: Add a bulk of UserAppMemberships
+      description: Provide a list of UserAppMemberships to be inserted
+      operationId: addUserAppMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembership'
+      parameters: []
+    put:
+      tags:
+        - UserAppMemberships
+      summary: Update a bulk of UserAppMemberships
+      description: Provide a bulk list of  UserAppMemberships to be updated
+      operationId: updateUserAppMemberships
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectMembershipObject'
+      parameters: []
+    delete:
+      tags:
+        - UserAppMemberships
+      summary: Delete all UserAppMemberships
+      description: Deletes all UserAppMemberships
+      operationId: deleteUserAppMemberships
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      parameters: []
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'

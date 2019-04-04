@@ -11,6 +11,7 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
@@ -256,6 +257,14 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
 
     public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
 
+    public static final String SQL_CONDITION_USER_GROUP_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
+
+    public static final String SQL_CONDITION_USER_ROLE_MEMBERSHIP  = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
+
+    public static final String SQL_CONDITION_GROUP_ROLE_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
+
+    public static final String SQL_CONDITION_USER_APP_MEMBERSHIP   = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_APP + "' AS uuid)\n";
+
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 
     private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
@@ -281,6 +290,15 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
     public static final String SQL_DELETE_GROUPS = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_GROUP_IS;
 
     public static final String FILTER_BY_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_DIRECTORY;
+
+    public static final String FILTER_USER_GROUP_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_GROUP_MEMBERSHIP;
+
+    public static final String FILTER_USER_ROLE_MEMBERSHIP  = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_ROLE_MEMBERSHIP;
+
+    public static final String FILTER_GROUP_ROLE_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_GROUP_ROLE_MEMBERSHIP;
+
+    public static final String FILTER_USER_APP_MEMBERSHIP   = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_APP_MEMBERSHIP;
+
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
