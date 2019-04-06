@@ -98,6 +98,11 @@ public class MailVerticle extends AbstractVerticle {
                 subject = Constants.PASSWORD_RESET_SUBJECT;
                 text = Constants.PASSWORD_RESET_TEXT;
                 //path = Constants.RESET_PASSWORD_PATH;
+            } else if (tokenType.equals(Constants.INVITE_USER_TOKEN)) {
+                from = Constants.MAIL_FROM_EMAIL_INVITATION;
+                subject = Constants.INVITATION_SUBJECT;
+                text = Constants.INVITE_USER_TEXT;
+                //path = Constants.INVITE_USER_PATH;
             } else {//TODO:handle token type is empty
                 from = Constants.MAIL_FROM_EMAIL_ACTIVATION;
                 subject = Constants.ACTIVATION_SUBJECT;

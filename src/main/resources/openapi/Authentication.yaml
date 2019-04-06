@@ -37,6 +37,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Switch Organization operations'
+  - name: Invite User
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: Find out more
+    description: 'Abyss plaftorm APIs : Invite User operations'
 paths:
   /abyss-session:
     post:
@@ -242,6 +247,36 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/SwitchOrganizationForm'
+      parameters: []
+  /invite-user:
+    post:
+      tags:
+        - Invite User
+      summary: User Invitatiton
+      description: Invite user to the platform
+      operationId: inviteUser
+      responses:
+        '201':
+          $ref: '#/components/responses/200-Generic'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/InviteUserForm'
+      parameters: []
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -359,6 +394,21 @@ components:
         organizationname:
           type: string
           description: 'Abyss platform organization name'
+    InviteUserInfo:
+      required:
+        - email
+        - hasConsentToShare
+      type: object
+      properties:
+        email:
+          type: string
+          description: E-mail of invitee
+        message:
+          type: string
+          description: Custom message to invitee
+        hasConsentToShare:
+          type: boolean
+          description: Has inviter given consent to share his or her firstname, lastname and e-mail defined in the Abyss Platform
   requestBodies:
     Credentials:
       content:
@@ -401,6 +451,13 @@ components:
           schema:
             $ref: '#/components/schemas/SwitchOrganizationInfo'
       description: 'Switch Organization request object'
+      required: true
+    InviteUserForm:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InviteUserInfo'
+      description: 'Invite User request object'
       required: true
   responses:
     '200':

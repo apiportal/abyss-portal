@@ -341,7 +341,27 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
         logger.trace("Received email:" + email);
         logger.trace("Received pass:" + password);
         logger.trace("Received pass2:" + password2);
-        logger.trace("Received isAgreedToTerms:" + isAgreedToTerms);
+        logger.trace("Received isAgreedToTerms:" + isAgreedToTerms); //TODO: Add to subject model
+
+        if (!isAgreedToTerms) {
+            logger.warn("Signing up User with info:[firstname:" + firstname + " lastname:" + lastname + " username:" + username + " email:" + email + "] has not aggreed to terms of use!. Thus rejected for sign up...");
+            return Single.error(new Forbidden403Exception("Signing up User with info:[firstname:" + firstname + " lastname:" + lastname + " username:" + username + " email:" + email + "] has not aggreed to terms of use!. Thus rejected for sign up...", true));
+        }
+
+        if (password == null || password.isEmpty()) {
+            logger.warn("password is null or empty");
+            return Single.error(new UnAuthorized401Exception("Please enter Password field"));
+        }
+
+        if (password2 == null || password2.isEmpty()) {
+            logger.warn("confirmPassword is null or empty");
+            return Single.error(new UnAuthorized401Exception("Please enter Confirm Password field"));
+        }
+
+        if (!(password.equals(password2))) {
+            logger.warn("Password and confirmPassword does not match");
+            return Single.error(new UnAuthorized401Exception("Password and Confirm Password does not match"));
+        }
 
         class SignupMetadata {
             private String subjectUUID;
@@ -713,6 +733,52 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                 .put("organizationname", temporaryOrganizationName)
         );
     }
+
+    public Single<JsonObject> inviteUser(RoutingContext routingContext, JDBCAuth jdbcAuth) {
+        logger.trace("inviteUser invoked");
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject inviteUserForm = requestParameters.body().getJsonObject();
+
+        String email = inviteUserForm.getString("email");
+        String message = inviteUserForm.getString("message");
+        Boolean hasConsentToShare = inviteUserForm.getBoolean("hasConsentToShare");
+
+        //TODO: OWASP Validate & Truncate the Fields that are going to be stored
+
+        logger.trace("Received email:" + email);
+        logger.trace("Received message:" + message);
+        logger.trace("Received hasConsentToShare:" + hasConsentToShare);
+
+
+        JsonObject json = new JsonObject();
+        json.put(Constants.EB_MSG_TOKEN, ""); //inviteUserMetadata.authInfo.getToken()); //TODO: referral token
+        json.put(Constants.EB_MSG_TO_EMAIL, email);
+        json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.INVITE_USER_TOKEN);
+        json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderActivationMailBody(routingContext,
+                Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SIGNUP_URL),
+                Constants.INVITE_USER_TEXT));
+
+        logger.trace("User invitation mail is rendered successfully");
+
+        return routingContext.vertx().eventBus().<JsonObject>rxSend(Constants.ABYSS_MAIL_CLIENT, json)
+            .flatMap(jsonObjectMessage -> {
+                logger.trace("Invitation Mailing Event Bus Result:" + jsonObjectMessage.isSend() + " | Result:" + jsonObjectMessage.body().encodePrettily());
+
+                return Single.just(new ApiSchemaError()
+                    .setCode(HttpResponseStatus.CREATED.code())
+                    .setUsermessage("Invitation Mail is sent to your friend's email address")
+                    .setInternalmessage("")
+                    .setDetails("Thank you")
+                    .setRecommendation("")
+                    //.setMoreinfo(new URL(""))
+                    .toJson());
+            });
+    }
+
+
 
     private Single<JsonObject> rxValidateToken(String token) {
         logger.trace("rxValidateToken invoked");

@@ -141,4 +141,34 @@ public class MailUtil {
         return result.get();
     }
 
+
+    public static String renderInviteUserMailBody(RoutingContext routingContext, String invitationUrl, String invitationText) {
+        logger.info("renderInviteUserMailBody invoked...");
+
+        AtomicReference<String> result = new AtomicReference<String>();
+        // In order to use a Thymeleaf template we first need to create an engine
+        final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
+
+        routingContext.put(Constants.MAIL_TEMPLATE_URL_INVITATION, invitationUrl);
+        routingContext.put(Constants.MAIL_TEMPLATE_TEXT_INVITATION, invitationText);
+        routingContext.put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+
+        JsonObject templateContext = new JsonObject()
+                .put(Constants.MAIL_TEMPLATE_URL_INVITATION, invitationUrl)
+                .put(Constants.MAIL_TEMPLATE_TEXT_INVITATION, invitationText)
+                .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
+
+        // and now delegate to the engine to render it.
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_INVITE_USER, res -> {
+            if (res.succeeded()) {
+                result.set(res.result().toString("UTF-8"));
+            } else {
+                logger.error(res.cause().getLocalizedMessage());
+                logger.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
+                routingContext.fail(res.cause());
+            }
+        });
+        return result.get();
+    }
+
 }
