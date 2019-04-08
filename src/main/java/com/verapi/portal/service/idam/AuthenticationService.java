@@ -757,7 +757,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
         json.put(Constants.EB_MSG_TOKEN, ""); //inviteUserMetadata.authInfo.getToken()); //TODO: referral token
         json.put(Constants.EB_MSG_TO_EMAIL, email);
         json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.INVITE_USER_TOKEN);
-        json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderActivationMailBody(routingContext,
+        json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderInviteUserMailBody(routingContext,
                 Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SIGNUP_URL),
                 Constants.INVITE_USER_TEXT));
 
