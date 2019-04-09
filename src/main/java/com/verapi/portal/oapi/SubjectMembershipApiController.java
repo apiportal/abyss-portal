@@ -240,7 +240,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
 
         requestBody.forEach(requestItem -> {
             ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_USER);
-            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_GROUP);
+            ((JsonObject) requestItem).put("subjectgrouptypeid", Constants.SUBJECT_TYPE_GROUP);
         });
 
         try {
@@ -305,7 +305,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
 
         requestBody.forEach(requestItem -> {
             ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_USER);
-            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_ROLE);
+            ((JsonObject) requestItem).put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE);
         });
 
         try {
@@ -370,7 +370,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
 
         requestBody.forEach(requestItem -> {
             ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_GROUP);
-            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_ROLE);
+            ((JsonObject) requestItem).put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE);
         });
 
          try {
@@ -435,7 +435,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
 
         requestBody.forEach(requestItem -> {
             ((JsonObject) requestItem).put("subjecttypeid", Constants.SUBJECT_TYPE_USER);
-            ((JsonObject) requestItem).put("subjecttypeid2", Constants.SUBJECT_TYPE_APP);
+            ((JsonObject) requestItem).put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP);
         });
 
         try {

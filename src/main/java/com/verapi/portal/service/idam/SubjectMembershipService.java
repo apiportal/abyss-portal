@@ -257,13 +257,13 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
 
     public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
 
-    public static final String SQL_CONDITION_USER_GROUP_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
+    public static final String SQL_CONDITION_USER_GROUP_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
 
-    public static final String SQL_CONDITION_USER_ROLE_MEMBERSHIP  = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
+    public static final String SQL_CONDITION_USER_ROLE_MEMBERSHIP  = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
 
-    public static final String SQL_CONDITION_GROUP_ROLE_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
+    public static final String SQL_CONDITION_GROUP_ROLE_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
 
-    public static final String SQL_CONDITION_USER_APP_MEMBERSHIP   = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjecttypeid2=CAST('" + Constants.SUBJECT_TYPE_APP + "' AS uuid)\n";
+    public static final String SQL_CONDITION_USER_APP_MEMBERSHIP   = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_APP + "' AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by id\n";
 
