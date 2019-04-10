@@ -402,6 +402,54 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /subjects/apps/user/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        description: 'uuid of User that owns Apps'
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - APPS OF USER
+      summary: 'Get list of APPs of user'
+      description: 'Returns list of APPs of user'
+      operationId: getAppsOfUser
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search APPs which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search APPs which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-AppWithContracts'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
   /subjects/users/:
     get:
       tags:
@@ -1387,6 +1435,174 @@ components:
                   type: boolean
                   readOnly: true
                   description: 'Is the permission active #readOnly#'
+    AppWithContracts:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
+        organizationid:
+          type: string
+          description: 'FK ID of Organization'
+        created:
+          type: string
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
+        updated:
+          type: string
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
+        deleted:
+          type: string
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
+        isactivated:
+          type: boolean
+          readOnly: true
+          description: 'Is user activated after signup by validating secondary verification mechanism #readOnly#'
+        subjecttypeid:
+          type: string
+          description: 'Id of Subject Type'
+        subjectname:
+          type: string
+          description: 'Username of user that is going to be used as credential'
+        displayname:
+          type: string
+          description: 'Display name or alias of user'
+        email:
+          type: string
+          format: email
+          description: 'Main contact email of user #email#'
+        effectivestartdate:
+          type: string
+          description: 'Effective start date time of user that he or she can start using the platform'
+        effectiveenddate:
+          type: string
+          description: 'Effective end date time of user that he or she can use the platform until'
+        subjectdirectoryid:
+          type: string
+          description: 'FK ID of Subject Directory'
+        subjectdirectory:
+          type: string
+          description: 'Name of Subject Directory'
+        islocked:
+          type: boolean
+          description: 'Is Subject Locked / Disabled'
+        issandbox:
+          type: boolean
+          description: 'Is Subject Sandbox'
+        url:
+          type: string
+          description: 'Url / Web Site Address of Subject (User or APP)'
+        description:
+          type: string
+          description: Description of subject
+        contracts:
+          type: object
+          properties:
+            uuid:
+              type: string
+              readOnly: true
+              description: 'Secondary primary key. Used in front end messages for security reasons.'
+            organizationid:
+              type: string
+              description: 'FK ID of Organization'
+            created:
+              type: string
+              readOnly: true
+              description: 'Timestamp of creation #readOnly#'
+            updated:
+              type: string
+              readOnly: true
+              description: 'Timestamp of update #readOnly#'
+            deleted:
+              type: string
+              readOnly: true
+              description: 'Timestamp of deletion #readOnly#'
+            isdeleted:
+              type: boolean
+              readOnly: true
+              description: 'Is record logically deleted #readOnly#'
+            name:
+              type: string
+              description: 'Name of contract'
+            description:
+              type: string
+              description: 'The text description of the contract'
+            apiid:
+              type: string
+              description: 'FK ID of API Version that this contract binds'
+            environment:
+              type: string
+              description: 'Environment that the contract relates to (Sandbox or Production).'
+            contractstateid:
+              type: string
+              description: 'FK ID of the current state of the contract.
+
+    The state values for an API contract are
+
+    pending_approval
+    config_pending (used only in certain custom workflow scenarios or in LaaS integration)
+    approved
+    activated
+    rejected
+    resubmitted
+    suspended
+    cancelled'
+            status:
+              type: string
+              description: 'The status of the contract.
+    draft - Indicates the contract has not yet been activated. workflow status of Pending Approval, Approved, and any other state before the contract is activated will have this status value.
+    inforce - Indicates that the contract is either Active or Suspended.
+    archived - Indicates that the active life of the contract is over. The workflow status of Cancelled, adn any other action that results in the cancellation of the contract (such as deletion of the app or API) will have this status value'
+            licenseid:
+              type: string
+              description: 'FK ID of license'
+            subjectpermissionid:
+              type: string
+              description: 'FK ID of Subject Permission'
+            tokens:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  readOnly: true
+                  description: 'Secondary primary key. Used in front end messages for security reasons.'
+                organizationid:
+                  type: string
+                  description: 'Id of Organization'
+                created:
+                  type: string
+                  readOnly: true
+                  description: 'Timestamp of creation #readOnly#'
+                updated:
+                  type: string
+                  readOnly: true
+                  description: 'Timestamp of update #readOnly#'
+                deleted:
+                  type: string
+                  readOnly: true
+                  description: 'Timestamp of deletion #readOnly#'
+                isdeleted:
+                  type: boolean
+                  readOnly: true
+                  description: 'Is record logically deleted #readOnly#'
+                token:
+                  type: string
+                  readOnly: true
+                  description: 'Activation token'
+                expiredate:
+                  type: string
+                  readOnly: true
+                  description: 'Expire date of activation code'
+                isactive:
+                  type: boolean
+                  description: 'Is Token Active'
     SubjectChangePassword:
       type: object
       properties:
@@ -1463,6 +1679,14 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/SubjectWithGroups'
+    '200-AppWithContracts':
+      description: 'Apps with contracts array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/AppWithContracts'
     '201':
       description: 'New Subject resource has been created'
       content:

@@ -175,7 +175,7 @@ public abstract class AbstractService<T> implements IService<T> {
                                     String tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
                                     logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
                                     boolean isParamTable = true;
-                                    if (tableName.isEmpty()) {
+                                    if (!tableName.isEmpty()) {
                                         isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
                                     }
 
@@ -293,7 +293,10 @@ public abstract class AbstractService<T> implements IService<T> {
                         .flatMap(conn1 -> { //TODO: Improve Organization Filter
                             String tableName = getTableNameFromSql(sql).toLowerCase();
                             logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
-                            boolean isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                            boolean isParamTable = true;
+                            if (!tableName.isEmpty()) {
+                                isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                            }
 
                             boolean isAdmin = false; //TODO: Admin Only
                             boolean doesContainOrderBy = false; //TODO: Order By Handling
@@ -475,9 +478,11 @@ public abstract class AbstractService<T> implements IService<T> {
 
         sql = sql.toLowerCase();
 
-        int tableNameStartIndex = sql.indexOf(SQL_FROM)+SQL_FROM.length();
+        int tableNameStartIndex = sql.indexOf(SQL_FROM);
         if (tableNameStartIndex==-1)
             return "";
+
+        tableNameStartIndex = tableNameStartIndex+SQL_FROM.length();
 
         String tableNameStr = sql.substring(tableNameStartIndex);
 

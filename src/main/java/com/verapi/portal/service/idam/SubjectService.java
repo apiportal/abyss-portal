@@ -630,4 +630,26 @@ public class SubjectService extends AbstractService<UpdateResult> {
             SQL_WHERE +
             "s." + SQL_CONDITION_UUID_IS;
 
+    public static final String FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS = "SELECT app.uuid, app.organizationid, app.created, app.updated, app.deleted, app.isdeleted, app.isactivated, app.subjectname, app.displayname, app.email, app.effectivestartdate, app.effectiveenddate, app.subjectdirectoryid, app.islocked, app.issandbox, app.url, app.description,\n" +
+            "COALESCE((select json_agg(\n" +
+            "\t\tjson_build_object('uuid', c.uuid, 'organizationid', c.organizationid, 'created', c.created, 'updated', c.updated, 'deleted', c.deleted, 'isdeleted', c.isdeleted, 'name', c.\"name\", 'description', c.description, 'apiid', c.apiid, 'environment', c.environment, 'contractstateid', c.contractstateid, 'status', c.status, 'licenseid', c.licenseid, 'subjectpermissionid', c.subjectpermissionid, \n" +
+            "\t\t\t'tokens', COALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', rat.uuid, 'organizationid', rat.organizationid, 'created', rat.created, 'deleted', rat.deleted, 'isdeleted', rat.isdeleted, 'isactive', 'token', rat.token, 'expiredate', rat.expiredate, rat.isactive)\n" +
+            "\t\t\t\t\t) from resource_access_token rat\n" +
+            "\t\t\t\t\t\twhere rat.subjectpermissionid = sp.uuid\n" +
+            "\t\t\t\t), '[]')\n" +
+            "\t\t\t)\n" +
+            "\t\t) from contract c\n" +
+            "     \t\tjoin subject_permission sp on sp.uuid = c.subjectpermissionid\n" +
+            "\t  \t\twhere app.uuid = c.subjectid\n" +
+            "\t), '[]') as contracts\n" +
+            "from \n" +
+            "subject app\n" +
+            ", subject usr, subject_membership sm\n" +
+            "where app.subjecttypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6' --APP\n" +
+            "and app.uuid = sm.subjectgroupid and sm.subjectid = usr.uuid \n" +
+            "and sm.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'::uuid and sm.subjectgrouptypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6'::uuid --USER + APP MEMBERSHIP\n" +
+            "and usr.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'::uuid \n" +
+            "and usr." + SQL_CONDITION_UUID_IS;
+
 }

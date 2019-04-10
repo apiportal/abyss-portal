@@ -45,6 +45,7 @@ public class SubjectApiController extends AbstractApiController {
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.NESTED_COLUMN_USER_GROUPS);
         add(Constants.NESTED_COLUMN_USER_PERMISSIONS);
+        add(Constants.NESTED_COLUMN_USER_CONTRACTS);
     }};
 
 
@@ -379,5 +380,11 @@ public class SubjectApiController extends AbstractApiController {
                 .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
+
+    @AbyssApiOperationHandler
+    public void getAppsOfUser(RoutingContext routingContext) {
+        getEntities(routingContext, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
 
 }
