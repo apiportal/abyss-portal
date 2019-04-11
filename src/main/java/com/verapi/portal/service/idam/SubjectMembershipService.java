@@ -240,9 +240,9 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
             "  crudsubjectid,\n" +
             "  subjectid,\n" +
             "  subjectgroupid,\n" +
-            "  subjectdirectoryid\n" +
-            "  subjecttypeid\n" +
-            "  subjectgrouptypeid\n" +
+            "  subjectdirectoryid,\n" +
+            "  subjecttypeid,\n" +
+            "  subjectgrouptypeid,\n" +
             "  isactive\n" +
             "from\n" +
             "subject_membership\n";
