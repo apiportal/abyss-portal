@@ -175,9 +175,9 @@ public abstract class AbstractService<T> implements IService<T> {
                                     String tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
                                     logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
                                     boolean isParamTable = true;
-                                    if (!tableName.isEmpty()) {
+                                    if (!tableName.isEmpty() && !tableName.equals("insert")) {
                                         isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
-                                    }
+                                    } //TODO: Check organizationid == org uuid in session
 
                                     boolean isAdmin = false; //TODO: Admin Only
                                     boolean doesContainOrderBy = false; //TODO: Order By Handling
@@ -514,9 +514,10 @@ public abstract class AbstractService<T> implements IService<T> {
             if (indexOfSqlInsertIntoVerb==-1) {
                 return "";
             } else { //Insert Into
-                tableNameStartIndex = indexOfSqlInsertIntoVerb+SQL_INSERT_INTO_VERB.length();
+                return "INSERT";
+                /*tableNameStartIndex = indexOfSqlInsertIntoVerb+SQL_INSERT_INTO_VERB.length();
                 tableNameStr = sql.substring(tableNameStartIndex);
-                tableNameEndIndex = tableNameStr.indexOf(" ");
+                tableNameEndIndex = tableNameStr.indexOf(" ");*/
             }
         } else { //Update
             tableNameStartIndex = indexOfSqlUpdateVerb+SQL_UPDATE_VERB.length();
