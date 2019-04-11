@@ -116,9 +116,15 @@ public abstract class AbstractApiController implements IApiController {
                                 factory.addHandlerByOperationId(methodName, routingContext -> {
                                     try {
                                         getClass().getDeclaredMethod(methodName, RoutingContext.class).invoke(this, routingContext);
-                                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                                    } catch (NoSuchMethodException | IllegalAccessException e) {
                                         logger.error("{}.{} invocation error: {} \n stack trace: {}", getClass().getName(), method.getName(), e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
                                         throwApiException(routingContext, InternalServerError500Exception.class, e);
+                                    } catch (InvocationTargetException eITE) {
+                                        logger.error("{}.{} invocation error: {} \n stack trace:\n{}\ntarget error msg: {}\n target stack trace:\n{}\n", getClass().getName(), method.getName(),
+                                                eITE.getLocalizedMessage(), Arrays.toString(eITE.getStackTrace()),
+                                                eITE.getTargetException().getLocalizedMessage(), Arrays.toString(eITE.getTargetException().getStackTrace())
+                                        );
+                                        throwApiException(routingContext, InternalServerError500Exception.class, eITE);
                                     }
                                 });
 
