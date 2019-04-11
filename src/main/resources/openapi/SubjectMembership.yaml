@@ -1073,6 +1073,17 @@ components:
           type: string
           description: 'FK ID of Subject Directory'
           nullable: true
+        subjecttypeid:
+          type: string
+          readOnly: true
+          description: 'Id of Subject Type'
+        subjectgrouptypeid:
+          type: string
+          readOnly: true
+          description: 'Id of Subject Group Type'
+        isactive:
+          type: boolean
+          description: 'Is the Subject Membership active or not'
   requestBodies:
     SubjectMembership:
       content:

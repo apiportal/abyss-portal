@@ -55,7 +55,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("crudsubjectid"))
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("subjectgroupid"))
-                            .add(jsonObj.getString("subjectdirectoryid"));
+                            .add(jsonObj.getString("subjectdirectoryid"))
+                            .add(jsonObj.getBoolean("isactive"));
+                    if (jsonObj.containsKey("subjecttypeid")) insertParam.add(jsonObj.getString("subjecttypeid"));
+                    if (jsonObj.containsKey("subjectgrouptypeid")) insertParam.add(jsonObj.getString("subjectgrouptypeid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -108,6 +111,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("subjectid"))
                 .add(updateRecord.getString("subjectgroupid"))
                 .add(updateRecord.getString("subjectdirectoryid"))
+                .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -128,6 +132,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("subjectgroupid"))
                             .add(jsonObj.getString("subjectdirectoryid"))
+                            .add(jsonObj.getBoolean("isactive"))
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -215,8 +220,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-    private static final String SQL_INSERT = "insert into subject_membership (organizationid, crudsubjectid, subjectid, subjectgroupid, subjectdirectoryid)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
+    private static final String SQL_INSERT = "insert into subject_membership (organizationid, crudsubjectid, subjectid, subjectgroupid, subjectdirectoryid,\n" +
+            "subjecttypeid, subjectgrouptypeid, isactive)\n" +
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid)," +
+                "CAST(? AS uuid) ,CAST(? AS uuid), ?)";
 
     private static final String SQL_DELETE = "update subject_membership\n" +
             "set\n" +
@@ -234,6 +241,9 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
             "  subjectid,\n" +
             "  subjectgroupid,\n" +
             "  subjectdirectoryid\n" +
+            "  subjecttypeid\n" +
+            "  subjectgrouptypeid\n" +
+            "  isactive\n" +
             "from\n" +
             "subject_membership\n";
 
@@ -244,7 +254,10 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
             "  , crudsubjectid      = CAST(? AS uuid)\n" +
             "  , subjectid      = CAST(? AS uuid)\n" +
             "  , subjectgroupid      = CAST(? AS uuid)\n" +
-            "  , subjectdirectoryid      = CAST(? AS uuid)\n";
+            "  , subjectdirectoryid      = CAST(? AS uuid)\n" +
+            //"  , subjecttypeid      = CAST(? AS uuid)\n" +
+            //"  , subjectgrouptypeid      = CAST(? AS uuid)\n" +
+            "  , isactive      = CAST(? AS uuid)\n";
 
 
     private static final String SQL_CONDITION_NAME_IS = "";
