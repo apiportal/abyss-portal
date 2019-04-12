@@ -11,7 +11,7 @@
 
 package com.verapi.portal.oapi.util;
 
-import com.verapi.portal.common.OpenAPIUtil;
+import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.portal.common.PlatformAPIList;
 import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.AbyssApiController;
@@ -73,5 +73,24 @@ public class UtilApiController extends AbstractApiController {
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
+
+    @AbyssApiOperationHandler
+    public void convertSwaggerToOpenAPIv3Spec(RoutingContext routingContext) {
+        try {
+            logger.trace("convertSwaggerToOpenAPIv3Spec invoked");
+            // Get the parsed parameters
+            RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+            // We get an user JSON array validated by Vert.x Open API validator
+            JsonObject requestBody = requestParameters.body().getJsonObject();
+
+            subscribeAndResponseString(routingContext, OpenAPIUtil.convertSwaggerToOpenAPI(requestBody.getJsonObject("spec")), HttpResponseStatus.OK.code(), false);
+        } catch (Exception e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 
 }

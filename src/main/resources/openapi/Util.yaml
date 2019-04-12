@@ -82,6 +82,34 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/OpenApiSpec'
+  /convert-swagger-to-oas:
+    post:
+      tags:
+        - OpenAPI Utils
+      summary: 'Converts Swagger to OpenAPI 3.x yaml'
+      description: 'Returns OpenAPI 3.x yaml file'
+      operationId: convertSwaggerToOpenAPIv3Spec
+      responses:
+        '200':
+          $ref: '#/components/responses/200-OASValidationSuccessful'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/OpenApiSpec'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -119,6 +147,17 @@ components:
         spec:
           type: object
           description: 'open api spec'
+#    OASYaml:
+#      type: object
+#      properties:
+#        openApiYaml:
+#          type: string
+#          description: 'OAS 3.x yaml'
+#        openApiSpecVersion:
+#          type: string
+#          description: 'OAS version'
+    OASYaml:
+      type: string
   requestBodies:
     OpenApiSpec:
       content:
@@ -150,6 +189,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/YamlFile'
+    '200-OASYaml':
+      description: 'Converted OAS Yaml'
+      content:
+        application/text:
+          schema:
+            $ref: '#/components/schemas/OASYaml'
     '400':
       description: 'Bad request'
       content:

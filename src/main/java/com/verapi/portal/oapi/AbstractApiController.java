@@ -780,6 +780,23 @@ public abstract class AbstractApiController implements IApiController {
         });
     }
 
+    protected void subscribeAndResponseString(RoutingContext routingContext, Single<String> response, int httpResponseStatus, boolean onlyStatus) {
+        response.subscribe(stringObject -> {
+//            elasticSearchService.indexDocument(routingContext,
+//                    this.getClass().getSimpleName().replace("ApiController", "").toLowerCase() + "-api",
+//                    jsonObject);
+            routingContext.response()
+                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/text; charset=utf-8")
+                    .putHeader("Vary", "Origin")
+                    .putHeader("Access-Control-Allow-Credentials", "true")
+                    .setStatusCode(httpResponseStatus)
+                    .end((onlyStatus) ? "." : stringObject);
+//            logger.trace("replied successfully");
+        }, throwable -> {
+            processException(routingContext, throwable);
+        });
+    }
+
 
     <T extends IService> void getEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, UnsupportedEncodingException {
         getEntities(routingContext, clazz, null, new ApiFilterQuery());
