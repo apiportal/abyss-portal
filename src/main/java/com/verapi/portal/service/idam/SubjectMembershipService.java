@@ -56,9 +56,9 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("subjectgroupid"))
                             .add(jsonObj.getString("subjectdirectoryid"))
+                            .add(jsonObj.containsKey("subjecttypeid")?jsonObj.getString("subjecttypeid"):Constants.SUBJECT_TYPE_USER)
+                            .add(jsonObj.containsKey("subjectgrouptypeid")?jsonObj.getString("subjectgrouptypeid"):Constants.SUBJECT_TYPE_GROUP)
                             .add(jsonObj.getBoolean("isactive"));
-                    if (jsonObj.containsKey("subjecttypeid")) insertParam.add(jsonObj.getString("subjecttypeid"));
-                    if (jsonObj.containsKey("subjectgrouptypeid")) insertParam.add(jsonObj.getString("subjectgrouptypeid"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
