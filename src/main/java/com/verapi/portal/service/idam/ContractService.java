@@ -291,6 +291,8 @@ public class ContractService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
 
+    private static final String SQL_CONDITION_LICENSEID_IN = "licenseid in (select distinct uuid from license where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
+
     private static final String SQL_CONDITION_SUBJECTPERMISSIONID_IS = "subjectpermissionid = CAST(? AS uuid)\n";
 
     private static final String SQL_ORDERBY_NAME = "order by name\n";
@@ -318,6 +320,8 @@ public class ContractService extends AbstractService<UpdateResult> {
     static final String FILTER_BY_SUBJECTPERMISSIONID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECTPERMISSIONID_IS;
 
     public static final String FILTER_BY_LICENSEID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
+
+    public static final String FILTER_BY_LICENSES_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IN;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
