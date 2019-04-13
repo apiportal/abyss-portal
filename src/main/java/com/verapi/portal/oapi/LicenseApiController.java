@@ -208,5 +208,12 @@ public class LicenseApiController extends AbstractApiController {
                 .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
+    @AbyssApiOperationHandler
+    public void getLicensesOfApiInUse(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(LicenseService.FILTER_BY_API)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
+
 
 }
