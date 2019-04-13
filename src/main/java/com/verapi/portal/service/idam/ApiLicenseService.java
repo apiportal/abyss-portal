@@ -256,7 +256,11 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_APIID_IS = "apiid = CAST(? AS uuid)\n";
 
+    private static final String SQL_CONDITION_APIID_IN = "apiid in (select distinct uuid from api where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
+
     private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
+
+    private static final String SQL_CONDITION_LICENSEID_IN = "licenseid in (select distinct uuid from license where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
 
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
@@ -276,5 +280,9 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
 
     public static final String SQL_LIST_API_LICENSES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
 
+    public static final String SQL_LIST_API_LICENSES_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IN;
+
     public static final String SQL_LIST_LICENSE_APIS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
+
+    public static final String SQL_LIST_LICENSE_APIS_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IN;
 }

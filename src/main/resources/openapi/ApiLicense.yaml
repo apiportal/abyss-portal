@@ -37,6 +37,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : License''s APIs listing operations'
+  - name: Api Licenses of User
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : User''s Licenses listing operations'
 paths:
   /api-licenses:
     get:
@@ -309,6 +314,53 @@ paths:
         - name: uuid
           in: path
           description: 'uuid of License'
+          required: true
+          schema:
+            type: string
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Api Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiLicense'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /api-licenses/user/{uuid}:
+    get:
+      tags:
+        - Api Licenses of User
+      summary: 'Get list of User''s Licenses'
+      description: 'Returns list of Licenses of a User'
+      operationId: getApiLicensesOfUser
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of User'
           required: true
           schema:
             type: string

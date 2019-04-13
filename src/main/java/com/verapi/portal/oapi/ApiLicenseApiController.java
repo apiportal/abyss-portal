@@ -182,4 +182,23 @@ public class ApiLicenseApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getApiLicensesOfUser(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    ApiLicenseService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiLicenseService.SQL_LIST_API_LICENSES_OF_USER)
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 }
