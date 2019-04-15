@@ -694,7 +694,7 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponseBulkList(routingContext, jsonListSingle, null, httpResponseStatus);
     }
 
-    private void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, List<String> jsonColumns, int httpResponseStatus) {
+    protected void subscribeAndResponseBulkList(RoutingContext routingContext, Single<List<JsonObject>> jsonListSingle, List<String> jsonColumns, int httpResponseStatus) {
         logger.trace("---subscribeAndResponseBulkList invoked");
         JsonArray arr = new JsonArray();
         jsonListSingle

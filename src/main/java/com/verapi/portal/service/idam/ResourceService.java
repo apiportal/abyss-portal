@@ -71,7 +71,7 @@ public class ResourceService extends AbstractService<UpdateResult> {
                 })
                 .flatMap(insertResult -> {
                     if (insertResult.getThrowable() == null) {
-                        if (insertResult.getResultSet() != null && insertResult.getResultSet().getNumRows()>0) {
+                        if (insertResult.getUpdateResult() != null && insertResult.getUpdateResult().getUpdated()>0) {
                             return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
                                     .onErrorResumeNext(ex -> {
                                         insertResult.setThrowable(ex);

@@ -69,6 +69,161 @@ public class SubjectService extends AbstractService<UpdateResult> {
         //*******
     }
 
+    //TODO: Process Bulk Insert
+    public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
+        logger.trace("---insertAllCascaded invoked");
+
+        class InsertAllCascadedMetadata {
+
+            private String appUuid;
+            private String appDirectoryUuid;
+
+            private JsonArray insertResourceRecords;
+            private JsonArray insertSubjectPermissionRecords;
+            private JsonArray insertResourceAccessTokensRecords;
+            private JsonArray insertSubjectMembershipRecords;
+
+
+            private List<JsonObject> jsonObjectList;
+
+            private ResourceService resourceService;
+            private SubjectPermissionService subjectPermissionService;
+            private ResourceAccessTokenService resourceAccessTokenService;
+            private SubjectMembershipService subjectMembershipService;
+
+
+            InsertAllCascadedMetadata() {
+            }
+        }
+
+        InsertAllCascadedMetadata insertAllCascadedMetadata = new InsertAllCascadedMetadata();
+
+        return insertAll(insertRecords)
+                .flatMap(jsonObjects -> {
+
+                    insertAllCascadedMetadata.jsonObjectList = jsonObjects;
+
+                    insertAllCascadedMetadata.insertResourceRecords = new JsonArray();
+
+                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
+                    jsonObjects.forEach(requestItem -> {
+                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+
+                            insertAllCascadedMetadata.appUuid = requestItem.getString("uuid"); //TODO: Remove
+                            insertAllCascadedMetadata.appDirectoryUuid = requestItem.getJsonObject("response").getString("subjectdirectoryid"); //TODO: Remove
+
+                            JsonObject resourceJsonObject = new JsonObject()
+                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
+                                    .put("resourcename", requestItem.getJsonObject("response").getString("displayname") + " APP")
+                                    .put("description", requestItem.getJsonObject("response").getString("description"))
+                                    .put("resourcerefid", requestItem.getString("uuid"))
+                                    .put("isactive", true);
+                            insertAllCascadedMetadata.insertResourceRecords.add(resourceJsonObject);
+                        }
+                    });
+
+                    insertAllCascadedMetadata.resourceService = new ResourceService(routingContext.vertx());
+                    //insertAllCascadedMetadata.resourceService.setAutoCommit(false);
+                    //return insertAllCascadedMetadata.resourceService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
+                    return insertAllCascadedMetadata.resourceService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                })
+                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.resourceService.insertAll(insertAllCascadedMetadata.insertResourceRecords)
+                )
+
+
+                .flatMap(jsonObjects -> {
+                    insertAllCascadedMetadata.insertSubjectPermissionRecords = new JsonArray();
+
+                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
+                    jsonObjects.forEach(requestItem -> {
+                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                            JsonObject permissionJsonObject = new JsonObject()
+                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("permission", "Subscription of my own " + requestItem.getJsonObject("response").getString("resourcename"))
+                                    .put("description", "Subscription of my own " + requestItem.getJsonObject("response").getString("resourcename"))
+                                    .put("effectivestartdate", Instant.now())
+                                    .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
+                                    .put("subjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("resourceid", requestItem.getString("uuid"))
+                                    .put("resourceactionid", Constants.RESOURCE_ACTION_OWN_APP)
+                                    .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
+                                    .put("isactive", true);
+                            insertAllCascadedMetadata.insertSubjectPermissionRecords.add(permissionJsonObject);
+                        }
+                    });
+
+                    insertAllCascadedMetadata.subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+                    //insertAllCascadedMetadata.subjectPermissionService.setAutoCommit(false);
+                    //return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
+                    return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                })
+                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.subjectPermissionService.insertAll(insertAllCascadedMetadata.insertSubjectPermissionRecords)
+                )
+
+
+                .flatMap(jsonObjects -> {
+                    insertAllCascadedMetadata.insertResourceAccessTokensRecords = new JsonArray();
+
+                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
+                    jsonObjects.forEach(requestItem -> {
+                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                            JsonObject accessTokenJsonObject = new JsonObject()
+                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("subjectpermissionid", requestItem.getString("uuid"))
+                                    .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
+                                    .put("resourcerefid", insertAllCascadedMetadata.appUuid)//TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
+                                    .put("isactive", true);
+                            insertAllCascadedMetadata.insertResourceAccessTokensRecords.add(accessTokenJsonObject);
+                        }
+                    });
+
+                    insertAllCascadedMetadata.resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
+                    //insertAllCascadedMetadata.resourceAccessTokenService.setAutoCommit(false);
+                    //return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
+                    return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                })
+                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.resourceAccessTokenService.insertAll(insertAllCascadedMetadata.insertResourceAccessTokensRecords)
+                )
+
+
+                .flatMap(jsonObjects -> {
+                    insertAllCascadedMetadata.insertSubjectMembershipRecords = new JsonArray();
+
+                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
+                    jsonObjects.forEach(requestItem -> {
+                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                            JsonObject subjectMembershipJsonObject = new JsonObject()
+                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("subjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("subjectgroupid", insertAllCascadedMetadata.appUuid) //TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
+                                    .put("subjectdirectoryid", insertAllCascadedMetadata.appDirectoryUuid) //TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
+                                    .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
+                                    .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP)
+                                    .put("isactive", true);
+                            insertAllCascadedMetadata.insertSubjectMembershipRecords.add(subjectMembershipJsonObject);
+                        }
+                    });
+
+                    insertAllCascadedMetadata.subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
+                    //insertAllCascadedMetadata.subjectMembershipService.setAutoCommit(true);
+                    //return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
+                    return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                })
+                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.subjectMembershipService.insertAll(insertAllCascadedMetadata.insertSubjectMembershipRecords)
+                )
+
+
+                .flatMap(jsonObjects -> {
+                   return Single.just(insertAllCascadedMetadata.jsonObjectList); //TODO: Cascaded Result
+                });
+    }
+
+
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
@@ -78,7 +233,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray insertParam = new JsonArray()
                             .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
+                            .add(jsonObj.getString("crudsubjectid")) //TODO: Make it readOnly in Yaml
                             .add(jsonObj.containsKey("isactivated") ? jsonObj.getBoolean("isactivated") : false)
                             .add(jsonObj.getString("subjecttypeid"))
                             .add(jsonObj.getString("subjectname"))

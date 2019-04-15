@@ -402,6 +402,87 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /subjects/apps/cascaded:
+    post:
+      tags:
+        - APPS CASCADED
+      summary: 'Add a bulk of APPs cascaded'
+      description: 'Provide a list of APPs to be inserted cascaded'
+      operationId: addAppsCascaded
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubject'
+      parameters: []
+    put:
+      tags:
+        - APPS CASCADED
+      summary: 'Update a bulk of APPs cascaded'
+      description: 'Provide a bulk list of APPs to be updated cascaded'
+      operationId: updateAppsCascaded
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
+    delete:
+      tags:
+        - APPS CASCADED
+      summary: 'Delete all APPs cascaded'
+      description: 'Deletes all APPs cascaded'
+      operationId: deleteAppsCascaded
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubjectObject'
+      parameters: []
   /subjects/apps/user/{uuid}:
     parameters:
       - name: uuid

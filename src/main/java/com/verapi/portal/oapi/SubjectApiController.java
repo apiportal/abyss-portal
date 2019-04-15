@@ -15,7 +15,10 @@ package com.verapi.portal.oapi;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.common.Constants;
 import com.verapi.portal.service.ApiFilterQuery;
+import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.SubjectService;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -79,8 +82,13 @@ public class SubjectApiController extends AbstractApiController {
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
-    
+
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
+        addEntitiesCascaded(routingContext, appendRequestBody, false);
+    }
+
+
+    void addEntitiesCascaded(RoutingContext routingContext, JsonObject appendRequestBody, boolean isCascaded) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -126,7 +134,16 @@ public class SubjectApiController extends AbstractApiController {
 
         //now it is time to add entities
         try {
-            addEntities(routingContext, SubjectService.class, requestBody);
+            if (isCascaded) {
+                logger.trace("---adding entities in a cascaded way");
+                SubjectService subjectService = new SubjectService(routingContext.vertx());
+                //subjectService.setAutoCommit(false);
+                Single<List<JsonObject>> insertAllCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                        .flatMap(jdbcClient -> subjectService.insertAllCascaded(routingContext, requestBody));
+                subscribeAndResponseBulkList(routingContext, insertAllCascadedResult, null, HttpResponseStatus.MULTI_STATUS.code());
+            } else {
+                addEntities(routingContext, SubjectService.class, requestBody);
+            }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -387,4 +404,9 @@ public class SubjectApiController extends AbstractApiController {
                 .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
+    @AbyssApiOperationHandler
+    public void addAppsCascaded(RoutingContext routingContext) {
+        addEntitiesCascaded(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
+                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)), true);
+    }
 }

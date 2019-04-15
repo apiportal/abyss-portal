@@ -27,6 +27,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,8 @@ public abstract class AbstractService<T> implements IService<T> {
     protected static ElasticSearchService elasticSearchService = new ElasticSearchService();
     protected String organizationUuid;// = Constants.DEFAULT_ORGANIZATION_UUID;
 
+    protected Boolean autoCommit = true;
+    protected SQLConnection sqlConnection = null;
 
     public static final String SQL_AND = "and\n";
 
@@ -131,6 +134,13 @@ public abstract class AbstractService<T> implements IService<T> {
         return initJDBCClient();
     }
 
+//    public Single<JDBCClient> initJDBCClient(String organizationUuid, SQLConnection sqlConnection) {
+//        this.organizationUuid = organizationUuid;
+//        this.sqlConnection = sqlConnection;
+//        return initJDBCClient();
+//    }
+
+
     public Vertx getVertx() {
         return vertx;
     }
@@ -147,14 +157,18 @@ public abstract class AbstractService<T> implements IService<T> {
         this.jdbcClient = jdbcClient;
     }
 
+    public Boolean getAutoCommit() { return autoCommit; }
+
+    public void setAutoCommit(Boolean autoCommit) { this.autoCommit = autoCommit; }
+
     private Single<CompositeResult> rxUpdateWithParams(String sql) {
         return rxUpdateWithParams(sql, null);
     }
 
     private Single<CompositeResult> rxUpdateWithParams(String sql, JsonArray params) {
         logger.trace("---rxUpdateWithParams invoked");
-        return jdbcClient
-                .rxGetConnection()
+        return (sqlConnection==null ? jdbcClient
+                .rxGetConnection() : Single.just(sqlConnection))
                 .flatMap(conn -> conn
                                 .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
                                 // Disable auto commit to handle transaction manually
@@ -172,6 +186,7 @@ public abstract class AbstractService<T> implements IService<T> {
 //                                //.onErrorResumeNext(throwable ->  Single.just(new UpdateResult().setKeys(new JsonArray().add(1)).setUpdated(1)))
 
                                 .flatMap(conn1 -> { //TODO: Improve Organization Filter
+                                    //sqlConnection = conn;
                                     String tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
                                     logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
                                     boolean isParamTable = true;
@@ -219,7 +234,13 @@ public abstract class AbstractService<T> implements IService<T> {
                                     return Single.just(resultSet);
                                 })
 
-                                .flatMap(updateResult -> conn.rxCommit().toSingleDefault(updateResult).map(commit -> new CompositeResult(updateResult)))
+                                .flatMap(updateResult -> {
+                                    if (autoCommit) {
+                                        return conn.rxCommit().toSingleDefault(updateResult).map(commit -> new CompositeResult(updateResult));
+                                    } else {
+                                        return Single.just(new CompositeResult(updateResult));
+                                    }
+                                })
 
 
 /*
@@ -256,7 +277,7 @@ public abstract class AbstractService<T> implements IService<T> {
                                 })
 
                                 // close the connection regardless succeeded or failed
-                                .doAfterTerminate(conn::close)
+                                .doAfterTerminate(conn::close) //TODO: ne zaman tetikleniyor?
                 );
     }
 
@@ -265,6 +286,7 @@ public abstract class AbstractService<T> implements IService<T> {
     }
 
     private Single<ResultSet> rxQueryWithParams(String sql, JsonArray params) {
+        logger.trace("---rxQueryWithParams invoked");
 /*
         java.sql.ResultSet tableMetaDataResultSet = null;
         try {
@@ -281,8 +303,9 @@ public abstract class AbstractService<T> implements IService<T> {
             logger.error("an error occurred while getting columns metada of API table. {}", (Object) e.getStackTrace());
         }
 */
-        return jdbcClient
-                .rxGetConnection().flatMap(conn -> conn
+        return (sqlConnection==null ? jdbcClient
+                .rxGetConnection() : Single.just(sqlConnection))
+                .flatMap(conn -> conn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.API_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
@@ -291,6 +314,7 @@ public abstract class AbstractService<T> implements IService<T> {
                         //execute query
                         //.flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
                         .flatMap(conn1 -> { //TODO: Improve Organization Filter
+                            //sqlConnection = conn;
                             String tableName = getTableNameFromSql(sql).toLowerCase();
                             logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
                             boolean isParamTable = true;
