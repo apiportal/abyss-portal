@@ -35,9 +35,10 @@ tags:
 paths:
   /subject-apps:
     get:
+      deprecated: true
       tags:
         - SubjectApps
-      summary: 'Get list of SubjectApps'
+      summary: 'Get list of SubjectApps - Use /subject-memberships/user-app/'
       description: 'Returns list of SubjectApps'
       operationId: getSubjectApps
       parameters:
@@ -75,9 +76,10 @@ paths:
         default:
           $ref: '#/components/responses/default'
     post:
+      deprecated: true
       tags:
         - SubjectApps
-      summary: 'Add a bulk of SubjectApps'
+      summary: 'Add a bulk of SubjectApps - Use /subject-memberships/user-app/'
       description: 'Provide a list of SubjectApps to be inserted'
       operationId: addSubjectApps
       responses:
@@ -102,9 +104,10 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectApp'
     put:
+      deprecated: true
       tags:
         - SubjectApps
-      summary: 'Update a bulk of SubjectApps'
+      summary: 'Update a bulk of SubjectApps - Use /subject-memberships/user-app/'
       description: 'Provide a bulk list of  SubjectApps to be updated'
       operationId: updateSubjectApps
       responses:
@@ -129,9 +132,10 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubjectAppObject'
     delete:
+      deprecated: true
       tags:
         - SubjectApps
-      summary: 'Delete all SubjectApps'
+      summary: 'Delete all SubjectApps - Use /subject-memberships/user-app/'
       description: 'Deletes all SubjectApps'
       operationId: deleteSubjectApps
       responses:
@@ -151,9 +155,10 @@ paths:
           $ref: '#/components/responses/default'
   /subject-apps/{uuid}:
     get:
+      deprecated: true
       tags:
         - SubjectApp
-      summary: 'Get an existing SubjectApp by uuid'
+      summary: 'Get an existing SubjectApp by uuid - Use /subject-memberships/{uuid}'
       description: 'Provide an uuid of SubjectApp to be get'
       operationId: getSubjectApp
       parameters:
@@ -183,9 +188,10 @@ paths:
         default:
           $ref: '#/components/responses/default'
     put:
+      deprecated: true
       tags:
         - SubjectApp
-      summary: 'Update an existing SubjectApp'
+      summary: 'Update an existing SubjectApp - Use /subject-memberships/{uuid}'
       description: 'Provide an altered SubjectApp to be updated'
       operationId: updateSubjectApp
       parameters:
@@ -217,9 +223,10 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/SubjectApp'
     delete:
+      deprecated: true
       tags:
         - SubjectApp
-      summary: 'Delete SubjectApp'
+      summary: 'Delete SubjectApp - Use /subject-memberships/{uuid}'
       description: 'Provide an uuid parameter of SubjectApp to be updated'
       operationId: deleteSubjectApp
       parameters:
@@ -248,9 +255,10 @@ paths:
           $ref: '#/components/responses/default'
   /subject-apps/subject/{uuid}:
     get:
+      deprecated: true
       tags:
         - Subject Apps
-      summary: 'Get list of subject''s Apps'
+      summary: 'Get list of subject''s Apps - Use /subjects/apps/user/{uuid}'
       description: 'Returns list of Apps of a subject'
       operationId: getAppsOfSubject
       parameters:
