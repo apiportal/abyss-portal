@@ -143,7 +143,7 @@ public abstract class AbstractApiController implements IApiController {
                                         ));
                                         })
                                         .subscribe(jsonObjects -> {
-                                            if (jsonObjects.isEmpty()) {
+                                            if (jsonObjects.isEmpty() && jsonObjects.get(0).size()>0) {
                                                 logger.trace("Resource Record exists for operation: {}", methodName);
                                             } else {
                                                 logger.trace("Resource Record {}\n for operation: {} inserted", jsonObjects.get(0).encodePrettily(), methodName);
