@@ -45,6 +45,7 @@ public abstract class AbstractService<T> implements IService<T> {
     private AbyssJDBCService abyssJDBCService;
     protected static ElasticSearchService elasticSearchService = new ElasticSearchService();
     protected String organizationUuid;// = Constants.DEFAULT_ORGANIZATION_UUID;
+    protected String operationId;
 
     protected Boolean autoCommit = true;
     protected SQLConnection sqlConnection = null;
@@ -131,6 +132,12 @@ public abstract class AbstractService<T> implements IService<T> {
 
     public Single<JDBCClient> initJDBCClient(String organizationUuid) {
         this.organizationUuid = organizationUuid;
+        return initJDBCClient();
+    }
+
+    public Single<JDBCClient> initJDBCClient(String organizationUuid, String operationId) {
+        this.organizationUuid = organizationUuid;
+        this.operationId = operationId;
         return initJDBCClient();
     }
 
@@ -318,8 +325,10 @@ public abstract class AbstractService<T> implements IService<T> {
                             String tableName = getTableNameFromSql(sql).toLowerCase();
                             logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
                             boolean isParamTable = true;
-                            if (!tableName.isEmpty()) {
-                                isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                            if (operationId != null && !operationId.equals("getCurrentUser")) {
+                                if (!tableName.isEmpty()) {
+                                    isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                                }
                             }
 
                             boolean isAdmin = false; //TODO: Admin Only

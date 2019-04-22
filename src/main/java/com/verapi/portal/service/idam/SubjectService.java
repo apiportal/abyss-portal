@@ -785,6 +785,25 @@ public class SubjectService extends AbstractService<UpdateResult> {
             SQL_WHERE +
             "s." + SQL_CONDITION_UUID_IS;
 
+    public static final String FILTER_USER_WITH_ORGANIZATIONS = "SELECT s.uuid, s.organizationid, s.created, s.updated, s.deleted, s.isdeleted, s.isactivated, s.subjecttypeid,\n" +
+            "       s.subjectname, s.firstname, s.lastname, s.displayname, s.email, s.secondaryemail, s.effectivestartdate, s.effectiveenddate,\n" +
+            "       s.picture, s.totallogincount, s.failedlogincount, s.invalidpasswordattemptcount, s.ispasswordchangerequired, s.passwordexpiresat,\n" +
+            "       s.lastloginat, s.lastpasswordchangeat, s.lastauthenticatedat, s.lastfailedloginat, s.subjectdirectoryid, --d.directoryname,\n" +
+            "       s.islocked, s.issandbox, s.url, s.isrestrictedtoprocessing, s.description,\n" +
+            "       s.distinguishedname, s.uniqueid, s.phonebusiness, s.phonehome, s.phonemobile, s.phoneextension,\n" +
+            "       s.jobtitle, s.department, s.company,\n" +
+            "COALESCE((select json_agg(\n" +
+            "\t\tjson_build_object('uuid', o.uuid, 'organizationid', o.organizationid, 'created', o.created, 'updated', o.updated, 'deleted', o.deleted, 'isdeleted', o.isdeleted, 'name', o.name, 'description', o.description, 'url', o.url, 'isactive', o.isactive, 'picture', o.picture \n" +
+            "\t\t\t)\n" +
+            "\t\t) from organization o\n" +
+            "     \t\tjoin subject_organization so on so.organizationrefid = o.uuid\n" +
+            "\t  \t\twhere s.uuid = so.subjectid\n" +
+            "\t), '[]') as organizations\n" +
+            "from\n" +
+            "subject\ns\n" +
+            "where s.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'::uuid\n" +  // --User
+            SQL_AND + "s." + SQL_CONDITION_UUID_IS;
+
     public static final String FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS = "SELECT app.uuid, app.organizationid, app.created, app.updated, app.deleted, app.isdeleted, app.isactivated, app.subjectname, app.displayname, app.email, app.effectivestartdate, app.effectiveenddate, app.subjectdirectoryid, app.islocked, app.issandbox, app.url, app.description,\n" +
             "COALESCE((select json_agg(\n" +
             "\t\tjson_build_object('uuid', c.uuid, 'organizationid', c.organizationid, 'created', c.created, 'updated', c.updated, 'deleted', c.deleted, 'isdeleted', c.isdeleted, 'name', c.\"name\", 'description', c.description, 'apiid', c.apiid, 'environment', c.environment, 'contractstateid', c.contractstateid, 'status', c.status, 'licenseid', c.licenseid, 'subjectpermissionid', c.subjectpermissionid, \n" +

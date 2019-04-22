@@ -649,6 +649,33 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /subjects/users/current-user:
+    get:
+      tags:
+        - USERS
+      summary: 'Get current user'
+      description: 'Returns info of current user'
+      operationId: getCurrentUser
+      responses:
+        '200':
+
+          $ref: '#/components/responses/200-UserWithOrganizations'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
   '/subjects/users/subject-directory/{uuid}':
     get:
       tags:
@@ -1296,186 +1323,54 @@ components:
           type: string
           description: Company of Subject
           nullable: true
-    SubjectWithGroups:
-      type: object
-      properties:
-        uuid:
-          type: string
-          readOnly: true
-          description: 'Secondary primary key. Used in front end messages for security reasons.'
-        organizationid:
-          type: string
-          description: 'FK ID of Organization'
-        organization:
-          type: string
-          readOnly: true
-          description: 'Name of Organization'
-        created:
-          type: string
-          readOnly: true
-          description: 'Timestamp of creation #readOnly#'
-        updated:
-          type: string
-          readOnly: true
-          description: 'Timestamp of update #readOnly#'
-        deleted:
-          type: string
-          readOnly: true
-          description: 'Timestamp of deletion #readOnly#'
-        isdeleted:
-          type: boolean
-          readOnly: true
-          description: 'Is record logically deleted #readOnly#'
-        isactivated:
-          type: boolean
-          readOnly: true
-          description: 'Is user activated after signup by validating secondary verification mechanism #readOnly#'
-        subjecttypeid:
-          type: string
-          description: 'Id of Subject Type'
-        subjectname:
-          type: string
-          description: 'Username of user that is going to be used as credential'
-        firstname:
-          type: string
-          description: 'First name of user'
-        lastname:
-          type: string
-          description: 'Surname of user'
-        displayname:
-          type: string
-          description: 'Display name or alias of user'
-        email:
-          type: string
-          format: email
-          description: 'Main contact email of user #email#'
-        secondaryemail:
-          type: string
-          format: email
-          description: 'Secondary email of user for recovering account etc. #email#'
-        effectivestartdate:
-          type: string
-          description: 'Effective start date time of user that he or she can start using the platform'
-        effectiveenddate:
-          type: string
-          description: 'Effective end date time of user that he or she can use the platform until'
-        picture:
-          type: string
-          format: byte
-          description: 'Picture of subject #base64#'
-        totallogincount:
-          type: integer
-          format: int32
-          readOnly: true
-          description: 'Total Login Count of Subject #readOnly#'
-        failedlogincount:
-          type: integer
-          format: int32
-          readOnly: true
-          description: 'Failed Login Count of Subject #readOnly#'
-        invalidpasswordattemptcount:
-          type: integer
-          format: int32
-          readOnly: true
-          description: 'Invalid Password Attempt Count of Subject #readOnly#'
-        ispasswordchangerequired:
-          type: boolean
-          readOnly: true
-          description: 'Does subject have to change password #readOnly#'
-        passwordexpiresat:
-          type: string
-          readOnly: true
-          description: 'Password expire date time. After this time subject must change password is still logon else should reset password to get a new one. #readOnly#'
-        lastloginat:
-          type: string
-          readOnly: true
-          description: 'Last login date time of subject #readOnly#'
-        lastpasswordchangeat:
-          type: string
-          readOnly: true
-          description: 'Last password change date time #readOnly#'
-        lastauthenticatedat:
-          type: string
-          readOnly: true
-          description: 'Last successful authentication date time #readOnly#'
-        lastfailedloginat:
-          type: string
-          readOnly: true
-          description: 'Last failed login attempt date time #readOnly#'
-        subjectdirectoryid:
-          type: string
-          description: 'FK ID of Subject Directory'
-        subjectdirectory:
-          type: string
-          description: 'Name of Subject Directory'
-        islocked:
-          type: boolean
-          description: 'Is Subject Locked / Disabled'
-        issandbox:
-          type: boolean
-          description: 'Is Subject Sandbox'
-        url:
-          type: string
-          description: 'Url / Web Site Address of Subject (User or APP)'
-        isrestrictedtoprocessing:
-          type: boolean
-          description: 'Is Subject Data Restricted to Processing - GDPR Compliance'
-        description:
-          type: string
-          description: Description of subject
-        distinguishedname:
-          type: string
-          description: Distinguished Name stored in User Directory of the Subject
-          nullable: true
-        uniqueid:
-          type: string
-          description: Unique ID from User Directory
-          nullable: true
-        phonebusiness:
-          type: string
-          description: Business Phone Number
-          nullable: true
-        phonehome:
-          type: string
-          description: Home Phone Number
-          nullable: true
-        phonemobile:
-          type: string
-          description: Mobile Phone Number
-          nullable: true
-        phoneextension:
-          type: string
-          description: Phone Extension Number
-          nullable: true
-        jobtitle:
-          type: string
-          description: Job Title of Subject
-          nullable: true
-        department:
-          type: string
-          description: Department of Subject
-          nullable: true
-        company:
-          type: string
-          description: Company of Subject
-          nullable: true
-        groups:
-          type: object
+    UserWithOrganizations:
+      allOf:
+        - $ref: '#/components/schemas/Subject'
+        - type: object
           properties:
-            uuid:
-              type: string
-              readOnly: true
-              description: 'Secondary primary key. Used in front end messages for security reasons.'
-            isdeleted:
-              type: boolean
-              readOnly: true
-              description: 'Is record logically deleted #readOnly#'
-            displayname:
-              type: string
-              description: 'Display name or alias of group'
-            description:
-              type: string
-              description: 'Description of group'
+            organizations:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  readOnly: true
+                  description: 'Secondary primary key. Used in front end messages for security reasons.'
+                isdeleted:
+                  type: boolean
+                  readOnly: true
+                  description: 'Is record logically deleted #readOnly#'
+                name:
+                  type: string
+                  description: 'Name or alias of organization'
+                description:
+                  type: string
+                  description: 'Description of organization'
+                isactive:
+                  type: boolean
+                  readOnly: true
+                  description: 'Is the organization active #readOnly#'
+    SubjectWithGroups:
+      allOf:
+        - $ref: '#/components/schemas/Subject'
+        - type: object
+          properties:
+            groups:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  readOnly: true
+                  description: 'Secondary primary key. Used in front end messages for security reasons.'
+                isdeleted:
+                  type: boolean
+                  readOnly: true
+                  description: 'Is record logically deleted #readOnly#'
+                displayname:
+                  type: string
+                  description: 'Display name or alias of group'
+                description:
+                  type: string
+                  description: 'Description of group'
     SubjectWithGroupsAndPermissions:
       allOf:
         - $ref: '#/components/schemas/SubjectWithGroups'
@@ -1768,6 +1663,12 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/AppWithContracts'
+    '200-UserWithOrganizations':
+      description: 'Users with Organizations'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserWithOrganizations'
     '201':
       description: 'New Subject resource has been created'
       content:

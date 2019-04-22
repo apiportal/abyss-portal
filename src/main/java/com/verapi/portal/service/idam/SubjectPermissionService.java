@@ -329,7 +329,7 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
             "and p.resourceid = r.uuid and (r.resourcename = ?)\n" +
             "and p.resourceactionid = ra.uuid and ra.uuid = 'cf52d8fc-591f-42dc-be1b-13983086f64d'\n"; // --INVOKE OPERATION ACTION
 
-    public static final String SQL_CHECK_ROLE_BASED_PERMISSION_OF_SUBJECT_IN_ORGANIZATION =
+    public static final String SQL_CHECK_ROLE_BASED_PERMISSION_OF_SUBJECT_IN_ORGANIZATION = // Params: (:org, :user, :operationId)
             "select o.name, p.organizationid, p.permission, r.resourcename, rt.\"type\", r.resourcerefid, ra.actionname, s.subjectname\n" +
             "from\n" +
             "subject_permission\n p, resource r, resource_action ra, resource_type rt, organization o, subject_membership sm, subject s\n" +

@@ -49,6 +49,7 @@ public class SubjectApiController extends AbstractApiController {
         add(Constants.NESTED_COLUMN_USER_GROUPS);
         add(Constants.NESTED_COLUMN_USER_PERMISSIONS);
         add(Constants.NESTED_COLUMN_USER_CONTRACTS);
+        add(Constants.NESTED_COLUMN_USER_ORGANIZATIONS);
     }};
 
 
@@ -409,4 +410,11 @@ public class SubjectApiController extends AbstractApiController {
         addEntitiesCascaded(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
                 .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)), true);
     }
+
+    @AbyssApiOperationHandler
+    public void getCurrentUser(RoutingContext routingContext) {
+        getEntities(routingContext, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USER_WITH_ORGANIZATIONS)
+                .setFilterQueryParams(new JsonArray().add((String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))));
+    }
+
 }
