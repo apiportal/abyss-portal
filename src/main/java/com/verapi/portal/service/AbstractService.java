@@ -197,7 +197,7 @@ public abstract class AbstractService<T> implements IService<T> {
 
                                     boolean isParamTable = true;
                                     String tableName = "";
-                                    boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
+                                    Boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
                                     logger.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
                                     if (isOrganizationFilteringEnabled) {
                                         tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
@@ -332,7 +332,7 @@ public abstract class AbstractService<T> implements IService<T> {
 
                             boolean isParamTable = true;
                             String tableName = "";
-                            boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
+                            Boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
                             logger.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
                             if (isOrganizationFilteringEnabled) {
 
