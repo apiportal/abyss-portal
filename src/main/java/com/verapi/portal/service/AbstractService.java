@@ -194,18 +194,25 @@ public abstract class AbstractService<T> implements IService<T> {
 
                                 .flatMap(conn1 -> { //TODO: Improve Organization Filter
                                     //sqlConnection = conn;
-                                    String tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
-                                    logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+
                                     boolean isParamTable = true;
-                                    if (!tableName.isEmpty() && !tableName.equals("insert")) {
-                                        isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
-                                    } //TODO: Check organizationid == org uuid in session
+                                    String tableName = "";
+                                    boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
+                                    logger.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
+                                    if (isOrganizationFilteringEnabled) {
+                                        tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
+                                        logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+                                        if (!tableName.isEmpty() && !tableName.equals("insert")) {
+                                            isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                                        } //TODO: Check organizationid == org uuid in session
 
-                                    boolean isAdmin = false; //TODO: Admin Only
-                                    boolean doesContainOrderBy = false; //TODO: Order By Handling
-                                    logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+                                        boolean isAdmin = false; //TODO: Admin Only
+                                        boolean doesContainOrderBy = false; //TODO: Order By Handling
+                                        logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+                                    }
 
-                                    if (organizationUuid == null || isParamTable) {
+
+                                    if (isParamTable || organizationUuid == null) {
                                         if (params == null) {
                                             logger.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
                                             return conn.rxUpdate(sql);
@@ -322,20 +329,29 @@ public abstract class AbstractService<T> implements IService<T> {
                         //.flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
                         .flatMap(conn1 -> { //TODO: Improve Organization Filter
                             //sqlConnection = conn;
-                            String tableName = getTableNameFromSql(sql).toLowerCase();
-                            logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+
                             boolean isParamTable = true;
-                            if (operationId != null && !operationId.equals("getCurrentUser")) {
-                                if (!tableName.isEmpty()) {
-                                    isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                            String tableName = "";
+                            boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
+                            logger.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
+                            if (isOrganizationFilteringEnabled) {
+
+                                tableName = getTableNameFromSql(sql).toLowerCase();
+                                logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+
+                                if (operationId != null && !operationId.equals("getCurrentUser")) {
+                                    if (!tableName.isEmpty()) {
+                                        isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
+                                    }
                                 }
+
+                                boolean isAdmin = false; //TODO: Admin Only
+                                boolean doesContainOrderBy = false; //TODO: Order By Handling
+                                logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
                             }
 
-                            boolean isAdmin = false; //TODO: Admin Only
-                            boolean doesContainOrderBy = false; //TODO: Order By Handling
-                            logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
 
-                            if (organizationUuid == null || isParamTable) {
+                            if (isParamTable || organizationUuid == null) {
                                 if (params == null) {
                                     logger.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
                                     return conn.rxQuery(sql);
