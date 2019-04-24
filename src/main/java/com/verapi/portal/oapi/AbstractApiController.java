@@ -636,7 +636,7 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponse(routingContext, resultSetSingle, null, httpResponseStatus);
     }
 
-    private void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
+    protected void subscribeAndResponse(RoutingContext routingContext, Single<ResultSet> resultSetSingle, List<String> jsonColumns, int httpResponseStatus) {
         resultSetSingle.subscribe(resp -> {
                     JsonArray arr = new JsonArray();
                     //if (jsonColumns.isEmpty()) {
@@ -918,7 +918,7 @@ public abstract class AbstractApiController implements IApiController {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> updateAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody)) //TODO:  an overloaded version of update() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
-                .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
+                .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid")))) //TODO: CompositeResult success & # of rows should be checked
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException("no_data_found"));
