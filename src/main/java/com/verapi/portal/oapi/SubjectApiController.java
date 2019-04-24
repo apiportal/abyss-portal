@@ -14,13 +14,14 @@ package com.verapi.portal.oapi;
 
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.exception.NoDataFoundException;
 import com.verapi.portal.service.ApiFilterQuery;
-import com.verapi.portal.service.IService;
 import com.verapi.portal.service.idam.SubjectService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
@@ -48,6 +50,7 @@ public class SubjectApiController extends AbstractApiController {
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.NESTED_COLUMN_USER_GROUPS);
         add(Constants.NESTED_COLUMN_USER_PERMISSIONS);
+        add(Constants.NESTED_COLUMN_USER_RESOURCES);
         add(Constants.NESTED_COLUMN_USER_CONTRACTS);
         add(Constants.NESTED_COLUMN_USER_ORGANIZATIONS);
     }};
@@ -85,11 +88,11 @@ public class SubjectApiController extends AbstractApiController {
     }
 
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
-        addEntitiesCascaded(routingContext, appendRequestBody, false);
+        addEntities(routingContext, appendRequestBody, false);
     }
 
 
-    void addEntitiesCascaded(RoutingContext routingContext, JsonObject appendRequestBody, boolean isCascaded) {
+    void addEntities(RoutingContext routingContext, JsonObject appendRequestBody, boolean isCascaded) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -258,6 +261,36 @@ public class SubjectApiController extends AbstractApiController {
         }
     }
 
+    void updateEntityCascaded(RoutingContext routingContext, JsonObject appendRequestBody) {
+        logger.trace("---updating entities in a cascaded way");
+
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON object validated by Vert.x Open API validator
+        JsonObject requestBody = requestParameters.body().getJsonObject();
+
+        if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
+            appendRequestBody.forEach(entry -> {
+                requestBody.put(entry.getKey(), entry.getValue());
+            });
+        }
+
+        SubjectService subjectService = new SubjectService(routingContext.vertx());
+        //subjectService.setAutoCommit(false);
+        Single<ResultSet> updateCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .flatMap(jdbcClient -> subjectService.updateCascaded(routingContext, UUID.fromString(routingContext.pathParam("uuid")), requestBody))
+                //.flatMap(resultSet -> subjectService.findById(UUID.fromString(routingContext.pathParam("uuid"))))
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows() == 0) {
+                        return Single.error(new NoDataFoundException("no_data_found"));
+                    } else
+                        return Single.just(resultSet);
+                });
+        subscribeAndResponse(routingContext, updateCascadedResult, null, HttpResponseStatus.OK.code());
+    }
+
+
     @AbyssApiOperationHandler
     public void updateSubject(RoutingContext routingContext) {
 
@@ -407,9 +440,23 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addAppsCascaded(RoutingContext routingContext) {
-        addEntitiesCascaded(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
-                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)), true);
+        addEntities(routingContext, new JsonObject()
+                .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
+                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)),
+                true
+        );
     }
+
+    @AbyssApiOperationHandler
+    public void updateAppCascaded(RoutingContext routingContext) {
+        updateEntityCascaded(routingContext, new JsonObject()
+                .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
+                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .put("crudsubjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+        );
+    }
+
+
 
     @AbyssApiOperationHandler
     public void getCurrentUser(RoutingContext routingContext) {

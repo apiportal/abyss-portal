@@ -82,12 +82,14 @@ public class LoginController extends PortalAbstractController {
                                 logger.trace("LoginController.handle() subjectService.findBySubjectName replied successfully " + resp.encodePrettily());
                                 User user = authResult.result();
                                 String userUUID = resp.getString("uuid");
+                                String displayName = resp.getString("displayname");
                                 user.principal().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
                                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                                 routingContext.session().regenerateId();
                                 routingContext.session().destroy();
                                 routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME, user.principal().getString("username"));
                                 routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
+                                routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME, displayName);
                                 routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID)); //TODO: Remove for OWASP Compliance
 //                                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 

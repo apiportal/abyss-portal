@@ -124,6 +124,27 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
 
+    public Single<CompositeResult> updateByRef(JsonObject updateRecord) {
+        JsonArray updateParams = new JsonArray()
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.getString("permission"))
+                .add(updateRecord.getString("description"))
+                .add(updateRecord.getInstant("effectivestartdate"))
+                .add(updateRecord.getInstant("effectiveenddate"))
+                .add(updateRecord.getString("subjectid"))
+                .add(updateRecord.getString("resourceid"))
+                .add(updateRecord.getString("resourceactionid"))
+                .add(updateRecord.getString("accessmanagerid"))
+                .add(updateRecord.getBoolean("isactive"))
+                //Where Condition Args
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("subjectid"))
+                .add(updateRecord.getString("resourceid"))
+                .add(updateRecord.getString("resourceactionid"));
+        return update(updateParams, SQL_UPDATE_BY_REF_UUID);
+    }
+
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
         updateRecords.forEach(updateRow -> {
@@ -287,6 +308,10 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
 
+    private static final String SQL_CONDITION_RESOURCEID_IS = "resourceid = CAST(? AS uuid)\n";
+
+    private static final String SQL_CONDITION_RESOURCEACTIONID_IS = "resourceactionid = CAST(? AS uuid)\n";
+
     private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
 
     private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
@@ -304,6 +329,12 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
     public static final String SQL_DELETE_BY_SUBJECT = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_SUBJECT_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    private static final String SQL_UPDATE_BY_REF_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_ORGANIZATION_IS +
+                                                                        SQL_AND + SQL_CONDITION_SUBJECT_IS +
+                                                                        SQL_AND + SQL_CONDITION_RESOURCEID_IS +
+                                                                        SQL_AND + SQL_CONDITION_RESOURCEACTIONID_IS +
+                                                                        SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

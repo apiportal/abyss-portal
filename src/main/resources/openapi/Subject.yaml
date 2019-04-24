@@ -431,12 +431,13 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/ListOfSubject'
       parameters: []
+  /subjects/apps/cascaded/{uuid}:
     put:
       tags:
         - APPS CASCADED
-      summary: 'Update a bulk of APPs cascaded'
-      description: 'Provide a bulk list of APPs to be updated cascaded'
-      operationId: updateAppsCascaded
+      summary: 'Update an APP cascaded'
+      description: 'Provide an APP to be updated cascaded'
+      operationId: updateAppCascaded
       responses:
         '207':
           $ref: '#/components/responses/207'
@@ -457,14 +458,20 @@ paths:
         default:
           $ref: '#/components/responses/default'
       requestBody:
-        $ref: '#/components/requestBodies/ListOfSubjectObject'
-      parameters: []
+        $ref: '#/components/requestBodies/Subject'
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be get'
+          required: true
+          schema:
+            type: string
     delete:
       tags:
         - APPS CASCADED
-      summary: 'Delete all APPs cascaded'
-      description: 'Deletes all APPs cascaded'
-      operationId: deleteAppsCascaded
+      summary: 'Delete APP cascaded'
+      description: 'Deletes APP cascaded'
+      operationId: deleteAppCascaded
       responses:
         '204':
           $ref: '#/components/responses/204'
@@ -480,9 +487,13 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-      requestBody:
-        $ref: '#/components/requestBodies/ListOfSubjectObject'
-      parameters: []
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be get'
+          required: true
+          schema:
+            type: string
   /subjects/apps/user/{uuid}:
     parameters:
       - name: uuid

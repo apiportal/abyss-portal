@@ -14,6 +14,7 @@ package com.verapi.portal.service.idam;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
+import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Config;
@@ -98,6 +99,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
         InsertAllCascadedMetadata insertAllCascadedMetadata = new InsertAllCascadedMetadata();
 
+        String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+
         return insertAll(insertRecords)
                 .flatMap(jsonObjects -> {
 
@@ -113,8 +117,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             insertAllCascadedMetadata.appDirectoryUuid = requestItem.getJsonObject("response").getString("subjectdirectoryid"); //TODO: Remove
 
                             JsonObject resourceJsonObject = new JsonObject()
-                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("organizationid", sessionOrganizationId)
+                                    .put("crudsubjectid", sessionUserId)
                                     .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
                                     .put("resourcename", requestItem.getJsonObject("response").getString("displayname") + " APP")
                                     .put("description", requestItem.getJsonObject("response").getString("description"))
@@ -126,8 +130,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
                     insertAllCascadedMetadata.resourceService = new ResourceService(routingContext.vertx());
                     //insertAllCascadedMetadata.resourceService.setAutoCommit(false);
-                    //return insertAllCascadedMetadata.resourceService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
-                    return insertAllCascadedMetadata.resourceService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                    //return insertAllCascadedMetadata.resourceService.initJDBCClient(sessionOrganizationId, sqlConnection);
+                    return insertAllCascadedMetadata.resourceService.initJDBCClient(sessionOrganizationId);
                 })
                 .flatMap(jdbcClient1 -> insertAllCascadedMetadata.resourceService.insertAll(insertAllCascadedMetadata.insertResourceRecords)
                 )
@@ -139,16 +143,17 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     //Transform MultiStatus Bulk Result -> Bulk Insert Request
                     jsonObjects.forEach(requestItem -> {
                         if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                            String description = "Ownership of " + requestItem.getJsonObject("response").getString("resourcename") + " by " + routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME);
                             JsonObject permissionJsonObject = new JsonObject()
-                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
-                                    .put("permission", "Subscription of my own " + requestItem.getJsonObject("response").getString("resourcename"))
-                                    .put("description", "Subscription of my own " + requestItem.getJsonObject("response").getString("resourcename"))
+                                    .put("organizationid", sessionOrganizationId)
+                                    .put("crudsubjectid", sessionUserId)
+                                    .put("permission", description)
+                                    .put("description", description)
                                     .put("effectivestartdate", Instant.now())
                                     .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
-                                    .put("subjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("subjectid", sessionUserId)
                                     .put("resourceid", requestItem.getString("uuid"))
-                                    .put("resourceactionid", Constants.RESOURCE_ACTION_OWN_APP)
+                                    .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
                                     .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
                                     .put("isactive", true);
                             insertAllCascadedMetadata.insertSubjectPermissionRecords.add(permissionJsonObject);
@@ -157,8 +162,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
                     insertAllCascadedMetadata.subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
                     //insertAllCascadedMetadata.subjectPermissionService.setAutoCommit(false);
-                    //return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
-                    return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                    //return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(sessionOrganizationId, sqlConnection);
+                    return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(sessionOrganizationId);
                 })
                 .flatMap(jdbcClient1 -> insertAllCascadedMetadata.subjectPermissionService.insertAll(insertAllCascadedMetadata.insertSubjectPermissionRecords)
                 )
@@ -171,8 +176,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     jsonObjects.forEach(requestItem -> {
                         if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
                             JsonObject accessTokenJsonObject = new JsonObject()
-                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("organizationid", sessionOrganizationId)
+                                    .put("crudsubjectid", sessionUserId)
                                     .put("subjectpermissionid", requestItem.getString("uuid"))
                                     .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
                                     .put("resourcerefid", insertAllCascadedMetadata.appUuid)//TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
@@ -183,8 +188,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
                     insertAllCascadedMetadata.resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
                     //insertAllCascadedMetadata.resourceAccessTokenService.setAutoCommit(false);
-                    //return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
-                    return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                    //return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(sessionOrganizationId, sqlConnection);
+                    return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(sessionOrganizationId);
                 })
                 .flatMap(jdbcClient1 -> insertAllCascadedMetadata.resourceAccessTokenService.insertAll(insertAllCascadedMetadata.insertResourceAccessTokensRecords)
                 )
@@ -197,9 +202,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     jsonObjects.forEach(requestItem -> {
                         if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
                             JsonObject subjectMembershipJsonObject = new JsonObject()
-                                    .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                                    .put("crudsubjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
-                                    .put("subjectid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                                    .put("organizationid", sessionOrganizationId)
+                                    .put("crudsubjectid", sessionUserId)
+                                    .put("subjectid", sessionUserId)
                                     .put("subjectgroupid", insertAllCascadedMetadata.appUuid) //TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
                                     .put("subjectdirectoryid", insertAllCascadedMetadata.appDirectoryUuid) //TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
                                     .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
@@ -211,8 +216,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
                     insertAllCascadedMetadata.subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
                     //insertAllCascadedMetadata.subjectMembershipService.setAutoCommit(true);
-                    //return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), sqlConnection);
-                    return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME));
+                    //return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(sessionOrganizationId, sqlConnection);
+                    return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(sessionOrganizationId);
                 })
                 .flatMap(jdbcClient1 -> insertAllCascadedMetadata.subjectMembershipService.insertAll(insertAllCascadedMetadata.insertSubjectMembershipRecords)
                 )
@@ -305,6 +310,153 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     return Observable.just(recordStatus);
                 })
                 .toList();
+    }
+
+
+    public Single<ResultSet> updateCascaded(RoutingContext routingContext, UUID uuid, JsonObject updateRecord) {
+        logger.trace("---updateCascaded invoked");
+
+        class UpdateCascadedMetadata {
+
+            private JsonObject resourceJsonObject;
+            private JsonObject permissionJsonObject;
+
+            private JsonObject updatedSubjectJO;
+            private JsonObject updatedResourceJO;
+            private JsonObject updatedPermissionJO;
+
+            private ResourceService resourceService;
+            private SubjectPermissionService subjectPermissionService;
+
+
+            UpdateCascadedMetadata() {
+            }
+        }
+
+        UpdateCascadedMetadata updateCascadedMetadata = new UpdateCascadedMetadata();
+
+        String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        String sessionUserDisplayName = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME);
+
+        return update(uuid, updateRecord)
+                .flatMap(compositeResult -> {
+                    if (compositeResult.getThrowable() == null) {
+                        if (compositeResult.getUpdateResult().getUpdated() == 1) {
+                            logger.trace("updateCascaded - app {} updated", uuid);
+                            return Single.just(compositeResult.getUpdateResult());
+                        } else {
+                            logger.error("updateCascaded - app {} not updated. Updated = 0", uuid);
+                            return Single.error(new NotFound404Exception("updateCascaded - app " + uuid + " not updated!"));
+                        }
+                    } else {
+                        logger.error("updateCascaded - app update error {}", compositeResult.getThrowable());
+                        return Single.error(compositeResult.getThrowable());
+                    }
+                })
+                .flatMap(updateResult -> findById(uuid)
+                )
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows()>0) {
+                        updateCascadedMetadata.updatedSubjectJO = resultSet.getRows().get(0);
+                        return Single.just(resultSet.getRows().get(0));
+                    } else {
+                        logger.error("updateCascaded - app {} not updated. Num of rows = 0", uuid);
+                        return Single.error(new NotFound404Exception("updateCascaded - app " + uuid + " not found after update!"));
+                    }
+                })
+                .flatMap(subjectJsonObject -> {
+
+                    updateCascadedMetadata.resourceJsonObject = new JsonObject()
+                            .put("organizationid", sessionOrganizationId)
+                            .put("crudsubjectid", sessionUserId)
+                            .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
+                            .put("resourcename", subjectJsonObject.getString("displayname") + " APP")
+                            .put("description", subjectJsonObject.getString("description"))
+                            .put("resourcerefid", subjectJsonObject.getString("uuid"))
+                            .put("isactive", true); //TODO?
+
+                    updateCascadedMetadata.resourceService = new ResourceService(routingContext.vertx());
+                    //updateCascadedMetadata.resourceService.setAutoCommit(false);
+                    //return updateCascadedMetadata.resourceService.initJDBCClient(sessionOrganizationId, sqlConnection);
+                    return updateCascadedMetadata.resourceService.initJDBCClient(sessionOrganizationId);
+                })
+                .flatMap(jdbcClient -> updateCascadedMetadata.resourceService.updateByRef(updateCascadedMetadata.resourceJsonObject)
+                )
+                .flatMap(compositeResult -> {
+                    if (compositeResult.getThrowable() == null) {
+                        if (compositeResult.getUpdateResult().getUpdated() > 0) {
+                            logger.trace("updateCascaded - resource [ref: {}, org: {}, type: {}] updated", uuid, sessionOrganizationId, Constants.RESOURCE_TYPE_APP);
+                            return updateCascadedMetadata.resourceService.findById(compositeResult.getUpdateResult().getKeys().getInteger(0));
+                        } else {
+                            logger.error("updateCascaded - resource [ref: {}, org: {}, type: {}] not updated. Updated = 0", uuid, sessionOrganizationId, Constants.RESOURCE_TYPE_APP);
+                            return Single.error(new NotFound404Exception("updateCascaded - resource [ref: " + uuid + ", org: " + sessionOrganizationId + ", type: " + Constants.RESOURCE_TYPE_APP + "] not updated!"));
+                        }
+                    } else {
+                        logger.error("updateCascaded - resource update error {}", compositeResult.getThrowable());
+                        return Single.error(compositeResult.getThrowable());
+                    }
+                })
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows()>0) {
+                        updateCascadedMetadata.updatedResourceJO = resultSet.getRows().get(0);
+                        return Single.just(resultSet.getRows().get(0));
+                    } else {
+                        logger.error("updateCascaded - resource [ref: {}, org: {}, type: {}] not updated. Num of rows = 0", uuid, sessionOrganizationId, Constants.RESOURCE_TYPE_APP);
+                        return Single.error(new NotFound404Exception("updateCascaded - resource [ref: " + uuid + ", org: " + sessionOrganizationId + ", type: " + Constants.RESOURCE_TYPE_APP + "] not found after update!"));
+                    }
+                })
+                .flatMap(resourceJsonObject -> {
+
+                    String description = "Ownership of " + resourceJsonObject.getString("resourcename") + " by " + sessionUserDisplayName;
+                    updateCascadedMetadata.permissionJsonObject = new JsonObject()
+                            .put("organizationid", sessionOrganizationId)
+                            .put("crudsubjectid", sessionUserId)
+                            .put("permission", description)
+                            .put("description", description)
+                            .put("effectivestartdate", Instant.now())
+                            .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
+                            .put("subjectid", sessionUserId)
+                            .put("resourceid", resourceJsonObject.getString("uuid"))
+                            .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
+                            .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
+                            .put("isactive", true); //TODO?
+
+                    updateCascadedMetadata.subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+                    //insertAllCascadedMetadata.subjectPermissionService.setAutoCommit(false);
+                    //return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(sessionOrganizationId, sqlConnection);
+                    return updateCascadedMetadata.subjectPermissionService.initJDBCClient(sessionOrganizationId);
+                })
+                .flatMap(jdbcClient -> updateCascadedMetadata.subjectPermissionService.updateByRef(updateCascadedMetadata.permissionJsonObject )
+                )
+                .flatMap(compositeResult -> {
+                    if (compositeResult.getThrowable() == null) {
+                        if (compositeResult.getUpdateResult().getUpdated() > 0) {
+                            logger.trace("updateCascaded - permission [org: {}, subject: {}, resource: {}, action: {}] updated", sessionOrganizationId, sessionUserId, updateCascadedMetadata.updatedResourceJO.getString("uuid"), Constants.RESOURCE_ACTION_ALL_APP_ACTION);
+                            return updateCascadedMetadata.resourceService.findById(compositeResult.getUpdateResult().getKeys().getInteger(0));
+                        } else {
+                            logger.error("updateCascaded - permission [org: {}, subject: {}, resource: {}, action: {}] not updated. Updated = 0", sessionOrganizationId, sessionUserId, updateCascadedMetadata.updatedResourceJO.getString("uuid"), Constants.RESOURCE_ACTION_ALL_APP_ACTION);
+                            return Single.error(new NotFound404Exception("updateCascaded - resource [org: " + sessionOrganizationId + ", subject: " + sessionUserId + ", resource: " + updateCascadedMetadata.updatedResourceJO.getString("uuid") + ", action: " + Constants.RESOURCE_ACTION_ALL_APP_ACTION + "] not updated!"));
+                        }
+                    } else {
+                        logger.error("updateCascaded - permission update error {}", compositeResult.getThrowable());
+                        return Single.error(compositeResult.getThrowable());
+                    }
+                })
+                .flatMap(resultSet -> {
+                    if (resultSet.getNumRows()>0) {
+                        updateCascadedMetadata.updatedPermissionJO = resultSet.getRows().get(0);
+                        return Single.just(resultSet.getRows().get(0));
+                    } else {
+                        logger.error("updateCascaded - permission [org: {}, subject: {}, resource: {}, action: {}] not updated. Num of rows = 0", sessionOrganizationId, sessionUserId, updateCascadedMetadata.updatedResourceJO.getString("uuid"), Constants.RESOURCE_ACTION_ALL_APP_ACTION);
+                        return Single.error(new NotFound404Exception("updateCascaded - permission [org: " + sessionOrganizationId + ", subject: " + sessionUserId + ", resource: " + updateCascadedMetadata.updatedResourceJO.getString("uuid") + ", action: " + Constants.RESOURCE_ACTION_ALL_APP_ACTION + "] not found after update!"));
+                    }
+                })
+                .flatMap(permissionJsonObject ->
+                     Single.just(new ResultSet(updateCascadedMetadata.updatedSubjectJO
+                             .put(Constants.NESTED_COLUMN_USER_RESOURCES, updateCascadedMetadata.updatedResourceJO)
+                             .put(Constants.NESTED_COLUMN_USER_PERMISSIONS, updateCascadedMetadata.updatedPermissionJO)))
+                );
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {

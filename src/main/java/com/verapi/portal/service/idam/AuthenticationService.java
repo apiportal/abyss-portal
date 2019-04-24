@@ -144,13 +144,15 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     //result.toJson().getValue("rows")
                     logger.trace(result.toJson().encodePrettily());
                     userUUID = result.getRows().get(0).getString("uuid");
-                    temporaryOrganizationName = "Organization of " + result.getRows().get(0).getString("displayname");
+                    String displayName = result.getRows().get(0).getString("displayname");
+                    temporaryOrganizationName = "Organization of " + displayName;
                     loginMetadata.user.principal().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
                     routingContext.setUser(loginMetadata.user); //TODO: Check context. Is this usefull? Should it be vertx context?
                     routingContext.session().regenerateId();
                     routingContext.session().destroy();
                     routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME, loginMetadata.user.principal().getString("username"));
                     routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID); //XXX
+                    routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME, displayName);
                     routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID).setPath("/")); //TODO: Remove for OWASP Compliance
                     //.setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
@@ -643,7 +645,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                         logger.trace("forgotPassword - subject {} deactivated", forgotPasswordMetadata.subjectUUID);
                                         return Single.just(compositeResult.getUpdateResult());
                                     } else {
-                                        logger.error("forgotPassword - " + compositeResult.getThrowable());
+                                        logger.error("forgotPassword - subject update error {}", compositeResult.getThrowable());
                                         return Single.error(compositeResult.getThrowable());
                                     }
                                 });

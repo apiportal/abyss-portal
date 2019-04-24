@@ -119,6 +119,10 @@ public class ResourceService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
+        return update(uuid, updateRecord, SQL_UPDATE_BY_UUID);
+    }
+
+    public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord, String sql) {
         JsonArray updateParams = new JsonArray()
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
@@ -128,7 +132,23 @@ public class ResourceService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getString("resourcerefid"))
                 .add(updateRecord.getBoolean("isactive"))
                 .add(uuid.toString());
-        return update(updateParams, SQL_UPDATE_BY_UUID);
+        return update(updateParams, sql);
+    }
+
+    public Single<CompositeResult> updateByRef(JsonObject updateRecord) {
+        JsonArray updateParams = new JsonArray()
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.getString("resourcetypeid"))
+                .add(updateRecord.getString("resourcename"))
+                .add(updateRecord.getString("description"))
+                .add(updateRecord.getString("resourcerefid"))
+                .add(updateRecord.getBoolean("isactive"))
+                //Where Condition Args
+                .add(updateRecord.getString("resourcerefid"))
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("resourcetypeid"));
+        return update(updateParams, SQL_UPDATE_BY_REF_UUID);
     }
 
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
@@ -301,6 +321,11 @@ public class ResourceService extends AbstractService<UpdateResult> {
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
+    private static final String SQL_UPDATE_BY_REF_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_RESOURCEREFID_IS +
+                                                                        SQL_AND + SQL_CONDITION_ORGANIZATIONID_IS +
+                                                                        SQL_AND + SQL_CONDITION_RESOURCETYPEID_IS +
+                                                                        SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
     public static final String FILTER_BY_RESOURCEREFERENCE = SQL_SELECT + SQL_WHERE + SQL_CONDITION_RESOURCEREFID_IS;
 
