@@ -187,7 +187,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     public void deleteMembershipsOfGroup(RoutingContext routingContext) {
         try {
             deleteEntities(routingContext,
-                    null,
+                    SubjectMembershipService.class,
                     new ApiFilterQuery()
                             .setFilterQuery(SubjectMembershipService.SQL_DELETE_GROUPS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
