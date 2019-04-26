@@ -288,6 +288,28 @@ public class LicenseService extends AbstractService<UpdateResult> {
 
     public static final String FILTER_BY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IN;
 
+    public static final String FILTER_BY_SUBJECT_WITH_RESOURCES_AND_PERMISSIONS =
+            "SELECT l.uuid, l.organizationid, l.created, l.updated, l.deleted, l.isdeleted, l.crudsubjectid, l.\"name\", l.\"version\", l.subjectid, l.licensedocument, l.isactive,\n" +
+            "COALESCE((select json_agg(\n" +
+            "json_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, 'isdeleted', r.isdeleted, \n" +
+            "\t\t\t\t\t'crudsubjectid', r.crudsubjectid, 'resourcetypeid', r.resourcetypeid, 'resourcename', r.resourcename, 'description', r.description, \n" +
+            "\t\t\t\t\t'resourcerefid', r.resourcerefid, 'isactive', r.isactive, 'subresourcename', r.subresourcename,\n" +
+            "\t\t\t\t\t'permissions', COALESCE((select json_agg(\n" +
+            "\t\t\t\t\t\t\t\tjson_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t'isdeleted', r.isdeleted, 'crudsubjectid', r.crudsubjectid, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t'permission', permission, 'description', description, 'effectivestartdate', effectivestartdate, 'effectiveenddate', effectiveenddate, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t'subjectid', subjectid, 'resourceid', resourceid, 'resourceactionid', resourceactionid, 'accessmanagerid', accessmanagerid, 'isactive', isactive)\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t) FROM subject_permission sp\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t\twhere sp.resourceid = r.uuid\n" +
+            "\t\t\t\t\t\t\t\t\t), '[]')\n" +
+            "\t\t\t\t)\n" +
+            "\t\t) FROM resource r\n" +
+            "\t\t\twhere l.uuid = r.resourcerefid\n" +
+            "\t\t\t), '[]') as resources\n" +
+            "from\n" +
+            "license\nl\n" +
+            SQL_WHERE + " l." + SQL_CONDITION_SUBJECT_IS;
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

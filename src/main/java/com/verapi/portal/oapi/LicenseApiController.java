@@ -37,6 +37,7 @@ public class LicenseApiController extends AbstractApiController {
 
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.JSONB_COLUMN_LICENSE_LICENSEDOCUMENT);
+        add(Constants.NESTED_COLUMN_USER_RESOURCES);
     }};
 
     /**
@@ -215,5 +216,15 @@ public class LicenseApiController extends AbstractApiController {
                 .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
     }
 
+    @AbyssApiOperationHandler
+    public void getLicensesOfSubjectCascaded(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(LicenseService.FILTER_BY_SUBJECT_WITH_RESOURCES_AND_PERMISSIONS)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+    }
 
+    @AbyssApiOperationHandler
+    public void addLicensesOfSubjectCascaded(RoutingContext routingContext) {
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+    }//todo
 }

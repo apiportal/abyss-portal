@@ -521,6 +521,9 @@ components:
         isactive:
           type: boolean
           description: 'Is Resource Active'
+        subresourcename:
+          type: string
+          description: 'Name of sub-resource'
   requestBodies:
     Resource:
       content:

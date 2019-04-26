@@ -11,11 +11,11 @@ securitySchemes:
     type: apiKey
     name: abyss.api.key
     in: header
-  abyssAppAccessTokenAuth:
+  abyssAppKeyAuth:
     type: apiKey
     name: abyss.app.access.token
     in: header
-  abyssAppAccessTokenCookieAuth:
+  abyssAppKeyCookieAuth:
     type: apiKey
     name: abyss.app.access.token
     in: cookie

@@ -435,6 +435,81 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /licenses/subject/{uuid}/cascaded:
+    parameters:
+      - name: uuid
+        in: path
+        description: 'uuid of Subject'
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Subject Licenses
+      summary: 'Get list of Subject''s Licenses Cascaded'
+      description: 'Returns list of Subject''s Licenses Cascaded'
+      operationId: getLicensesOfSubjectCascaded
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Licenses which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subject''s Licenses which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-LicenseWithResources'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - Subject Licenses
+      summary: 'Add a bulk of Subject''s Licenses Cascaded'
+      description: 'Provide a list of Subject''s Licenses to be inserted cascaded'
+      operationId: addLicensesOfSubjectCascaded
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfLicense'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -523,6 +598,18 @@ Legal'
         isactive:
           type: boolean
           description: 'Is the license active or not'
+    LicenseWithResources:
+      allOf:
+        - $ref: '#/components/schemas/License'
+        - type: object
+          properties:
+            resources:
+              allOf:
+                - $ref: './Resource.yaml#/components/schemas/Resource'
+                - type: object
+                  properties:
+                    permissions:
+                      $ref: './SubjectPermission.yaml#/components/schemas/SubjectPermission'
   requestBodies:
     License:
       content:
@@ -563,6 +650,12 @@ Legal'
             type: array
             items:
               $ref: '#/components/schemas/License'
+    '200-LicenseWithResources':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LicenseWithResources'
     '201':
       description: 'New License resource has been created'
       content:
@@ -660,17 +753,17 @@ Legal'
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: '../openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: '../openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: '../openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: '../openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: '../openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: '../openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
