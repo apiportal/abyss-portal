@@ -11,6 +11,7 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
@@ -24,12 +25,16 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class LicenseService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(LicenseService.class);
@@ -41,6 +46,110 @@ public class LicenseService extends AbstractService<UpdateResult> {
     public LicenseService(Vertx vertx) {
         super(vertx);
     }
+
+    public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
+        logger.trace("LicenseService --- insertAllCascaded invoked");
+
+        String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+
+        Observable<JsonObject> insertParamsObservable = Observable.fromIterable(insertRecords).map(o -> (JsonObject) o);
+
+        //daisy chaining record status
+        return insertParamsObservable
+                .flatMap(insertRecord -> insert(insertRecord, null).toObservable()) //insert license
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject licenseInsertResult = recordStatus.getJsonObject("response");
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("resourcetypeid", Constants.RESOURCE_TYPE_LICENSE)
+                                .put("resourcename", licenseInsertResult.getString("name") + " LICENSE")
+                                .put("description", new JsonObject(licenseInsertResult.getString("licensedocument"))
+                                        .getJsonObject("info")
+                                        .getString("description") )
+                                .put("resourcerefid", licenseInsertResult.getString("uuid"))
+                                .put("isactive", true);
+
+                        ResourceService resourceService = new ResourceService(routingContext.vertx());
+                        return resourceService.initJDBCClient(sessionOrganizationId)
+                            .flatMap(jdbcClient -> resourceService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+                })
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject resourceInsertResult = recordStatus.getJsonObject("response");
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("permission", "Ownership permission")
+                                .put("description", "Ownership of " + resourceInsertResult.getString("resourcename"))
+                                .put("effectivestartdate", Instant.now())
+                                .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
+                                .put("subjectid", sessionUserId)
+                                .put("resourceid", resourceInsertResult.getString("uuid"))
+                                .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_LICENSE_ACTION)
+                                .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
+                                .put("isactive", true);
+
+                        SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+                        return subjectPermissionService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> subjectPermissionService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+                })
+                .flatMap(recordStatus -> {
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
+
+                        JsonObject resourceRecordStatus = recordStatus.getJsonObject("parentRecordStatus");
+                        resourceRecordStatus.getJsonObject("response").put("permissions", permissionInsertResult);
+
+                        JsonObject licenseRecordStatus = resourceRecordStatus.getJsonObject("parentRecordStatus");
+                        licenseRecordStatus.getJsonObject("response").put("resources", resourceRecordStatus.getJsonObject("response"));
+
+                        return Observable.just(licenseRecordStatus);
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+
+                }).toList();
+    }
+
+    /**
+     *
+     * @param insertRecord
+     * @return recordStatus
+     */
+    public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
+        logger.trace("---insert invoked");
+
+        JsonArray insertParam = new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("name"))
+                .add(insertRecord.getString("version"))
+                .add(insertRecord.getString("subjectid"))
+                .add(insertRecord.getJsonObject("licensedocument").encode())
+                .add(insertRecord.getBoolean("isactive"));
+        return insert(insertParam, SQL_INSERT)
+                .flatMap(insertResult -> {
+                    if (insertResult.getThrowable() == null) {
+                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
+                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
+                    } else {
+                        return Single.just(insertResult);
+                    }
+                })
+                .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
+    }
+
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
@@ -72,33 +181,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
                         return Observable.just(insertResult);
                     }
                 })
-                .flatMap(result -> {
-                    JsonObject recordStatus = new JsonObject();
-                    if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
-                        recordStatus
-                                .put("uuid", "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
-                                        .setUsermessage(result.getThrowable().getLocalizedMessage())
-                                        .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                        .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
-                                        .toJson());
-                    } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
-                        JsonArray arr = new JsonArray();
-                        result.getResultSet().getRows().forEach(arr::add);
-                        recordStatus
-                                .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
-                    }
-                    return Observable.just(recordStatus);
-                })
+                .flatMap(result -> Observable.just(evaluateCompositeResultAndReturnRecordStatus(result))
+                )
                 .toList();
     }
 

@@ -42,6 +42,35 @@ public class ResourceService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
+    /**
+     *
+     * @param insertRecord
+     * @return recordStatus
+     */
+    public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
+        logger.trace("---insert invoked");
+
+        JsonArray insertParam = new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("resourcetypeid"))
+                .add(insertRecord.getString("resourcename"))
+                .add(insertRecord.getString("description"))
+                .add(insertRecord.getString("resourcerefid"))
+                .add(insertRecord.getBoolean("isactive"));
+        return insert(insertParam, SQL_INSERT)
+                .flatMap(insertResult -> {
+                    if (insertResult.getThrowable() == null) {
+                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
+                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
+                    } else {
+                        return Single.just(insertResult);
+                    }
+                })
+                .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
+    }
+
+
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         return insertAllWithSql(insertRecords, SQL_INSERT);
@@ -86,35 +115,8 @@ public class ResourceService extends AbstractService<UpdateResult> {
                         return Observable.just(insertResult);
                     }
                 })
-                .flatMap(result -> {
-                    JsonObject recordStatus = new JsonObject();
-                    if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
-                        recordStatus
-                                .put("uuid", "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
-                                        .setUsermessage(result.getThrowable().getLocalizedMessage())
-                                        .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                        .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
-                                        .toJson());
-                    } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
-                        if (result.getResultSet() != null) {
-                            JsonArray arr = new JsonArray();
-                            result.getResultSet().getRows().forEach(arr::add);
-                            recordStatus
-                                    .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                                    .put("status", HttpResponseStatus.CREATED.code())
-                                    .put("response", arr.getJsonObject(0))
-                                    .put("error", new ApiSchemaError().toJson());
-                        }
-                    }
-                    return Observable.just(recordStatus);
-                })
+                .flatMap(result -> Observable.just(evaluateCompositeResultAndReturnRecordStatus(result))
+                )
                 .toList();
     }
 

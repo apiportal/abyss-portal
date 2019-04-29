@@ -15,6 +15,8 @@ import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.LicenseService;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -62,6 +64,10 @@ public class LicenseApiController extends AbstractApiController {
     }
 
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
+        addEntities(routingContext, appendRequestBody, false);
+    }
+
+    void addEntities(RoutingContext routingContext, JsonObject appendRequestBody, boolean isCascaded) {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -77,7 +83,16 @@ public class LicenseApiController extends AbstractApiController {
         });
 
         try {
-            addEntities(routingContext, LicenseService.class, requestBody, jsonbColumnsList);
+            if(isCascaded) {
+                logger.trace("---adding entities in a cascaded way");
+                LicenseService licenseService = new LicenseService(routingContext.vertx());
+                //licenseService.setAutoCommit(false);
+                Single<List<JsonObject>> insertAllCascadedResult = licenseService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                        .flatMap(jdbcClient -> licenseService.insertAllCascaded(routingContext, requestBody));
+                subscribeAndResponseBulkList(routingContext, insertAllCascadedResult, jsonbColumnsList, HttpResponseStatus.MULTI_STATUS.code());
+            } else {
+                addEntities(routingContext, LicenseService.class, requestBody, jsonbColumnsList);
+            }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -225,6 +240,11 @@ public class LicenseApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addLicensesOfSubjectCascaded(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
-    }//todo
+        addEntities(routingContext, new JsonObject()
+                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .put("crudsubjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                .put("subjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                ,true
+        );
+    }
 }
