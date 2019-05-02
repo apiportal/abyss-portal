@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -121,7 +122,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         // 2: install body handler
         //A handler which gathers the entire request body and sets it on the RoutingContext
         //It also handles HTTP file uploads and can be used to limit body sizes
-        router.route().handler(BodyHandler.create());
+        //router.route().handler(BodyHandler.create()); //TODO: Web API Contract - Router Factory automatically mounts a BodyHandler to manage request bodies.
 
         // 3: install session handler
         //A handler that maintains a Session for each browser session
@@ -135,7 +136,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         //Handler which adds a header `x-response-time` in the response of matching requests containing the time taken in ms to process the request.
         router.route().handler(ResponseTimeHandler.create());
 
-        //router.route().failureHandler(this::failureHandler);
+        router.route().failureHandler(this::failureHandler);
 
         //router.route(Constants.ABYSS_GATEWAY_ROOT + "/:apiUUID/:apiPath").handler(this::routingContextHandler);
         router.route(Constants.ABYSS_GATEWAY_ROOT).handler(this::routingContextHandler);
@@ -156,6 +157,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         return Single.just(router);
     }
 
+/*
     Single<Router> createSubRouter(String mountPoint) {
         logger.trace("---createSubRouter invoked");
 
@@ -185,11 +187,21 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
         return Single.just(subRouter);
     }
+*/
 
     private void failureHandler(RoutingContext routingContext) {
+        logger.trace("AbstractGatewayVerticle - failureHandler invoked");
 
         // This is the failure handler
         Throwable failure = routingContext.failure();
+        logger.error("AbstractGatewayVerticle - failure: {}\n{}", failure.getLocalizedMessage(), Arrays.toString(failure.getStackTrace()));
+
+        if (routingContext.response().ended()) {
+            logger.error("AbstractGatewayVerticle - failureHandler invoked but response has already been ended. So quiting handler...");
+            return;
+        }
+
+
         if (failure instanceof AbyssApiException) {
             //Handle Abyss Api Exception
             routingContext.response()
@@ -233,6 +245,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                     .setPassword(Constants.HTTPS_GATEWAY_SSL_TRUSTSTORE_PASSWORD)
                     );
         }
+/*
         HttpServer server = vertx.createHttpServer(httpServerOptions);
         server.requestStream()
                 .toFlowable()
@@ -251,13 +264,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     logger.trace("http server started | {}:{}", serverHost, serverPort);
                     return Single.just(httpServer);
                 });
+*/
 
-/*
         return vertx.createHttpServer(httpServerOptions)
                 .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
                 .requestHandler(router::accept)
                 .rxListen(serverPort, serverHost);
-*/
     }
 
     Single<Router> enableCorsSupport(Router router) {
@@ -573,7 +585,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     void genericFailureHandler(RoutingContext routingContext) {
-        logger.error("failureHandler invoked {} | {} ", routingContext.failure().getLocalizedMessage(), routingContext.failure().getStackTrace());
+        logger.error("AbstractGatewayVerticle - genericFailureHandler invoked {} | {} ", routingContext.failure().getLocalizedMessage(), routingContext.failure().getStackTrace());
 
         // This is the failure handler
         Throwable failure = routingContext.failure();

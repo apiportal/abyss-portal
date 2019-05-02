@@ -32,7 +32,12 @@ import io.vertx.ext.web.api.contract.RouterFactoryOptions;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.api.contract.openapi3.OpenAPI3RouterFactory;
+import io.vertx.reactivex.ext.web.handler.CookieHandler;
+import io.vertx.reactivex.ext.web.handler.ResponseTimeHandler;
+import io.vertx.reactivex.ext.web.handler.SessionHandler;
+import io.vertx.reactivex.ext.web.handler.TimeoutHandler;
 import io.vertx.reactivex.ext.web.handler.UserSessionHandler;
+import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.servicediscovery.Record;
 import io.vertx.servicediscovery.types.HttpLocation;
 import org.slf4j.Logger;
@@ -156,6 +161,12 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                 OpenAPIUtil.createOpenAPI3RouterFactory(vertx, swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
                                     if (openAPI3RouterFactoryAsyncResult.succeeded()) {
                                         OpenAPI3RouterFactory factory = openAPI3RouterFactoryAsyncResult.result();
+
+                                        //factory.addGlobalHandler(CookieHandler.create());
+                                        //factory.addGlobalHandler(SessionHandler.create(LocalSessionStore.create(vertx, Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)).setSessionCookieName(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME).setSessionTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60 * 1000));
+                                        //factory.addGlobalHandler(TimeoutHandler.create(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_TIMEOUT)));
+                                        //factory.addGlobalHandler(ResponseTimeHandler.create());
+                                        //factory.addGlobalHandler(this::routingContextHandler);
 
                                         //add generic security handler for each security requirement
                                         AddSecurityHandlers(swaggerParseResult.getOpenAPI(), swaggerParseResult.getOpenAPI().getSecurity(), factory);
