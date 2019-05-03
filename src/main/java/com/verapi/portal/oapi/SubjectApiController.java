@@ -279,17 +279,20 @@ public class SubjectApiController extends AbstractApiController {
         SubjectService subjectService = new SubjectService(routingContext.vertx());
         //subjectService.setAutoCommit(false);
         Single<ResultSet> updateCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                .flatMap(jdbcClient -> subjectService.updateCascaded(routingContext, UUID.fromString(routingContext.pathParam("uuid")), requestBody))
-                //.flatMap(resultSet -> subjectService.findById(UUID.fromString(routingContext.pathParam("uuid"))))
+                .flatMap(jdbcClient -> subjectService.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
+                .flatMap(resultSet -> subjectService.findAll(new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS)
+                        .setFilterQueryParams(new JsonArray().add((String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME)))
+                        .addFilterQuery(SubjectService.FILTER_APP_UUID)
+                        .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")))
+                ))
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException("no_data_found"));
                     } else
                         return Single.just(resultSet);
                 });
-        subscribeAndResponse(routingContext, updateCascadedResult, null, HttpResponseStatus.OK.code());
+        subscribeAndResponse(routingContext, updateCascadedResult, jsonbColumnsList, HttpResponseStatus.OK.code());
     }
-
 
     @AbyssApiOperationHandler
     public void updateSubject(RoutingContext routingContext) {
