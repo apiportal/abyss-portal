@@ -931,11 +931,17 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "where s.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'::uuid\n" +  // --User
             SQL_AND + "s." + SQL_CONDITION_UUID_IS;
 
-    public static final String FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS = "SELECT app.uuid, app.organizationid, app.created, app.updated, app.deleted, app.isdeleted, app.isactivated, app.subjectname, app.displayname, app.email, app.effectivestartdate, app.effectiveenddate, app.subjectdirectoryid, app.islocked, app.issandbox, app.url, app.description,\n" +
+    public static final String FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS = "SELECT app.uuid, app.organizationid, app.created, app.updated, app.deleted, app.isdeleted, app.crudsubjectid, app.isactivated, app.subjecttypeid, app.subjectname, \n" +
+            "\t\tapp.firstname, app.lastname, app.displayname, app.email, app.effectivestartdate, app.effectiveenddate, app.picture, app.subjectdirectoryid, \n" +
+            "\t\tapp.islocked, app.issandbox, app.url, app.description,\n" +
             "COALESCE((select json_agg(\n" +
-            "\t\tjson_build_object('uuid', c.uuid, 'organizationid', c.organizationid, 'created', c.created, 'updated', c.updated, 'deleted', c.deleted, 'isdeleted', c.isdeleted, 'name', c.\"name\", 'description', c.description, 'apiid', c.apiid, 'environment', c.environment, 'contractstateid', c.contractstateid, 'status', c.status, 'licenseid', c.licenseid, 'subjectpermissionid', c.subjectpermissionid, \n" +
+            "\t\tjson_build_object('uuid', c.uuid, 'organizationid', c.organizationid, 'created', c.created, 'updated', c.updated, 'deleted', c.deleted, 'isdeleted', c.isdeleted, 'crudsubjectid', c.crudsubjectid, \n" +
+            "\t\t\t'name', c.\"name\", 'description', c.description, 'apiid', c.apiid, 'subjectid', c.subjectid, 'environment', c.environment, 'contractstateid', c.contractstateid, \n" +
+            "\t\t\t'status', c.status, 'isrestrictedtosubsetofapi', c.isrestrictedtosubsetofapi, 'licenseid', c.licenseid, 'subjectpermissionid', c.subjectpermissionid, \n" +
             "\t\t\t'tokens', COALESCE((select json_agg(\n" +
-            "\t\t\t\t\tjson_build_object('uuid', rat.uuid, 'organizationid', rat.organizationid, 'created', rat.created, 'deleted', rat.deleted, 'isdeleted', rat.isdeleted, 'isactive', 'token', rat.token, 'expiredate', rat.expiredate, rat.isactive)\n" +
+            "\t\t\t\t\tjson_build_object('uuid', rat.uuid, 'organizationid', rat.organizationid, 'created', rat.created, 'updated', rat.updated, 'deleted', rat.deleted, 'isdeleted', rat.isdeleted, \n" +
+            "\t\t\t\t\t'crudsubjectid', rat.crudsubjectid, 'subjectpermissionid', rat.subjectpermissionid, 'resourcetypeid', rat.resourcetypeid, 'resourcerefid', rat.resourcerefid, \n" +
+            "\t\t\t\t\t'token', rat.token, 'expiredate', rat.expiredate, 'isactive', rat.isactive)\n" +
             "\t\t\t\t\t) from resource_access_token rat\n" +
             "\t\t\t\t\t\twhere rat.subjectpermissionid = sp.uuid\n" +
             "\t\t\t\t), '[]')\n" +
