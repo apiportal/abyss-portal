@@ -753,17 +753,39 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public static final String FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS = "SELECT app.uuid, app.organizationid, app.created, app.updated, app.deleted, app.isdeleted, app.crudsubjectid, app.isactivated, app.subjecttypeid, app.subjectname, \n" +
             "\t\tapp.firstname, app.lastname, app.displayname, app.email, app.effectivestartdate, app.effectiveenddate, app.picture, app.subjectdirectoryid, \n" +
             "\t\tapp.islocked, app.issandbox, app.url, app.description,\n" +
+
             "COALESCE((select json_agg(\n" +
             "\t\tjson_build_object('uuid', c.uuid, 'organizationid', c.organizationid, 'created', c.created, 'updated', c.updated, 'deleted', c.deleted, 'isdeleted', c.isdeleted, 'crudsubjectid', c.crudsubjectid, \n" +
             "\t\t\t'name', c.\"name\", 'description', c.description, 'apiid', c.apiid, 'subjectid', c.subjectid, 'environment', c.environment, 'contractstateid', c.contractstateid, \n" +
             "\t\t\t'status', c.status, 'isrestrictedtosubsetofapi', c.isrestrictedtosubsetofapi, 'licenseid', c.licenseid, 'subjectpermissionid', c.subjectpermissionid, \n" +
+
             "\t\t\t'tokens', COALESCE((select json_agg(\n" +
             "\t\t\t\t\tjson_build_object('uuid', rat.uuid, 'organizationid', rat.organizationid, 'created', rat.created, 'updated', rat.updated, 'deleted', rat.deleted, 'isdeleted', rat.isdeleted, \n" +
             "\t\t\t\t\t'crudsubjectid', rat.crudsubjectid, 'subjectpermissionid', rat.subjectpermissionid, 'resourcetypeid', rat.resourcetypeid, 'resourcerefid', rat.resourcerefid, \n" +
             "\t\t\t\t\t'token', rat.token, 'expiredate', rat.expiredate, 'isactive', rat.isactive)\n" +
             "\t\t\t\t\t) from resource_access_token rat\n" +
             "\t\t\t\t\t\twhere rat.subjectpermissionid = sp.uuid\n" +
+            "\t\t\t\t), '[]'),\n" +
+
+            "\t\t\t'licenses', COALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', l.uuid, 'organizationid', l.organizationid, 'created', l.created, 'updated', l.updated, 'deleted', l.deleted, 'isdeleted', l.isdeleted, \n" +
+            "\t\t\t\t\t'crudsubjectid', l.crudsubjectid, 'name', l.\"name\", 'version', l.\"version\", 'subjectid', l.subjectid, 'licensedocument', l.licensedocument, 'isactive', l.isactive)\n" +
+            "\t\t\t\t\t) from license l\n" +
+            "\t\t\t\t\t\twhere c.licenseid = l.uuid\n" +
+            "\t\t\t\t), '[]'),\n" +
+
+            "\t\t\t'apis', COALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', a.uuid, 'organizationid', a.organizationid, 'created', a.created, 'updated', a.updated, 'deleted', a.deleted, 'isdeleted', a.isdeleted, \n" +
+            "\t\t\t\t\t'crudsubjectid', a.crudsubjectid, 'subjectid', a.subjectid, 'isproxyapi', a.isproxyapi, 'apistateid', a.apistateid, 'apivisibilityid', a.apivisibilityid, \n" +
+            "\t\t\t\t\t'languagename', a.languagename, 'languageversion', a.languageversion, 'languageformat', a.languageformat, 'image', a.image, 'color', a.color, 'deployed', a.deployed, \n" +
+            "\t\t\t\t\t'changelog', a.changelog, 'version', a.\"version\", 'issandbox', a.issandbox, 'islive', a.islive, 'isdefaultversion', a.isdefaultversion, 'islatestversion', a.islatestversion, \n" +
+            "\t\t\t\t\t'apioriginid', a.apioriginid, 'apiparentid', a.apiparentid, \n" +
+            "\t\t\t\t\t'apititle', a.openapidocument->'info'->>'title', 'apidescription', a.openapidocument->'info'->>'description', 'apiversion', a.openapidocument->'info'->>'version',\n" +
+            "\t\t\t\t\t'apilicense', a.openapidocument->'info'->'license'->>'name', 'apiservers', a.openapidocument->'servers')\n" +
+            "\t\t\t\t\t) from api a\n" +
+            "\t\t\t\t\t\twhere c.apiid = a.uuid\n" +
             "\t\t\t\t), '[]')\n" +
+
             "\t\t\t)\n" +
             "\t\t) from contract c\n" +
             "     \t\tjoin subject_permission sp on sp.uuid = c.subjectpermissionid\n" +
