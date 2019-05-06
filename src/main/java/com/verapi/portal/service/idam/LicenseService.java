@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 6 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.service.idam;
@@ -122,7 +127,13 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 }).toList();
     }
 
-    private JsonArray prepareInsertParameters(JsonObject insertRecord) {
+    @Override
+    protected String getInsertSql() { return SQL_INSERT; }
+
+    @Override
+    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+
+    protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
         return new JsonArray()
                 .add(insertRecord.getString("organizationid"))
                 .add(insertRecord.getString("crudsubjectid"))
@@ -133,35 +144,13 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 .add(insertRecord.getBoolean("isactive"));
     }
 
-    /**
-     *
-     * @param insertRecord
-     * @return recordStatus
-     */
-    public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
-        logger.trace("---insert invoked");
-
-        JsonArray insertParam = prepareInsertParameters(insertRecord);
-        return insert(insertParam, SQL_INSERT)
-                .flatMap(insertResult -> {
-                    if (insertResult.getThrowable() == null) {
-                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
-                    } else {
-                        return Single.just(insertResult);
-                    }
-                })
-                .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
-    }
-
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
+                .flatMap(jsonObj -> {
                     JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
@@ -184,14 +173,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
-        JsonArray updateParams = new JsonArray()
-                .add(updateRecord.getString("organizationid"))
-                .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.getString("name"))
-                .add(updateRecord.getString("version"))
-                .add(updateRecord.getString("subjectid"))
-                .add(updateRecord.getJsonObject("licensedocument").encode())
-                .add(updateRecord.getBoolean("isactive"))
+        JsonArray updateParams = prepareInsertParameters(updateRecord)
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -206,14 +188,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
         return updateParamsObservable
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
-                    JsonArray updateParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getJsonObject("licensedocument").encode())
-                            .add(jsonObj.getBoolean("isactive"))
+                    JsonArray updateParam = prepareInsertParameters(jsonObj)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })

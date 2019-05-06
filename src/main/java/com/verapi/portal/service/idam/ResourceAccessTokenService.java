@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 7 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.service.idam;
@@ -47,38 +52,57 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
-
-    private JsonArray prepareInsertParameters(JsonObject insertRecord) throws Exception {
+    protected void prepareTokenParameters(JsonObject insertRecord) throws UnsupportedEncodingException {
 
         //Generate and Persist Activation Token
         Token tokenGenerator = new Token();
         AuthenticationInfo authInfo;
-        try {
-            long tokenTTL = 0;
-            if (insertRecord.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_API))
-                tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.api.ttl") * Constants.ONE_DAY_IN_SECONDS;
-            else if (insertRecord.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_APP))
-                tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.app.ttl") * Constants.ONE_DAY_IN_SECONDS;
-            authInfo = tokenGenerator.generateToken(tokenTTL,
-                    insertRecord.getString("subjectpermissionid") + insertRecord.getString("resourcerefid"),
-                    vertx.getDelegate());
-            logger.trace("access token is created successfully: " + authInfo.getToken());
-        } catch (UnsupportedEncodingException e) {
-            logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
-            throw new Exception("activation token could not be generated", e);
-        }
 
+        long tokenTTL = 0;
+        if (insertRecord.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_API))
+            tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.api.ttl") * Constants.ONE_DAY_IN_SECONDS;
+        else if (insertRecord.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_APP))
+            tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.app.ttl") * Constants.ONE_DAY_IN_SECONDS;
+        authInfo = tokenGenerator.generateToken(tokenTTL,
+                insertRecord.getString("subjectpermissionid") + insertRecord.getString("resourcerefid"),
+                vertx.getDelegate());
+        logger.trace("access token is created successfully: " + authInfo.getToken());
+
+        insertRecord.put("token", authInfo.getToken());
+        insertRecord.put("expiredate", authInfo.getExpireDate());
+        insertRecord.put("nonce", authInfo.getNonce());
+        insertRecord.put("userdata", authInfo.getUserData());
+    }
+
+    @Override
+    protected String getInsertSql() { return SQL_INSERT; }
+
+    @Override
+    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+
+    @Override
+    protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
         return new JsonArray()
                 .add(insertRecord.getString("organizationid"))
                 .add(insertRecord.getString("crudsubjectid"))
                 .add(insertRecord.getString("subjectpermissionid"))
                 .add(insertRecord.getString("resourcetypeid"))
                 .add(insertRecord.getString("resourcerefid"))
-                .add(authInfo.getToken())
-                .add(authInfo.getExpireDate())
-                .add(authInfo.getNonce())
-                .add(authInfo.getUserData())
+                .add(insertRecord.getString("token"))
+                .add(insertRecord.getInstant("expiredate"))
+                .add(insertRecord.getString("nonce"))
+                .add(insertRecord.getString("userdata"))
                 .add(insertRecord.getBoolean("isactive"));
+    }
+
+    protected JsonArray prepareUpdateParameters(JsonObject updateRecord) {
+        return new JsonArray()
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(updateRecord.getString("subjectpermissionid"))
+                .add(updateRecord.getString("resourcetypeid"))
+                .add(updateRecord.getString("resourcerefid"))
+                .add(updateRecord.getBoolean("isactive"));
     }
 
     /**
@@ -86,24 +110,18 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
      * @param insertRecord
      * @return recordStatus
      */
+    @Override
     public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
         logger.trace("---insert invoked");
 
         try {
-            JsonArray insertParam = prepareInsertParameters(insertRecord);
-            return insert(insertParam, SQL_INSERT)
-                    .flatMap(insertResult -> {
-                        if (insertResult.getThrowable() == null) {
-                            return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                    .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
-                        } else {
-                            return Single.just(insertResult);
-                        }
-                    })
-                    .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
-        } catch (Exception e) {
-            return Single.error(e);
+            prepareTokenParameters(insertRecord);
+        } catch (UnsupportedEncodingException e) {
+            logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+            return Single.error(new Exception("activation token could not be generated", e));
         }
+
+        return insert(insertRecord, parentRecordStatus);
     }
 
 
@@ -112,38 +130,16 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
+                .flatMap(jsonObj -> {
 
-                    //Generate and Persist Activation Token
-                    Token tokenGenerator = new Token();
-                    AuthenticationInfo authInfo;
                     try {
-                        long tokenTTL = 0;
-                        if (jsonObj.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_API))
-                            tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.api.ttl") * Constants.ONE_DAY_IN_SECONDS;
-                        else if (jsonObj.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_APP))
-                            tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.app.ttl") * Constants.ONE_DAY_IN_SECONDS;
-                        authInfo = tokenGenerator.generateToken(tokenTTL,
-                                jsonObj.getString("subjectpermissionid") + jsonObj.getString("resourcerefid"),
-                                vertx.getDelegate());
-                        logger.trace("access token is created successfully: " + authInfo.getToken());
+                        prepareTokenParameters(jsonObj);
                     } catch (UnsupportedEncodingException e) {
                         logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
                         return Observable.error(new Exception("activation token could not be generated"));
                     }
 
-                    JsonArray insertParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("subjectpermissionid"))
-                            .add(jsonObj.getString("resourcetypeid"))
-                            .add(jsonObj.getString("resourcerefid"))
-                            .add(authInfo.getToken())
-                            .add(authInfo.getExpireDate())
-                            .add(authInfo.getNonce())
-                            .add(authInfo.getUserData())
-                            .add(jsonObj.getBoolean("isactive"));
+                    JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -190,13 +186,7 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
-        JsonArray updateParams = new JsonArray()
-                .add(updateRecord.getString("organizationid"))
-                .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.getString("subjectpermissionid"))
-                .add(updateRecord.getString("resourcetypeid"))
-                .add(updateRecord.getString("resourcerefid"))
-                .add(updateRecord.getBoolean("isactive"))
+        JsonArray updateParams = prepareUpdateParameters(updateRecord)
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -211,13 +201,7 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
         return updateParamsObservable
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
-                    JsonArray updateParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("subjectpermissionid"))
-                            .add(jsonObj.getString("resourcetypeid"))
-                            .add(jsonObj.getString("resourcerefid"))
-                            .add(jsonObj.getBoolean("isactive"))
+                    JsonArray updateParam = prepareUpdateParameters(jsonObj)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })

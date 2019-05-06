@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 5 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.service.idam;
@@ -45,39 +50,51 @@ public class ApiService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
+    @Override
+    protected String getInsertSql() { return SQL_INSERT; }
+
+    @Override
+    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+
+    @Override
+    protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
+        JsonArray insertParam = new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("subjectid"))
+                .add(insertRecord.getBoolean("isproxyapi"))
+                .add(insertRecord.getString("apistateid"))
+                .add(insertRecord.getString("apivisibilityid"))
+                .add(insertRecord.getString("languagename"))
+                .add(insertRecord.getString("languageversion"))
+                .add(((Number) insertRecord.getValue("languageformat")).longValue())
+                .add(insertRecord.getString("originaldocument"))
+                .add(insertRecord.getJsonObject("openapidocument").encode())
+                .add(insertRecord.getJsonObject("extendeddocument").encode());
+        if (insertRecord.getBoolean("isproxyapi"))
+            insertParam.add(insertRecord.getString("businessapiid"));
+        insertParam.add(insertRecord.getString("image"))
+                .add(insertRecord.getString("color"))
+                .add(insertRecord.getInstant("deployed"))
+                .add(insertRecord.getString("changelog"))
+                .add(insertRecord.getString("version"))
+                .add(insertRecord.getBoolean("issandbox"))
+                .add(insertRecord.getBoolean("islive"))
+                .add(insertRecord.getBoolean("isdefaultversion"))
+                .add(insertRecord.getBoolean("islatestversion"))
+                .add(insertRecord.getString("apioriginid"))
+                .add(insertRecord.getString("apiparentid"));
+
+        return insertParam;
+    }
+
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
-                    JsonArray insertParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getBoolean("isproxyapi"))
-                            .add(jsonObj.getString("apistateid"))
-                            .add(jsonObj.getString("apivisibilityid"))
-                            .add(jsonObj.getString("languagename"))
-                            .add(jsonObj.getString("languageversion"))
-                            .add(((Number) jsonObj.getValue("languageformat")).longValue())
-                            .add(jsonObj.getString("originaldocument"))
-                            .add(jsonObj.getJsonObject("openapidocument").encode())
-                            .add(jsonObj.getJsonObject("extendeddocument").encode());
-                    if (jsonObj.getBoolean("isproxyapi"))
-                        insertParam.add(jsonObj.getString("businessapiid"));
-                    insertParam.add(jsonObj.getString("image"))
-                            .add(jsonObj.getString("color"))
-                            .add(jsonObj.getInstant("deployed"))
-                            .add(jsonObj.getString("changelog"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getBoolean("issandbox"))
-                            .add(jsonObj.getBoolean("islive"))
-                            .add(jsonObj.getBoolean("isdefaultversion"))
-                            .add(jsonObj.getBoolean("islatestversion"))
-                            .add(jsonObj.getString("apioriginid"))
-                            .add(jsonObj.getString("apiparentid"));
+                .flatMap(jsonObj -> {
+                    JsonArray insertParam = prepareInsertParameters(jsonObj);
 
                     return insert(insertParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_INSERT : SQL_INSERT_BUSINESS_API).toObservable();
                 })
@@ -125,32 +142,7 @@ public class ApiService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
-        JsonArray updateParams = new JsonArray()
-                .add(updateRecord.getString("organizationid"))
-                .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.getString("subjectid"))
-                .add(updateRecord.getBoolean("isproxyapi"))
-                .add(updateRecord.getString("apistateid"))
-                .add(updateRecord.getString("apivisibilityid"))
-                .add(updateRecord.getString("languagename"))
-                .add(updateRecord.getString("languageversion"))
-                .add(((Number) updateRecord.getValue("languageformat")).longValue())
-                .add(updateRecord.getString("originaldocument"))
-                .add(updateRecord.getJsonObject("openapidocument").encode())
-                .add(updateRecord.getJsonObject("extendeddocument").encode());
-        if (updateRecord.getBoolean("isproxyapi"))
-            updateParams.add(updateRecord.getString("businessapiid"));
-        updateParams.add(updateRecord.getValue("image"))
-                .add(updateRecord.getString("color"))
-                .add(updateRecord.getInstant("deployed"))
-                .add(updateRecord.getString("changelog"))
-                .add(updateRecord.getString("version"))
-                .add(updateRecord.getBoolean("issandbox"))
-                .add(updateRecord.getBoolean("islive"))
-                .add(updateRecord.getBoolean("isdefaultversion"))
-                .add(updateRecord.getBoolean("islatestversion"))
-                .add(updateRecord.getString("apioriginid"))
-                .add(updateRecord.getString("apiparentid"))
+        JsonArray updateParams = prepareInsertParameters(updateRecord)
                 .add(uuid.toString());
         return update(updateParams, (updateRecord.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID);
     }
@@ -162,32 +154,7 @@ public class ApiService extends AbstractService<UpdateResult> {
         return updateParamsObservable
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
-                    JsonArray updateParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getBoolean("isproxyapi"))
-                            .add(jsonObj.getString("apistateid"))
-                            .add(jsonObj.getString("apivisibilityid"))
-                            .add(jsonObj.getString("languagename"))
-                            .add(jsonObj.getString("languageversion"))
-                            .add(((Number) jsonObj.getValue("languageformat")).longValue())
-                            .add(jsonObj.getString("originaldocument"))
-                            .add(jsonObj.getJsonObject("openapidocument").encode())
-                            .add(jsonObj.getJsonObject("extendeddocument").encode());
-                    if (jsonObj.getBoolean("isproxyapi"))
-                        updateParam.add(jsonObj.getString("businessapiid"));
-                    updateParam.add(jsonObj.getString("image"))
-                            .add(jsonObj.getString("color"))
-                            .add(jsonObj.getInstant("deployed"))
-                            .add(jsonObj.getString("changelog"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getBoolean("issandbox"))
-                            .add(jsonObj.getBoolean("islive"))
-                            .add(jsonObj.getBoolean("isdefaultversion"))
-                            .add(jsonObj.getBoolean("islatestversion"))
-                            .add(jsonObj.getString("apioriginid"))
-                            .add(jsonObj.getString("apiparentid"))
+                    JsonArray updateParam = prepareInsertParameters(jsonObj)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID).toObservable();
                 })

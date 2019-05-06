@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 7 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.service.idam;
@@ -42,20 +47,40 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
+    @Override
+    protected String getInsertSql() { return SQL_INSERT; }
+
+    @Override
+    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+
+    @Override
+    protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
+        return new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("typename"))
+                .add(insertRecord.getString("description"))
+                .add(insertRecord.getJsonObject("attributetemplate").encode())
+                .add(insertRecord.getBoolean("isactive"));
+    }
+
+    protected JsonArray prepareUpdateParameters(JsonObject updateRecord) {
+        return new JsonArray()
+                .add(updateRecord.getString("organizationid"))
+                .add(updateRecord.getString("crudsubjectid"))
+                .add(((String) updateRecord.getValue("typename")))
+                .add(((String) updateRecord.getValue("description")))
+                .add(updateRecord.getJsonObject("attributetemplate").encode())
+                .add(updateRecord.getBoolean("isactive"));
+    }
+
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
-                    JsonArray insertParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("typename"))
-                            .add(jsonObj.getString("description"))
-                            .add(jsonObj.getJsonObject("attributetemplate").encode())
-                            .add(jsonObj.getBoolean("isactive"));
+                .flatMap(jsonObj -> {
+                    JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -102,13 +127,7 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
-        JsonArray updateParams = new JsonArray()
-                .add(updateRecord.getString("organizationid"))
-                .add(updateRecord.getString("crudsubjectid"))
-                .add(((String) updateRecord.getValue("typename")))
-                .add(((String) updateRecord.getValue("description")))
-                .add(updateRecord.getJsonObject("attributetemplate").encode())
-                .add(updateRecord.getBoolean("isactive"))
+        JsonArray updateParams = prepareUpdateParameters(updateRecord)
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -123,13 +142,7 @@ public class AccessManagerTypeService extends AbstractService<UpdateResult> {
         return updateParamsObservable
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
-                    JsonArray updateParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(((String) jsonObj.getValue("typename")))
-                            .add(((String) jsonObj.getValue("description")))
-                            .add(jsonObj.getJsonObject("attributetemplate").encode())
-                            .add(jsonObj.getBoolean("isactive"))
+                    JsonArray updateParam = prepareUpdateParameters(jsonObj)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })

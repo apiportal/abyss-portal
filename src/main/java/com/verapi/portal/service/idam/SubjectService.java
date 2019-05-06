@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 5 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.service.idam;
@@ -70,6 +75,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
         //*******
     }
 
+
+
     //TODO: Process Bulk Insert
     public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
         logger.trace("SubjectService --- insertAllCascaded invoked");
@@ -81,7 +88,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
         //daisy chaining record status
         return insertParamsObservable
-            .flatMap(insertRecord -> insert2(insertRecord, null).toObservable()) //insert app
+            .flatMap(insertRecord -> insert(insertRecord, null).toObservable()) //insert app
             .flatMap(recordStatus -> {
                 //Convert recordStatus to insertRecord Json Object
                 if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
@@ -155,7 +162,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             .flatMap(recordStatus -> {
                 //Convert recordStatus to insertRecord Json Object
                 if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                    JsonObject resourceAccessTokenInsertResult = recordStatus.getJsonObject("response");
+                    //JsonObject resourceAccessTokenInsertResult = recordStatus.getJsonObject("response");
 
                     JsonObject appRecord = recordStatus.getJsonObject("parentRecordStatus")
                             .getJsonObject("parentRecordStatus")
@@ -181,7 +188,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
             })
                 .flatMap(recordStatus -> {
                     if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject subjectMembershipInsertResult = recordStatus.getJsonObject("response");
+                        //JsonObject subjectMembershipInsertResult = recordStatus.getJsonObject("response");
 
                         JsonObject resourceAccessTokenRecordStatus = recordStatus.getJsonObject("parentRecordStatus");
                         JsonObject resourceAccessTokenInsertResult = resourceAccessTokenRecordStatus.getJsonObject("response");
@@ -206,7 +213,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 }).toList();
     }
 
-    private JsonArray prepareInsertParameters(JsonObject insertRecord) {
+    @Override
+    protected String getInsertSql() { return SQL_INSERT; }
+
+    @Override
+    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+
+    protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
         return new JsonArray()
                 .add(insertRecord.getString("organizationid"))
                 .add(insertRecord.getString("crudsubjectid")) //TODO: Make it readOnly in Yaml
@@ -240,30 +253,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(insertRecord.containsKey("company") ? insertRecord.getString("company") : "");
     }
 
-    public Single<JsonObject> insert2(JsonObject insertRecord, JsonObject parentRecordStatus) {
-        logger.trace("---insert invoked");
-
-        JsonArray insertParam = prepareInsertParameters(insertRecord);
-        return insert(insertParam, SQL_INSERT)
-                .flatMap(insertResult -> {
-                    if (insertResult.getThrowable() == null) {
-                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
-                    } else {
-                        return Single.just(insertResult);
-                    }
-                })
-                .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
-    }
-
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
+                .flatMap(jsonObj -> {
                     JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
@@ -285,21 +281,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .toList();
     }
 
-
-    public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
-        if ((!updateRecord.containsKey("picture")) || (updateRecord.getValue("picture") == null)) {
-            try {
-                logger.trace("Updating Subject with default avatar");
-                //update default avatar image TODO: later use picture using request message
-                ClassLoader classLoader = getClass().getClassLoader();
-                File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
-                updateRecord.put("picture", encodeFileToBase64Binary(file));
-            } catch (IOException e) {
-                logger.error(e.getLocalizedMessage());
-                logger.error(Arrays.toString(e.getStackTrace()));
-            }
-        }
-        JsonArray updateParams = new JsonArray()
+    protected JsonArray prepareUpdateParameters(JsonObject updateRecord) {
+        return new JsonArray()
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
                 .add(updateRecord.containsKey("isactivated") ? updateRecord.getBoolean("isactivated") : false)
@@ -331,7 +314,23 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.containsKey("phoneextension") ? updateRecord.getString("phoneextension") : "")
                 .add(updateRecord.containsKey("jobtitle") ? updateRecord.getString("jobtitle") : "")
                 .add(updateRecord.containsKey("department") ? updateRecord.getString("department") : "")
-                .add(updateRecord.containsKey("company") ? updateRecord.getString("company") : "")
+                .add(updateRecord.containsKey("company") ? updateRecord.getString("company") : "");
+    }
+
+    public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
+        if ((!updateRecord.containsKey("picture")) || (updateRecord.getValue("picture") == null)) {
+            try {
+                logger.trace("Updating Subject with default avatar");
+                //update default avatar image TODO: later use picture using request message
+                ClassLoader classLoader = getClass().getClassLoader();
+                File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
+                updateRecord.put("picture", encodeFileToBase64Binary(file));
+            } catch (IOException e) {
+                logger.error(e.getLocalizedMessage());
+                logger.error(Arrays.toString(e.getStackTrace()));
+            }
+        }
+        JsonArray updateParams = prepareUpdateParameters(updateRecord)
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -357,39 +356,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                             logger.error(Arrays.toString(e.getStackTrace()));
                         }
                     }
-                    JsonArray updateParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.containsKey("isactivated") ? jsonObj.getBoolean("isactivated") : false)
-                            .add(jsonObj.getString("subjecttypeid"))
-                            .add(jsonObj.getString("subjectname"))
-                            .add(jsonObj.getString("firstname"))
-                            .add(jsonObj.getString("lastname"))
-                            .add(jsonObj.getString("displayname"))
-                            .add(jsonObj.getString("email"))
-                            .add(jsonObj.containsKey("secondaryemail") ? jsonObj.getString("secondaryemail") : "")
-                            .add(jsonObj.getInstant("effectivestartdate"))
-                            .add(jsonObj.containsKey("effectiveenddate") ? jsonObj.getInstant("effectiveenddate") : Instant.now().plus(90, DAYS))
-/*
-                            .add(jsonObj.getString("password"))
-                            .add(jsonObj.getString("passwordsalt"))
-*/
-                            .add(jsonObj.getValue("picture"))
-                            .add(jsonObj.getString("subjectdirectoryid"))
-                            .add(jsonObj.getBoolean("islocked"))
-                            .add(jsonObj.getBoolean("issandbox"))
-                            .add(jsonObj.getString("url"))
-                            .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
-                            .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "")
-                            .add(jsonObj.containsKey("distinguishedname") ? jsonObj.getString("distinguishedname") : "")
-                            .add(jsonObj.containsKey("uniqueid") ? jsonObj.getString("uniqueid") : "")
-                            .add(jsonObj.containsKey("phonebusiness") ? jsonObj.getString("phonebusiness") : "")
-                            .add(jsonObj.containsKey("phonehome") ? jsonObj.getString("phonehome") : "")
-                            .add(jsonObj.containsKey("phonemobile") ? jsonObj.getString("phonemobile") : "")
-                            .add(jsonObj.containsKey("phoneextension") ? jsonObj.getString("phoneextension") : "")
-                            .add(jsonObj.containsKey("jobtitle") ? jsonObj.getString("jobtitle") : "")
-                            .add(jsonObj.containsKey("department") ? jsonObj.getString("department") : "")
-                            .add(jsonObj.containsKey("company") ? jsonObj.getString("company") : "")
+                    JsonArray updateParam = prepareUpdateParameters(jsonObj)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
@@ -802,8 +769,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "     \t\tjoin subject_permission sp on sp.uuid = c.subjectpermissionid\n" +
             "\t  \t\twhere app.uuid = c.subjectid\n" +
             "\t), '[]') as contracts\n" +
-            "from \n" +
-            "subject app\n" +
+            "from\n" +
+            "subject\napp\n" +
             ", subject usr, subject_membership sm\n" +
             "where app.subjecttypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6' --APP\n" +
             "and app.uuid = sm.subjectgroupid and sm.subjectid = usr.uuid \n" +

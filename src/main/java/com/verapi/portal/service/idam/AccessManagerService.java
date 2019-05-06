@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 7 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.service.idam;
@@ -42,21 +47,31 @@ public class AccessManagerService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
+    @Override
+    protected String getInsertSql() { return SQL_INSERT; }
+
+    @Override
+    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+
+    @Override
+    protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
+        return new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("accessmanagername"))
+                .add(insertRecord.getString("description"))
+                .add(insertRecord.getBoolean("isactive"))
+                .add(insertRecord.getString("accessmanagertypeid"))
+                .add(insertRecord.getJsonObject("accessmanagerattributes").encode());
+    }
+
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(o -> {
-                    JsonObject jsonObj = (JsonObject) o;
-                    JsonArray insertParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("accessmanagername"))
-                            .add(jsonObj.getString("description"))
-                            .add(jsonObj.getBoolean("isactive"))
-                            .add(jsonObj.getString("accessmanagertypeid"))
-                            .add(jsonObj.getJsonObject("accessmanagerattributes").encode());
+                .flatMap(jsonObj -> {
+                    JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
@@ -103,14 +118,7 @@ public class AccessManagerService extends AbstractService<UpdateResult> {
     }
 
     public Single<CompositeResult> update(UUID uuid, JsonObject updateRecord) {
-        JsonArray updateParams = new JsonArray()
-                .add(updateRecord.getString("organizationid"))
-                .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.getString("accessmanagername"))
-                .add(updateRecord.getString("description"))
-                .add(updateRecord.getBoolean("isactive"))
-                .add(updateRecord.getString("accessmanagertypeid"))
-                .add(updateRecord.getJsonObject("accessmanagerattributes").encode())
+        JsonArray updateParams = prepareInsertParameters(updateRecord)
                 .add(uuid.toString());
         return update(updateParams, SQL_UPDATE_BY_UUID);
     }
@@ -125,14 +133,7 @@ public class AccessManagerService extends AbstractService<UpdateResult> {
         return updateParamsObservable
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
-                    JsonArray updateParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("accessmanagername"))
-                            .add(jsonObj.getString("description"))
-                            .add(jsonObj.getBoolean("isactive"))
-                            .add(jsonObj.getString("accessmanagertypeid"))
-                            .add(jsonObj.getJsonObject("accessmanagerattributes").encode())
+                    JsonArray updateParam = prepareInsertParameters(jsonObj)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })

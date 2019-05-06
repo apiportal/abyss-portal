@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 4 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.service;
@@ -615,6 +620,33 @@ public abstract class AbstractService<T> implements IService<T> {
             }
         }
         return recordStatus;
+    }
+
+    abstract protected JsonArray prepareInsertParameters(JsonObject insertRecord);
+
+    abstract protected String getInsertSql();
+
+    abstract protected String getFindByIdSql();
+
+    /**
+     * insert
+     * @param insertRecord
+     * @return recordStatus
+     */
+    public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
+        logger.trace("---insert invoked");
+
+        JsonArray insertParam = prepareInsertParameters(insertRecord);
+        return insert(insertParam, getInsertSql())
+                .flatMap(insertResult -> {
+                    if (insertResult.getThrowable() == null) {
+                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), getFindByIdSql())
+                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
+                    } else {
+                        return Single.just(insertResult);
+                    }
+                })
+                .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
     }
 
 }
