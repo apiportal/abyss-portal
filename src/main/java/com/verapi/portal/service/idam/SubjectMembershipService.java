@@ -43,6 +43,41 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
+
+    private JsonArray prepareInsertParameters(JsonObject insertRecord) {
+        return new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("subjectid"))
+                .add(insertRecord.getString("subjectgroupid"))
+                .add(insertRecord.getString("subjectdirectoryid"))
+                .add(insertRecord.containsKey("subjecttypeid")?insertRecord.getString("subjecttypeid"):Constants.SUBJECT_TYPE_USER)
+                .add(insertRecord.containsKey("subjectgrouptypeid")?insertRecord.getString("subjectgrouptypeid"):Constants.SUBJECT_TYPE_GROUP)
+                .add(insertRecord.getBoolean("isactive"));
+    }
+
+    /**
+     *
+     * @param insertRecord
+     * @return recordStatus
+     */
+    public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
+        logger.trace("---insert invoked");
+
+        JsonArray insertParam = prepareInsertParameters(insertRecord);
+        return insert(insertParam, SQL_INSERT)
+                .flatMap(insertResult -> {
+                    if (insertResult.getThrowable() == null) {
+                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
+                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
+                    } else {
+                        return Single.just(insertResult);
+                    }
+                })
+                .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
+    }
+
+
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);

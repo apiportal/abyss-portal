@@ -47,6 +47,66 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
+
+    private JsonArray prepareInsertParameters(JsonObject insertRecord) throws Exception {
+
+        //Generate and Persist Activation Token
+        Token tokenGenerator = new Token();
+        AuthenticationInfo authInfo;
+        try {
+            long tokenTTL = 0;
+            if (insertRecord.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_API))
+                tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.api.ttl") * Constants.ONE_DAY_IN_SECONDS;
+            else if (insertRecord.getString("resourcetypeid").equals(Constants.RESOURCE_TYPE_APP))
+                tokenTTL = Config.getInstance().getConfigJsonObject().getInteger("token.access.app.ttl") * Constants.ONE_DAY_IN_SECONDS;
+            authInfo = tokenGenerator.generateToken(tokenTTL,
+                    insertRecord.getString("subjectpermissionid") + insertRecord.getString("resourcerefid"),
+                    vertx.getDelegate());
+            logger.trace("access token is created successfully: " + authInfo.getToken());
+        } catch (UnsupportedEncodingException e) {
+            logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+            throw new Exception("activation token could not be generated", e);
+        }
+
+        return new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("subjectpermissionid"))
+                .add(insertRecord.getString("resourcetypeid"))
+                .add(insertRecord.getString("resourcerefid"))
+                .add(authInfo.getToken())
+                .add(authInfo.getExpireDate())
+                .add(authInfo.getNonce())
+                .add(authInfo.getUserData())
+                .add(insertRecord.getBoolean("isactive"));
+    }
+
+    /**
+     *
+     * @param insertRecord
+     * @return recordStatus
+     */
+    public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
+        logger.trace("---insert invoked");
+
+        try {
+            JsonArray insertParam = prepareInsertParameters(insertRecord);
+            return insert(insertParam, SQL_INSERT)
+                    .flatMap(insertResult -> {
+                        if (insertResult.getThrowable() == null) {
+                            return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
+                                    .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
+                        } else {
+                            return Single.just(insertResult);
+                        }
+                    })
+                    .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
+        } catch (Exception e) {
+            return Single.error(e);
+        }
+    }
+
+
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
         logger.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);

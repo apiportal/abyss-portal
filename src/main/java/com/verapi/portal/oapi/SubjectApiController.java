@@ -445,6 +445,7 @@ public class SubjectApiController extends AbstractApiController {
     public void addAppsCascaded(RoutingContext routingContext) {
         addEntities(routingContext, new JsonObject()
                 .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
+                .put("crudsubjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
                 .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)),
                 true
         );

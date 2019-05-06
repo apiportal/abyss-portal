@@ -74,158 +74,186 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
         logger.trace("SubjectService --- insertAllCascaded invoked");
 
-        class InsertAllCascadedMetadata {
-
-            private String appUuid;
-            private String appDirectoryUuid;
-
-            private JsonArray insertResourceRecords;
-            private JsonArray insertSubjectPermissionRecords;
-            private JsonArray insertResourceAccessTokensRecords;
-            private JsonArray insertSubjectMembershipRecords;
-
-
-            private List<JsonObject> jsonObjectList;
-
-            private ResourceService resourceService;
-            private SubjectPermissionService subjectPermissionService;
-            private ResourceAccessTokenService resourceAccessTokenService;
-            private SubjectMembershipService subjectMembershipService;
-
-
-            InsertAllCascadedMetadata() {
-            }
-        }
-
-        InsertAllCascadedMetadata insertAllCascadedMetadata = new InsertAllCascadedMetadata();
-
         String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
         String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
-        return insertAll(insertRecords)
-                .flatMap(jsonObjects -> {
+        Observable<JsonObject> insertParamsObservable = Observable.fromIterable(insertRecords).map(o -> (JsonObject) o);
 
-                    insertAllCascadedMetadata.jsonObjectList = jsonObjects;
+        //daisy chaining record status
+        return insertParamsObservable
+            .flatMap(insertRecord -> insert2(insertRecord, null).toObservable()) //insert app
+            .flatMap(recordStatus -> {
+                //Convert recordStatus to insertRecord Json Object
+                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                    JsonObject appInsertResult = recordStatus.getJsonObject("response");
+                    JsonObject insertRecord = new JsonObject()
+                            .put("organizationid", sessionOrganizationId)
+                            .put("crudsubjectid", sessionUserId)
+                            .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
+                            .put("resourcename", appInsertResult.getString("displayname") + " APP")
+                            .put("description", appInsertResult.getString("description"))
+                            .put("resourcerefid", appInsertResult.getString("uuid"))
+                            .put("isactive", true);
 
-                    insertAllCascadedMetadata.insertResourceRecords = new JsonArray();
+                    ResourceService resourceService = new ResourceService(routingContext.vertx());
+                    return resourceService.initJDBCClient(sessionOrganizationId)
+                            .flatMap(jdbcClient -> resourceService.insert(insertRecord, recordStatus)).toObservable();
+                } else {
+                    return Observable.just(recordStatus);
+                }
 
-                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
-                    jsonObjects.forEach(requestItem -> {
-                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+            })
+            .flatMap(recordStatus -> {
+                //Convert recordStatus to insertRecord Json Object
+                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                    JsonObject resourceInsertResult = recordStatus.getJsonObject("response");
+                    String description = "Ownership of " + resourceInsertResult.getString("resourcename") + " by " + routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME);
+                    JsonObject insertRecord = new JsonObject()
+                            .put("organizationid", sessionOrganizationId)
+                            .put("crudsubjectid", sessionUserId)
+                            .put("permission", "Ownership permission")
+                            .put("description", description)
+                            .put("effectivestartdate", Instant.now())
+                            .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
+                            .put("subjectid", sessionUserId)
+                            .put("resourceid", resourceInsertResult.getString("uuid"))
+                            .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
+                            .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
+                            .put("isactive", true);
 
-                            insertAllCascadedMetadata.appUuid = requestItem.getString("uuid"); //TODO: Remove
-                            insertAllCascadedMetadata.appDirectoryUuid = requestItem.getJsonObject("response").getString("subjectdirectoryid"); //TODO: Remove
+                    SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+                    return subjectPermissionService.initJDBCClient(sessionOrganizationId)
+                            .flatMap(jdbcClient -> subjectPermissionService.insert(insertRecord, recordStatus)).toObservable();
+                } else {
+                    return Observable.just(recordStatus);
+                }
 
-                            JsonObject resourceJsonObject = new JsonObject()
-                                    .put("organizationid", sessionOrganizationId)
-                                    .put("crudsubjectid", sessionUserId)
-                                    .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
-                                    .put("resourcename", requestItem.getJsonObject("response").getString("displayname") + " APP")
-                                    .put("description", requestItem.getJsonObject("response").getString("description"))
-                                    .put("resourcerefid", requestItem.getString("uuid"))
-                                    .put("isactive", true);
-                            insertAllCascadedMetadata.insertResourceRecords.add(resourceJsonObject);
-                        }
-                    });
+            })
+            .flatMap(recordStatus -> {
+                //Convert recordStatus to insertRecord Json Object
+                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                    JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
 
-                    insertAllCascadedMetadata.resourceService = new ResourceService(routingContext.vertx());
-                    //insertAllCascadedMetadata.resourceService.setAutoCommit(false);
-                    //return insertAllCascadedMetadata.resourceService.initJDBCClient(sessionOrganizationId, sqlConnection);
-                    return insertAllCascadedMetadata.resourceService.initJDBCClient(sessionOrganizationId);
+                    String appUuid = recordStatus.getJsonObject("parentRecordStatus")
+                            .getJsonObject("parentRecordStatus").getString("uuid");
+
+                    JsonObject insertRecord = new JsonObject()
+                            .put("organizationid", sessionOrganizationId)
+                            .put("crudsubjectid", sessionUserId)
+                            .put("subjectpermissionid", permissionInsertResult.getString("uuid"))
+                            .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
+                            .put("resourcerefid", appUuid)
+                            .put("isactive", true);
+
+                    ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
+                    return resourceAccessTokenService.initJDBCClient(sessionOrganizationId)
+                            .flatMap(jdbcClient -> resourceAccessTokenService.insert(insertRecord, recordStatus)).toObservable();
+                } else {
+                    return Observable.just(recordStatus);
+                }
+            })
+            .flatMap(recordStatus -> {
+                //Convert recordStatus to insertRecord Json Object
+                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                    JsonObject resourceAccessTokenInsertResult = recordStatus.getJsonObject("response");
+
+                    JsonObject appRecord = recordStatus.getJsonObject("parentRecordStatus")
+                            .getJsonObject("parentRecordStatus")
+                            .getJsonObject("parentRecordStatus")
+                            .getJsonObject("response");
+
+                    JsonObject insertRecord = new JsonObject()
+                            .put("organizationid", sessionOrganizationId)
+                            .put("crudsubjectid", sessionUserId)
+                            .put("subjectid", sessionUserId)
+                            .put("subjectgroupid", appRecord.getString("uuid"))
+                            .put("subjectdirectoryid", appRecord.getString("subjectdirectoryid"))
+                            .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
+                            .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP)
+                            .put("isactive", true);
+
+                    SubjectMembershipService subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
+                    return  subjectMembershipService.initJDBCClient(sessionOrganizationId)
+                            .flatMap(jdbcClient -> subjectMembershipService.insert(insertRecord, recordStatus)).toObservable();
+                } else {
+                    return Observable.just(recordStatus);
+                }
+            })
+                .flatMap(recordStatus -> {
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject subjectMembershipInsertResult = recordStatus.getJsonObject("response");
+
+                        JsonObject resourceAccessTokenRecordStatus = recordStatus.getJsonObject("parentRecordStatus");
+                        JsonObject resourceAccessTokenInsertResult = resourceAccessTokenRecordStatus.getJsonObject("response");
+
+                        JsonObject subjectPermissionRecordStatus = resourceAccessTokenRecordStatus.getJsonObject("parentRecordStatus");
+                        JsonObject subjectPermissionInsertResult = subjectPermissionRecordStatus.getJsonObject("response")
+                                .put("tokens", resourceAccessTokenInsertResult);
+
+                        JsonObject resourceRecordStatus = subjectPermissionRecordStatus.getJsonObject("parentRecordStatus");
+                        JsonObject resourceInsertResult = resourceRecordStatus.getJsonObject("response")
+                                .put("permissions", subjectPermissionInsertResult);
+
+                        JsonObject appRecordStatus = resourceRecordStatus.getJsonObject("parentRecordStatus");
+                        appRecordStatus.getJsonObject("response").put("resources", resourceInsertResult);
+                        appRecordStatus.getJsonObject("response").put("contracts", new JsonArray()); //Empty contracts
+
+                        return Observable.just(appRecordStatus);
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+
+                }).toList();
+    }
+
+    private JsonArray prepareInsertParameters(JsonObject insertRecord) {
+        return new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid")) //TODO: Make it readOnly in Yaml
+                .add(insertRecord.containsKey("isactivated") ? insertRecord.getBoolean("isactivated") : false)
+                .add(insertRecord.getString("subjecttypeid"))
+                .add(insertRecord.getString("subjectname"))
+                .add(insertRecord.getString("firstname"))
+                .add(insertRecord.getString("lastname"))
+                .add(insertRecord.getString("displayname"))
+                .add(insertRecord.getString("email"))
+                .add(insertRecord.containsKey("secondaryemail") ? insertRecord.getString("secondaryemail") : "")
+                .add(insertRecord.getInstant("effectivestartdate"))
+                .add(insertRecord.containsKey("effectiveenddate") ? insertRecord.getInstant("effectiveenddate") : Instant.now().plus(90, DAYS))
+                .add(insertRecord.getString("password"))
+                .add(insertRecord.getString("passwordsalt"))
+                .add(insertRecord.getValue("picture"))
+                .add(insertRecord.getString("subjectdirectoryid"))
+                .add(insertRecord.getBoolean("islocked"))
+                .add(insertRecord.getBoolean("issandbox"))
+                .add(insertRecord.getString("url"))
+                .add(insertRecord.containsKey("isrestrictedtoprocessing") ? insertRecord.getBoolean("isrestrictedtoprocessing") : false)
+                .add(insertRecord.containsKey("description") ? insertRecord.getString("description") : "")
+                .add(insertRecord.containsKey("distinguishedname") ? insertRecord.getString("distinguishedname") : "")
+                .add(insertRecord.containsKey("uniqueid") ? insertRecord.getString("uniqueid") : "")
+                .add(insertRecord.containsKey("phonebusiness") ? insertRecord.getString("phonebusiness") : "")
+                .add(insertRecord.containsKey("phonehome") ? insertRecord.getString("phonehome") : "")
+                .add(insertRecord.containsKey("phonemobile") ? insertRecord.getString("phonemobile") : "")
+                .add(insertRecord.containsKey("phoneextension") ? insertRecord.getString("phoneextension") : "")
+                .add(insertRecord.containsKey("jobtitle") ? insertRecord.getString("jobtitle") : "")
+                .add(insertRecord.containsKey("department") ? insertRecord.getString("department") : "")
+                .add(insertRecord.containsKey("company") ? insertRecord.getString("company") : "");
+    }
+
+    public Single<JsonObject> insert2(JsonObject insertRecord, JsonObject parentRecordStatus) {
+        logger.trace("---insert invoked");
+
+        JsonArray insertParam = prepareInsertParameters(insertRecord);
+        return insert(insertParam, SQL_INSERT)
+                .flatMap(insertResult -> {
+                    if (insertResult.getThrowable() == null) {
+                        return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
+                                .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)));
+                    } else {
+                        return Single.just(insertResult);
+                    }
                 })
-                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.resourceService.insertAll(insertAllCascadedMetadata.insertResourceRecords)
-                )
-
-
-                .flatMap(jsonObjects -> {
-                    insertAllCascadedMetadata.insertSubjectPermissionRecords = new JsonArray();
-
-                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
-                    jsonObjects.forEach(requestItem -> {
-                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                            String description = "Ownership of " + requestItem.getJsonObject("response").getString("resourcename") + " by " + routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME);
-                            JsonObject permissionJsonObject = new JsonObject()
-                                    .put("organizationid", sessionOrganizationId)
-                                    .put("crudsubjectid", sessionUserId)
-                                    .put("permission", description)
-                                    .put("description", description)
-                                    .put("effectivestartdate", Instant.now())
-                                    .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
-                                    .put("subjectid", sessionUserId)
-                                    .put("resourceid", requestItem.getString("uuid"))
-                                    .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
-                                    .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
-                                    .put("isactive", true);
-                            insertAllCascadedMetadata.insertSubjectPermissionRecords.add(permissionJsonObject);
-                        }
-                    });
-
-                    insertAllCascadedMetadata.subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
-                    //insertAllCascadedMetadata.subjectPermissionService.setAutoCommit(false);
-                    //return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(sessionOrganizationId, sqlConnection);
-                    return insertAllCascadedMetadata.subjectPermissionService.initJDBCClient(sessionOrganizationId);
-                })
-                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.subjectPermissionService.insertAll(insertAllCascadedMetadata.insertSubjectPermissionRecords)
-                )
-
-
-                .flatMap(jsonObjects -> {
-                    insertAllCascadedMetadata.insertResourceAccessTokensRecords = new JsonArray();
-
-                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
-                    jsonObjects.forEach(requestItem -> {
-                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                            JsonObject accessTokenJsonObject = new JsonObject()
-                                    .put("organizationid", sessionOrganizationId)
-                                    .put("crudsubjectid", sessionUserId)
-                                    .put("subjectpermissionid", requestItem.getString("uuid"))
-                                    .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
-                                    .put("resourcerefid", insertAllCascadedMetadata.appUuid)//TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
-                                    .put("isactive", true);
-                            insertAllCascadedMetadata.insertResourceAccessTokensRecords.add(accessTokenJsonObject);
-                        }
-                    });
-
-                    insertAllCascadedMetadata.resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
-                    //insertAllCascadedMetadata.resourceAccessTokenService.setAutoCommit(false);
-                    //return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(sessionOrganizationId, sqlConnection);
-                    return insertAllCascadedMetadata.resourceAccessTokenService.initJDBCClient(sessionOrganizationId);
-                })
-                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.resourceAccessTokenService.insertAll(insertAllCascadedMetadata.insertResourceAccessTokensRecords)
-                )
-
-
-                .flatMap(jsonObjects -> {
-                    insertAllCascadedMetadata.insertSubjectMembershipRecords = new JsonArray();
-
-                    //Transform MultiStatus Bulk Result -> Bulk Insert Request
-                    jsonObjects.forEach(requestItem -> {
-                        if (requestItem.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                            JsonObject subjectMembershipJsonObject = new JsonObject()
-                                    .put("organizationid", sessionOrganizationId)
-                                    .put("crudsubjectid", sessionUserId)
-                                    .put("subjectid", sessionUserId)
-                                    .put("subjectgroupid", insertAllCascadedMetadata.appUuid) //TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
-                                    .put("subjectdirectoryid", insertAllCascadedMetadata.appDirectoryUuid) //TODO: Bulk App.uuid. Works only for single inserts. !!!!!!!!!! ******
-                                    .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
-                                    .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP)
-                                    .put("isactive", true);
-                            insertAllCascadedMetadata.insertSubjectMembershipRecords.add(subjectMembershipJsonObject);
-                        }
-                    });
-
-                    insertAllCascadedMetadata.subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
-                    //insertAllCascadedMetadata.subjectMembershipService.setAutoCommit(true);
-                    //return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(sessionOrganizationId, sqlConnection);
-                    return insertAllCascadedMetadata.subjectMembershipService.initJDBCClient(sessionOrganizationId);
-                })
-                .flatMap(jdbcClient1 -> insertAllCascadedMetadata.subjectMembershipService.insertAll(insertAllCascadedMetadata.insertSubjectMembershipRecords)
-                )
-
-
-                .flatMap(jsonObjects -> {
-                   return Single.just(insertAllCascadedMetadata.jsonObjectList); //TODO: Cascaded Result
-                });
+                .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
     }
 
 
@@ -236,37 +264,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .flatMap(o -> Observable.just((JsonObject) o))
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
-                    JsonArray insertParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid")) //TODO: Make it readOnly in Yaml
-                            .add(jsonObj.containsKey("isactivated") ? jsonObj.getBoolean("isactivated") : false)
-                            .add(jsonObj.getString("subjecttypeid"))
-                            .add(jsonObj.getString("subjectname"))
-                            .add(jsonObj.getString("firstname"))
-                            .add(jsonObj.getString("lastname"))
-                            .add(jsonObj.getString("displayname"))
-                            .add(jsonObj.getString("email"))
-                            .add(jsonObj.containsKey("secondaryemail") ? jsonObj.getString("secondaryemail") : "")
-                            .add(jsonObj.getInstant("effectivestartdate"))
-                            .add(jsonObj.containsKey("effectiveenddate") ? jsonObj.getInstant("effectiveenddate") : Instant.now().plus(90, DAYS))
-                            .add(jsonObj.getString("password"))
-                            .add(jsonObj.getString("passwordsalt"))
-                            .add(jsonObj.getValue("picture"))
-                            .add(jsonObj.getString("subjectdirectoryid"))
-                            .add(jsonObj.getBoolean("islocked"))
-                            .add(jsonObj.getBoolean("issandbox"))
-                            .add(jsonObj.getString("url"))
-                            .add(jsonObj.containsKey("isrestrictedtoprocessing") ? jsonObj.getBoolean("isrestrictedtoprocessing") : false)
-                            .add(jsonObj.containsKey("description") ? jsonObj.getString("description") : "")
-                            .add(jsonObj.containsKey("distinguishedname") ? jsonObj.getString("distinguishedname") : "")
-                            .add(jsonObj.containsKey("uniqueid") ? jsonObj.getString("uniqueid") : "")
-                            .add(jsonObj.containsKey("phonebusiness") ? jsonObj.getString("phonebusiness") : "")
-                            .add(jsonObj.containsKey("phonehome") ? jsonObj.getString("phonehome") : "")
-                            .add(jsonObj.containsKey("phonemobile") ? jsonObj.getString("phonemobile") : "")
-                            .add(jsonObj.containsKey("phoneextension") ? jsonObj.getString("phoneextension") : "")
-                            .add(jsonObj.containsKey("jobtitle") ? jsonObj.getString("jobtitle") : "")
-                            .add(jsonObj.containsKey("department") ? jsonObj.getString("department") : "")
-                            .add(jsonObj.containsKey("company") ? jsonObj.getString("company") : "");
+                    JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {

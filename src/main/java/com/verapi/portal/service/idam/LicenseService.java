@@ -122,6 +122,17 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 }).toList();
     }
 
+    private JsonArray prepareInsertParameters(JsonObject insertRecord) {
+        return new JsonArray()
+                .add(insertRecord.getString("organizationid"))
+                .add(insertRecord.getString("crudsubjectid"))
+                .add(insertRecord.getString("name"))
+                .add(insertRecord.getString("version"))
+                .add(insertRecord.getString("subjectid"))
+                .add(insertRecord.getJsonObject("licensedocument").encode())
+                .add(insertRecord.getBoolean("isactive"));
+    }
+
     /**
      *
      * @param insertRecord
@@ -130,14 +141,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
     public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
         logger.trace("---insert invoked");
 
-        JsonArray insertParam = new JsonArray()
-                .add(insertRecord.getString("organizationid"))
-                .add(insertRecord.getString("crudsubjectid"))
-                .add(insertRecord.getString("name"))
-                .add(insertRecord.getString("version"))
-                .add(insertRecord.getString("subjectid"))
-                .add(insertRecord.getJsonObject("licensedocument").encode())
-                .add(insertRecord.getBoolean("isactive"));
+        JsonArray insertParam = prepareInsertParameters(insertRecord);
         return insert(insertParam, SQL_INSERT)
                 .flatMap(insertResult -> {
                     if (insertResult.getThrowable() == null) {
@@ -158,14 +162,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 .flatMap(o -> Observable.just((JsonObject) o))
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
-                    JsonArray insertParam = new JsonArray()
-                            .add(jsonObj.getString("organizationid"))
-                            .add(jsonObj.getString("crudsubjectid"))
-                            .add(jsonObj.getString("name"))
-                            .add(jsonObj.getString("version"))
-                            .add(jsonObj.getString("subjectid"))
-                            .add(jsonObj.getJsonObject("licensedocument").encode())
-                            .add(jsonObj.getBoolean("isactive"));
+                    JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
                 .flatMap(insertResult -> {
