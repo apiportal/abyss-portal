@@ -7,91 +7,48 @@
 
     <parent>
         <groupId>com.verapi.abyss</groupId>
-        <artifactId>abyss</artifactId>
+        <artifactId>abyss-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../abyss/pom.xml</relativePath>
+        <relativePath/>
     </parent>
 
-    <groupId>com.verapi.abyss.portal</groupId>
     <artifactId>abyss-portal</artifactId>
-    <!--     <version>1.0.0-SNAPSHOT</version> -->
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Verapi Web Abyss API Portal Project</name>
-    <description>Verapi Web Abyss API Portal Project</description>
+    <name>Abyss API Portal Project</name>
+    <description>Abyss API Portal Project</description>
     <url>https://apiportal.com</url>
 
-    <organization>
-        <name>Verapi Software Technologies</name>
-        <url>https://verapi.com</url>
-    </organization>
 
-    <licenses>
-        <license>
-            <name>Verapi License Version 1.0</name>
-            <url>https://verapi.com/licenses/VPL-1.0.txt</url>
-            <distribution>manual</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>Halil ÖZKAN</name>
-            <id>halil.ozkan</id>
-            <email>halil.ozkan@verapi.com</email>
-            <url>https://www.linkedin.com/in/halil-%C3%B6zkan-796bbb2/</url>
-            <organization>Verapi</organization>
-            <roles>
-                <role>Enterprise Architect</role>
-            </roles>
-            <timezone>+3</timezone>
-        </developer>
-        <developer>
-            <name>İsmet Faik SAĞLAR</name>
-            <id>faik.saglar</id>
-            <email>faik.saglar@verapi.com</email>
-            <url>https://www.linkedin.com/in/ismet-faik-saglar-a799587/</url>
-            <organization>Verapi</organization>
-            <roles>
-                <role>Software Architect</role>
-            </roles>
-            <timezone>+3</timezone>
-        </developer>
-    </developers>
+    <scm>
+        <url>https://github.com/apiportal/abyss-portal</url>
+        <connection>scm:git:https://github.com/apiportal/abyss-portal.git</connection>
+        <developerConnection>scm:git:https://github.com/apiportal/abyss-portal.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 
     <issueManagement>
-        <system>jira</system>
-        <url>https://jira.verapi.com:18443</url>
+        <system>GitHub Issues</system>
+        <url>https://github.com/apiportal/abyss-portal/issues</url>
     </issueManagement>
+
+    <ciManagement>
+        <system>Travis CI</system>
+        <url>https://travis-ci.org/apiportal-ci/abyss-portal</url>
+    </ciManagement>
+
+    <distributionManagement>
+        <site>
+            <id>site</id>
+            <url>scm:git:https://github.com/apiportal/abyss-portal.git</url>
+        </site>
+    </distributionManagement>
+
 
     <properties>
         <main.verticle>com.verapi.portal.verticle.InitVerticle</main.verticle>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <show>private</show>
-                    <nohelp>true</nohelp>
-                </configuration>
-            </plugin>
-        </plugins>
-    </reporting>
-
-    <modules>
-    </modules>
-
-    <dependencyManagement>
-        <dependencies>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -177,12 +134,6 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-auth-jwt</artifactId>
         </dependency>
-<!--
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-dropwizard-metrics</artifactId>
-        </dependency>
--->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-micrometer-metrics</artifactId>
@@ -276,40 +227,6 @@
             <groupId>com.networknt</groupId>
             <artifactId>json-schema-validator</artifactId>
         </dependency>
-        <!--
-                <dependency>
-                    <groupId>io.swagger.core.v3</groupId>
-                    <artifactId>swagger-jaxrs2</artifactId>
-                    <scope>compile</scope>
-                </dependency>
-        -->
-        <!--
-                <dependency>
-                    <groupId>io.swagger.core.v3</groupId>
-                    <artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
-                </dependency>
-        -->
-
-        <!--
-                <dependency>
-                    <groupId>io.swagger.core.v3</groupId>
-                    <artifactId>swagger-core</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>io.swagger.core.v3</groupId>
-                    <artifactId>swagger-annotations</artifactId>
-                </dependency>
-                <dependency>
-                    <groupId>io.swagger</groupId>
-                    <artifactId>swagger-jaxrs</artifactId>
-                </dependency>
-        -->
-        <!--
-                <dependency>
-                    <groupId>io.swagger.parser.v3</groupId>
-                    <artifactId>swagger-parser</artifactId>
-                </dependency>
-        -->
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-v3</artifactId>
@@ -340,18 +257,6 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
         </dependency>
-        <!--
-                <dependency>
-                    <groupId>com.atlassian.oai</groupId>
-                    <artifactId>swagger-request-validator-core</artifactId>
-                    <exclusions>
-                        <exclusion>
-                            <artifactId>swagger-parser</artifactId>
-                            <groupId>io.swagger.parser.v3</groupId>
-                        </exclusion>
-                    </exclusions>
-                </dependency>
-        -->
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
@@ -387,74 +292,34 @@
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch-x-content</artifactId>
-            <version>${version.elasticsearch}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
         <dependency>
             <groupId>com.verapi.abyss</groupId>
             <artifactId>abyss-sql-builder</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.verapi.abyss</groupId>
             <artifactId>abyss-logger</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.verapi.abyss</groupId>
             <artifactId>abyss-exception</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.verapi.abyss</groupId>
             <artifactId>abyss-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.verapi.abyss</groupId>
             <artifactId>abyss-cassandra</artifactId>
-            <version>1.0-SNAPSHOT</version>
         </dependency>
-
-
-        <!--         <dependency> -->
-        <!--         	<groupId>joda-time</groupId> -->
-        <!--         	<artifactId>joda-time</artifactId> -->
-        <!--         	<version>2.9.9</version> -->
-        <!--         </dependency> -->
     </dependencies>
 
     <build>
-        <!--<resources>
-          <resource>
-              <directory>src/main/java/com/verapi/starter/template</directory>
-            <targetPath>com/verapi/starter/template</targetPath>
-          </resource>
-        </resources>-->
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                        <annotationProcessors>
-                            <annotationProcessor>io.vertx.codegen.CodeGenProcessor</annotationProcessor>
-                        </annotationProcessors>
-                        <generatedSourcesDirectory>
-                            ${project.basedir}/src/main/generated
-                        </generatedSourcesDirectory>
-                        <compilerArgs>
-                            <arg>-Acodegen.output=${project.basedir}/src/main</arg>
-                        </compilerArgs>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -491,35 +356,7 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--
-                        <plugin>
-                            <artifactId>maven-deploy-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <id>deploy-file</id>
-                                    <phase>deploy</phase>
-                                    <goals>
-                                        <goal>deploy-file</goal>
-                                    </goals>
-                                    <configuration>
-                                        <file>target/*fat.jar</file>
-                                        <repositoryId>InternalSnapshots</repositoryId>
-                                        <url>http://nexus.verapi.com:8081/repository/maven-snapshots/</url>
-                                        <packaging>jar</packaging>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
-            -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-
+<!--
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -542,7 +379,7 @@
                     <skipLocalStaging>true</skipLocalStaging>
                 </configuration>
             </plugin>
-
+-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -561,50 +398,18 @@
                     </arguments>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>aggregate-download-licenses</id>
-                        <goals>
-                            <goal>aggregate-download-licenses</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
+<!--
             <plugin>
                 <groupId>io.dazraf</groupId>
                 <artifactId>vertx-hot-maven-plugin</artifactId>
                 <version>2.1.0</version>
                 <configuration>
                     <verticleReference>${main.verticle}</verticleReference>
-                    <!--<configFile>config filename</configFile>-->
+                    -<configFile>config filename</configFile>-
                     <buildResources>true</buildResources>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>${version.maven-jar-plugin}</version>
-                <!--
-                                <executions>
-                                    <execution>
-                                        <id>default-jar</id>
-                                        <phase>package</phase>
-                                        <goals>
-                                            <goal>jar</goal>
-                                        </goals>
-                                        <configuration>
-                                            <classifier>bak</classifier>
-                                        </configuration>
-                                    </execution>
-                                </executions>
-                -->
-            </plugin>
-
+-->
         </plugins>
     </build>
 
