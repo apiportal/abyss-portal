@@ -667,4 +667,23 @@ public class ApiApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getApisByPolicy(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_BY_POLICY)
+                            .setFilterQueryParams(new JsonArray().add("[\""+ routingContext.pathParam("uuid") +"\"]")));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 }

@@ -314,6 +314,11 @@ public class ContractService extends AbstractService<UpdateResult> {
 
     public static final String FILTER_BY_LICENSES_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IN;
 
+    public static final String FILTER_BY_POLICY = SQL_SELECT + SQL_WHERE + "licenseid in (\n" +
+            "    select uuid\n" +
+            "    from license\n" +
+            "    where licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb)";
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

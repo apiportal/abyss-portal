@@ -301,6 +301,39 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /apis/policy/{uuid}:
+    get:
+      tags:
+        - Api
+      summary: 'Get an Api list of policy'
+      description: 'Returns Api list of policy'
+      operationId: getApisByPolicy
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Policy'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
   /apis/subject/{uuid}:
     get:
       tags:

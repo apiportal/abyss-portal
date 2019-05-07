@@ -366,6 +366,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
             "license\nl\n" +
             SQL_WHERE + " l." + SQL_CONDITION_SUBJECT_IS;
 
+    public static final String FILTER_BY_POLICY = SQL_SELECT + SQL_WHERE + "licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb";
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

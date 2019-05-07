@@ -88,7 +88,7 @@ public class LicenseApiController extends AbstractApiController {
         });
 
         try {
-            if(isCascaded) {
+            if (isCascaded) {
                 logger.trace("---adding entities in a cascaded way");
                 LicenseService licenseService = new LicenseService(routingContext.vertx());
                 //licenseService.setAutoCommit(false);
@@ -246,10 +246,18 @@ public class LicenseApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addLicensesOfSubjectCascaded(RoutingContext routingContext) {
         addEntities(routingContext, new JsonObject()
-                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                .put("crudsubjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
-                .put("subjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
-                ,true
+                        .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                        .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                        .put("subjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                , true
         );
     }
+
+    @AbyssApiOperationHandler
+    public void getLicensesOfPolicy(RoutingContext routingContext) {
+        getEntities(routingContext, new ApiFilterQuery()
+                .setFilterQuery(LicenseService.FILTER_BY_POLICY)
+                .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
+    }
+
 }

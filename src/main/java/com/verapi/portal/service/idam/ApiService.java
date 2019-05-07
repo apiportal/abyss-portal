@@ -445,6 +445,14 @@ public class ApiService extends AbstractService<UpdateResult> {
             SQL_WHERE + "api.uuid = api_license.apiid\n" +
             SQL_AND + "api_license.licenseid = CAST(? AS uuid)\n";
 
+    public static final String FILTER_BY_POLICY = SQL_SELECT2 + SQL_WHERE + "uuid in (\n" +
+            "    select apiid\n" +
+            "    from api_license\n" +
+            "    where licenseid in (\n" +
+            "        select uuid\n" +
+            "        from license\n" +
+            "        where licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb))";
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     /*static {

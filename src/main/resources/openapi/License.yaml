@@ -510,6 +510,39 @@ paths:
           $ref: '#/components/responses/default'
       requestBody:
         $ref: '#/components/requestBodies/ListOfLicense'
+  /licenses/policy/{uuid}:
+    get:
+      tags:
+        - List-Licenses
+      summary: 'Get License list of policy'
+      description: 'Returns license list of policy'
+      operationId: getLicensesOfPolicy
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of policy'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'

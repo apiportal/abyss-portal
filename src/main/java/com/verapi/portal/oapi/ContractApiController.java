@@ -220,4 +220,23 @@ public class ContractApiController extends AbstractApiController {
         }
     }
 
+    @AbyssApiOperationHandler
+    public void getContractsOfPolicy(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+
+        try {
+            getEntities(routingContext,
+                    ContractService.class,
+                    null,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ContractService.FILTER_BY_POLICY)
+                            .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
 }
