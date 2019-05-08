@@ -656,7 +656,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     String businessApiServerURLStr = serversList.get(serverPosition).getUrl();
                     HttpVersion businessApiServerHttpProtocolVersion;
 
-                    if (serversList.get(serverPosition).getExtensions().containsKey(Constants.OPENAPI_HTTP_PROTOCOL_VERSION))
+                    if (serversList.get(serverPosition).getExtensions() != null && serversList.get(serverPosition).getExtensions().containsKey(Constants.OPENAPI_HTTP_PROTOCOL_VERSION))
                         businessApiServerHttpProtocolVersion = HttpVersion.valueOf(serversList.get(serverPosition).getExtensions().get(Constants.OPENAPI_HTTP_PROTOCOL_VERSION).toString());
                     else
                         businessApiServerHttpProtocolVersion = HttpVersion.HTTP_1_1;
