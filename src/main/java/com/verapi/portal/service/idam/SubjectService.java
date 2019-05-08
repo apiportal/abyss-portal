@@ -777,12 +777,15 @@ public class SubjectService extends AbstractService<UpdateResult> {
             "\t\t\t'apis', COALESCE((select json_agg(\n" +
             "\t\t\t\t\tjson_build_object('uuid', a.uuid, 'organizationid', a.organizationid, 'created', a.created, 'updated', a.updated, 'deleted', a.deleted, 'isdeleted', a.isdeleted, \n" +
             "\t\t\t\t\t'crudsubjectid', a.crudsubjectid, 'subjectid', a.subjectid, 'isproxyapi', a.isproxyapi, 'apistateid', a.apistateid, 'apivisibilityid', a.apivisibilityid, \n" +
-            "\t\t\t\t\t'languagename', a.languagename, 'languageversion', a.languageversion, 'languageformat', a.languageformat, 'image', a.image, 'color', a.color, 'deployed', a.deployed, \n" +
+            "\t\t\t\t\t'languagename', a.languagename, 'languageversion', a.languageversion, 'languageformat', a.languageformat, 'businessapiid', a.businessapiid, \n" +
+            "\t\t\t\t\t'image', a.image, 'color', a.color, 'deployed', a.deployed, \n" +
             "\t\t\t\t\t'changelog', a.changelog, 'version', a.\"version\", 'issandbox', a.issandbox, 'islive', a.islive, 'isdefaultversion', a.isdefaultversion, 'islatestversion', a.islatestversion, \n" +
             "\t\t\t\t\t'apioriginid', a.apioriginid, 'apiparentid', a.apiparentid, \n" +
             "\t\t\t\t\t'apititle', a.openapidocument->'info'->>'title', 'apidescription', a.openapidocument->'info'->>'description', 'apiversion', a.openapidocument->'info'->>'version',\n" +
-            "\t\t\t\t\t'apilicense', a.openapidocument->'info'->'license'->>'name', 'apiservers', a.openapidocument->'servers')\n" +
+            "\t\t\t\t\t'apilicense', a.openapidocument->'info'->'license'->>'name', 'apiservers', a.openapidocument->'servers', \n" +
+            "\t\t\t\t\t'apiowner', s.displayname)\n" +
             "\t\t\t\t\t) from api a\n" +
+            "\t\t\t\t\t\tjoin subject s on s.uuid = a.subjectid\n" +
             "\t\t\t\t\t\twhere c.apiid = a.uuid\n" +
             "\t\t\t\t), '[]')\n" +
 
