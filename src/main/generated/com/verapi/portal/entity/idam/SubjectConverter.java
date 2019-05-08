@@ -39,8 +39,8 @@ public class SubjectConverter {
     if (json.getValue("firstName") instanceof String) {
       obj.setFirstName((String)json.getValue("firstName"));
     }
-    if (json.getValue("id") instanceof String) {
-      obj.setId((String)json.getValue("id"));
+    if (json.getValue("id") instanceof Long) {
+      obj.setId((Long)json.getValue("id"));
     }
     if (json.getValue("isActivated") instanceof Number) {
       obj.setIsActivated(((Number)json.getValue("isActivated")).longValue());
@@ -85,9 +85,7 @@ public class SubjectConverter {
     if (obj.getFirstName() != null) {
       json.put("firstName", obj.getFirstName());
     }
-    if (obj.getId() != null) {
-      json.put("id", obj.getId());
-    }
+    json.put("id", obj.getId());
     json.put("isActivated", obj.getIsActivated());
     json.put("isDeleted", obj.getIsDeleted());
     if (obj.getLastName() != null) {
