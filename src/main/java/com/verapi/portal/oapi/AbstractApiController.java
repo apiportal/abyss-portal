@@ -148,13 +148,13 @@ public abstract class AbstractApiController implements IApiController {
                                         ));
                                         })
                                         .subscribe(jsonObjects -> {
-                                            if (jsonObjects.isEmpty() && jsonObjects.get(0).size()>0) {
+                                            if (jsonObjects.isEmpty() || jsonObjects.get(0).size()==0) {
                                                 logger.trace("Resource Record exists for operation: {}", methodName);
                                             } else {
                                                 logger.trace("Resource Record {}\n for operation: {} inserted", jsonObjects.get(0).encodePrettily(), methodName);
                                             }
                                         }, throwable -> {
-                                            logger.error("Resource Recording error {} | {}: ", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                            logger.error("Resource Recording [{}] error {} | {}: ", methodName, throwable.getLocalizedMessage(), throwable.getStackTrace());
                                         });
                             }
                         }

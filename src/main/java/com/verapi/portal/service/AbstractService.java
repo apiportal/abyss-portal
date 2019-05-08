@@ -607,14 +607,22 @@ public abstract class AbstractService<T> implements IService<T> {
                             .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                             .toJson());
         } else {
-            logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
-            JsonArray arr = new JsonArray();
-            result.getResultSet().getRows().forEach(arr::add);
-            recordStatus
-                    .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                    .put("status", HttpResponseStatus.CREATED.code())
-                    .put("response", arr.getJsonObject(0))
-                    .put("error", new ApiSchemaError().toJson());
+            logger.trace("evaluateCompositeResultAndReturnRecordStatus>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+            if (result.getResultSet()!=null) {
+                logger.trace("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet {}", result.getResultSet().toJson().encodePrettily());
+            } else {
+                logger.info("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet is null");
+            }
+
+            if (result.getResultSet()!=null && result.getResultSet().getNumRows()>0) {
+                JsonArray arr = new JsonArray();
+                result.getResultSet().getRows().forEach(arr::add);
+                recordStatus
+                        .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
+                        .put("status", HttpResponseStatus.CREATED.code())
+                        .put("response", arr.getJsonObject(0))
+                        .put("error", new ApiSchemaError().toJson());
+            }
             if (parentRecordStatus != null) {
                 recordStatus.put("parentRecordStatus", parentRecordStatus);
             }
