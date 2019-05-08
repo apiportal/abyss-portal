@@ -330,4 +330,32 @@ public class SubjectPermissionService extends AbstractService<UpdateResult> {
             "and s.subjecttypeid = 'bb76f638-632d-41f8-9511-9865091701f9'::uuid and s.uuid = sm.subjectgroupid and s.isactivated = true and s.islocked = false and s.isdeleted = false";
             //TODO: Check effective-date-start-end
 
+    public static final String SQL_CHECK_RESOURCE_ACCESS_CONTROL = // Params: (:org, :org, :user, /*:role,*/ :resourceId, :operationId, :operationId)
+            "select \n" +
+            "p.organizationid, p.permission, p.subjectid,\n" +
+            "o.name,\n" +
+            "r.resourcename, r.resourcerefid, r.subresourcename ,\n" +
+            "rt.\"type\",\n" +
+            "ra.actionname\n" +
+            "from\n" +
+            "subject_permission p,\n" +
+            "organization o,\n" +
+            "resource r,\n" +
+            "resource_type rt,\n" +
+            "resource_action ra\n" +
+            "where \n" +
+            "p.isactive = true and p.effectivestartdate < now() and now() < coalesce(p.effectiveenddate, now() + interval '5 minutes')\n" + // -- Permission should be active and within effective use time
+            "and p.organizationid = o.uuid and p.organizationid in (CAST(? AS uuid), '3c65fafc-8f3a-4243-9c4e-2821aa32d293'::uuid) and o.isactive = true\n" +  // -- Organization of permission should be current user or PUBLIC_ORG that is also ACTIVE
+            "and p.subjectid in ('3c65fafc-8f3a-4243-9c4e-2821aa32d293'::uuid, CAST(? AS uuid), CAST(? AS uuid)   )\n" + // -- Subject of permission should be PUBLIC_ORG or session ORG TODO: or session USER??? or ROLEs???-- TODO: CHECK being active and being within effective use time
+            "and p.resourceid = r.uuid and (r.resourcename = 'ALL_RESOURCES' or r.resourcerefid = CAST(? AS uuid)) and r.isactive = true\n" + // -- Resource should be ALL or requested resource that is also ACTIVE
+            "\tand r.subresourcename in ('ALL_SUB_RESOURCES', ? )\n" + // -- AND SubResource should be ALL or requested subResource
+            "and r.resourcetypeid = rt.uuid and rt.isactive = true\n" + // -- Resource Type should be ACTIVE
+            "and p.resourceactionid = ra.uuid and ( \n" +
+             "\t(ra.actionname like '%ALL%')\n" + // -- Action should be ALL, OWN, USE,
+             "\tor \n" +
+             "\t(ra.uuid in (select distinct sa.resourceactionid from subresource_action sa where sa.subresource = ? ) )\n" + // -- or requested action
+            ") and ra.isactive = true"; // -- that is also ACTIVE
+
 }
+
+

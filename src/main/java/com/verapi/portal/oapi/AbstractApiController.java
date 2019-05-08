@@ -485,6 +485,17 @@ public abstract class AbstractApiController implements IApiController {
         String userUuid = userUuidTemp;
 
         String operationId = ((Operation) routingContext.data().get("openApiOperation")).getOperationId();
+        routingContext.put(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID, operationId);
+
+        //Get and check resource ID is a valid uuid
+        String resourceIdTemp = routingContext.pathParam("uuid");
+        if (resourceIdTemp != null) {
+            String[] components = resourceIdTemp.split("-");
+            if (components.length != 5) {
+                resourceIdTemp = null;
+            }
+        }
+        String resourceId = resourceIdTemp;
 
 
         logger.trace("abyssPathAuthorizationHandler invoked,\n" +
@@ -538,7 +549,34 @@ public abstract class AbstractApiController implements IApiController {
                             } else {
                                 return Single.error(new Forbidden403Exception("abyssPathAuthorizationHandler failed - no permission for org:[" + organizationUuid + "] user:[" + userUuid + "] operation:[" + operationId + "]"));
                             }
-                        });
+                        })
+//                        .flatMap(entries -> {
+//                            if (resourceId != null && !resourceId.isEmpty()) {
+//
+//                                ApiFilterQuery apiFilterQueryForResourceAccess = new ApiFilterQuery()
+//                                        .setFilterQuery(SubjectPermissionService.SQL_CHECK_RESOURCE_ACCESS_CONTROL)
+//                                        .setFilterQueryParams(new JsonArray().add(organizationUuid).add(organizationUuid).add(userUuid).add(resourceId).add(operationId).add(operationId));
+//
+//                                return subjectPermissionService.findAll(apiFilterQueryForResourceAccess);
+//
+//                            } else {
+//                                return Single.just(entries);
+//                            }
+//                        })
+//                        .flatMap(result -> {
+//                            if (result instanceof ResultSet) {
+//                                ResultSet resultSet = (ResultSet)result;
+//                                if (resultSet.getNumRows() > 0) {
+//                                    logger.trace("# of access permissions: [{}]\n[{}]\n", resultSet.getNumRows(), resultSet.toJson().encodePrettily());
+//                                    return Single.just(resultSet.getRows().get(0));
+//                                } else {
+//                                    return Single.error(new Forbidden403Exception("abyssPathAuthorizationHandler failed - no permission for the resource:[" + resourceId + "] org:[" + organizationUuid + "] user:[" + userUuid + "] operation:[" + operationId + "]"));
+//                                }
+//                            } else {
+//                                return Single.just((JsonObject)result);
+//                            }
+//                        })
+                        ;
 
                 permissionResponse.subscribe(resp -> {
                             logger.trace("abyssPathAuthorizationHandler() subjectPermissionService.findAll replied successfully " + resp.encodePrettily());
