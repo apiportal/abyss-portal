@@ -121,7 +121,7 @@ public class ResourceAccessTokenService extends AbstractService<UpdateResult> {
             return Single.error(new Exception("activation token could not be generated", e));
         }
 
-        return insert(insertRecord, parentRecordStatus);
+        return super.insert(insertRecord, parentRecordStatus);
     }
 
 
