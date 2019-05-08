@@ -1,12 +1,17 @@
 /*
+ * Copyright 2019 Verapi Inc
  *
- *  *  Copyright (C) Verapi Yazilim Teknolojileri A.S. - All Rights Reserved
- *  *
- *  *  Unauthorized copying of this file, via any medium is strictly prohibited
- *  *  Proprietary and confidential
- *  *
- *  *  Written by Halil Özkan <halil.ozkan@verapi.com>, 6 2018
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.verapi.portal.verticle;
@@ -19,7 +24,7 @@ import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
-import com.verapi.portal.common.OpenAPIUtil;
+import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.portal.service.idam.AuthenticationService;
 import com.verapi.portal.service.idam.AuthorizationService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -33,6 +38,7 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpVersion;
 import io.vertx.core.http.RequestOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -426,10 +432,11 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         JsonObject apiSpec = new JsonObject(abyssHttpRequest.abyssServiceReference.serviceReference.record().getMetadata().getString("apiSpec"));
         JsonArray servers = apiSpec.getJsonArray(OpenAPIUtil.OPENAPI_SECTION_SERVERS);
         URL serverURL;
+        int serverPosition = new Random().nextInt(servers.size());
         try {
-            serverURL = new URL(servers.getJsonObject(new Random().nextInt(servers.size())).getString("url"));
+            serverURL = new URL(servers.getJsonObject(serverPosition).getString("url"));
         } catch (MalformedURLException e) {
-            logger.error("malformed server url {}", servers.getJsonObject(new Random().nextInt(servers.size())).getString("url"));
+            logger.error("malformed server url {}", servers.getJsonObject(serverPosition).getString("url"));
             return Flowable.error(e);
         }
 
@@ -614,6 +621,17 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
     void genericOperationHandler(RoutingContext routingContext) {
         logger.trace("---genericOperationHandler invoked");
+
+        class BusinessApi {
+            private URL serverURL;
+            private HttpVersion protocolVersion;
+
+            private BusinessApi(URL serverURL, HttpVersion protocolVersion) {
+                this.serverURL = serverURL;
+                this.protocolVersion = protocolVersion;
+            }
+        }
+
         if (routingContext.get("method") == null)
             routingContext.put("method", routingContext.request().method());
         else {
@@ -628,40 +646,50 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
         JsonObject validationReport = routingContext.get("validationreport");
         JsonObject apiSpec = new JsonObject(validationReport.getString("businessapiopenapidocument"));
+        HttpClientOptions httpClientOptions = new HttpClientOptions();
 
         OpenAPIUtil.openAPIParser(apiSpec)
                 .flatMap(swaggerParseResult -> {
                     List<Server> serversList = swaggerParseResult.getOpenAPI().getServers();
                     URL businessApiServerURL;
-                    String businessApiServerURLStr = serversList.get(new Random().nextInt(serversList.size())).getUrl();
+                    int serverPosition = new Random().nextInt(serversList.size());
+                    String businessApiServerURLStr = serversList.get(serverPosition).getUrl();
+                    HttpVersion businessApiServerHttpProtocolVersion;
+
+                    if (serversList.get(serverPosition).getExtensions().containsKey(Constants.OPENAPI_HTTP_PROTOCOL_VERSION))
+                        businessApiServerHttpProtocolVersion = HttpVersion.valueOf(serversList.get(serverPosition).getExtensions().get(Constants.OPENAPI_HTTP_PROTOCOL_VERSION).toString());
+                    else
+                        businessApiServerHttpProtocolVersion = HttpVersion.HTTP_1_1;
+
                     try {
                         businessApiServerURL = new URL(businessApiServerURLStr + pathParameters);
-                        return Single.just(businessApiServerURL);
+                        return Single.just(new BusinessApi(businessApiServerURL, businessApiServerHttpProtocolVersion));
                     } catch (MalformedURLException e) {
                         logger.error("malformed server url {}", businessApiServerURLStr);
                         return Single.error(e);
                     }
                 })
-                .subscribe(businessApiServerURL -> {
-                            logger.trace("Business API Server URL : {} Path: {}", businessApiServerURL, businessApiServerURL.getPath());
-                            HttpClient httpClient = vertx.createHttpClient(new HttpClientOptions()
-                                    .setSsl("https".equals(businessApiServerURL.getProtocol()))
+                .subscribe(businessApi -> {
+                            logger.trace("Business API Server URL : {} Path: {}", businessApi.serverURL, businessApi.serverURL.getPath());
+                            HttpClient httpClient = vertx.createHttpClient(httpClientOptions
+                                    .setSsl("https".equals(businessApi.serverURL.getProtocol()))
                                     .setTrustAll(true) //TODO: re-engineering for parametric trust certificate of api
                                     .setVerifyHost(false)
-                                    .setLogActivity(true)
+                                    //.setLogActivity(true)
                                     .setMaxPoolSize(50)
+                                    .setProtocolVersion(businessApi.protocolVersion)
                             );
                             RequestOptions requestOptions = new RequestOptions()
-                                    .setHost(businessApiServerURL.getHost());
-                            if (businessApiServerURL.getPort() != -1) {
-                                requestOptions.setPort(businessApiServerURL.getPort());
+                                    .setHost(businessApi.serverURL.getHost());
+                            if (businessApi.serverURL.getPort() != -1) {
+                                requestOptions.setPort(businessApi.serverURL.getPort());
                             } else {
-                                if ("https".equals(businessApiServerURL.getProtocol()))
+                                if ("https".equals(businessApi.serverURL.getProtocol()))
                                     requestOptions.setPort(443);
                             }
                             requestOptions
-                                    .setSsl("https".equals(businessApiServerURL.getProtocol()))
-                                    .setURI(businessApiServerURL.getPath());
+                                    .setSsl("https".equals(businessApi.serverURL.getProtocol()))
+                                    .setURI(businessApi.serverURL.getPath());
 
                             if (routingContext.request().params().size() > 0) {
                                 String apiQueryParams = "?";
@@ -670,7 +698,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                     apiQueryParams = (apiQueryParams.equals("?")) ? apiQueryParams : apiQueryParams.concat("&");
                                     apiQueryParams = apiQueryParams.concat(stringStringEntry.getKey()).concat("=").concat(stringStringEntry.getValue());
                                 }
-                                requestOptions.setURI(businessApiServerURL.getPath().concat(apiQueryParams));
+                                requestOptions.setURI(businessApi.serverURL.getPath().concat(apiQueryParams));
                             }
                             // pass through http request method
                             HttpClientRequest request = httpClient.request(routingContext.request().method(), requestOptions);
