@@ -12,10 +12,6 @@ buildNumber.properties
 .settings/
 .vertx/
 *.log
-.idea/libraries/
-.idea/workspace.xml
-.idea/uiDesigner.xml
-.idea/compiler.xml
 logs/
 abyssjdbc.log.1
 abyssjdbc.log.1.lck
@@ -26,3 +22,4 @@ abyssjdbc.log*
 /GitExtensions.settings
 /abyss-portal.iml
 /.gitmodules
+.idea/

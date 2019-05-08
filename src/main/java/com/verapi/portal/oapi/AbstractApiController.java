@@ -31,7 +31,7 @@ import com.verapi.abyss.exception.UnProcessableEntity422Exception;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
 import com.verapi.abyss.common.Constants;
-import com.verapi.portal.common.OpenAPIUtil;
+import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.es.ElasticSearchService;
