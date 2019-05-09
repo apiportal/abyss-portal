@@ -686,6 +686,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
 
     public static String FILTER_GROUPS_UNDER_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_IS_GROUP + SQL_AND + SQL_CONDITION_DIRECTORY + SQL_AND + SQL_CONDITION_ONLY_NOTDELETED;
 
+    public static final String SQL_GET_IMAGE_BY_UUID = "select picture\nfrom\nsubject\n" + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     //TODO: from+CRLF

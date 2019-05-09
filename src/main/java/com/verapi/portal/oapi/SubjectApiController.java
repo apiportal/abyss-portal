@@ -17,6 +17,7 @@
 package com.verapi.portal.oapi;
 
 
+import com.verapi.abyss.exception.BadRequest400Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.NoDataFoundException;
@@ -471,6 +472,25 @@ public class SubjectApiController extends AbstractApiController {
     public void getCurrentUser(RoutingContext routingContext) {
         getEntities(routingContext, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USER_WITH_ORGANIZATIONS)
                 .setFilterQueryParams(new JsonArray().add((String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))));
+    }
+
+    @AbyssApiOperationHandler
+    public void getSubjectImage(RoutingContext routingContext) {
+
+        if (routingContext.pathParam("uuid")==null || routingContext.pathParam("uuid").isEmpty()) {
+            logger.error("getSubjectImage invoked - uuid null or empty");
+            throwApiException(routingContext, BadRequest400Exception.class, "getSubjectImage uuid null or empty");
+        }
+
+        SubjectService subjectService = new SubjectService(vertx);
+        Single<ResultSet> resultSetSingle = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
+                .flatMap(jdbcClient -> subjectService.findAll(
+                        new ApiFilterQuery()
+                                .setFilterQuery(SubjectService.SQL_GET_IMAGE_BY_UUID)
+                                .setFilterQueryParams(new JsonArray()
+                                        .add(routingContext.pathParam("uuid"))))
+                );
+        subscribeForImage(routingContext, resultSetSingle, "getSubjectImage", "picture");
     }
 
 }

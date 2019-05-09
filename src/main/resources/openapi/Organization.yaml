@@ -241,6 +241,39 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /organizations/image/{uuid}:
+    get:
+      tags:
+        - Organization
+      summary: 'Get image of an existing Organization by uuid'
+      description: 'Provide an uuid of Organization to be get'
+      operationId: getOrganizationImage
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Organization that need to be get'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-OrganizationImage'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
 externalDocs:
   description: 'See Abyss example'
   url: 'https://apiportal.com/apidocs/index.html'
@@ -328,6 +361,10 @@ components:
           type: string
           format: byte
           description: 'Picture or Logo of Organization'
+    OrganizationImage:
+      type: string
+      format: binary
+      description: Organization Image
   requestBodies:
     Organization:
       content:
@@ -368,6 +405,15 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/Organization'
+    '200-OrganizationImage':
+      description: 'Successful operation'
+      content:
+        image/jpeg:
+          schema:
+            $ref: '#/components/schemas/OrganizationImage'
+        image/png:
+          schema:
+            $ref: '#/components/schemas/OrganizationImage'
     '201':
       description: 'New Organization resource has been created'
       content:

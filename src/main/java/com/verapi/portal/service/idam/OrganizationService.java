@@ -279,6 +279,8 @@ public class OrganizationService extends AbstractService<UpdateResult> {
 
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
+    public static final String SQL_GET_IMAGE_BY_UUID = "select picture\nfrom\norganization\n" + SQL_WHERE + SQL_CONDITION_UUID_IS;
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

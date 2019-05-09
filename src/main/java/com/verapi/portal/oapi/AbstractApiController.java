@@ -38,6 +38,7 @@ import com.verapi.portal.service.es.ElasticSearchService;
 import com.verapi.portal.service.idam.ResourceService;
 import com.verapi.portal.service.idam.SubjectPermissionService;
 import com.verapi.portal.service.idam.SubjectService;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
@@ -51,6 +52,7 @@ import io.vertx.ext.sql.UpdateResult;
 import io.vertx.ext.web.api.contract.RouterFactoryOptions;
 import io.vertx.ext.web.api.validation.ValidationException;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.web.Cookie;
@@ -67,6 +69,7 @@ import java.net.URLDecoder;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -621,6 +624,9 @@ public abstract class AbstractApiController implements IApiController {
         else if (throwable instanceof UnAuthorized401Exception) {
             logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
             throwApiException(routingContext, UnAuthorized401Exception.class, throwable.getLocalizedMessage());
+        } else if (throwable instanceof BadRequest400Exception) {
+            logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+            throwApiException(routingContext, BadRequest400Exception.class, throwable.getLocalizedMessage());
         } else if (throwable instanceof Forbidden403Exception) {
             logger.error("response has errors: {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
             throwApiException(routingContext, Forbidden403Exception.class, throwable.getLocalizedMessage());
@@ -1016,6 +1022,56 @@ public abstract class AbstractApiController implements IApiController {
                         return Single.just(resultSet);
                 });
         subscribeAndResponse(routingContext, funcResult, jsonColumns, HttpResponseStatus.OK.code());
+    }
+
+    void subscribeForImage(RoutingContext routingContext, Single<ResultSet> resultSetSingle, String methodName, String imageColumnName) {
+        resultSetSingle.subscribe(resultSet -> {
+                    if (resultSet.getNumRows() > 0) {
+                        String sourceData = resultSet.getRows().get(0).getString(imageColumnName);
+                        if (sourceData == null || sourceData.isEmpty()) {
+                            String errorMessage = methodName + " - picture not found for uuid: " + routingContext.pathParam("uuid");
+                            logger.error(errorMessage);
+                            throwApiException(routingContext, NotFound404Exception.class, errorMessage);
+                        } else {
+                            returnAsImage(routingContext, resultSet, imageColumnName);
+                        }
+                    } else {
+                        String errorMessage = methodName + " - record not found for uuid: " + routingContext.pathParam("uuid");
+                        logger.error(errorMessage);
+                        throwApiException(routingContext, NotFound404Exception.class, errorMessage);
+                    }
+                },
+                throwable -> {
+                    processException(routingContext, throwable);
+
+                });
+    }
+
+    private void returnAsImage(RoutingContext routingContext, ResultSet resultSet, String imageColumnName) {
+        String sourceData = resultSet.getRows().get(0).getString(imageColumnName);
+
+        // tokenize the data
+        String parts[] = sourceData.split(",");
+        String imageString = parts[1];
+
+        String contentType = parts[0].substring(parts[0].indexOf(':')+1, parts[0].indexOf(';'));
+        String imageFormat = "." + contentType.substring(contentType.indexOf('/')+1);
+        logger.trace("imageColumnName: {}. contentType: {}. imageFormat: {}", imageColumnName, contentType, imageFormat);
+
+        Base64.Decoder base64Decoder = Base64.getDecoder();
+        byte[] imageByte = base64Decoder.decode(imageString);
+
+        routingContext.response()
+                .putHeader(HttpHeaders.CONTENT_TYPE, contentType)
+                .putHeader(HttpHeaders.CACHE_CONTROL, HttpHeaderValues.MAX_AGE + "=864000") //Ten Days
+                .putHeader(HttpHeaders.CONTENT_DISPOSITION,
+                        //HttpHeaderValues.ATTACHMENT + "; " +
+                        //"inline; " +
+                        HttpHeaderValues.FILENAME + "=\"" + routingContext.pathParam("uuid") + imageFormat + "\"")
+                .setChunked(true)
+                .setStatusCode(HttpResponseStatus.OK.code())
+                .write(Buffer.buffer(imageByte))
+                .end();
     }
 
     private void logHandler(RoutingContext routingContext) {

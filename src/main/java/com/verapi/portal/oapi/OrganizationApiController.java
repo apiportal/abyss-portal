@@ -16,10 +16,15 @@
 
 package com.verapi.portal.oapi;
 
+import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.exception.BadRequest400Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
+import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.OrganizationService;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -146,6 +151,25 @@ public class OrganizationApiController extends AbstractApiController {
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
+    }
+
+    @AbyssApiOperationHandler
+    public void getOrganizationImage(RoutingContext routingContext) {
+
+        if (routingContext.pathParam("uuid")==null || routingContext.pathParam("uuid").isEmpty()) {
+            logger.error("getOrganizationImage invoked - uuid null or empty");
+            throwApiException(routingContext, BadRequest400Exception.class, "getOrganizationImage uuid null or empty");
+        }
+
+        OrganizationService organizationService = new OrganizationService(vertx);
+        Single<ResultSet> resultSetSingle = organizationService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
+                .flatMap(jdbcClient -> organizationService.findAll(
+                        new ApiFilterQuery()
+                                .setFilterQuery(OrganizationService.SQL_GET_IMAGE_BY_UUID)
+                                .setFilterQueryParams(new JsonArray()
+                                        .add(routingContext.pathParam("uuid"))))
+                );
+        subscribeForImage(routingContext, resultSetSingle, "getOrganizationImage", "picture");
     }
 
 }

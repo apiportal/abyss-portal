@@ -284,6 +284,39 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  '/subjects/image/{uuid}':
+    get:
+      tags:
+        - Subject
+      summary: 'Get image of an existing Subject by uuid'
+      description: 'Provide an uuid of Subject to be get'
+      operationId: getSubjectImage
+      parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of Subject that need to be get'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200-SubjectImage'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
   /subjects/apps/:
     get:
       tags:
@@ -1605,6 +1638,10 @@ components:
           type: string
           writeOnly: true
           description: 'confirm new password'
+    SubjectImage:
+      type: string
+      format: binary
+      description: Subject Image
   requestBodies:
     Subject:
       content:
@@ -1680,6 +1717,15 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserWithOrganizations'
+    '200-SubjectImage':
+      description: 'Successful operation'
+      content:
+        image/jpeg:
+          schema:
+            $ref: '#/components/schemas/SubjectImage'
+        image/png:
+          schema:
+            $ref: '#/components/schemas/SubjectImage'
     '201':
       description: 'New Subject resource has been created'
       content:

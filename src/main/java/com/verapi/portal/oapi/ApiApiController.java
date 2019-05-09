@@ -17,18 +17,17 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.exception.BadRequest400Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ApiService;
 import com.verapi.portal.service.idam.ApiTagService;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.http.HttpHeaders;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -697,40 +696,21 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiImage(RoutingContext routingContext) {
+
+        if (routingContext.pathParam("uuid")==null || routingContext.pathParam("uuid").isEmpty()) {
+            logger.error("getApiImage invoked - uuid null or empty");
+            throwApiException(routingContext, BadRequest400Exception.class, "getApiImage uuid null or empty");
+        }
+
         ApiService apiService = new ApiService(vertx);
-        apiService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
+        Single<ResultSet> resultSetSingle = apiService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
                 .flatMap(jdbcClient -> apiService.findAll(
                         new ApiFilterQuery()
                                 .setFilterQuery(ApiService.SQL_GET_IMAGE_BY_UUID)
                                 .setFilterQueryParams(new JsonArray()
                                         .add(routingContext.pathParam("uuid"))))
-                )
-                .subscribe(resultSet -> {
-                    String sourceData = resultSet.getRows().get(0).getString("image");
-
-                    // tokenize the data
-                    String parts[] = sourceData.split(",");
-                    String imageString = parts[1];
-
-                    String contentType = parts[0].substring(parts[0].indexOf(':')+1, parts[0].indexOf(';'));
-                    String imageFormat = "." + contentType.substring(contentType.indexOf('/')+1);
-                    logger.trace("contentType: {}. imageFormat: {}", contentType, imageFormat);
-
-                    Base64.Decoder base64Decoder = Base64.getDecoder();
-                    byte[] imageByte = base64Decoder.decode(imageString);
-
-                    routingContext.response()
-                            .putHeader(HttpHeaders.CONTENT_TYPE, contentType)
-                            .putHeader(HttpHeaders.CACHE_CONTROL, HttpHeaderValues.MAX_AGE + "=864000") //Ten Days
-                            .putHeader(HttpHeaders.CONTENT_DISPOSITION,
-                                    //HttpHeaderValues.ATTACHMENT + "; " +
-                                    //"inline; " +
-                                            HttpHeaderValues.FILENAME + "=\"" + routingContext.pathParam("uuid") + imageFormat + "\"")
-                            .setChunked(true)
-                            .setStatusCode(HttpResponseStatus.OK.code())
-                            .write(Buffer.buffer(imageByte))
-                            .end();
-                });
+                );
+        subscribeForImage(routingContext, resultSetSingle, "getApiImage", "image");
     }
 
 }
