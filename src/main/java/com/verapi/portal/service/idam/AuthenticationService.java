@@ -36,7 +36,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.ext.auth.jdbc.impl.JDBCUser;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.ext.web.api.RequestParameters;
@@ -49,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -64,6 +62,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
     private String userUUID;
     private String temporaryOrganizationName;
+    private String userOrganizationUUID;
 
     class SignUpUser implements io.vertx.ext.auth.User {
 
@@ -158,6 +157,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     //result.toJson().getValue("rows")
                     logger.trace(result.toJson().encodePrettily());
                     userUUID = result.getRows().get(0).getString("uuid");
+                    userOrganizationUUID = result.getRows().get(0).getString("organizationid");
                     String displayName = result.getRows().get(0).getString("displayname");
                     temporaryOrganizationName = "Organization of " + displayName;
                     loginMetadata.user.principal().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
@@ -280,11 +280,13 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         routingContext.session().put("userOrganizationArray", jsonArray);
 
                         for (int i=0; i<organizationJsonObjects.size(); i++) {
-                            if ( (organizationJsonObjects.get(i).getBoolean("isdeleted")==false) && (organizationJsonObjects.get(i).getBoolean("isactive")==true) ) {
-                                //Url Encode for cookie compliance
-                                organizationUuid = URLEncoder.encode(organizationJsonObjects.get(i).getString("uuid"), "UTF-8");
-                                temporaryOrganizationName = URLEncoder.encode(organizationJsonObjects.get(i).getString("name"), "UTF-8");
-                                break;
+                            if ( userOrganizationUUID.equals(organizationJsonObjects.get(i).getString("uuid")) ) {
+                                if (isOrganizationUndeleletedAndActive(organizationJsonObjects.get(i))) break;
+                            }
+                        }
+                        if (organizationUuid == null || organizationUuid.isEmpty()) {
+                            for (int i = 0; i < organizationJsonObjects.size(); i++) {
+                                if (isOrganizationUndeleletedAndActive(organizationJsonObjects.get(i))) break;
                             }
                         }
 
@@ -300,6 +302,17 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                 });
     }
+
+    private boolean isOrganizationUndeleletedAndActive(JsonObject organizationJsonObject) throws UnsupportedEncodingException {
+        if ((organizationJsonObject.getBoolean("isdeleted") == false) && (organizationJsonObject.getBoolean("isactive") == true)) {
+            //Url Encode for cookie compliance
+            organizationUuid = URLEncoder.encode(organizationJsonObject.getString("uuid"), "UTF-8");
+            temporaryOrganizationName = URLEncoder.encode(organizationJsonObject.getString("name"), "UTF-8");
+            return true;
+        }
+        return false;
+    }
+
 
     public Single<JsonObject> logout(RoutingContext routingContext) {
         logger.error("logout invoked for sessionid in path: {}, in header: {}, session context: {}", routingContext.pathParam("sessionid"), routingContext.request().headers().get("Cookie"), routingContext.session().id());
@@ -351,13 +364,13 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
         //TODO: OWASP Validate & Truncate the Fields that are going to be stored
 
-        logger.trace("Received firstname:" + firstname);
-        logger.trace("Received lastname:" + lastname);
-        logger.trace("Received user:" + username);
-        logger.trace("Received email:" + email);
-        logger.trace("Received pass:" + password);
-        logger.trace("Received pass2:" + password2);
-        logger.trace("Received isAgreedToTerms:" + isAgreedToTerms); //TODO: Add to subject model
+        logger.trace("Received firstname:{}", firstname);
+        logger.trace("Received lastname:{}", lastname);
+        logger.trace("Received user:{}", username);
+        logger.trace("Received email:{}", email);
+        logger.trace("Received pass:{}", password);
+        logger.trace("Received pass2:{}", password2);
+        logger.trace("Received isAgreedToTerms:{}", isAgreedToTerms); //TODO: Add to subject model
 
         if (!isAgreedToTerms) {
             logger.warn("Signing up User with info:[firstname:" + firstname + " lastname:" + lastname + " username:" + username + " email:" + email + "] has not aggreed to terms of use!. Thus rejected for sign up...");
