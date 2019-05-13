@@ -224,8 +224,8 @@
             <artifactId>fast-classpath-scanner</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.networknt</groupId>
-            <artifactId>json-schema-validator</artifactId>
+            <groupId>com.verapi.abyss</groupId>
+            <artifactId>abyss-json-schema-validator</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
