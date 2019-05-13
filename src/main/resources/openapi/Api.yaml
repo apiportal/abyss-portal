@@ -2250,6 +2250,10 @@ components:
                   properties:
                     permissions:
                       $ref: './SubjectPermission.yaml#/components/schemas/SubjectPermission'
+                - type: object
+                  properties:
+                    availablelicenses:
+                      $ref: './License.yaml#/components/schemas/License'
   requestBodies:
     Api:
       content:

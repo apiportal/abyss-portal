@@ -54,6 +54,8 @@ public class ApiApiController extends AbstractApiController {
         add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
         add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
         add(Constants.NESTED_COLUMN_USER_RESOURCES);
+        add(Constants.NESTED_COLUMN_API_SERVERS);
+        add(Constants.NESTED_COLUMN_API_AVAILABLE_LICENSES);
     }};
 
     /**
