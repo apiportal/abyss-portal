@@ -455,6 +455,39 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public static final String SQL_GET_IMAGE_BY_UUID = "select image\nfrom\napi\n" + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
+    public static final String FILTER_PROXIES_WITH_RESOURCES_FOR_EXPLORE = "SELECT \n" +
+            "\ta.uuid, a.organizationid, a.created, a.updated, a.deleted, a.isdeleted, a.crudsubjectid, a.subjectid, \n" +
+            "\ta.apistateid, a.apivisibilityid, a.languagename, a.languageversion, a.languageformat, a.color, a.deployed, \n" +
+            "\ta.changelog, a.\"version\", a.issandbox, a.islive, a.isdefaultversion, a.islatestversion, a.apioriginid, a.apiparentid,\n" +
+            "\ta.openapidocument->'info'->>'title' as apititle, \n" +
+            "\ta.openapidocument->'info'->>'description' as apidescription,\n" +
+            "\ta.openapidocument->'info'->>'version' as apiversion,\n" +
+            "\ta.openapidocument->'info'->'license'->>'name' as apilicense,\n" +
+            "\ta.openapidocument->'servers' as apiservers,\n" +
+            "\ts.displayname as apiowner,\n" +
+            "\tCOALESCE((select json_agg(\n" +
+            "\tjson_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, 'isdeleted', r.isdeleted, \n" +
+            "\t\t\t\t\t\t'crudsubjectid', r.crudsubjectid, 'resourcetypeid', r.resourcetypeid, 'resourcename', r.resourcename, 'description', r.description, \n" +
+            "\t\t\t\t\t\t'resourcerefid', r.resourcerefid, 'isactive', r.isactive, 'subresourcename', r.subresourcename,\n" +
+            "\t\t\t\t\t\t'permissions', COALESCE((select json_agg(\n" +
+            "\t\t\t\t\t\t\t\t\tjson_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t\t'isdeleted', r.isdeleted, 'crudsubjectid', r.crudsubjectid, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t\t'permission', permission, 'description', description, 'effectivestartdate', effectivestartdate, 'effectiveenddate', effectiveenddate, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t\t'subjectid', subjectid, 'resourceid', resourceid, 'resourceactionid', resourceactionid, 'accessmanagerid', accessmanagerid, 'isactive', isactive)\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t\t) FROM subject_permission sp\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\t\t\twhere sp.resourceid = r.uuid\n" +
+            "\t\t\t\t\t\t\t\t\t\t), '[]')\n" +
+            "\t\t\t\t\t)\n" +
+            "\t\t\t) FROM resource r\n" +
+            "\t\t\t\twhere a.uuid = r.resourcerefid\n" +
+            "\t\t\t\t), '[]') as resources\n" +
+            "FROM\napi\na\n" +
+            "\tjoin subject s on s.uuid = a.subjectid\n" +
+            "where a.isproxyapi = true\n" + // -- Only Proxies
+            "and a.isdeleted = false\n" + // --Not Deleted
+            "and a.apivisibilityid = 'e63c2874-aa12-433c-9dcf-65c1e8738a14'::uuid\n" + // --Public
+            "and a.apistateid = '1425993f-f6be-4ca0-84fe-8a83e983ffd9'::uuid"; // --Promoted
+
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     /*static {

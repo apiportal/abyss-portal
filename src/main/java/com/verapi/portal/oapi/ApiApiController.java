@@ -53,6 +53,7 @@ public class ApiApiController extends AbstractApiController {
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
         add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
+        add(Constants.NESTED_COLUMN_USER_RESOURCES);
     }};
 
     /**
@@ -711,6 +712,24 @@ public class ApiApiController extends AbstractApiController {
                                         .add(routingContext.pathParam("uuid"))))
                 );
         subscribeForImage(routingContext, resultSetSingle, "getApiImage", "image");
+    }
+
+    @AbyssApiOperationHandler
+    public void getApiProxiesExplore(RoutingContext routingContext) {
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        try {
+            getEntities(routingContext,
+                    ApiService.class,
+                    jsonbColumnsList,
+                    new ApiFilterQuery()
+                            .setFilterQuery(ApiService.FILTER_PROXIES_WITH_RESOURCES_FOR_EXPLORE));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
     }
 
 }

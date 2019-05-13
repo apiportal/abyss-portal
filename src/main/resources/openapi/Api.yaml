@@ -839,6 +839,47 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /apis/proxies/explore:
+    get:
+      tags:
+        - API-Proxies
+      summary: 'Get list of API Proxies with Resources'
+      description: 'Returns list of API Proxies with Resources'
+      operationId: getApiProxiesExplore
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search API Proxies which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search API Proxies which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfApiProxyWithResources'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
   /apis/proxies/{uuid}:
     get:
       tags:
@@ -2097,6 +2138,118 @@ components:
       type: string
       format: binary
       description: Api Image
+    ApiProxyWithResources:
+      allOf:
+        - type: object
+          properties:
+            uuid:
+              type: string
+              readOnly: true
+              description: 'Secondary primary key. Used in front end messages for security reasons.'
+            organizationid:
+              type: string
+              description: 'Id of Organization'
+            created:
+              type: string
+              readOnly: true
+              description: 'Timestamp of creation #readOnly#'
+            updated:
+              type: string
+              readOnly: true
+              description: 'Timestamp of update #readOnly#'
+            deleted:
+              type: string
+              readOnly: true
+              description: 'Timestamp of deletion #readOnly#'
+            isdeleted:
+              type: boolean
+              readOnly: true
+              description: 'Is record logically deleted #readOnly#'
+            crudsubjectid:
+              type: string
+              description: 'ID of Subject that reads, creates, updates or deletes'
+            subjectid:
+              type: string
+              description: 'FK ID of owner Subject'
+            apistateid:
+              type: string
+              description: 'FK ID of State of Business API'
+            apivisibilityid:
+              type: string
+              description: 'ID of Business API Visibility - Private, Closed Group, Public, ...'
+            languagename:
+              type: string
+              description: 'Formal API Description Language - Swagger, OpenAPI, RAML, WADL, WSDL, ...'
+            languageversion:
+              type: string
+              description: 'Version of Description Language'
+            languageformat:
+              type: integer
+              format: int32
+              description: 'Data format type. 0 - JSON, 1 - YAML, 2 - XML'
+            color:
+              type: string
+              description: 'Color of Business API'
+            deployed:
+              type: string
+              description: 'Deployed Date Time of API'
+            changelog:
+              type: string
+              description: 'Release notes and change log of API'
+            version:
+              type: string
+              description: 'Version of API'
+            issandbox:
+              type: boolean
+              description: 'Is API Sandbox'
+            islive:
+              type: boolean
+              description: 'Is API Live'
+            isdefaultversion:
+              type: boolean
+              description: 'Is this API Version Default'
+            islatestversion:
+              type: boolean
+              description: 'Is this API Version Latest'
+            apioriginid:
+              type: string
+              description: 'Origin ID of this API Version'
+            apiparentid:
+              type: string
+              description: 'Parent ID of this API Version'
+            apititle:
+              type: string
+              description: 'Title of API inside OAS doc'
+            apidescription:
+              type: string
+              description: 'Description of API inside OAS doc'
+            apiversion:
+              type: string
+              description: 'Version of API inside OAS doc'
+            apilicense:
+              type: string
+              description: 'License of API inside OAS doc'
+            apiservers:
+              type: array
+              description: 'Servers of API inside OAS doc'
+              items:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: 'Server urls of API inside OAS doc'
+            apiowner:
+              type: string
+              description: 'Owner display name of API'
+        - type: object
+          properties:
+            resources:
+              allOf:
+                - $ref: './Resource.yaml#/components/schemas/Resource'
+                - type: object
+                  properties:
+                    permissions:
+                      $ref: './SubjectPermission.yaml#/components/schemas/SubjectPermission'
   requestBodies:
     Api:
       content:
@@ -2176,6 +2329,14 @@ components:
         image/png:
           schema:
             $ref: '#/components/schemas/ApiImage'
+    '200-ListOfApiProxyWithResources':
+      description: 'An Api Proxy with Resources array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ApiProxyWithResources'
     '201':
       description: 'New Api resource has been created'
       content:
