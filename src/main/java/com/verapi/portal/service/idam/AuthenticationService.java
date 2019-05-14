@@ -24,6 +24,7 @@ import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.abyss.common.Constants;
 import com.verapi.portal.common.MailUtil;
+import com.verapi.portal.entity.idam.SubjectMembership;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.AbstractService;
@@ -131,6 +132,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
             private SubjectService subjectService = new SubjectService(routingContext.vertx());
             private SubjectOrganizationService subjectOrganizationService = new SubjectOrganizationService(routingContext.vertx());
             private OrganizationService organizationService = new OrganizationService(routingContext.vertx());
+            private SubjectMembershipService subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
 
             LoginMetadata() {
             }
@@ -240,6 +242,22 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 })
                                 .flatMap(jsonObjects2 -> {
                                     logger.trace("CreateOrganizationController - subjectOrganizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
+
+                                    return loginMetadata.subjectMembershipService.initJDBCClient();
+                                })
+                                .flatMap(jdbcClient1 -> {
+                                    return loginMetadata.subjectMembershipService.insertAll(new JsonArray().add(new JsonObject()
+                                            .put("organizationid", organizationUuid)
+                                            .put("crudsubjectid", userUUID)
+                                            .put("subjectid", userUUID)
+                                            .put("subjectgroupid", Constants.ROLE_SYS_ADMIN) //TODO: Change to Organization Admin
+                                            .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
+                                            .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
+                                            .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE)
+                                            .put("isactive", true) ));
+                                })
+                                .flatMap(jsonObjects2 -> {
+                                    logger.trace("CreateOrganizationController - subjectMembershipService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
 
                                     return loginMetadata.subjectService.updateSubjectOrganization(new JsonArray().add(organizationUuid).add(userUUID).add(userUUID));
                                 })
