@@ -250,7 +250,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("organizationid", organizationUuid)
                                             .put("crudsubjectid", userUUID)
                                             .put("subjectid", userUUID)
-                                            .put("subjectgroupid", Constants.ROLE_SYS_ADMIN) //TODO: Change to Organization Admin
+                                            .put("subjectgroupid", Constants.ROLE_ORGANIZATION_ADMIN)
                                             .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
                                             .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                             .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE)
