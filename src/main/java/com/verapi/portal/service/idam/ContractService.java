@@ -16,6 +16,7 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
@@ -29,12 +30,16 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 public class ContractService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(ContractService.class);
@@ -46,6 +51,143 @@ public class ContractService extends AbstractService<UpdateResult> {
     public ContractService(Vertx vertx) {
         super(vertx);
     }
+
+
+    /** Subscribe APP to API
+     *
+     * @param routingContext
+     * @param insertRecords
+     * @return
+     */
+    public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
+        logger.trace("ContractService --- insertAllCascaded invoked");
+
+        String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+
+        Observable<JsonObject> insertParamsObservable = Observable.fromIterable(insertRecords).map(o -> (JsonObject) o);
+
+        //daisy chaining record status
+        return insertParamsObservable
+
+                //SUBJECT PERMISSION FOR SUBSCRIPTION
+                .flatMap(insertRequest -> {
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("permission", "Subscription Permission")
+                                .put("description", "Subscription Permission of " + insertRequest.getString("contractdescription"))
+                                .put("effectivestartdate", insertRequest.containsKey("effectivestartdate") ? insertRequest.getInstant("effectivestartdate") : Instant.now())
+                                .put("effectiveenddate", insertRequest.containsKey("effectiveenddate") ? insertRequest.getInstant("effectiveenddate") : Instant.now().plus(365, DAYS)) //TODO: Get from License or subscription
+                                .put("subjectid", insertRequest.getString("appid"))
+                                .put("resourceid", insertRequest.getString("resourceidofapi"))
+                                .put("resourceactionid", Constants.RESOURCE_ACTION_INVOKE_API)
+                                .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
+                                .put("isactive", true);
+
+                        SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+                        return subjectPermissionService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> subjectPermissionService.insert(insertRecord, insertRequest)).toObservable();
+                })
+
+                //CONTRACT
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        //JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
+                        JsonObject insertRequest = recordStatus.getJsonObject("parentRecordStatus");
+
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("name", insertRequest.getString("contractname"))
+                                .put("description", insertRequest.getString("contractdescription"))
+                                .put("apiid", insertRequest.getString("apiid"))
+                                .put("subjectid", insertRequest.getString("appid"))
+                                .put("environment", insertRequest.getString("environment"))
+                                .put("contractstateid", Constants.CONTRACT_STATE_IS_ACTIVATED)
+                                .put("status", Constants.CONTRACT_STATUS_IS_INFORCE)
+                                .put("isrestrictedtosubsetofapi", false)
+                                .put("licenseid", insertRequest.getString("licenseid"))
+                                .put("subjectpermissionid", recordStatus.getString("uuid"));
+
+                        return insert(insertRecord, recordStatus).toObservable(); //insert contract
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+                })
+
+                //RESOURCE OF CONTRACT
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject contractInsertResult = recordStatus.getJsonObject("response");
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("resourcetypeid", Constants.RESOURCE_TYPE_CONTRACT)
+                                .put("resourcename", contractInsertResult.getString("name") + " CONTRACT RESOURCE " + contractInsertResult.getString("uuid"))
+                                .put("description", contractInsertResult.getString("description") + " CONTRACT RESOURCE")
+                                .put("resourcerefid", contractInsertResult.getString("uuid"))
+                                .put("isactive", true);
+
+                        ResourceService resourceService = new ResourceService(routingContext.vertx());
+                        return resourceService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> resourceService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+                })
+
+                //RESOURCE ACCESS TOKEN
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        String subjectPermissionId = recordStatus
+                                .getJsonObject("parentRecordStatus")
+                                .getJsonObject("parentRecordStatus")
+                                .getString("uuid");
+
+                        String apiId = recordStatus.getJsonObject("parentRecordStatus")
+                                .getJsonObject("response").getString("apiid");
+
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("subjectpermissionid", subjectPermissionId)
+                                .put("resourcetypeid", Constants.RESOURCE_TYPE_API_PROXY)
+                                .put("resourcerefid", apiId)
+                                .put("isactive", true);
+
+                        ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
+                        return resourceAccessTokenService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> resourceAccessTokenService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+                })
+
+                //PREPARE RESULT
+                .flatMap(recordStatus -> {
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject accessTokenInsertResult = recordStatus.getJsonObject("response");
+                        JsonObject resourceRecordStatus = recordStatus.getJsonObject("parentRecordStatus");
+                        JsonObject contractRecordStatus = resourceRecordStatus.getJsonObject("parentRecordStatus");
+                        JsonObject permissionRecordStatus = contractRecordStatus.getJsonObject("parentRecordStatus");
+
+                        permissionRecordStatus.getJsonObject("response").put("accesstokens", accessTokenInsertResult);
+                        resourceRecordStatus.getJsonObject("response").put("permissions", permissionRecordStatus.getJsonObject("response"));
+                        contractRecordStatus.getJsonObject("response").put("resources", resourceRecordStatus.getJsonObject("response"));
+                        contractRecordStatus.remove("parentRecordStatus");
+
+                        return Observable.just(contractRecordStatus);
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+
+                }).toList();
+    }
+
 
     @Override
     protected String getInsertSql() { return SQL_INSERT; }

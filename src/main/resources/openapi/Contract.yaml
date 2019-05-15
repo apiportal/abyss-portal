@@ -27,6 +27,11 @@ tags:
       url: 'https://apiportal.com'
       description: 'Find out more'
     description: 'Abyss plaftorm APIs : Contract crud operations'
+  - name: Subscription
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Subscription crud operations'
   - name: List-Contracts
     externalDocs:
       url: 'https://apiportal.com'
@@ -226,6 +231,105 @@ paths:
         - name: uuid
           in: path
           description: 'The uuid of Contract that needs to be deleted'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+  /contracts/subscribe/:
+    get:
+      tags:
+        - Subscription
+      summary: 'Get list of Subscriptions'
+      description: 'Returns list of Subscriptions'
+      operationId: getSubscriptions
+      parameters:
+        - name: byname
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subscriptions which names exact match'
+        - name: likename
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 'search Subscriptions which names begin with'
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/200-ListOfContractCascaded'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+    post:
+      tags:
+        - Subscription
+      summary: 'Add a bulk of Subscriptions'
+      description: 'Provide a list of Subscriptions to be inserted'
+      operationId: addSubscriptions
+      responses:
+        '207':
+          $ref: '#/components/responses/207'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/ListOfSubscription'
+  /contracts/{uuid}/unsubscribe:
+    delete:
+      tags:
+        - Subscription
+      summary: 'Delete Subscription'
+      description: 'Provide an uuid parameter of Contract to be deleted'
+      operationId: deleteSubscription
+      parameters:
+        - name: uuid
+          in: path
+          description: 'The uuid of Subscription that needs to be deleted'
           required: true
           schema:
             type: string
@@ -582,6 +686,81 @@ archived - Indicates that the active life of the contract is over. The workflow 
         subjectpermissionid:
           type: string
           description: 'FK ID of Subject Permission'
+    ContractWithResourcesAndPermission:
+      allOf:
+        - $ref: '#/components/schemas/Contract'
+        - type: object
+          properties:
+            resources:
+              allOf:
+                - $ref: './Resource.yaml#/components/schemas/Resource'
+                - type: object
+                  properties:
+                    permissions:
+                      allOf:
+                        - $ref: './SubjectPermission.yaml#/components/schemas/SubjectPermission'
+                        - type: object
+                          properties:
+                            accesstoken:
+                              $ref: './ResourceAccessToken.yaml#/components/schemas/ResourceAccessToken'
+    Subscription:
+      type: object
+      properties:
+        uuid:
+          type: string
+          readOnly: true
+          description: 'Secondary primary key. Used in front end messages for security reasons.'
+        organizationid:
+          type: string
+          readOnly: true
+          description: 'Id of Organization'
+        created:
+          type: string
+          readOnly: true
+          description: 'Timestamp of creation #readOnly#'
+        updated:
+          type: string
+          readOnly: true
+          description: 'Timestamp of update #readOnly#'
+        deleted:
+          type: string
+          readOnly: true
+          description: 'Timestamp of deletion #readOnly#'
+        isdeleted:
+          type: boolean
+          readOnly: true
+          description: 'Is record logically deleted #readOnly#'
+        crudsubjectid:
+          type: string
+          readOnly: true
+          description: 'ID of Subject that reads, creates, updates or deletes'
+        contractname:
+          type: string
+          description: 'Name of contract'
+        contractdescription:
+          type: string
+          description: 'The text description of the contract'
+        apiid:
+          type: string
+          description: 'FK ID of API Version that this contract binds'
+        resourceidofapi:
+          type: string
+          description: 'FK ID of API Resource that this contracting API'
+        appid:
+          type: string
+          description: 'FK ID of App that this contract binds'
+        environment:
+          type: string
+          description: 'Environment that the contract relates to (Sandbox or Production).'
+        licenseid:
+          type: string
+          description: 'FK ID of license'
+        effectivestartdate:
+          type: string
+          description: 'Effective start date time of permission that it is active'
+        effectiveenddate:
+          type: string
+          description: 'Effective end date time of permission that is active until'
   requestBodies:
     Contract:
       content:
@@ -607,6 +786,15 @@ archived - Indicates that the active life of the contract is over. The workflow 
             additionalProperties: true
       description:  'list of Contract objects that needs to be updated, each additional property name should be the uuid of coresponding Contract record'
       required: true
+    ListOfSubscription:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Subscription'
+      description: 'Subscription array that needs to be made'
+      required: true
   responses:
     '200':
       description: 'Successful operation'
@@ -622,6 +810,14 @@ archived - Indicates that the active life of the contract is over. The workflow 
             type: array
             items:
               $ref: '#/components/schemas/Contract'
+    '200-ListOfContractCascaded':
+      description: 'A Cascaded Contract array'
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ContractWithResourcesAndPermission'
     '201':
       description: 'New Contract resource has been created'
       content:

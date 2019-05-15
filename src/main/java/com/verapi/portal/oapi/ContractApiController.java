@@ -16,9 +16,12 @@
 
 package com.verapi.portal.oapi;
 
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.ContractService;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -31,11 +34,17 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/Contract.yaml")
 public class ContractApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(ContractApiController.class);
+
+    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
+        add(Constants.NESTED_COLUMN_USER_RESOURCES);
+    }};
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -238,6 +247,43 @@ public class ContractApiController extends AbstractApiController {
                             .setFilterQuery(ContractService.FILTER_BY_POLICY)
                             .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            logger.error(e.getLocalizedMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void addSubscriptions(RoutingContext routingContext) {
+
+        // Get the parsed parameters
+        RequestParameters requestParameters = routingContext.get("parsedParameters");
+
+        // We get an user JSON array validated by Vert.x Open API validator
+        JsonArray requestBody = requestParameters.body().getJsonArray();
+
+        //Change request to make it suitable for subject permission
+        JsonObject appendRequestBody = new JsonObject()
+                        .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                        .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+        ;
+
+        requestBody.forEach(requestItem -> {
+            if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
+                appendRequestBody.forEach(entry -> {
+                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
+                });
+            }
+        });
+
+        try {
+            logger.trace("---adding entities in a cascaded way for subscription");
+            ContractService contractService = new ContractService(routingContext.vertx());
+            //contractService.setAutoCommit(false);
+            Single<List<JsonObject>> insertAllCascadedResult = contractService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                    .flatMap(jdbcClient -> contractService.insertAllCascaded(routingContext, requestBody));
+            subscribeAndResponseBulkList(routingContext, insertAllCascadedResult, jsonbColumnsList, HttpResponseStatus.MULTI_STATUS.code());
+        } catch (Exception e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
