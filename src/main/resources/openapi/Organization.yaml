@@ -360,6 +360,7 @@ components:
         picture:
           type: string
           format: byte
+          writeOnly: true
           description: 'Picture or Logo of Organization'
     OrganizationImage:
       type: string

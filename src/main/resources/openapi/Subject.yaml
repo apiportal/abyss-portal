@@ -1273,6 +1273,7 @@ components:
         picture:
           type: string
           format: byte
+          writeOnly: true
           description: 'Picture of subject #base64#'
         totallogincount:
           type: integer

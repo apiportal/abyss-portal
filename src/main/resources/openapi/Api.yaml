@@ -1921,6 +1921,8 @@ components:
           description: 'FK ID of Business API for API Proxies'
         image:
           type: string
+          format: byte
+          writeOnly: true
           description: 'Image data of Business API'
         color:
           type: string
@@ -2017,6 +2019,8 @@ components:
         #   description: 'FK ID of Business API for API Proxies'
         image:
           type: string
+          format: byte
+          writeOnly: true
           description: 'Image data of Business API'
         color:
           type: string
