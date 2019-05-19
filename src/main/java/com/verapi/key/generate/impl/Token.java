@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 //import java.security.NoSuchAlgorithmException;
 //import java.time.ZonedDateTime;
 //import java.time.LocalDateTime;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 //import org.joda.time.DateTime;
 //import org.joda.time.format.DateTimeFormat;
@@ -168,7 +169,7 @@ public class Token implements TokenRemoteIntf{
 		
 		Hash hash = new Hash();
 
-		String userDataBase64 = apiKey.encodeBase64(userData.getBytes(ApiKey.UTF8_ENCODING));
+		String userDataBase64 = apiKey.encodeBase64(userData.getBytes(StandardCharsets.UTF_8));
 		String userDataBase64Hash = hash.generateHash(userDataBase64);
 
 		String nonceBase64 = VertxContextPRNG.current(vertx).nextString(32);
@@ -251,7 +252,7 @@ public class Token implements TokenRemoteIntf{
 		byte[] plainBytes = apiKey.decodeBase64(receivedToken);
 		//ByteUtils.printByteArray(plainBytes, "plainBytes"); //TODO: Kaldır. For Debug
 
-		String plainStr = new String(plainBytes, ApiKey.UTF8_ENCODING);
+		String plainStr = new String(plainBytes, StandardCharsets.UTF_8);
 
 
 		///////////////////////////////////////////////////////////////////
@@ -290,7 +291,7 @@ public class Token implements TokenRemoteIntf{
 		Hash hash = new Hash();
 
 		//Check UserData Match
-		String userDataBase64 = apiKey.encodeBase64(storedAuthInfo.getUserData().getBytes(ApiKey.UTF8_ENCODING));
+		String userDataBase64 = apiKey.encodeBase64(storedAuthInfo.getUserData().getBytes(StandardCharsets.UTF_8));
 		String userDataBase64Hash = hash.generateHash(userDataBase64);
 		if (!(userDataBase64Hash.equals(strArray[INDEX_USER_DATA]))) {
 			storedAuthInfo.setResultText("USER DATA in Received Token does not match");
@@ -334,7 +335,7 @@ public class Token implements TokenRemoteIntf{
 		
 		ApiKey apiKey = new ApiKey();
 		
-		String userDataBase64 = apiKey.encodeBase64(userData.getBytes(ApiKey.UTF8_ENCODING));
+		String userDataBase64 = apiKey.encodeBase64(userData.getBytes(StandardCharsets.UTF_8));
 		
 		String nonceBase64;
 		nonceBase64 = apiKey.generateRandomKey();
@@ -358,7 +359,7 @@ public class Token implements TokenRemoteIntf{
 		
 		Cryptor aes = Cryptor.getInstance(); //TODO: Switch to A.E.
 		
-		byte[] inputBytes = input.getBytes(ApiKey.UTF8_ENCODING);
+		byte[] inputBytes = input.getBytes(StandardCharsets.UTF_8);
 		
 		//ByteUtils.printByteArray(inputBytes, "INPUT"); //TODO: Kaldır. For Debug
 		
@@ -412,7 +413,7 @@ public class Token implements TokenRemoteIntf{
 		byte[] plainBytes = cryptoOperarionResult.getOutputBytes();
 		//ByteUtils.printByteArray(plainBytes, "PLAIN"); //TODO: Kaldır.
 		
-		String plainStr = new String(plainBytes, ApiKey.UTF8_ENCODING);
+		String plainStr = new String(plainBytes, StandardCharsets.UTF_8);
 		
 		
 		///////////////////////////////////////////////////////////////////
