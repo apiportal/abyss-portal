@@ -17,6 +17,7 @@
 package com.verapi.portal.common;
 
 import io.vertx.core.json.JsonArray;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ class FileUtil {
 
     JsonArray getYamlFileList() {
         JsonArray yamlFileList = new JsonArray();
-        String s = new java.io.File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
+        String s = new java.io.File(FilenameUtils.getName(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath())).getName();
 
         try (JarFile jf = new JarFile(s)) {
             Enumeration<JarEntry> entries = jf.entries();

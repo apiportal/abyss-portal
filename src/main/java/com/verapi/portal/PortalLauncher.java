@@ -37,6 +37,7 @@ import io.vertx.ext.shell.command.CommandRegistry;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxInfluxDbOptions;
 import io.vertx.micrometer.VertxJmxMetricsOptions;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             System.setProperty("vertx.logger-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
 
         try {
-            System.setProperty("abyss-jar.name", new java.io.File(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+            System.setProperty("abyss-jar.name", new java.io.File(FilenameUtils.getName(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName()));
         } catch (Exception e) {
             System.setProperty("abyss-jar.name", "abyss-portal.jar");
         }
