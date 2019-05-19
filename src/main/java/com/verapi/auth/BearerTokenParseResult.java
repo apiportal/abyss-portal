@@ -17,7 +17,6 @@ package com.verapi.auth;
 
 /**
  * @author faik.saglar
- *
  */
 public class BearerTokenParseResult {
 
@@ -29,7 +28,7 @@ public class BearerTokenParseResult {
      * Http Basic Auth Bearer Token Parse Result
      *
      * @param isFailed is parse failed
-     * @param token token
+     * @param token    token
      */
     public BearerTokenParseResult(Boolean isFailed, String token) {
         this.isFailed = isFailed;

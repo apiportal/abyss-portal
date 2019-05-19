@@ -22,39 +22,31 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class FileUtil {
+class FileUtil {
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     JsonArray getYamlFileList() {
         JsonArray yamlFileList = new JsonArray();
-        JarFile jf = null;
-        try {
-            String s = new java.io.File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-            jf = new JarFile(s);
+        String s = new java.io.File(this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
 
+        try (JarFile jf = new JarFile(s)) {
             Enumeration<JarEntry> entries = jf.entries();
             while (entries.hasMoreElements()) {
                 JarEntry je = entries.nextElement();
-                if (je.getName().startsWith("openapi") && (je.getName().toLowerCase().endsWith(".yaml"))) {
+                if (je.getName().startsWith("openapi") && (je.getName().toLowerCase(Locale.ENGLISH).endsWith(".yaml"))) {
                     String fileName = je.getName();
-                    yamlFileList.add(fileName.substring(fileName.lastIndexOf("openapi") + "openapi".length() + 1, fileName.length()));
+                    yamlFileList.add(fileName.substring(fileName.lastIndexOf("openapi") + "openapi".length() + 1));
                 }
             }
         } catch (IOException e) {
-            logger.error("error while getting resource files readMyResources {} - {}", e.getLocalizedMessage(), e.getStackTrace());
-        } finally {
-            try {
-                if (jf != null) {
-                    jf.close();
-                }
-            } catch (Exception e) {
-                logger.error("error while getting resource files readMyResources {} - {}", e.getLocalizedMessage(), e.getStackTrace());
-            }
+            logger.error("error while getting resource files readMyResources {} - {}"
+                    , e.getLocalizedMessage(), e.getStackTrace());
         }
+
         return yamlFileList;
     }
-
 }
