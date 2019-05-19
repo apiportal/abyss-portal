@@ -50,13 +50,15 @@ import java.util.List;
 public class ApiApiController extends AbstractApiController {
     private static final Logger logger = LoggerFactory.getLogger(ApiApiController.class);
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
-        add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
-        add(Constants.NESTED_COLUMN_USER_RESOURCES);
-        add(Constants.NESTED_COLUMN_API_SERVERS);
-        add(Constants.NESTED_COLUMN_API_AVAILABLE_LICENSES);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
+
+    static {
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_API_OPENAPIDOCUMENT);
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_API_EXTENDEDDOCUMENT);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_USER_RESOURCES);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_API_SERVERS);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_API_AVAILABLE_LICENSES);
+    }
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -107,9 +109,7 @@ public class ApiApiController extends AbstractApiController {
                 }
 
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
-                appendRequestBody.forEach(entry -> {
-                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
-                });
+                appendRequestBody.forEach(entry -> ((JsonObject) requestItem).put(entry.getKey(), entry.getValue()));
             }
         });
 
@@ -150,9 +150,6 @@ public class ApiApiController extends AbstractApiController {
     }
 
     void getEntity(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntity(routingContext,
                     ApiService.class,
@@ -219,44 +216,16 @@ public class ApiApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateApi(RoutingContext routingContext) {
         updateEntity(routingContext, null);
-/*
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
-        // We get an user JSON object validated by Vert.x Open API validator
-        JsonObject requestBody = requestParameters.body().getJsonObject();
-
-        try {
-            updateEntity(routingContext, ApiService.class, requestBody, jsonbColumnsList);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void deleteApi(RoutingContext routingContext) {
         deleteEntity(routingContext, (ApiFilterQuery) null);
-/*
-        try {
-            deleteEntity(routingContext, ApiService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void getApisOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
-            //getEntities(routingContext, ApiService.class, jsonbColumnsList, ApiService.FILTER_BY_SUBJECT.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
             getEntities(routingContext,
                     ApiService.class,
                     jsonbColumnsList,
@@ -291,9 +260,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getBusinessApis(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         getEntities(routingContext, new ApiFilterQuery().setFilterQuery(ApiService.FILTER_BY_BUSINESS_API));
     }
 
@@ -368,9 +334,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getBusinessApisOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -409,9 +372,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiProxiesOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -450,9 +410,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getTagsOfBusinessApisOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -469,9 +426,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getAggregatedTagsOfBusinessApisOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiTagService.class,
@@ -488,9 +442,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getBusinessApisOfSubjectByTag(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -510,9 +461,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getBusinessApisOfSubjectByCategory(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -532,9 +480,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getBusinessApisOfSubjectByGroup(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -554,9 +499,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiProxiesOfSubjectByTag(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -576,9 +518,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiProxiesOfSubjectByCategory(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -598,9 +537,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiProxiesOfSubjectByGroup(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -620,9 +556,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApisSharedWithSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -640,9 +573,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApisSharedBySubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -660,9 +590,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiProxiesUnderLicense(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -680,16 +607,13 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApisByPolicy(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
                     jsonbColumnsList,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_POLICY)
-                            .setFilterQueryParams(new JsonArray().add("[\""+ routingContext.pathParam("uuid") +"\"]")));
+                            .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             logger.error(e.getLocalizedMessage());
             logger.error(Arrays.toString(e.getStackTrace()));
@@ -700,7 +624,7 @@ public class ApiApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getApiImage(RoutingContext routingContext) {
 
-        if (routingContext.pathParam("uuid")==null || routingContext.pathParam("uuid").isEmpty()) {
+        if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
             logger.error("getApiImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getApiImage uuid null or empty");
         }
@@ -718,9 +642,6 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiProxiesExplore(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntities(routingContext,
                     ApiService.class,
@@ -733,5 +654,4 @@ public class ApiApiController extends AbstractApiController {
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
-
 }
