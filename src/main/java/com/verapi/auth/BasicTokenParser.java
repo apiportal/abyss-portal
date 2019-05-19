@@ -60,7 +60,7 @@ public class BasicTokenParser {
 
         String credentials;
         try {
-            byte[] bytes = DatatypeConverter.parseBase64Binary(pieces[pieces.length-1]);
+            byte[] bytes = DatatypeConverter.parseBase64Binary(pieces[pieces.length-1]); // TODO: Jaxb bağımsızlığı için; DatatypeConverter.parseBase64Binary bu sınıfın yerine başka bir tane bul
 
             credentials = new String(bytes, "UTF8");//TODO: Charset
         } catch (UnsupportedEncodingException | IllegalArgumentException e) {

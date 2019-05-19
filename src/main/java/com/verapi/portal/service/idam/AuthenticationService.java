@@ -17,16 +17,15 @@
 package com.verapi.portal.service.idam;
 
 import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.exception.Forbidden403Exception;
+import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.abyss.common.Constants;
 import com.verapi.portal.common.MailUtil;
-import com.verapi.portal.entity.idam.SubjectMembership;
 import com.verapi.portal.oapi.CompositeResult;
-import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -99,10 +98,14 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return ""; }
+    protected String getInsertSql() {
+        return "";
+    }
 
     @Override
-    protected String getFindByIdSql() { return ""; }
+    protected String getFindByIdSql() {
+        return "";
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -254,7 +257,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
                                             .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                             .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE)
-                                            .put("isactive", true) ));
+                                            .put("isactive", true)));
                                 })
                                 .flatMap(jsonObjects2 -> {
                                     logger.trace("CreateOrganizationController - subjectMembershipService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
@@ -263,7 +266,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 })
                                 .flatMap(compositeResult -> {
 
-                                    if (compositeResult.getThrowable()==null) {
+                                    if (compositeResult.getThrowable() == null) {
                                         logger.trace("Subject's Organization updated with newly created one successfully");
                                         try {
                                             //Url Encode for cookie compliance
@@ -297,14 +300,14 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         logger.trace("LoginController.handle() findByIdResult.subscribe result: {}", jsonArray);
                         routingContext.session().put("userOrganizationArray", jsonArray);
 
-                        for (int i=0; i<organizationJsonObjects.size(); i++) {
-                            if ( userOrganizationUUID.equals(organizationJsonObjects.get(i).getString("uuid")) ) {
-                                if (isOrganizationUndeleletedAndActive(organizationJsonObjects.get(i))) break;
+                        for (JsonObject organizationJsonObject : organizationJsonObjects) {
+                            if (userOrganizationUUID.equals(organizationJsonObject.getString("uuid"))) {
+                                if (isOrganizationUndeleletedAndActive(organizationJsonObject)) break;
                             }
                         }
                         if (organizationUuid == null || organizationUuid.isEmpty()) {
-                            for (int i = 0; i < organizationJsonObjects.size(); i++) {
-                                if (isOrganizationUndeleletedAndActive(organizationJsonObjects.get(i))) break;
+                            for (JsonObject organizationJsonObject : organizationJsonObjects) {
+                                if (isOrganizationUndeleletedAndActive(organizationJsonObject)) break;
                             }
                         }
 
@@ -322,7 +325,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     }
 
     private boolean isOrganizationUndeleletedAndActive(JsonObject organizationJsonObject) throws UnsupportedEncodingException {
-        if ((organizationJsonObject.getBoolean("isdeleted") == false) && (organizationJsonObject.getBoolean("isactive") == true)) {
+        if ((!organizationJsonObject.getBoolean("isdeleted")) && (organizationJsonObject.getBoolean("isactive"))) {
             //Url Encode for cookie compliance
             organizationUuid = URLEncoder.encode(organizationJsonObject.getString("uuid"), "UTF-8");
             temporaryOrganizationName = URLEncoder.encode(organizationJsonObject.getString("name"), "UTF-8");
@@ -333,12 +336,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
 
     public Single<JsonObject> logout(RoutingContext routingContext) {
-        logger.error("logout invoked for sessionid in path: {}, in header: {}, session context: {}", routingContext.pathParam("sessionid"), routingContext.request().headers().get("Cookie"), routingContext.session().id());
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
-        // We get an user JSON object validated by Vert.x Open API validator
-        //JsonObject requestBody = requestParameters.body().getJsonObject();
+        if (logger.isErrorEnabled())
+            logger.error("logout invoked for sessionid in path: {}, in header: {}, session context: {}", routingContext.pathParam("sessionid"), routingContext.request().headers().get("Cookie"), routingContext.session().id());
 
         if (!Objects.equals(routingContext.pathParam("sessionid"), routingContext.session().id()))
             return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
@@ -357,7 +356,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
         routingContext.removeCookie(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
         routingContext.session().destroy();
 
-        routingContext.setUser(new User(new SignUpUser("logout."+username)));
+        routingContext.setUser(new User(new SignUpUser("logout." + username)));
 
         return Single.just(new JsonObject().put("username", username)
                 .put("sessionid", sessionid));
@@ -417,7 +416,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
             private SubjectService subjectService = new SubjectService(routingContext.vertx());
             private SubjectActivationService subjectActivationService = new SubjectActivationService(routingContext.vertx());
 
-            SignupMetadata() {
+            private SignupMetadata() {
             }
         }
 
@@ -432,7 +431,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     routingContext.setUser(new User(new SignUpUser(username)));
 
                     if (resultSet.getNumRows() > 0) {
-                        logger.trace("user found: " + resultSet.toJson().encodePrettily());
+                        logger.trace("user found: {}", resultSet.toJson().encodePrettily());
                         signupMetadata.subjectUUID = resultSet.getRows(true).get(0).getString("uuid");
 
                         if (resultSet.getRows(true).get(0).getBoolean("isactivated")) {
@@ -450,7 +449,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                         // save user to the database
                         JsonObject userRecord = new JsonObject();
-                            userRecord
+                        userRecord
                                 .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
                                 .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
                                 .put("isactivated", false)
@@ -489,7 +488,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                 .flatMap(updateResult -> {
                     if (updateResult instanceof UpdateResult) {
                         signupMetadata.subjectUUID = ((UpdateResult) updateResult).getKeys().getString(0);
-                        logger.trace("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | String Key @pos=1 (subjectUUID):" + signupMetadata.subjectUUID);
+                        logger.trace("[{}] user created successfully: {}  | String Key @pos=1 (subjectUUID): {}", ((UpdateResult) updateResult).getUpdated(), ((UpdateResult) updateResult).getKeys().encodePrettily(), signupMetadata.subjectUUID);
                     } else if (updateResult instanceof ResultSet) {
                         logger.trace("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | subjectUUID:" + signupMetadata.subjectUUID);
                     }
@@ -500,9 +499,9 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         signupMetadata.authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
                                 email,
                                 routingContext.vertx().getDelegate());
-                        logger.trace("activation token is created successfully: " + signupMetadata.authInfo.getToken());
+                        logger.trace("activation token is created successfully: {}", signupMetadata.authInfo.getToken());
                     } catch (UnsupportedEncodingException e) {
-                        logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                        logger.trace("tokenGenerator.generateToken: {}", e.getLocalizedMessage());
                         return Single.error(new RuntimeException("activation token could not be generated"));
                     }
 
@@ -528,7 +527,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
                                 } else {
                                     if (!jsonObjects.isEmpty()) {
-                                        ApiSchemaError apiSchemaError = (ApiSchemaError)jsonObjects.get(0).getValue("error");
+                                        ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue("error");
                                         return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
                                     } else {
                                         return Single.error(new RuntimeException("User Activation could not be created during signup"));
@@ -581,7 +580,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
             private SubjectService subjectService = new SubjectService(routingContext.vertx());
             private SubjectActivationService subjectActivationService = new SubjectActivationService(routingContext.vertx());
 
-            ForgotPasswordMetadata() {
+            private ForgotPasswordMetadata() {
             }
         }
 
@@ -631,7 +630,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         logger.error("forgotPassword - email is connected to multiple accounts [" + numOfRows + "]");
                         return Single.error(new Exception("This email is connected to multiple accounts. Please correct the other accounts by getting help from administration of your organization and try again."));
                     }
-                 })
+                })
                 .flatMap(jdbcClient1 -> {
                     JsonObject resetPasswordRecord = new JsonObject();
                     resetPasswordRecord
@@ -652,7 +651,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
                                 } else {
                                     if (!jsonObjects.isEmpty()) {
-                                        ApiSchemaError apiSchemaError = (ApiSchemaError)jsonObjects.get(0).getValue("error");
+                                        ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue("error");
                                         logger.trace("forgotPassword - " + apiSchemaError.getUsermessage());
                                         return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
                                     } else {
@@ -666,23 +665,23 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     logger.trace("forgotPassword - Deactivating Subject with id:[" + forgotPasswordMetadata.subjectUUID + "] -> " + updateResult.getKeys().encodePrettily());
                     if (updateResult.getUpdated() == 1) {
                         JsonObject updateJson = new JsonObject()
-                            .put("organizationid", forgotPasswordMetadata.subjectRow.getString("organizationid"))
-                            .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
-                            .put("isactivated", false)
-                            .put("subjecttypeid", forgotPasswordMetadata.subjectRow.getString("subjecttypeid"))
-                            .put("subjectname", forgotPasswordMetadata.subjectRow.getString("subjectname"))
-                            .put("firstname", forgotPasswordMetadata.subjectRow.getString("firstname"))
-                            .put("lastname", forgotPasswordMetadata.subjectRow.getString("lastname"))
-                            .put("displayname", forgotPasswordMetadata.subjectRow.getString("displayname"))
-                            .put("email", forgotPasswordMetadata.subjectRow.getString("email"))
-                            .put("secondaryemail", forgotPasswordMetadata.subjectRow.getString("secondaryemail"))
-                            .put("effectivestartdate", forgotPasswordMetadata.subjectRow.getInstant("effectivestartdate"))
-                            .put("effectiveenddate", forgotPasswordMetadata.subjectRow.getInstant("effectiveenddate"))
-                            .put("picture", forgotPasswordMetadata.subjectRow.getValue("picture"))
-                            .put("subjectdirectoryid", forgotPasswordMetadata.subjectRow.getString("subjectdirectoryid"))
-                            .put("islocked", forgotPasswordMetadata.subjectRow.getBoolean("islocked"))
-                            .put("issandbox", forgotPasswordMetadata.subjectRow.getBoolean("issandbox"))
-                            .put("url", forgotPasswordMetadata.subjectRow.getString("url"));
+                                .put("organizationid", forgotPasswordMetadata.subjectRow.getString("organizationid"))
+                                .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
+                                .put("isactivated", false)
+                                .put("subjecttypeid", forgotPasswordMetadata.subjectRow.getString("subjecttypeid"))
+                                .put("subjectname", forgotPasswordMetadata.subjectRow.getString("subjectname"))
+                                .put("firstname", forgotPasswordMetadata.subjectRow.getString("firstname"))
+                                .put("lastname", forgotPasswordMetadata.subjectRow.getString("lastname"))
+                                .put("displayname", forgotPasswordMetadata.subjectRow.getString("displayname"))
+                                .put("email", forgotPasswordMetadata.subjectRow.getString("email"))
+                                .put("secondaryemail", forgotPasswordMetadata.subjectRow.getString("secondaryemail"))
+                                .put("effectivestartdate", forgotPasswordMetadata.subjectRow.getInstant("effectivestartdate"))
+                                .put("effectiveenddate", forgotPasswordMetadata.subjectRow.getInstant("effectiveenddate"))
+                                .put("picture", forgotPasswordMetadata.subjectRow.getValue("picture"))
+                                .put("subjectdirectoryid", forgotPasswordMetadata.subjectRow.getString("subjectdirectoryid"))
+                                .put("islocked", forgotPasswordMetadata.subjectRow.getBoolean("islocked"))
+                                .put("issandbox", forgotPasswordMetadata.subjectRow.getBoolean("issandbox"))
+                                .put("url", forgotPasswordMetadata.subjectRow.getString("url"));
 
                         return forgotPasswordMetadata.subjectService.update(UUID.fromString(forgotPasswordMetadata.subjectUUID), updateJson)
                                 .flatMap(compositeResult -> {
@@ -811,20 +810,19 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
         logger.trace("User invitation mail is rendered successfully");
 
         return routingContext.vertx().eventBus().<JsonObject>rxSend(Constants.ABYSS_MAIL_CLIENT, json)
-            .flatMap(jsonObjectMessage -> {
-                logger.trace("Invitation Mailing Event Bus Result:" + jsonObjectMessage.isSend() + " | Result:" + jsonObjectMessage.body().encodePrettily());
+                .flatMap(jsonObjectMessage -> {
+                    logger.trace("Invitation Mailing Event Bus Result:" + jsonObjectMessage.isSend() + " | Result:" + jsonObjectMessage.body().encodePrettily());
 
-                return Single.just(new ApiSchemaError()
-                    .setCode(HttpResponseStatus.CREATED.code())
-                    .setUsermessage("Invitation Mail is sent to your friend's email address")
-                    .setInternalmessage("")
-                    .setDetails("Thank you")
-                    .setRecommendation("")
-                    //.setMoreinfo(new URL(""))
-                    .toJson());
-            });
+                    return Single.just(new ApiSchemaError()
+                            .setCode(HttpResponseStatus.CREATED.code())
+                            .setUsermessage("Invitation Mail is sent to your friend's email address")
+                            .setInternalmessage("")
+                            .setDetails("Thank you")
+                            .setRecommendation("")
+                            //.setMoreinfo(new URL(""))
+                            .toJson());
+                });
     }
-
 
 
     private Single<JsonObject> rxValidateToken(String token) {

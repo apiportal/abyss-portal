@@ -16,9 +16,6 @@
 
 package com.verapi.portal.verticle;
 
-//import io.reactivex.Single;
-//import io.reactivex.disposables.Disposable;
-
 import com.verapi.abyss.cassandra.impl.verticle.CassandraLoggerVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -35,17 +32,15 @@ public class InitVerticle extends AbstractVerticle {
 
         vertx.rxDeployVerticle(PortalVerticle.class.getName(), new DeploymentOptions().setHa(true))
                 .flatMap(id -> vertx.rxDeployVerticle(MailVerticle.class.getName(), new DeploymentOptions().setHa(true)))
-                .flatMap(id -> vertx.rxDeployVerticle(ApiHttpServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
-                //.flatMap(id -> vertx.rxDeployVerticle(ApiBusServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(OpenApiServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(EchoServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(GatewayHttpServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(CassandraLoggerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .subscribe(id -> {
-                    logger.info(System.getProperty("abyss-jar.name") + " InitVerticle : All verticles successfully deployed");
+                    logger.info("{} InitVerticle : All verticles successfully deployed", System.getProperty("abyss-jar.name"));
                     super.start(startFuture);
                 }, t -> {
-                    logger.error(System.getProperty("abyss-jar.name") + " InitVerticle : Deploying verticles failed " + t);
+                    logger.error("{} InitVerticle : Deploying verticles failed: {} \n {}", System.getProperty("abyss-jar.name"), t.getLocalizedMessage(), t.getStackTrace());
                     startFuture.fail(t);
                 });
     }

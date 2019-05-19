@@ -20,7 +20,6 @@
     <description>Abyss API Portal Project</description>
     <url>https://apiportal.com</url>
 
-
     <scm>
         <url>https://github.com/apiportal/abyss-portal</url>
         <connection>scm:git:https://github.com/apiportal/abyss-portal.git</connection>
@@ -44,7 +43,6 @@
             <url>scm:git:https://github.com/apiportal/abyss-portal.git</url>
         </site>
     </distributionManagement>
-
 
     <properties>
         <main.verticle>com.verapi.portal.verticle.InitVerticle</main.verticle>
@@ -173,6 +171,12 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-api-contract</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.networknt</groupId>
+                    <artifactId>json-schema-validator</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -181,6 +185,10 @@
         <dependency>
             <groupId>com.datastax.cassandra</groupId>
             <artifactId>cassandra-driver-extras</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
         </dependency>
         <dependency>
             <groupId>net.jpountz.lz4</groupId>
@@ -206,7 +214,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
         </dependency>
-
+<!--
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-vertx</artifactId>
@@ -219,6 +227,7 @@
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jaxrs</artifactId>
         </dependency>
+-->
         <dependency>
             <groupId>io.github.lukehutch</groupId>
             <artifactId>fast-classpath-scanner</artifactId>
@@ -234,6 +243,10 @@
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
@@ -317,6 +330,14 @@
             <groupId>com.verapi.abyss</groupId>
             <artifactId>abyss-cassandra</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -356,30 +377,30 @@
                     </execution>
                 </executions>
             </plugin>
-<!--
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <serverId>InternalSnapshots</serverId>
-                    <nexusUrl>http://nexus.verapi.com:8081/</nexusUrl>
-                    <skipStaging>true</skipStaging>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                    <skipLocalStaging>true</skipLocalStaging>
-                </configuration>
-            </plugin>
--->
+            <!--
+                        <plugin>
+                            <groupId>org.sonatype.plugins</groupId>
+                            <artifactId>nexus-staging-maven-plugin</artifactId>
+                            <version>1.6.8</version>
+                            <extensions>true</extensions>
+                            <executions>
+                                <execution>
+                                    <id>default-deploy</id>
+                                    <phase>deploy</phase>
+                                    <goals>
+                                        <goal>deploy</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                            <configuration>
+                                <serverId>InternalSnapshots</serverId>
+                                <nexusUrl>http://nexus.verapi.com:8081/</nexusUrl>
+                                <skipStaging>true</skipStaging>
+                                <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                                <skipLocalStaging>true</skipLocalStaging>
+                            </configuration>
+                        </plugin>
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -398,18 +419,6 @@
                     </arguments>
                 </configuration>
             </plugin>
-<!--
-            <plugin>
-                <groupId>io.dazraf</groupId>
-                <artifactId>vertx-hot-maven-plugin</artifactId>
-                <version>2.1.0</version>
-                <configuration>
-                    <verticleReference>${main.verticle}</verticleReference>
-                    -<configFile>config filename</configFile>-
-                    <buildResources>true</buildResources>
-                </configuration>
-            </plugin>
--->
         </plugins>
     </build>
 
