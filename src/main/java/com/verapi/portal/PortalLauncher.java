@@ -37,6 +37,7 @@ import io.vertx.ext.shell.command.CommandRegistry;
 import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxInfluxDbOptions;
 import io.vertx.micrometer.VertxJmxMetricsOptions;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,11 +59,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     public static void main(String[] args) {
 
         //enforce SLF4J logging set
-        if (null == System.getProperty("vertx.logger-delegate-factory-class-name"))
+        if (null == System.getProperty("vertx.logger-delegate-factory-class-name")) {
             System.setProperty("vertx.logger-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
-
+        }
         try {
-            System.setProperty("abyss-jar.name", new java.io.File(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+            System.setProperty("abyss-jar.name", new java.io.File(FilenameUtils.getName(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getName());
         } catch (Exception e) {
             System.setProperty("abyss-jar.name", "abyss-portal.jar");
         }
@@ -293,13 +294,10 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     }
 
     private static void attachShutDownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                System.out.println("Shutdown hook routine started now");
-                System.out.println("active thread count: " + Thread.activeCount());
-            }
-        });
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutdown hook routine started now");
+            System.out.println("active thread count: " + Thread.activeCount());
+        }));
         System.out.println("Shutdown hook attached");
     }
 

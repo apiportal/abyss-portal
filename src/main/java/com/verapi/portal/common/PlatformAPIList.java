@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 public class PlatformAPIList {
     private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
-    public static PlatformAPIList instance = null;
-    private JsonArray platformApiList = null;
+    private static PlatformAPIList instance;
+    private JsonArray platformApiList;
 
     private PlatformAPIList() {
     }
@@ -42,16 +42,9 @@ public class PlatformAPIList {
         return platformApiList;
     }
 
-    public PlatformAPIList setPlatformAPIList(JsonArray platformApiList) {
+    private PlatformAPIList setPlatformAPIList(JsonArray platformApiList) {
         this.platformApiList = platformApiList;
         return this;
-    }
-
-    @Override
-    public void finalize() {
-        if (platformApiList != null) {
-            platformApiList.clear();
-        }
     }
 
 }

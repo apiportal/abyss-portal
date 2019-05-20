@@ -101,11 +101,11 @@ public class CassandraService {
                         preparedStatement = prepareResult.result();
                         setCassandraClient(cassandraClient);
                     } else {
-                        logger.error("Cassandra client is unable to prepare statement, error: {} \n stack trace:{}", event.cause().getLocalizedMessage());
+                        logger.error("Cassandra client is unable to prepare statement, error: {} \n stack trace:{}", event.cause().getLocalizedMessage(), event.cause().getStackTrace());
                     }
                 });
             } else {
-                logger.error("Cassandra client is unable to connect, error: {} \n stack trace:{}", event.cause().getLocalizedMessage());
+                logger.error("Cassandra client is unable to connect, error: {} \n stack trace:{}", event.cause().getLocalizedMessage(), event.cause().getStackTrace());
             }
         });
     }

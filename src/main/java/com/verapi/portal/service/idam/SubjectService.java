@@ -16,14 +16,13 @@
 
 package com.verapi.portal.service.idam;
 
+import com.verapi.abyss.common.Config;
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.exception.Forbidden403Exception;
 import com.verapi.abyss.exception.NoDataFoundException;
-import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.common.AbyssJDBCService;
-import com.verapi.abyss.common.Config;
-import com.verapi.abyss.common.Constants;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
 import com.verapi.portal.service.ApiFilterQuery;
@@ -38,6 +37,7 @@ import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,116 +76,115 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 
 
-
     //TODO: Process Bulk Insert
     public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
         logger.trace("SubjectService --- insertAllCascaded invoked");
 
-        String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
-        String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        String sessionOrganizationId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
         Observable<JsonObject> insertParamsObservable = Observable.fromIterable(insertRecords).map(o -> (JsonObject) o);
 
         //daisy chaining record status
         return insertParamsObservable
-            .flatMap(insertRecord -> insert(insertRecord, null).toObservable()) //insert app
-            .flatMap(recordStatus -> {
-                //Convert recordStatus to insertRecord Json Object
-                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                    JsonObject appInsertResult = recordStatus.getJsonObject("response");
-                    JsonObject insertRecord = new JsonObject()
-                            .put("organizationid", sessionOrganizationId)
-                            .put("crudsubjectid", sessionUserId)
-                            .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
-                            .put("resourcename", appInsertResult.getString("displayname") + " APP")
-                            .put("description", appInsertResult.getString("description"))
-                            .put("resourcerefid", appInsertResult.getString("uuid"))
-                            .put("isactive", true);
+                .flatMap(insertRecord -> insert(insertRecord, null).toObservable()) //insert app
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject appInsertResult = recordStatus.getJsonObject("response");
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
+                                .put("resourcename", appInsertResult.getString("displayname") + " APP")
+                                .put("description", appInsertResult.getString("description"))
+                                .put("resourcerefid", appInsertResult.getString("uuid"))
+                                .put("isactive", true);
 
-                    ResourceService resourceService = new ResourceService(routingContext.vertx());
-                    return resourceService.initJDBCClient(sessionOrganizationId)
-                            .flatMap(jdbcClient -> resourceService.insert(insertRecord, recordStatus)).toObservable();
-                } else {
-                    return Observable.just(recordStatus);
-                }
+                        ResourceService resourceService = new ResourceService(routingContext.vertx());
+                        return resourceService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> resourceService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
 
-            })
-            .flatMap(recordStatus -> {
-                //Convert recordStatus to insertRecord Json Object
-                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                    JsonObject resourceInsertResult = recordStatus.getJsonObject("response");
-                    String description = "Ownership of " + resourceInsertResult.getString("resourcename") + " by " + routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME);
-                    JsonObject insertRecord = new JsonObject()
-                            .put("organizationid", sessionOrganizationId)
-                            .put("crudsubjectid", sessionUserId)
-                            .put("permission", "Ownership permission")
-                            .put("description", description)
-                            .put("effectivestartdate", Instant.now())
-                            .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
-                            .put("subjectid", sessionUserId)
-                            .put("resourceid", resourceInsertResult.getString("uuid"))
-                            .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
-                            .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
-                            .put("isactive", true);
+                })
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject resourceInsertResult = recordStatus.getJsonObject("response");
+                        String description = "Ownership of " + resourceInsertResult.getString("resourcename") + " by " + routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME);
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("permission", "Ownership permission")
+                                .put("description", description)
+                                .put("effectivestartdate", Instant.now())
+                                .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
+                                .put("subjectid", sessionUserId)
+                                .put("resourceid", resourceInsertResult.getString("uuid"))
+                                .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
+                                .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
+                                .put("isactive", true);
 
-                    SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
-                    return subjectPermissionService.initJDBCClient(sessionOrganizationId)
-                            .flatMap(jdbcClient -> subjectPermissionService.insert(insertRecord, recordStatus)).toObservable();
-                } else {
-                    return Observable.just(recordStatus);
-                }
+                        SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+                        return subjectPermissionService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> subjectPermissionService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
 
-            })
-            .flatMap(recordStatus -> {
-                //Convert recordStatus to insertRecord Json Object
-                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                    JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
+                })
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
 
-                    String appUuid = recordStatus.getJsonObject("parentRecordStatus")
-                            .getJsonObject("parentRecordStatus").getString("uuid");
+                        String appUuid = recordStatus.getJsonObject("parentRecordStatus")
+                                .getJsonObject("parentRecordStatus").getString("uuid");
 
-                    JsonObject insertRecord = new JsonObject()
-                            .put("organizationid", sessionOrganizationId)
-                            .put("crudsubjectid", sessionUserId)
-                            .put("subjectpermissionid", permissionInsertResult.getString("uuid"))
-                            .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
-                            .put("resourcerefid", appUuid)
-                            .put("isactive", true);
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("subjectpermissionid", permissionInsertResult.getString("uuid"))
+                                .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
+                                .put("resourcerefid", appUuid)
+                                .put("isactive", true);
 
-                    ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
-                    return resourceAccessTokenService.initJDBCClient(sessionOrganizationId)
-                            .flatMap(jdbcClient -> resourceAccessTokenService.insert(insertRecord, recordStatus)).toObservable();
-                } else {
-                    return Observable.just(recordStatus);
-                }
-            })
-            .flatMap(recordStatus -> {
-                //Convert recordStatus to insertRecord Json Object
-                if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                    //JsonObject resourceAccessTokenInsertResult = recordStatus.getJsonObject("response");
+                        ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
+                        return resourceAccessTokenService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> resourceAccessTokenService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+                })
+                .flatMap(recordStatus -> {
+                    //Convert recordStatus to insertRecord Json Object
+                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                        //JsonObject resourceAccessTokenInsertResult = recordStatus.getJsonObject("response");
 
-                    JsonObject appRecord = recordStatus.getJsonObject("parentRecordStatus")
-                            .getJsonObject("parentRecordStatus")
-                            .getJsonObject("parentRecordStatus")
-                            .getJsonObject("response");
+                        JsonObject appRecord = recordStatus.getJsonObject("parentRecordStatus")
+                                .getJsonObject("parentRecordStatus")
+                                .getJsonObject("parentRecordStatus")
+                                .getJsonObject("response");
 
-                    JsonObject insertRecord = new JsonObject()
-                            .put("organizationid", sessionOrganizationId)
-                            .put("crudsubjectid", sessionUserId)
-                            .put("subjectid", sessionUserId)
-                            .put("subjectgroupid", appRecord.getString("uuid"))
-                            .put("subjectdirectoryid", appRecord.getString("subjectdirectoryid"))
-                            .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
-                            .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP)
-                            .put("isactive", true);
+                        JsonObject insertRecord = new JsonObject()
+                                .put("organizationid", sessionOrganizationId)
+                                .put("crudsubjectid", sessionUserId)
+                                .put("subjectid", sessionUserId)
+                                .put("subjectgroupid", appRecord.getString("uuid"))
+                                .put("subjectdirectoryid", appRecord.getString("subjectdirectoryid"))
+                                .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
+                                .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP)
+                                .put("isactive", true);
 
-                    SubjectMembershipService subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
-                    return  subjectMembershipService.initJDBCClient(sessionOrganizationId)
-                            .flatMap(jdbcClient -> subjectMembershipService.insert(insertRecord, recordStatus)).toObservable();
-                } else {
-                    return Observable.just(recordStatus);
-                }
-            })
+                        SubjectMembershipService subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
+                        return subjectMembershipService.initJDBCClient(sessionOrganizationId)
+                                .flatMap(jdbcClient -> subjectMembershipService.insert(insertRecord, recordStatus)).toObservable();
+                    } else {
+                        return Observable.just(recordStatus);
+                    }
+                })
                 .flatMap(recordStatus -> {
                     if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
                         //JsonObject subjectMembershipInsertResult = recordStatus.getJsonObject("response");
@@ -214,10 +213,14 @@ public class SubjectService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
         return new JsonArray()
@@ -323,7 +326,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 logger.trace("Updating Subject with default avatar");
                 //update default avatar image TODO: later use picture using request message
                 ClassLoader classLoader = getClass().getClassLoader();
-                File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
+                File file = new File(FilenameUtils.getName(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile()));
                 updateRecord.put("picture", encodeFileToBase64Binary(file));
             } catch (IOException e) {
                 logger.error(e.getLocalizedMessage());
@@ -349,7 +352,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         try {
                             //update default avatar image TODO: later use request base
                             ClassLoader classLoader = getClass().getClassLoader();
-                            File file = new File(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile());
+                            File file = new File(FilenameUtils.getName(Objects.requireNonNull(classLoader.getResource(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR)).getFile()));
                             jsonObj.put("picture", encodeFileToBase64Binary(file));
                         } catch (IOException e) {
                             logger.error(e.getLocalizedMessage());
@@ -478,12 +481,11 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .flatMap(findByIdResultSet -> {
                     if (findByIdResultSet.getNumRows() == 0)
                         return Single.error(new NoDataFoundException("The specified subject does not exist"));
-                    else
-                        if (findByIdResultSet.getRows().get(0).getString("organizationid").equals(organizationUuid)) {
-                            return Single.just(findByIdResultSet);
-                        } else {
-                            return Single.error(new Forbidden403Exception("Organization incorrect. Please use your organization."));
-                        }
+                    else if (findByIdResultSet.getRows().get(0).getString("organizationid").equals(organizationUuid)) {
+                        return Single.just(findByIdResultSet);
+                    } else {
+                        return Single.error(new Forbidden403Exception("Organization incorrect. Please use your organization."));
+                    }
 
                 })
                 .flatMap(resultSet -> {
