@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class Login implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(Login.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Login.class);
     private final AuthProvider authProvider;
 
     public Login(AuthProvider authProvider) {
@@ -38,13 +38,13 @@ public class Login implements Handler<RoutingContext> {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("Login.handle invoked..");
+        LOGGER.info("Login.handle invoked..");
 
         String username = routingContext.request().getFormAttribute("username");
         String password = routingContext.request().getFormAttribute("password");
 
-        logger.info("Received user:" + username);
-        logger.info("Received pass:" + password);
+        LOGGER.info("Received user:" + username);
+        LOGGER.info("Received pass:" + password);
 
         JsonObject creds = new JsonObject()
                 .put("username", username)
@@ -55,12 +55,12 @@ public class Login implements Handler<RoutingContext> {
                 User user = authResult.result();
                 String userName = user.principal().getString("username");
                 routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context? 
-                logger.info("Logged in user: " + user.principal().encodePrettily());
+                LOGGER.info("Logged in user: " + user.principal().encodePrettily());
                 routingContext.put("username", userName);
                 routingContext.session().regenerateId();
                 routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME, userName);
                 routingContext.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
-                logger.info("redirected../index");
+                LOGGER.info("redirected../index");
             } else {
                 routingContext.fail(401);
             }
@@ -68,7 +68,7 @@ public class Login implements Handler<RoutingContext> {
     }
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("Login.pageRender invoked...");
+        LOGGER.info("Login.pageRender invoked...");
 
         Boolean isUserActivated = routingContext.session().get("isUserActivated");
         if (isUserActivated == null) {

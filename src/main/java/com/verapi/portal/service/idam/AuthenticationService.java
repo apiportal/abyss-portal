@@ -228,7 +228,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                                 })
                                 .flatMap(jsonObjects2 -> {
-                                    logger.trace("CreateOrganizationController - organizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
+                                    logger.trace("CreateOrganizationPortalController - organizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
 
                                     organizationUuid = jsonObjects2.get(0).getString("uuid");
 
@@ -244,7 +244,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("isactive", true)));
                                 })
                                 .flatMap(jsonObjects2 -> {
-                                    logger.trace("CreateOrganizationController - subjectOrganizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
+                                    logger.trace("CreateOrganizationPortalController - subjectOrganizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
 
                                     return loginMetadata.subjectMembershipService.initJDBCClient();
                                 })
@@ -260,7 +260,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("isactive", true)));
                                 })
                                 .flatMap(jsonObjects2 -> {
-                                    logger.trace("CreateOrganizationController - subjectMembershipService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
+                                    logger.trace("CreateOrganizationPortalController - subjectMembershipService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
 
                                     return loginMetadata.subjectService.updateSubjectOrganization(new JsonArray().add(organizationUuid).add(userUUID).add(userUUID));
                                 })
@@ -285,7 +285,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                     .put("principalid", userUUID).put("organizationid", organizationUuid).put("organizationname", temporaryOrganizationName));
 
                                         } catch (UnsupportedEncodingException e) {
-                                            logger.error("SelectOrganizationController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+                                            logger.error("SelectOrganizationPortalController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
                                             throw new RuntimeException(e);
                                         }
 
@@ -297,7 +297,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     } else {
                         //Select-organization
                         JsonArray jsonArray = new JsonArray(organizationJsonObjects);
-                        logger.trace("LoginController.handle() findByIdResult.subscribe result: {}", jsonArray);
+                        logger.trace("LoginPortalController.handle() findByIdResult.subscribe result: {}", jsonArray);
                         routingContext.session().put("userOrganizationArray", jsonArray);
 
                         for (JsonObject organizationJsonObject : organizationJsonObjects) {

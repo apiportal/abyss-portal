@@ -31,57 +31,58 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 @AbyssController(routePathGET = "select-organization", routePathPOST = "select-organization", htmlTemplateFile = "select-organization.html", isPublic = true)
-public class SelectOrganizationController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(SelectOrganizationController.class);
+public class SelectOrganizationPortalController extends AbstractPortalController {
+    private static final String USER_ORGANIZATION_ARRAY = "userOrganizationArray";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelectOrganizationPortalController.class);
 
-    public SelectOrganizationController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public SelectOrganizationPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("SelectOrganizationController.defaultGetHandler invoked...");
+        LOGGER.trace("SelectOrganizationPortalController.defaultGetHandler invoked...");
 
-        logger.trace("userOrganizationList: {}", (JsonArray) routingContext.session().get("userOrganizationArray"));
+        LOGGER.trace("userOrganizationList: {}", (JsonArray) routingContext.session().get(USER_ORGANIZATION_ARRAY));
 
         class OrganizationTuple {
             public String uuid;
             public String name;
 
-            public OrganizationTuple(String uuid, String name) {
+            private OrganizationTuple(String uuid, String name) {
                 this.uuid = uuid;
                 this.name = name;
             }
         }
 
-        ArrayList<OrganizationTuple> orgs = new ArrayList<OrganizationTuple>();
+        ArrayList<OrganizationTuple> orgs = new ArrayList<>();
 
-        JsonArray jsonArray = (JsonArray) routingContext.session().get("userOrganizationArray");
+        JsonArray jsonArray = routingContext.session().get(USER_ORGANIZATION_ARRAY);
 
-        jsonArray.forEach(o -> {
+        jsonArray.forEach((Object o) -> {
             JsonObject j = (JsonObject) o;
             orgs.add(new OrganizationTuple(j.getString("uuid"), j.getString("name")));
         });
 
-        logger.trace("userOrganizationArray: {}", orgs);
+        LOGGER.trace("{}: {}", USER_ORGANIZATION_ARRAY, orgs);
 
-        routingContext.put("userOrganizationArray", orgs);
+        routingContext.put(USER_ORGANIZATION_ARRAY, orgs);
 
-        JsonObject context = new JsonObject().put("userOrganizationArray", orgs);
+        JsonObject context = new JsonObject().put(USER_ORGANIZATION_ARRAY, orgs);
 
         renderTemplate(routingContext, context, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("SelectOrganizationController.handle invoked..");
+        LOGGER.trace("SelectOrganizationPortalController.handle invoked..");
 
         String compositeValue = routingContext.request().getFormAttribute("orgid");
-        logger.trace("Received orgid:" + compositeValue);
+        LOGGER.trace("Received orgid: {}", compositeValue);
 
         String[] values = compositeValue.split("\\|");
-        logger.trace("values:" + values[0] + "," + values[1]);
-        if ((values != null) && (values.length == 2)) {
+        LOGGER.trace("values: {}, {}", values[0], values[1]);
+        if (values.length == 2) {
 
             try {
                 //Url Encode for cookie compliance
@@ -99,8 +100,8 @@ public class SelectOrganizationController extends PortalAbstractController {
                 redirect(routingContext, Constants.ABYSS_ROOT + "/index");
 
             } catch (UnsupportedEncodingException e) {
-                logger.error("SelectOrganizationController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
-                showTrxResult(routingContext, logger, 400, "Organization Selection Failed!", e.getLocalizedMessage(), "");
+                LOGGER.error("SelectOrganizationPortalController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+                showTrxResult(routingContext, LOGGER, 400, "Organization Selection Failed!", e.getLocalizedMessage(), "");
             }
 
         } else {

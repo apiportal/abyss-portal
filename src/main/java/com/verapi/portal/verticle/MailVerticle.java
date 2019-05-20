@@ -35,7 +35,7 @@ import java.util.Locale;
 
 public class MailVerticle extends AbstractVerticle {
 
-    private static Logger logger = LoggerFactory.getLogger(MailVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailVerticle.class);
 
     private MailClient mailClient;
 
@@ -44,7 +44,7 @@ public class MailVerticle extends AbstractVerticle {
 
 
     public void start() {
-        logger.trace("MailClient is starting");
+        LOGGER.trace("MailClient is starting");
 
         MailConfig mailConfig = new MailConfig()
                 .setHostname(Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_SMTP_HOST, "verapi-com.mail.protection.outlook.com")) //"dev.apiportal.com"; //"localhost"
@@ -62,17 +62,17 @@ public class MailVerticle extends AbstractVerticle {
         }
 
         mailClient = MailClient.createShared(vertx, mailConfig);
-        logger.trace("MailClient is configured and created.");
+        LOGGER.trace("MailClient is configured and created.");
 
         vertx.eventBus().<JsonObject>consumer(Constants.ABYSS_MAIL_CLIENT).handler(mailSender());
-        logger.trace("MailClient is listening on Event Bus @ " + Constants.ABYSS_MAIL_CLIENT);
+        LOGGER.trace("MailClient is listening on Event Bus @ " + Constants.ABYSS_MAIL_CLIENT);
     }
 
     private Handler<Message<JsonObject>>mailSender() {
         return msg -> {
 
-            logger.info("MailVerticle - mailSender invoked...");
-            logger.debug("Msg:" + msg.body().encodePrettily());
+            LOGGER.info("MailVerticle - mailSender invoked...");
+            LOGGER.debug("Msg:" + msg.body().encodePrettily());
 
             String token = msg.body().getString(Constants.EB_MSG_TOKEN, "");
             String toEmail = msg.body().getString(Constants.EB_MSG_TO_EMAIL, "");
@@ -117,13 +117,13 @@ public class MailVerticle extends AbstractVerticle {
 
             if (token.isEmpty()) {
                 //TODO:give error
-                logger.info("Mail Client received both token and type empty");
+                LOGGER.info("Mail Client received both token and type empty");
                 //throw
             }
 
             if (toEmail.isEmpty()) {
                 //TODO:give error
-                logger.info("Mail Client received both token and type empty");
+                LOGGER.info("Mail Client received both token and type empty");
                 //throw
             }
 
@@ -142,10 +142,10 @@ public class MailVerticle extends AbstractVerticle {
 
             mailClient.sendMail(email, result -> {
                 if (result.succeeded()) {
-                    logger.debug(result.result().toString());
-                    logger.info("Mail successfully sent");
+                    LOGGER.debug(result.result().toString());
+                    LOGGER.info("Mail successfully sent");
                 } else {
-                    logger.error("Mail client got exception:"+result.cause());
+                    LOGGER.error("Mail client got exception:"+result.cause());
                     //result.cause().printStackTrace();
                 }
             });

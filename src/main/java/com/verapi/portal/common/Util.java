@@ -24,7 +24,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -34,8 +33,12 @@ import java.util.Map;
 /**
  *
  */
-public class Util {
-    private static final Logger logger = LoggerFactory.getLogger(Util.class);
+public final class Util {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
+
+    private Util() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * Null value<br>
@@ -47,7 +50,11 @@ public class Util {
      * @return returns a if a is <b>not</b> null <br>returns b if a is null
      */
     public static <T> T nvl(T a, T b) {
-        return (a == null) ? b : a;
+        if (a == null) {
+            return b;
+        } else {
+            return a;
+        }
     }
 
     /**
@@ -61,17 +68,19 @@ public class Util {
      */
     public static <T> T nnvl(T a, T b) {
         //TODO: replaced with functional interface to disable executing b parameter before initalization
-        if (a != null)
+        if (a != null) {
             return b;
-        else
+        } else {
             return null;
+        }
     }
 
     public static String encodeFileToBase64Binary(File file) throws IOException {
         byte[] bytes;
         try (FileInputStream fileInputStreamReader = new FileInputStream(file)) {
             bytes = new byte[(int) file.length()];
-            fileInputStreamReader.read(bytes);
+            int read = fileInputStreamReader.read(bytes);
+            LOGGER.trace("encodeFileToBase64Binary read {} bytes", read);
         }
         return new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
     }
@@ -79,27 +88,15 @@ public class Util {
     public static JsonObject convertYamlToJson(String yamlString) {
         Yaml yaml = new Yaml();
         Map<String, Object> map = yaml.load(yamlString);
-
         return new JsonObject(map);
     }
 
     public static JsonObject loadYamlFile(File yamlFileName) throws IOException {
-//        ClassLoader classLoader = getClass().getClassLoader();
-//        File file = new File(Objects.requireNonNull(classLoader.getResource(yamlFileName)).getFile());
         Map<String, Object> map;
         try (InputStream inputStream = new FileInputStream(yamlFileName)) {
             Yaml yaml = new Yaml();
             map = yaml.load(inputStream);
             return new JsonObject(map);
-        } catch (FileNotFoundException e) {
-            logger.error("yaml file not found: {} \n error stack: {}"
-                    , e.getLocalizedMessage(), e.getStackTrace());
-            throw e;
-        } catch (IOException e) {
-            logger.error("error while getting yaml file: {} \n error stack: {}"
-                    , e.getLocalizedMessage(), e.getStackTrace());
-            throw e;
         }
-
     }
 }

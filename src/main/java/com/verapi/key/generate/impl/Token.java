@@ -66,7 +66,7 @@ public class Token implements TokenRemoteIntf {
     private static final int INDEX_NONCE = 1;
     private static final int INDEX_USER_DATA = 2;
     private static final int INDEX_EXPIRE_DATE = 3;
-    private static Logger logger = LoggerFactory.getLogger(Token.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Token.class);
 
 
     public Token() {
@@ -86,34 +86,34 @@ public class Token implements TokenRemoteIntf {
 
         AuthenticationInfo authInfo = token.encodeToken(new TokenRequest("userData123@xyz", 60 * 10));
 
-        logger.trace("{}", authInfo.getToken());
-        logger.trace("{}", SEPARATOR);
+        LOGGER.trace("{}", authInfo.getToken());
+        LOGGER.trace("{}", SEPARATOR);
 
         AuthenticationInfo authResult = token.decodeAndValidateToken(authInfo.getToken(), authInfo);
-        logger.trace("DECODED OUTPUT: {}", authResult.getResultText());
-        logger.trace("{}", SEPARATOR);
+        LOGGER.trace("DECODED OUTPUT: {}", authResult.getResultText());
+        LOGGER.trace("{}", SEPARATOR);
 
 
         String wrongToken = authInfo.getToken().replaceAll("a", "x").replaceAll("e", "z");
         authResult = token.decodeAndValidateToken(wrongToken, authInfo);
-        logger.trace("DECODED OUTPUT: {}", authResult.getResultText());
-        logger.trace("{}", SEPARATOR);
+        LOGGER.trace("DECODED OUTPUT: {}", authResult.getResultText());
+        LOGGER.trace("{}", SEPARATOR);
 
 
         //----------------------- USAGE EXAMPLE
         AuthenticationInfo authInfo2 = token.generateToken(60 * 10, "userData123@xyz", Vertx.vertx());
 
-        logger.trace("{}", authInfo2.getToken());
-        logger.trace("{}", SEPARATOR);
+        LOGGER.trace("{}", authInfo2.getToken());
+        LOGGER.trace("{}", SEPARATOR);
 
         AuthenticationInfo authResult2 = token.validateToken(authInfo2.getToken(), authInfo2);
-        logger.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
-        logger.trace("{}", SEPARATOR);
+        LOGGER.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
+        LOGGER.trace("{}", SEPARATOR);
 
         String wrongToken2 = authInfo2.getToken().replaceAll("a", "x").replaceAll("e", "z");
         authResult2 = token.validateToken(wrongToken2, authInfo2);
-        logger.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
-        logger.trace("{}", SEPARATOR);
+        LOGGER.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
+        LOGGER.trace("{}", SEPARATOR);
 
     }
 
@@ -143,7 +143,7 @@ public class Token implements TokenRemoteIntf {
 //}
     private void printDateTime(Instant date, String name) {
         //System.out.println(name + ":" + date.toString());
-        logger.info(name + ":" + date.toString());
+        LOGGER.info(name + ":" + date.toString());
     }
 
     /**
@@ -226,7 +226,7 @@ public class Token implements TokenRemoteIntf {
         //String expireDateStr = expireDate.toString(ISO_DATETIME_FORMATTER);
         String expireDateStr = expireDate.toString();
 
-        logger.info("expireDateStr: {}", expireDateStr);
+        LOGGER.info("expireDateStr: {}", expireDateStr);
 
         String expireDateStrHash = hash.generateHash(expireDateStr);
 

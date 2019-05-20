@@ -22,23 +22,23 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AbyssController(routePathGET = "my-apis", routePathPOST = "my-apis", htmlTemplateFile = "my-apis.html")
-public class MyApisController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(MyApisController.class);
+@AbyssController(routePathGET = "user-directories", routePathPOST = "user-directories", htmlTemplateFile = "user-directories.html")
+public class SubjectDirectoryPortalController extends AbstractPortalController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDirectoryPortalController.class);
 
-    public MyApisController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public SubjectDirectoryPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("MyApisController.defaultGetHandler invoked...");
+        LOGGER.trace("SubjectDirectoryPortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("MyApisController.handle invoked...");
+        LOGGER.trace("SubjectDirectoryPortalController.handle invoked...");
     }
 
 }

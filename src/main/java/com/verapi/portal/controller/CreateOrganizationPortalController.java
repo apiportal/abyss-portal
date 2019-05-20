@@ -16,7 +16,6 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
 import com.verapi.portal.service.idam.OrganizationService;
 import com.verapi.portal.service.idam.SubjectOrganizationService;
@@ -32,11 +31,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 
 @AbyssController(routePathGET = "create-organization", routePathPOST = "create-organization", htmlTemplateFile = "create-organization.html", isPublic = true)
-public class CreateOrganizationController extends PortalAbstractController {
+public class CreateOrganizationPortalController extends AbstractPortalController {
 
-    private static Logger logger = LoggerFactory.getLogger(CreateOrganizationController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateOrganizationPortalController.class);
 
 //    private String name;
 //    private String description;
@@ -44,27 +44,27 @@ public class CreateOrganizationController extends PortalAbstractController {
 
     private String organizationUuid;
 
-    public CreateOrganizationController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public CreateOrganizationPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("CreateOrganizationController.defaultGetHandler invoked...");
+        LOGGER.trace("CreateOrganizationPortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("CreateOrganizationController.handle invoked...");
+        LOGGER.trace("CreateOrganizationPortalController.handle invoked...");
 
         String name = routingContext.request().getFormAttribute("name");
         String description = routingContext.request().getFormAttribute("description");
         String url = routingContext.request().getFormAttribute("url");
 
-        logger.trace("Received name:" + name);
-        logger.trace("Received description:" + description);
-        logger.trace("Received url:" + url);
+        LOGGER.trace("Received name: {}", name);
+        LOGGER.trace("Received description: {}", description);
+        LOGGER.trace("Received url: {}", url);
 
         String userUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
@@ -73,45 +73,45 @@ public class CreateOrganizationController extends PortalAbstractController {
         SubjectOrganizationService subjectOrganizationService = new SubjectOrganizationService(routingContext.vertx());
 
         organizationService.initJDBCClient()
-                .flatMap(jdbcClient1 -> {
-                    return organizationService.insertAll(new JsonArray().add(new JsonObject()
-                            .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
-                            .put("crudsubjectid", userUuid)
-                            .put("name", name)
-                            .put("description", description)
-                            .put("url", url)
-                            .put("isactive", true)
-                            .put("picture", "")));
+                .flatMap((JDBCClient jdbcClient1) ->
+                        organizationService.insertAll(new JsonArray().add(new JsonObject()
+                                .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
+                                .put("crudsubjectid", userUuid)
+                                .put("name", name)
+                                .put("description", description)
+                                .put("url", url)
+                                .put("isactive", true)
+                                .put("picture", "")))
 
-                })
-                .flatMap(jsonObjects -> {
-                    logger.trace("CreateOrganizationController - organizationService.insertAll successfull: {}", jsonObjects.get(0).encodePrettily());
+                )
+                .flatMap((List<JsonObject> jsonObjects) -> {
+                    LOGGER.trace("CreateOrganizationPortalController - organizationService.insertAll successfull: {}", jsonObjects.get(0).encodePrettily());
 
                     organizationUuid = jsonObjects.get(0).getString("uuid");
 
                     return subjectOrganizationService.initJDBCClient();
                 })
-                .flatMap(jdbcClient1 -> {
-                  return subjectOrganizationService.insertAll(new JsonArray().add(new JsonObject()
-                          .put("organizationid", organizationUuid)
-                          .put("crudsubjectid",userUuid)
-                          .put("subjectid",userUuid)
-                          .put("organizationrefid", organizationUuid)
-                          .put("isowner", true)
-                          .put("isactive", true)));
-                })
-                .flatMap(jsonObjects -> {
-                    logger.trace("CreateOrganizationController - subjectOrganizationService.insertAll successfull: {}", jsonObjects.get(0).encodePrettily());
+                .flatMap((JDBCClient jdbcClient1) ->
+                        subjectOrganizationService.insertAll(new JsonArray().add(new JsonObject()
+                                .put("organizationid", organizationUuid)
+                                .put("crudsubjectid", userUuid)
+                                .put("subjectid", userUuid)
+                                .put("organizationrefid", organizationUuid)
+                                .put("isowner", true)
+                                .put("isactive", true)))
+                )
+                .flatMap((List<JsonObject> jsonObjects) -> {
+                    LOGGER.trace("CreateOrganizationPortalController - subjectOrganizationService.insertAll successfull: {}", jsonObjects.get(0).encodePrettily());
 
                     return Single.just(jsonObjects);
 
                 })
 //                .doOnError(throwable -> {
-//                    logger.error("exception occured " + throwable.getLocalizedMessage());
-//                    logger.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
+//                    LOGGER.error("exception occured " + throwable.getLocalizedMessage());
+//                    LOGGER.error("exception occured " + Arrays.toString(throwable.getStackTrace()));
 //                    throwApiException(routingContext, InternalServerError500Exception.class, throwable.getLocalizedMessage());
 
-                .subscribe(jsonObjects -> {
+                .subscribe((List<JsonObject> jsonObjects) -> {
                     try {
                         //Url Encode for cookie compliance
                         String userLoginOrganizationName = URLEncoder.encode(name, "UTF-8");
@@ -128,13 +128,12 @@ public class CreateOrganizationController extends PortalAbstractController {
                         redirect(routingContext, Constants.ABYSS_ROOT + "/index");
 
                     } catch (UnsupportedEncodingException e) {
-                        logger.error("SelectOrganizationController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
-                        showTrxResult(routingContext, logger, 400, "Organization Selection Failed!", e.getLocalizedMessage(), "");
+                        LOGGER.error("SelectOrganizationPortalController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+                        showTrxResult(routingContext, LOGGER, 400, "Organization Selection Failed!", e.getLocalizedMessage(), "");
                     }
 
-                }, throwable -> {
-                    logger.error("CreateOrganizationController.handle() error {} | {}: ", throwable.getLocalizedMessage(), throwable.getStackTrace());
-                });
+                }, (Throwable throwable) -> LOGGER.error("CreateOrganizationPortalController.handle() error {} | {}: "
+                        , throwable.getLocalizedMessage(), throwable.getStackTrace()));
 
 
     }

@@ -23,22 +23,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AbyssController(routePathGET = "my-apps", routePathPOST = "my-apps", htmlTemplateFile = "my-apps.html")
-public class MyAppsController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(MyAppsController.class);
+public class MyAppsPortalController extends AbstractPortalController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MyAppsPortalController.class);
 
-    public MyAppsController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public MyAppsPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("MyAppsController.defaultGetHandler invoked...");
+        LOGGER.trace("MyAppsPortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("MyAppsController.handle invoked...");
+        LOGGER.trace("MyAppsPortalController.handle invoked...");
     }
 
 }

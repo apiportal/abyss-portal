@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.verapi.key.util;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 
 /**
  * @author faik.saglar
- *
  */
 public class ByteUtils {
-	
+    private static final Logger LOGGER = LoggerFactory.getLogger(ByteUtils.class);
     private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);    //TODO: is thread safe?
 
     public static byte[] longToBytes(long x) {
@@ -35,22 +38,13 @@ public class ByteUtils {
         buffer.flip();//need flip 
         return buffer.getLong();
     }
-    
-	public static void printByteArray(byte[] bytes, String variableName) {
-        //byte[] bytes = str.getBytes();
-        System.out.print("Byte Array of "+ variableName + " ["+ bytes.length +" bytes]: ");
-        for(byte b: bytes){
-            //System.out.print(b +" ");
-            System.out.printf("%02X ", b);
-        }
-        System.out.println();
-	}
 
-/*	private static void convertByteArray(byte[] bytes, String variableName) {
-        
-        for(byte b: bytes){
-            //System.out.print(b +" ");
-            System.out.printf("%02X ", b);
+    public static void printByteArray(byte[] bytes, String variableName) {
+        LOGGER.trace("Byte Array of {} [{} bytes]: ", variableName, bytes.length);
+        for (byte b : bytes) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace(String.format("%02X", b));
+            }
         }
-	}*/
+    }
 }

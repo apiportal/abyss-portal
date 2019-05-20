@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.verapi.key.model;
 
 import java.io.Serializable;
@@ -20,35 +21,34 @@ import java.io.Serializable;
 /**
  * @author faik.saglar
  * @version 1.0
- *
  */
-public class TokenRequest implements Serializable{
-	
-	private static final long serialVersionUID = -3876122451170298004L;
-	
-	private String userData;
-	private long secondsToExpire;
+public class TokenRequest implements Serializable {
 
-	/**
-	 * @param userData user data
-	 * @param secondsToExpire seconds to expire
-	 */
-	public TokenRequest(String userData, long secondsToExpire) {
-		this.userData = userData;
-		this.secondsToExpire = secondsToExpire;
-	}
+    private static final long serialVersionUID = -3876122451170298004L;
 
-	/**
-	 * @return the userData
-	 */
-	public String getUserData() {
-		return userData;
-	}
+    private String userData;
+    private long secondsToExpire;
 
-	/**
-	 * @return the secondsToExpire
-	 */
-	public long getSecondsToExpire() {
-		return secondsToExpire;
-	}
+    /**
+     * @param userData        user data
+     * @param secondsToExpire seconds to expire
+     */
+    public TokenRequest(String userData, long secondsToExpire) {
+        this.userData = userData;
+        this.secondsToExpire = secondsToExpire;
+    }
+
+    /**
+     * @return the userData
+     */
+    public String getUserData() {
+        return userData;
+    }
+
+    /**
+     * @return the secondsToExpire
+     */
+    public long getSecondsToExpire() {
+        return secondsToExpire;
+    }
 }

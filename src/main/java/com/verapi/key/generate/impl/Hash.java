@@ -13,8 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.verapi.key.generate.impl;
 
+import com.verapi.key.generate.intf.HashRemoteIntf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,15 +31,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 import java.util.Random;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.verapi.key.generate.intf.HashRemoteIntf;
-
 
 /**
  * @author faik.saglar
@@ -39,21 +38,53 @@ import com.verapi.key.generate.intf.HashRemoteIntf;
  */
 public class Hash implements HashRemoteIntf {
 
-    private static Logger logger = LoggerFactory.getLogger(Hash.class);
-
     private static final int ITERATIONS = 1000;
     private static final int KEY_LENGTH = 256; // bits
     private static final int SALT_LENGTH = 32; // bytes
-
     private static final Random SECURE_RANDOM = new SecureRandom();
-
     private static final Base64.Encoder base64UrlEncoder = Base64.getUrlEncoder();
     private static final Base64.Decoder base64UrlDecoder = Base64.getUrlDecoder();
+    private static final Logger LOGGER = LoggerFactory.getLogger(Hash.class);
 
 
     public Hash() {
         super();
     }
+
+    /**
+     * Unit Test
+     *
+     * @param args args
+     * @author faik.saglar
+     */
+    public static void main(String[] args) {
+
+        Hash hash = new Hash();
+
+        String hashStr = hash.generateSaltedPasswordHash("password");
+
+        LOGGER.trace("{}", hashStr);
+
+        LOGGER.trace("{}", hash.isSaltedPasswordHashCorrect("enteredPassword", hashStr));
+
+        LOGGER.trace("{}", hash.isSaltedPasswordHashCorrect("password", hashStr));
+
+        LOGGER.trace("{}", hash.generateRandomPassword(8));
+
+    }
+
+    /*
+     * http://stackoverflow.com/questions/18142745/how-do-i-generate-a-salt-in-java-for-salted-hash
+     * https://www.owasp.org/index.php/Hashing_Java
+     * https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
+     * https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html
+     * https://adambard.com/blog/3-wrong-ways-to-store-a-password/
+     * http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html
+     * http://stackoverflow.com/questions/18142745/how-do-i-generate-a-salt-in-java-for-salted-hash
+     *  http://stackoverflow.com/questions/2860943/how-can-i-hash-a-password-in-java
+     *  http://security.stackexchange.com/questions/4781/do-any-security-experts-recommend-bcrypt-for-password-storage/6415#6415
+     *   !!!!to avoid DDOS check the username before checking the password. Then if there have been multiple failed login attempts in a row for that user (say, 10 of them) reject the password without even checking it unless the account has "cooled off" for a few minutes. This way an account can be DDOS'd but not the whole server, and it makes even horribly weak passwords impossible to brute force without an offline attack.
+     */
 
     /**
      * Returns the hash of input data
@@ -75,27 +106,14 @@ public class Hash implements HashRemoteIntf {
             digestText = base64UrlEncoder.encodeToString(hashBytes); //TODO: is thread-safe?
 
         } catch (NoSuchAlgorithmException e) {
-            logger.error("generateHash NoSuchAlgorithmException error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("generateHash NoSuchAlgorithmException error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
         } catch (UnsupportedEncodingException e) {
-            logger.error("generateHash UnsupportedEncodingException error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("generateHash UnsupportedEncodingException error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
         }
 
         return digestText;
 
     }
-
-    /*
-     * http://stackoverflow.com/questions/18142745/how-do-i-generate-a-salt-in-java-for-salted-hash
-     * https://www.owasp.org/index.php/Hashing_Java
-     * https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
-     * https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html
-     * https://adambard.com/blog/3-wrong-ways-to-store-a-password/
-     * http://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html
-     * http://stackoverflow.com/questions/18142745/how-do-i-generate-a-salt-in-java-for-salted-hash
-     * 	http://stackoverflow.com/questions/2860943/how-can-i-hash-a-password-in-java
-     * 	http://security.stackexchange.com/questions/4781/do-any-security-experts-recommend-bcrypt-for-password-storage/6415#6415
-     * 		!!!!to avoid DDOS check the username before checking the password. Then if there have been multiple failed login attempts in a row for that user (say, 10 of them) reject the password without even checking it unless the account has "cooled off" for a few minutes. This way an account can be DDOS'd but not the whole server, and it makes even horribly weak passwords impossible to brute force without an offline attack.
-     */
 
     /**
      * Returns random salt to be used for password hashing
@@ -113,7 +131,6 @@ public class Hash implements HashRemoteIntf {
 
         return saltBytes;
     }
-
 
     /**
      * Returns string formatted salted hash of input password
@@ -168,16 +185,16 @@ public class Hash implements HashRemoteIntf {
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             // TODO: handle exception
-            logger.error("generateSaltedPasswordHash error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("generateSaltedPasswordHash error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             throw new RuntimeException(e);
         } finally { //Sensitive data should be cleared after you have used it (set the array elements to zero).
             spec.clearPassword();
-//			try {
-//				key.destroy();  //javax.security.auth.DestroyFailedException at javax.security.auth.Destroyable.destroy(Unknown Source)
-//			} catch (DestroyFailedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+//   try {
+//    key.destroy();  //javax.security.auth.DestroyFailedException at javax.security.auth.Destroyable.destroy(Unknown Source)
+//   } catch (DestroyFailedException e) {
+//    // TODO Auto-generated catch block
+//    e.printStackTrace();
+//   }
         }
 
         return saltPlusHashedPasswordString;
@@ -222,14 +239,13 @@ public class Hash implements HashRemoteIntf {
         String enteredPasswordHash = generateSaltedPasswordHash(enteredPassword, extractSalt(storedSaltedPasswordHash)).replaceAll("=", "");
         enteredPassword = null; //Delete password
 
-        logger.trace("Check equality:*********************");
-        logger.trace("{}", storedSaltedPasswordHash);
-        logger.trace("{}", enteredPasswordHash);
+        LOGGER.trace("Check equality:*********************");
+        LOGGER.trace("{}", storedSaltedPasswordHash);
+        LOGGER.trace("{}", enteredPasswordHash);
 
         return storedSaltedPasswordHash.equals(enteredPasswordHash);
 
     }
-
 
     /**
      * Generates a random password of a given length, using letters and digits.
@@ -251,28 +267,6 @@ public class Hash implements HashRemoteIntf {
             }
         }
         return sb.toString();
-    }
-
-    /**
-     * Unit Test
-     *
-     * @param args args
-     * @author faik.saglar
-     */
-    public static void main(String[] args) {
-
-        Hash hash = new Hash();
-
-        String hashStr = hash.generateSaltedPasswordHash("password");
-
-        logger.trace("{}", hashStr);
-
-        logger.trace("{}", hash.isSaltedPasswordHashCorrect("enteredPassword", hashStr));
-
-        logger.trace("{}", hash.isSaltedPasswordHashCorrect("password", hashStr));
-
-        logger.trace("{}", hash.generateRandomPassword(8));
-
     }
 
 }

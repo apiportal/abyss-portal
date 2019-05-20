@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class InitVerticle extends AbstractVerticle {
 
-    private static Logger logger = LoggerFactory.getLogger(InitVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitVerticle.class);
 
     @Override
     public void start(Future<Void> startFuture) {
@@ -36,11 +36,12 @@ public class InitVerticle extends AbstractVerticle {
                 .flatMap(id -> vertx.rxDeployVerticle(EchoServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(GatewayHttpServerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
                 .flatMap(id -> vertx.rxDeployVerticle(CassandraLoggerVerticle.class.getName(), new DeploymentOptions().setHa(true)))
-                .subscribe(id -> {
-                    logger.info("{} InitVerticle : All verticles successfully deployed", System.getProperty("abyss-jar.name"));
+                .subscribe((String id) -> {
+                    LOGGER.info("{} InitVerticle : All verticles successfully deployed", System.getProperty("abyss-jar.name"));
                     super.start(startFuture);
-                }, t -> {
-                    logger.error("{} InitVerticle : Deploying verticles failed: {} \n {}", System.getProperty("abyss-jar.name"), t.getLocalizedMessage(), t.getStackTrace());
+                }, (Throwable t) -> {
+                    LOGGER.error("{} InitVerticle : Deploying verticles failed: {} \n {}"
+                            , System.getProperty("abyss-jar.name"), t.getLocalizedMessage(), t.getStackTrace());
                     startFuture.fail(t);
                 });
     }

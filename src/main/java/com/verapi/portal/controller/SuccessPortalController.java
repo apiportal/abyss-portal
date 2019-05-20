@@ -24,27 +24,23 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AbyssController(routePathGET = "failure", routePathPOST = "failure", htmlTemplateFile = "failure.html", isPublic = true)
-public class FailureController extends PortalAbstractController {
+@AbyssController(routePathGET = "success", routePathPOST = "success", htmlTemplateFile = "success.html", isPublic = true)
+public class SuccessPortalController extends AbstractPortalController {
 
-    private static Logger logger = LoggerFactory.getLogger(FailureController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SuccessPortalController.class);
 
-    public FailureController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public SuccessPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("FailureController.defaultGetHandler invoked...");
-    }
-
-    @Override
-    public void handle(RoutingContext routingContext) {
         Integer statusCode = routingContext.session().get(Constants.HTTP_STATUSCODE);
-        statusCode = (statusCode != null) ? (statusCode > 0) ? statusCode : 200 : 200;
+        if (statusCode <= 0) {
+            statusCode = 200;
+        }
 
-
-        logger.trace("FailureController.handle invoked - status code: " + statusCode);
+        LOGGER.trace("SuccessPortalController.defaultGetHandler invoked - status code: {}", statusCode);
 
         routingContext.put(Constants.HTTP_STATUSCODE, statusCode);
         routingContext.put(Constants.HTTP_URL, routingContext.session().get(Constants.HTTP_URL));
@@ -58,9 +54,32 @@ public class FailureController extends PortalAbstractController {
                 .put(Constants.CONTEXT_FAILURE_MESSAGE, (String) routingContext.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
 
-        renderTemplate(routingContext, templateContext, Controllers.TRX_NOK.templateFileName, statusCode);
-
-        super.handle(routingContext); //TODO: bu satır çağrılmalı mı?
+        renderTemplate(routingContext, templateContext, Controllers.TRX_OK.templateFileName, statusCode);
     }
 
+    @Override
+    public void handle(RoutingContext routingContext) {
+        Integer statusCode = routingContext.session().get(Constants.HTTP_STATUSCODE);
+        if (statusCode <= 0) {
+            statusCode = 200;
+        }
+
+        LOGGER.trace("SuccessPortalController.handle invoked - status code: {}", statusCode);
+
+        routingContext.put(Constants.HTTP_STATUSCODE, statusCode);
+        routingContext.put(Constants.HTTP_URL, routingContext.session().get(Constants.HTTP_URL));
+        routingContext.put(Constants.HTTP_ERRORMESSAGE, routingContext.session().get(Constants.HTTP_ERRORMESSAGE));
+        routingContext.put(Constants.CONTEXT_FAILURE_MESSAGE, routingContext.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+
+        JsonObject templateContext = new JsonObject()
+                .put(Constants.HTTP_STATUSCODE, statusCode)
+                .put(Constants.HTTP_URL, (String) routingContext.session().get(Constants.HTTP_URL))
+                .put(Constants.HTTP_ERRORMESSAGE, (String) routingContext.session().get(Constants.HTTP_ERRORMESSAGE))
+                .put(Constants.CONTEXT_FAILURE_MESSAGE, (String) routingContext.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+
+        renderTemplate(routingContext, templateContext, Controllers.TRX_OK.templateFileName, statusCode);
+
+        super.handle(routingContext);
+
+    }
 }

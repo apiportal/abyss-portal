@@ -17,11 +17,11 @@
 package com.verapi.portal.oapi.util;
 
 import com.verapi.abyss.common.OpenAPIUtil;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.common.PlatformAPIList;
 import com.verapi.portal.oapi.AbstractApiController;
 import com.verapi.portal.oapi.AbyssApiController;
 import com.verapi.portal.oapi.AbyssApiOperationHandler;
-import com.verapi.abyss.exception.InternalServerError500Exception;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.api.RequestParameters;
@@ -32,11 +32,9 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-
 @AbyssApiController(apiSpec = "/openapi/Util.yaml")
 public class UtilApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(UtilApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UtilApiController.class);
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -52,11 +50,10 @@ public class UtilApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getYamlFileList(RoutingContext routingContext) {
         try {
-            logger.trace("getYamlFileList invoked");
+            LOGGER.trace("getYamlFileList invoked");
             subscribeAndResponse(routingContext, PlatformAPIList.getInstance().getPlatformAPIList(), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error("getYamlFileList error : {}\n{}", e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -64,7 +61,7 @@ public class UtilApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void validateOpenAPIv3Spec(RoutingContext routingContext) {
         try {
-            logger.trace("validateOpenAPIv3Spec invoked");
+            LOGGER.trace("validateOpenAPIv3Spec invoked");
             // Get the parsed parameters
             RequestParameters requestParameters = routingContext.get("parsedParameters");
 
@@ -73,8 +70,7 @@ public class UtilApiController extends AbstractApiController {
 
             subscribeAndResponseBulk(routingContext, OpenAPIUtil.openAPIParser(requestBody.getJsonObject("spec").encode()), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error("validateOpenAPIv3Spec error : {}\n{}", e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -82,17 +78,18 @@ public class UtilApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void convertSwaggerToOpenAPIv3Spec(RoutingContext routingContext) {
         try {
-            logger.trace("convertSwaggerToOpenAPIv3Spec invoked");
+            LOGGER.trace("convertSwaggerToOpenAPIv3Spec invoked");
             // Get the parsed parameters
             RequestParameters requestParameters = routingContext.get("parsedParameters");
 
             // We get an user JSON array validated by Vert.x Open API validator
             JsonObject requestBody = requestParameters.body().getJsonObject();
 
-            subscribeAndResponseString(routingContext, OpenAPIUtil.convertSwaggerToOpenAPI(requestBody.getJsonObject("spec")), HttpResponseStatus.OK.code(), false);
+            subscribeAndResponseString(routingContext
+                    , OpenAPIUtil.convertSwaggerToOpenAPI(requestBody.getJsonObject("spec"))
+                    , HttpResponseStatus.OK.code(), false);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error("convertSwaggerToOpenAPIv3Spec error : {}\n{}", e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

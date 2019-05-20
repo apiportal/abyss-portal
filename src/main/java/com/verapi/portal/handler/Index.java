@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 public class Index implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(Index.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Index.class);
     private final AuthProvider authProvider;
 
     public Index(AuthProvider authProvider) {
@@ -37,12 +37,12 @@ public class Index implements Handler<RoutingContext> {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("Index.handle invoked..");
+        LOGGER.info("Index.handle invoked..");
 
     }
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("Index.pageRender invoked...");
+        LOGGER.info("Index.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());

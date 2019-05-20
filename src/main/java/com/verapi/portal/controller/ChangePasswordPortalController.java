@@ -22,58 +22,63 @@ import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AbyssController(routePathGET = "change-password", routePathPOST = "change-password", htmlTemplateFile = "change-password.html")
-public class ChangePasswordController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(ChangePasswordController.class);
+public class ChangePasswordPortalController extends AbstractPortalController {
+    @SuppressWarnings("squid:S2068")
+    private static final String CHANGE_PASSWORD_ERROR_OCCURED = "Change Password Error Occured!";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChangePasswordPortalController.class);
 
-    public ChangePasswordController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public ChangePasswordPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("ChangePasswordController.defaultGetHandler invoked...");
+        LOGGER.trace("ChangePasswordPortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("ChangePasswordController.handle invoked...");
+        LOGGER.trace("ChangePasswordPortalController.handle invoked...");
         String username = routingContext.user().principal().getString("username");
         String oldPassword = routingContext.request().getFormAttribute("oldPassword");
         String newPassword = routingContext.request().getFormAttribute("newPassword");
         //TODO: should password consistency check be performed @FE or @BE or BOTH?
         String confirmPassword = routingContext.request().getFormAttribute("confirmPassword");
 
-        logger.trace("Context user:" + username);
-        logger.trace("Received old Password:" + oldPassword);
-        logger.trace("Received new Password:" + newPassword);
-        logger.trace("Received confirm Password:" + confirmPassword);
+        LOGGER.trace("Context user: {}", username);
 
         //TODO: OWASP Validate
 
         if (oldPassword == null || oldPassword.isEmpty()) {
-            logger.warn("oldPassword is null or empty");
-            showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter Old Password field", "");
+            LOGGER.warn("oldPassword is null or empty");
+            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter Old Password field", "");
         }
         if (newPassword == null || newPassword.isEmpty()) {
-            logger.warn("newPassword is null or empty");
-            showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter New Password field", "");
+            LOGGER.warn("newPassword is null or empty");
+            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter New Password field", "");
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
-            logger.warn("confirmPassword is null or empty");
-            showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "Please enter Confirm Password field", "");
+            LOGGER.warn("confirmPassword is null or empty");
+            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter Confirm Password field", "");
         }
 
-        if (!(newPassword.equals(confirmPassword))) {
-            logger.warn("newPassword and confirmPassword does not match");
-            showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", "New Password and Confirm Password does not match", "Please check and enter again");
+        if (newPassword != null && !(newPassword.equals(confirmPassword))) {
+            LOGGER.warn("newPassword and confirmPassword does not match");
+            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "New Password and Confirm Password does not match", "Please check and enter again");
         }
 
         JsonObject creds = new JsonObject()
@@ -81,7 +86,7 @@ public class ChangePasswordController extends PortalAbstractController {
                 .put("password", oldPassword);
 
 
-        jdbcClient.rxGetConnection().flatMap(resConn ->
+        jdbcClient.rxGetConnection().flatMap((SQLConnection resConn) ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
@@ -89,10 +94,10 @@ public class ChangePasswordController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         .flatMap(checkAuth -> authProvider.rxAuthenticate(creds))
-                        .flatMap(user -> {
-                            logger.trace("Authenticated User with Old Password: " + user.principal().encodePrettily());
+                        .flatMap((User user) -> {
+                            LOGGER.trace("Authenticated User with Old Password: " + user.principal().encodePrettily());
 
-                            logger.trace("Updating user records...");
+                            LOGGER.trace("Updating user records...");
                             String salt = authProvider.generateSalt();
                             String hash = authProvider.computeHash(newPassword, salt);
 
@@ -118,20 +123,20 @@ public class ChangePasswordController extends PortalAbstractController {
                                 .flatMap(ignore -> Single.error(ex))
                         )
 
-                        .doAfterSuccess(succ -> {
-                            logger.trace("Change Password: User record is updated and persisted successfully");
-                        })
+                        .doAfterSuccess((Boolean succ) -> LOGGER.trace("Change Password: User record is updated and persisted successfully"))
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-        ).subscribe(result -> {
-                    logger.info("Subscription to ChangePassword successfull:" + result);
-                    showTrxResult(routingContext, logger, 200, "Password has been successfully changed!", "You may login using your new password", "");
+        ).subscribe((Boolean result) -> {
+                    LOGGER.info("Subscription to ChangePassword successfull: {}", result);
+                    showTrxResult(routingContext, LOGGER, 200, "Password has been successfully changed!"
+                            , "You may login using your new password", "");
                     //TODO: Send email to user
-                }, t -> {
-                    logger.error("ChangePassword Error", t);
-                    showTrxResult(routingContext, logger, 401, "Change Password Error Occured!", t.getLocalizedMessage(), "");
+                }, (Throwable t) -> {
+                    LOGGER.error("ChangePassword Error", t);
+                    showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                            , t.getLocalizedMessage(), "");
                 }
         );
 

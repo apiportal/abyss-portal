@@ -40,9 +40,8 @@ public final class PlatformAPIList {
         return platformApis;
     }
 
-    private PlatformAPIList setPlatformAPIList(JsonArray platformApiList) {
+    private void setPlatformAPIList(JsonArray platformApiList) {
         this.platformApis = platformApiList;
-        return this;
     }
 
 }
