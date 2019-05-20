@@ -36,23 +36,12 @@ import java.time.Instant;
 import java.util.UUID;
 
 public class CassandraService {
-    private static Logger logger = LoggerFactory.getLogger(CassandraService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraService.class);
 
-    private static CassandraService instance = null;
+    private static CassandraService instance;
     private CassandraClient cassandraClient;
     private PreparedStatement preparedStatement;
     private RoutingContext routingContext;
-
-    /**
-     * returns a singleton CassandraService instance
-     *
-     * @param routingContext Vertx instance is associated with this routing context, it is required for {@link io.vertx.cassandra.CassandraClient#createShared(Vertx, CassandraClientOptions)}
-     */
-    public static CassandraService getInstance(RoutingContext routingContext) {
-        if ((instance == null) && (routingContext != null))
-            instance = new CassandraService(routingContext);
-        return instance;
-    }
 
     /**
      * Construct new singleton CassandraService instance
@@ -62,7 +51,7 @@ public class CassandraService {
 
 
     private CassandraService(RoutingContext routingContext) {
-        logger.info("initializing Cassandra Service");
+        LOGGER.info("initializing Cassandra Service");
         setRoutingContext(routingContext);
         String[] cassandraContactPoints = Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_CONTACT_POINTS).split(",");
 
@@ -70,7 +59,7 @@ public class CassandraService {
 
         for (String contactPoint : cassandraContactPoints) {
             cassandraClientOptions.addContactPoint(contactPoint);
-            logger.info("Cassandra contact point[{}] added", contactPoint);
+            LOGGER.info("Cassandra contact point[{}] added", contactPoint);
         }
         cassandraClientOptions.setPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.CASSANDRA_PORT));
 
@@ -92,27 +81,41 @@ public class CassandraService {
         CassandraClient cassandraClient = CassandraClient.createShared(getRoutingContext().vertx(), cassandraClientOptions);
         cassandraClient.connect(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_KEYSPACE), event -> {
             if (event.succeeded()) {
-                logger.info("Cassandra client connected");
+                LOGGER.info("Cassandra client connected");
                 String insertStatement = "insert into platform_api_log (id, httpmethod, httppath, httpsession, \"index\", remoteaddress, source, timestamp,username)\n" +
                         "values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                cassandraClient.prepare(insertStatement, prepareResult -> {
+                cassandraClient.prepare(insertStatement,  prepareResult -> {
                     if (prepareResult.succeeded()) {
-                        logger.trace("Cassandra client prepared statement");
+                        LOGGER.trace("Cassandra client prepared statement");
                         preparedStatement = prepareResult.result();
                         setCassandraClient(cassandraClient);
                     } else {
-                        logger.error("Cassandra client is unable to prepare statement, error: {} \n stack trace:{}", event.cause().getLocalizedMessage(), event.cause().getStackTrace());
+                        LOGGER.error("Cassandra client is unable to prepare statement, error: {} \n stack trace:{}"
+                                , event.cause().getLocalizedMessage(), event.cause().getStackTrace());
                     }
                 });
             } else {
-                logger.error("Cassandra client is unable to connect, error: {} \n stack trace:{}", event.cause().getLocalizedMessage(), event.cause().getStackTrace());
+                LOGGER.error("Cassandra client is unable to connect, error: {} \n stack trace:{}"
+                        , event.cause().getLocalizedMessage(), event.cause().getStackTrace());
             }
         });
     }
 
+    /**
+     * returns a singleton CassandraService instance
+     *
+     * @param routingContext Vertx instance is associated with this routing context, it is required for {@link io.vertx.cassandra.CassandraClient#createShared(Vertx, CassandraClientOptions)}
+     */
+    public static CassandraService getInstance(RoutingContext routingContext) {
+        if ((instance == null) && (routingContext != null)) {
+            instance = new CassandraService(routingContext);
+        }
+        return instance;
+    }
+
     public void indexDocument(String index, UUID id, JsonObject source) {
         if (cassandraClient == null) {
-            logger.warn("Cassandra client initialization not completed yet");
+            LOGGER.warn("Cassandra client initialization not completed yet");
             return; //TODO: fix to wait cassandraClient instance creation asynch block
         }
 
@@ -127,12 +130,9 @@ public class CassandraService {
                         , Instant.now()
                         , getRoutingContext().user().principal().getString("username")))
                 .doAfterTerminate(() -> cassandraClient.rxDisconnect())
-                .subscribe(o -> {
-                            logger.info("successfully inserted into Cassandra");
-                        }
-                        , throwable -> {
-                            logger.error("unable to insert into Cassandra! error:{} \n stack trace: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
-                        });
+                .subscribe(o -> LOGGER.info("successfully inserted into Cassandra")
+                        , throwable -> LOGGER.error("unable to insert into Cassandra! error:{} \n stack trace: {}"
+                                , throwable.getLocalizedMessage(), throwable.getStackTrace()));
     }
 
     private RoutingContext getRoutingContext() {
@@ -143,7 +143,7 @@ public class CassandraService {
         this.routingContext = routingContext;
     }
 
-    private CassandraClient getCassandraClient() {
+    CassandraClient getCassandraClient() {
         return this.cassandraClient;
     }
 

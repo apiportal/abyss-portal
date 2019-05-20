@@ -17,12 +17,8 @@
 package com.verapi.portal.common;
 
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PlatformAPIList {
-    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
 
     private static PlatformAPIList instance;
     private JsonArray platformApiList;

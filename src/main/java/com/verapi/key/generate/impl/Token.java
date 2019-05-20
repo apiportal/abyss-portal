@@ -16,31 +16,29 @@
 
 package com.verapi.key.generate.impl;
 
-import java.io.UnsupportedEncodingException;
-//import java.rmi.RemoteException;
-//import java.security.NoSuchAlgorithmException;
-//import java.time.ZonedDateTime;
-//import java.time.LocalDateTime;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-//import org.joda.time.DateTime;
-//import org.joda.time.format.DateTimeFormat;
-//import org.joda.time.format.DateTimeFormatter;
-//import org.joda.time.format.ISODateTimeFormat;
-
-//import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.verapi.key.generate.intf.TokenRemoteIntf;
 import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.key.model.CryptoOperationResult;
 import com.verapi.key.model.TokenRequest;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.VertxContextPRNG;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.verapi.key.generate.intf.TokenRemoteIntf;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+
+//import java.rmi.RemoteException;
+//import java.security.NoSuchAlgorithmException;
+//import java.time.ZonedDateTime;
+//import java.time.LocalDateTime;
+//import org.joda.time.DateTime;
+//import org.joda.time.format.DateTimeFormat;
+//import org.joda.time.format.DateTimeFormatter;
+//import org.joda.time.format.ISODateTimeFormat;
+//import java.time.format.DateTimeFormatter;
 
 
 /**
@@ -52,12 +50,10 @@ import com.verapi.key.generate.intf.TokenRemoteIntf;
 public class Token implements TokenRemoteIntf {
 
     private static final String PRECHECKS_OK = "prechecks.ok";
-    private static Logger logger = LoggerFactory.getLogger(Token.class);
+    private static final String SPLITTER = ":";
 
     //http://www.oracle.com/technetwork/articles/java/jf14-date-time-2125367.html
     //http://www.joda.org/joda-time/
-
-    private static final String SPLITTER = ":";
     //private static final String DATETIME_FORMAT = "uuuuMMdd'T'HHmmss.SSSxx"; //Java ZonedDateTime
     //private static final String DATETIME_FORMAT = "yyyyMMdd'T'HHmmss.SSSZ"; //Joda Time
     //private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormat.forPattern(DATETIME_FORMAT);
@@ -70,11 +66,62 @@ public class Token implements TokenRemoteIntf {
     private static final int INDEX_NONCE = 1;
     private static final int INDEX_USER_DATA = 2;
     private static final int INDEX_EXPIRE_DATE = 3;
+    private static Logger logger = LoggerFactory.getLogger(Token.class);
 
 
     public Token() {
         super();
     }
+
+    /**
+     * Unit Test
+     *
+     * @param args ars
+     * @throws UnsupportedEncodingException if base64 encoding has errors
+     */
+    public static void main(String[] args) throws UnsupportedEncodingException {
+
+        final String SEPARATOR = "----------------------------------";
+        Token token = new Token();
+
+        AuthenticationInfo authInfo = token.encodeToken(new TokenRequest("userData123@xyz", 60 * 10));
+
+        logger.trace("{}", authInfo.getToken());
+        logger.trace("{}", SEPARATOR);
+
+        AuthenticationInfo authResult = token.decodeAndValidateToken(authInfo.getToken(), authInfo);
+        logger.trace("DECODED OUTPUT: {}", authResult.getResultText());
+        logger.trace("{}", SEPARATOR);
+
+
+        String wrongToken = authInfo.getToken().replaceAll("a", "x").replaceAll("e", "z");
+        authResult = token.decodeAndValidateToken(wrongToken, authInfo);
+        logger.trace("DECODED OUTPUT: {}", authResult.getResultText());
+        logger.trace("{}", SEPARATOR);
+
+
+        //----------------------- USAGE EXAMPLE
+        AuthenticationInfo authInfo2 = token.generateToken(60 * 10, "userData123@xyz", Vertx.vertx());
+
+        logger.trace("{}", authInfo2.getToken());
+        logger.trace("{}", SEPARATOR);
+
+        AuthenticationInfo authResult2 = token.validateToken(authInfo2.getToken(), authInfo2);
+        logger.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
+        logger.trace("{}", SEPARATOR);
+
+        String wrongToken2 = authInfo2.getToken().replaceAll("a", "x").replaceAll("e", "z");
+        authResult2 = token.validateToken(wrongToken2, authInfo2);
+        logger.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
+        logger.trace("{}", SEPARATOR);
+
+    }
+
+    /*
+    private long zonedDateTimeDifference(ZonedDateTime d1, ZonedDateTime d2, ChronoUnit unit){
+        return unit.between(d1, d2);
+    }
+    */
 
     /**
      * Print Date Time
@@ -83,27 +130,21 @@ public class Token implements TokenRemoteIntf {
      * @param name name of date variable to be used as label while printing
      * @author faik.saglar
      */
-//	private void printDateTime(ZonedDateTime date, String name) {
-//		System.out.println(name + ":" + date.format(DATETIME_FORMATTER));
-//	}
-//	
-//	private void printDateTime(LocalDateTime date, String name) {
-//		System.out.println(name + ":" + date.format(DATETIME_FORMATTER));
-//	}
+//private void printDateTime(ZonedDateTime date, String name) {
+//System.out.println(name + ":" + date.format(DATETIME_FORMATTER));
+//}
+//
+//private void printDateTime(LocalDateTime date, String name) {
+//System.out.println(name + ":" + date.format(DATETIME_FORMATTER));
+//}
 
-//	private void printDateTime(DateTime date, String name) {
-//		System.out.println(name + ":" + date.toString(ISO_DATETIME_FORMATTER));
-//	}
+//private void printDateTime(DateTime date, String name) {
+//System.out.println(name + ":" + date.toString(ISO_DATETIME_FORMATTER));
+//}
     private void printDateTime(Instant date, String name) {
         //System.out.println(name + ":" + date.toString());
         logger.info(name + ":" + date.toString());
     }
-	
-	/*
-	private long zonedDateTimeDifference(ZonedDateTime d1, ZonedDateTime d2, ChronoUnit unit){
-	    return unit.between(d1, d2);
-	}
-	*/
 
     /**
      * Is Token Expired compared current date time (now)
@@ -277,7 +318,7 @@ public class Token implements TokenRemoteIntf {
 
         // For Debug
         //for (int i = 0; i < strArray.length; i++) {
-        //	System.out.println(strArray[i]);
+        //System.out.println(strArray[i]);
         //}
 
 
@@ -439,9 +480,8 @@ public class Token implements TokenRemoteIntf {
 
         //TODO Kaldır. For Debug
         //for (int i = 0; i < strArray.length; i++) {
-        //	System.out.println(strArray[i]);
+        //System.out.println(strArray[i]);
         //}
-
 
         //Check nonce
         if (!(authInfo.getNonce().equals(strArray[INDEX_NONCE]))) {
@@ -477,51 +517,5 @@ public class Token implements TokenRemoteIntf {
         } else {
             return decodeAndValidateToken(authInfo.getToken(), authInfo);
         }
-
     }
-
-    /**
-     * Unit Test
-     *
-     * @param args ars
-     * @throws UnsupportedEncodingException if base64 encoding has errors
-     */
-    public static void main(String[] args) throws UnsupportedEncodingException {
-
-        final String separator = "----------------------------------";
-        Token token = new Token();
-
-        AuthenticationInfo authInfo = token.encodeToken(new TokenRequest("userData123@xyz", 60 * 10));
-
-        logger.trace("{}", authInfo.getToken());
-        logger.trace("{}", separator);
-
-        AuthenticationInfo authResult = token.decodeAndValidateToken(authInfo.getToken(), authInfo);
-        logger.trace("{}", "DECODED OUTPUT:" + authResult.getResultText());
-        logger.trace("{}", separator);
-
-
-        String wrongToken = authInfo.getToken().replaceAll("a", "x").replaceAll("e", "z");
-        authResult = token.decodeAndValidateToken(wrongToken, authInfo);
-        logger.trace("{}", "DECODED OUTPUT:" + authResult.getResultText());
-        logger.trace("{}", separator);
-
-
-        //----------------------- USAGE EXAMPLE
-        AuthenticationInfo authInfo2 = token.generateToken(60 * 10, "userData123@xyz", Vertx.vertx());
-
-        logger.trace("{}", authInfo2.getToken());
-        logger.trace("{}", separator);
-
-        AuthenticationInfo authResult2 = token.validateToken(authInfo2.getToken(), authInfo2);
-        logger.trace("{}", "DECODED OUTPUT2:" + authResult2.getResultText());
-        logger.trace("{}", separator);
-
-        String wrongToken2 = authInfo2.getToken().replaceAll("a", "x").replaceAll("e", "z");
-        authResult2 = token.validateToken(wrongToken2, authInfo2);
-        logger.trace("{}", "DECODED OUTPUT2:" + authResult2.getResultText());
-        logger.trace("{}", separator);
-
-    }
-
 }
