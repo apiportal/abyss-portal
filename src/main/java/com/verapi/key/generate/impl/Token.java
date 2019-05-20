@@ -79,41 +79,48 @@ public class Token implements TokenRemoteIntf {
      * @param args ars
      * @throws UnsupportedEncodingException if base64 encoding has errors
      */
-    public static void main(String[] args) throws UnsupportedEncodingException {
+    public static void main(String[] args) {
 
         final String SEPARATOR = "----------------------------------";
         Token token = new Token();
 
-        AuthenticationInfo authInfo = token.encodeToken(new TokenRequest("userData123@xyz", 60 * 10));
 
-        LOGGER.trace("{}", authInfo.getToken());
-        LOGGER.trace("{}", SEPARATOR);
-
-        AuthenticationInfo authResult = token.decodeAndValidateToken(authInfo.getToken(), authInfo);
-        LOGGER.trace("DECODED OUTPUT: {}", authResult.getResultText());
-        LOGGER.trace("{}", SEPARATOR);
+        AuthenticationInfo authInfo = null;
+        try {
+            authInfo = token.encodeToken(new TokenRequest("userData123@xyz", 60 * 10));
 
 
-        String wrongToken = authInfo.getToken().replaceAll("a", "x").replaceAll("e", "z");
-        authResult = token.decodeAndValidateToken(wrongToken, authInfo);
-        LOGGER.trace("DECODED OUTPUT: {}", authResult.getResultText());
-        LOGGER.trace("{}", SEPARATOR);
+            LOGGER.trace("{}", authInfo.getToken());
+            LOGGER.trace("{}", SEPARATOR);
+
+            AuthenticationInfo authResult = token.decodeAndValidateToken(authInfo.getToken(), authInfo);
+            LOGGER.trace("DECODED OUTPUT: {}", authResult.getResultText());
+            LOGGER.trace("{}", SEPARATOR);
 
 
-        //----------------------- USAGE EXAMPLE
-        AuthenticationInfo authInfo2 = token.generateToken(60 * 10, "userData123@xyz", Vertx.vertx());
+            String wrongToken = authInfo.getToken().replaceAll("a", "x").replaceAll("e", "z");
+            authResult = token.decodeAndValidateToken(wrongToken, authInfo);
+            LOGGER.trace("DECODED OUTPUT: {}", authResult.getResultText());
+            LOGGER.trace("{}", SEPARATOR);
 
-        LOGGER.trace("{}", authInfo2.getToken());
-        LOGGER.trace("{}", SEPARATOR);
 
-        AuthenticationInfo authResult2 = token.validateToken(authInfo2.getToken(), authInfo2);
-        LOGGER.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
-        LOGGER.trace("{}", SEPARATOR);
+            //----------------------- USAGE EXAMPLE
+            AuthenticationInfo authInfo2 = token.generateToken(60 * 10, "userData123@xyz", Vertx.vertx());
 
-        String wrongToken2 = authInfo2.getToken().replaceAll("a", "x").replaceAll("e", "z");
-        authResult2 = token.validateToken(wrongToken2, authInfo2);
-        LOGGER.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
-        LOGGER.trace("{}", SEPARATOR);
+            LOGGER.trace("{}", authInfo2.getToken());
+            LOGGER.trace("{}", SEPARATOR);
+
+            AuthenticationInfo authResult2 = token.validateToken(authInfo2.getToken(), authInfo2);
+            LOGGER.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
+            LOGGER.trace("{}", SEPARATOR);
+
+            String wrongToken2 = authInfo2.getToken().replaceAll("a", "x").replaceAll("e", "z");
+            authResult2 = token.validateToken(wrongToken2, authInfo2);
+            LOGGER.trace("DECODED OUTPUT2: {}", authResult2.getResultText());
+            LOGGER.trace("{}", SEPARATOR);
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("main {}", e.getLocalizedMessage());
+        }
 
     }
 

@@ -20,12 +20,16 @@ import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
@@ -34,6 +38,8 @@ import org.slf4j.LoggerFactory;
 public class ChangePassword extends PortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChangePassword.class);
+    @SuppressWarnings("squid:S2068")
+    private static final String CHANGE_PASSWORD_ERROR_OCCURED = "Change Password Error Occured";
 
     private final JDBCClient jdbcClient;
 
@@ -57,28 +63,29 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
         //TODO: should password consistency check be performed @FE or @BE or BOTH?
         String confirmPassword = routingContext.request().getFormAttribute("confirmPassword");
 
-        LOGGER.info("Context user:" + username);
-        LOGGER.info("Received old Password:" + oldPassword);
-        LOGGER.info("Received new Password:" + newPassword);
-        LOGGER.info("Received confirm Password:" + confirmPassword);
+        LOGGER.info("Context user: {}", username);
 
         //TODO: OWASP Validate
 
         if (oldPassword == null || oldPassword.isEmpty()) {
             LOGGER.info("oldPassword is null or empty");
-            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "Please enter Old Password field", "", "");
+            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter Old Password field", "", "");
         }
         if (newPassword == null || newPassword.isEmpty()) {
             LOGGER.info("newPassword is null or empty");
-            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "Please enter New Password field", "", "");
+            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter New Password field", "", "");
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             LOGGER.info("newPassword is null or empty");
-            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "Please enter Confirm Password field", "", "");
+            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter Confirm Password field", "", "");
         }
-        if (!(newPassword.equals(confirmPassword))) {
+        if (newPassword != null && !(newPassword.equals(confirmPassword))) {
             LOGGER.info("newPassword and confirmPassword does not match");
-            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "New Password and Confirm Password does not match", "Please check and enter again", "");
+            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "New Password and Confirm Password does not match", "Please check and enter again", "");
         }
 
         JsonObject creds = new JsonObject()
@@ -86,7 +93,7 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
                 .put("password", oldPassword);
 
 
-        jdbcClient.rxGetConnection().flatMap(resConn ->
+        jdbcClient.rxGetConnection().flatMap((SQLConnection resConn) ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
@@ -94,8 +101,8 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         .flatMap(checkAuth -> authProvider.rxAuthenticate(creds))
-                        .flatMap(user -> {
-                            LOGGER.info("Authenticated User with Old Password: " + user.principal().encodePrettily());
+                        .flatMap((User user) -> {
+                            LOGGER.info("Authenticated User with Old Password: {}", user.principal().encodePrettily());
 
                             LOGGER.info("Updating user records...");
                             String salt = authProvider.generateSalt();
@@ -123,20 +130,18 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
                                 .flatMap(ignore -> Single.error(ex))
                         )
 
-                        .doAfterSuccess(succ -> {
-                            LOGGER.info("Change Password: User record is updated and persisted successfully");
-                        })
+                        .doAfterSuccess((Boolean succ) -> LOGGER.info("Change Password: User record is updated and persisted successfully"))
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-        ).subscribe(result -> {
-                    LOGGER.info("Subscription to ChangePassword successfull:" + result);
+        ).subscribe((Boolean result) -> {
+                    LOGGER.info("Subscription to ChangePassword successfull: {}", result);
                     generateResponse(routingContext, LOGGER, 200, "Password is changed.", "Please use your new password.", "", "");
                     //TODO: Send email to user
-                }, t -> {
+                }, (Throwable t) -> {
                     LOGGER.error("ChangePassword Error", t);
-                    generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", t.getLocalizedMessage(), "", "");
+                    generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED, t.getLocalizedMessage(), "", "");
 
                 }
         );
@@ -150,7 +155,7 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
         // delegate to the engine to render it.
-        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_CHANGE_PASSWORD, res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_CHANGE_PASSWORD, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 routingContext.response().end(res.result());

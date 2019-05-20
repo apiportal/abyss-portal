@@ -17,9 +17,11 @@
 package com.verapi.portal.handler;
 
 import com.verapi.abyss.common.Constants;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.auth.AuthProvider;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
@@ -51,7 +53,7 @@ public class Index implements Handler<RoutingContext> {
         //routingContext.put("signin", "Sign in Abyss");
         routingContext.put("user.name", routingContext.user().principal().getValue("username"));
         // and now delegate to the engine to render it.
-        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_INDEX, res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_INDEX, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 routingContext.response().end(res.result());

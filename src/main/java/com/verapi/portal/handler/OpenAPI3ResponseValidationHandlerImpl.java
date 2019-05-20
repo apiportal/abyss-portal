@@ -16,38 +16,19 @@
 
 package com.verapi.portal.handler;
 
-import com.verapi.portal.verticle.GatewayHttpServerVerticle;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import io.swagger.v3.parser.ResolverCache;
-import io.vertx.ext.web.api.RequestParameter;
 import io.vertx.ext.web.api.contract.impl.HTTPOperationRequestValidationHandlerImpl;
 import io.vertx.ext.web.api.contract.openapi3.OpenAPI3RequestValidationHandler;
 import io.vertx.ext.web.api.contract.openapi3.impl.OpenApi3Utils;
-import io.vertx.ext.web.api.validation.ParameterLocation;
-import io.vertx.ext.web.api.validation.ParameterType;
-import io.vertx.ext.web.api.validation.ParameterTypeValidator;
-import io.vertx.ext.web.api.validation.SpecFeatureNotSupportedException;
-import io.vertx.ext.web.api.validation.ValidationException;
-import io.vertx.ext.web.api.validation.impl.AnyOfTypeValidator;
-import io.vertx.ext.web.api.validation.impl.ArrayTypeValidator;
 import io.vertx.ext.web.api.validation.impl.JsonTypeValidator;
-import io.vertx.ext.web.api.validation.impl.ParameterValidationRuleImpl;
-import io.vertx.ext.web.api.validation.impl.RegularExpressions;
 import io.vertx.ext.web.impl.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class OpenAPI3ResponseValidationHandlerImpl extends HTTPOperationRequestValidationHandlerImpl<Operation> implements OpenAPI3RequestValidationHandler {
 
@@ -69,7 +50,7 @@ public class OpenAPI3ResponseValidationHandlerImpl extends HTTPOperationRequestV
     };*/
 
     //List<Parameter> resolvedParameters;
-    OpenAPI spec;
+    private OpenAPI spec;
     //ResolverCache refsCache;
 
     /* --- Initialization functions --- */
@@ -84,7 +65,7 @@ public class OpenAPI3ResponseValidationHandlerImpl extends HTTPOperationRequestV
     }
 
     @Override
-    public void parseOperationSpec() {
+    public final void parseOperationSpec() {
         LOGGER.trace("parseOperationSpec invoked");
         // Extract from path spec parameters description
 /*        if (resolvedParameters!=null) {
