@@ -22,23 +22,23 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AbyssController(routePathGET = "my-licenses", routePathPOST = "", htmlTemplateFile = "my-licenses.html")
-public class LicenseController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(LicenseController.class);
+@AbyssController(routePathGET = "explore", routePathPOST = "", htmlTemplateFile = "explore.html")
+public class ExplorePortalController extends AbstractPortalController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExplorePortalController.class);
 
-    public LicenseController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public ExplorePortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("LicenseController.defaultGetHandler invoked...");
+        LOGGER.trace("ExplorePortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("LicenseController.handle invoked...");
+        LOGGER.trace("ExplorePortalController.handle invoked...");
     }
 
 }

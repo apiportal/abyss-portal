@@ -88,7 +88,7 @@ import java.util.UUID;
 
 //public class AbstractGatewayVerticle extends AbstractVerticle implements IGatewayVerticle {
 public abstract class AbstractGatewayVerticle extends AbstractVerticle {
-    private static Logger logger = LoggerFactory.getLogger(AbstractGatewayVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGatewayVerticle.class);
 
     static Router gatewayRouter;
     private AbyssJDBCService abyssJDBCService;
@@ -99,24 +99,24 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.trace("---start invoked");
+        LOGGER.trace("---start invoked");
         super.start(startFuture);
     }
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
-        logger.trace("---stop invoked");
+        LOGGER.trace("---stop invoked");
         super.stop(stopFuture);
     }
 
     private Single<Router> createRouter() {
-        logger.trace("---createRouter invoked");
+        LOGGER.trace("---createRouter invoked");
         gatewayRouter = Router.router(vertx);
         return configureRouter(gatewayRouter);
     }
 
     private Single<Router> configureRouter(Router router) {
-        logger.trace("---configureRouter invoked");
+        LOGGER.trace("---configureRouter invoked");
 
         //log HTTP requests
         //router.route().handler(LoggerHandler.create(LoggerFormat.DEFAULT));
@@ -147,7 +147,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         //router.route(Constants.ABYSS_GATEWAY_ROOT + "/:apiUUID/:apiPath").handler(this::routingContextHandler);
         router.route(Constants.ABYSS_GATEWAY_ROOT).handler(this::routingContextHandler);
 
-        logger.trace("router route list: {}", router.getRoutes());
+        LOGGER.trace("router route list: {}", router.getRoutes());
 
         // jdbcAuth is only prepared for UserSessionHandler usage inside openAPI routers
         jdbcAuth = JDBCAuth.create(vertx, jdbcClient);
@@ -165,7 +165,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
 /*
     Single<Router> createSubRouter(String mountPoint) {
-        logger.trace("---createSubRouter invoked");
+        LOGGER.trace("---createSubRouter invoked");
 
         if (!mountPoint.startsWith("/"))
             mountPoint = "/" + mountPoint;
@@ -196,14 +196,14 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 */
 
     private void failureHandler(RoutingContext routingContext) {
-        logger.trace("AbstractGatewayVerticle - failureHandler invoked");
+        LOGGER.trace("AbstractGatewayVerticle - failureHandler invoked");
 
         // This is the failure handler
         Throwable failure = routingContext.failure();
-        logger.error("AbstractGatewayVerticle - failure: {}\n{}", failure.getLocalizedMessage(), Arrays.toString(failure.getStackTrace()));
+        LOGGER.error("AbstractGatewayVerticle - failure: {}\n{}", failure.getLocalizedMessage(), Arrays.toString(failure.getStackTrace()));
 
         if (routingContext.response().ended()) {
-            logger.error("AbstractGatewayVerticle - failureHandler invoked but response has already been ended. So quiting handler...");
+            LOGGER.error("AbstractGatewayVerticle - failureHandler invoked but response has already been ended. So quiting handler...");
             return;
         }
 
@@ -226,7 +226,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     private Single<HttpServer> createHttpServer(Router router, String serverHost, int serverPort, Boolean isSSL) {
-        logger.trace("---createHttpServer invoked");
+        LOGGER.trace("---createHttpServer invoked");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 //.setMaxChunkSize(8192) //TODO: Http Chunked Serving
                 .setLogActivity(Config.getInstance().getConfigJsonObject()
@@ -264,22 +264,22 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                 });
 
         return server
-                .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
+                .exceptionHandler(event -> LOGGER.error(event.getLocalizedMessage(), event))
                 .rxListen(serverPort, serverHost)
                 .flatMap(httpServer -> {
-                    logger.trace("http server started | {}:{}", serverHost, serverPort);
+                    LOGGER.trace("http server started | {}:{}", serverHost, serverPort);
                     return Single.just(httpServer);
                 });
 */
 
         return vertx.createHttpServer(httpServerOptions)
-                .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
+                .exceptionHandler(event -> LOGGER.error(event.getLocalizedMessage(), event))
                 .requestHandler(router::accept)
                 .rxListen(serverPort, serverHost);
     }
 
     Single<Router> enableCorsSupport(Router router) {
-        logger.trace("---enableCorsSupport invoked");
+        LOGGER.trace("---enableCorsSupport invoked");
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");
         allowHeaders.add("Access-Control-Allow-Origin");
@@ -303,7 +303,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     private Single<JDBCClient> initializeJdbcClient(String dataSourceName) {
-        logger.trace("---initializeJdbcClient[{}] invoked", dataSourceName);
+        LOGGER.trace("---initializeJdbcClient[{}] invoked", dataSourceName);
         abyssJDBCService = new AbyssJDBCService(vertx);
         return abyssJDBCService.publishDataSource(dataSourceName)
                 .flatMap(rec -> abyssJDBCService.getJDBCServiceObject(dataSourceName))
@@ -314,7 +314,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     Completable initializeServer() {
-        logger.trace("---initializeServer invoked");
+        LOGGER.trace("---initializeServer invoked");
         return Completable.fromSingle(initializeJdbcClient(Constants.GATEWAY_DATA_SOURCE_SERVICE)
                 .flatMap(jdbcClient -> createRouter())
                 .flatMap(this::enableCorsSupport)
@@ -323,12 +323,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                         verticleConf.serverPort,
                         verticleConf.isSSL)
                 )
-                .doOnSuccess(httpServer -> logger.info("initializeServer successful"))
-                .doOnError(throwable -> logger.error("initializeServer error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace())));
+                .doOnSuccess(httpServer -> LOGGER.info("initializeServer successful"))
+                .doOnError(throwable -> LOGGER.error("initializeServer error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace())));
     }
 
     Completable registerEchoHttpService() {
-        logger.trace("---registerEchoHttpService invoked");
+        LOGGER.trace("---registerEchoHttpService invoked");
         Record record = new Record()
                 .setType("http-endpoint")
                 .setLocation((new HttpLocation()
@@ -343,7 +343,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     Completable testEchoHttpService() {
-        logger.trace("---testEchoHttpService invoked");
+        LOGGER.trace("---testEchoHttpService invoked");
         return Completable.fromSingle(
                 AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", Constants.ECHO_HTTP_SERVICE))
                         .flatMapSingle(record -> {
@@ -356,21 +356,21 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                         "/", resp -> {
                                             //System.out.println("Got echo response " + resp.statusCode());
                                             //resp.handler(buf -> System.out.println(buf.toString("UTF-8")));
-                                            resp.handler(buf -> logger.trace("status:{} response:{}", resp.statusCode(), buf.toString("UTF-8")));
+                                            resp.handler(buf -> LOGGER.trace("status:{} response:{}", resp.statusCode(), buf.toString("UTF-8")));
                                         })
                                         .setChunked(true)
                                         .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
                                         .write("hello").end();
                             } finally {
                                 AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().release(serviceReference);
-                                logger.trace("{}service released", serviceReference.record().getName());
+                                LOGGER.trace("{}service released", serviceReference.record().getName());
                             }
                             return Single.just(serviceReference);
                         })
                         .doOnError(throwable -> {
-                            logger.error("testEchoHttpService error");
-                            logger.error(throwable.getLocalizedMessage());
-                            logger.error(Arrays.toString(throwable.getStackTrace()));
+                            LOGGER.error("testEchoHttpService error");
+                            LOGGER.error(throwable.getLocalizedMessage());
+                            LOGGER.error(Arrays.toString(throwable.getStackTrace()));
                         })
         );
     }
@@ -401,19 +401,19 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     return Single.just(new AbyssServiceReference(serviceReference, httpClient));
                 })
                 .doOnError(throwable -> {
-                    logger.error("lookupHttpService error - {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                    LOGGER.error("lookupHttpService error - {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                 })
                 .doAfterSuccess(serviceReference -> {
-                    logger.trace("{} service lookup completed successfully", serviceName);
+                    LOGGER.trace("{} service lookup completed successfully", serviceName);
                 });
     }
 
     Completable releaseHttpService(ServiceReference serviceReference) {
         if (AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().release(serviceReference)) {
-            logger.trace("{}service released", serviceReference.record().getName());
+            LOGGER.trace("{}service released", serviceReference.record().getName());
             return Completable.complete();
         } else {
-            logger.error("releaseHttpService error");
+            LOGGER.error("releaseHttpService error");
             return Completable.error(Throwable::new);
         }
     }
@@ -436,7 +436,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         try {
             serverURL = new URL(servers.getJsonObject(serverPosition).getString("url"));
         } catch (MalformedURLException e) {
-            logger.error("malformed server url {}", servers.getJsonObject(serverPosition).getString("url"));
+            LOGGER.error("malformed server url {}", servers.getJsonObject(serverPosition).getString("url"));
             return Flowable.error(e);
         }
 
@@ -466,7 +466,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 /*
 *çağrılan yerden aşağıdaki gibi subscribe olunacak ve tüketilecek...
         request.toFlowable().subscribe(httpClientResponse -> {
-            logger.trace("httpClientResponse statusCode: {} - headers: {}", httpClientResponse.statusCode(), httpClientResponse.headers());
+            LOGGER.trace("httpClientResponse statusCode: {} - headers: {}", httpClientResponse.statusCode(), httpClientResponse.headers());
         });
 */
 
@@ -483,12 +483,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
 
     Completable loadAllProxyApis() {
-        logger.trace("---loadAllProxyApis invoked");
+        LOGGER.trace("---loadAllProxyApis invoked");
         return Completable.complete();
     }
 
     public void routingContextHandler(RoutingContext context) {
-        logger.trace("---routingContextHandler invoked");
+        LOGGER.trace("---routingContextHandler invoked");
         context.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
     }
 
@@ -507,12 +507,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     void dummySecuritySchemaHandler(SecurityScheme securityScheme, RoutingContext routingContext) {
-        logger.trace("---dummySecuritySchemaHandler invoked");
+        LOGGER.trace("---dummySecuritySchemaHandler invoked");
         routingContext.next();
     }
 
     void genericSecuritySchemaHandler(SecurityScheme securityScheme, RoutingContext routingContext) {
-        logger.trace("---genericSecuritySchemaHandler invoked for security schema name {}", securityScheme.getName());
+        LOGGER.trace("---genericSecuritySchemaHandler invoked for security schema name {}", securityScheme.getName());
         SecurityScheme.Type securitySchemeType = securityScheme.getType();
         SecurityScheme.In securitySchemeIn = securityScheme.getIn();
 
@@ -521,7 +521,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                 if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
                     //check if this cookie exists in http request headers
                     if (routingContext.getCookie(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME) == null) {
-                        logger.error("platform security scheme cookie [{}] does not exist inside cookies", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
+                        LOGGER.error("platform security scheme cookie [{}] does not exist inside cookies", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
                         routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
                         return;
                     }
@@ -535,17 +535,17 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                         routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
                     }
                 } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
-                    logger.error("unsupported platform security scheme [{}] in cookie", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+                    LOGGER.error("unsupported platform security scheme [{}] in cookie", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
                 }
             } else if (securitySchemeIn == SecurityScheme.In.HEADER) {
                 if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
-                    logger.error("unsupported platform security scheme [{}] in header", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
+                    LOGGER.error("unsupported platform security scheme [{}] in header", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
                 } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
                     //check if this access token sent via http request header
                     if (!routingContext.request().headers().names().contains(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
-                        logger.error("platform security scheme access token [{}] does not exist inside headers", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+                        LOGGER.error("platform security scheme access token [{}] does not exist inside headers", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
                         routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
                         return;
                     }
@@ -553,7 +553,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     AuthenticationService authenticationService = new AuthenticationService(vertx);
                     authenticationService.validateAccessToken(apiAccessToken).subscribe(accessTokenValidation -> {
                         if (!accessTokenValidation.getBoolean("status")) {
-                            logger.error("platform security scheme access token [{}] validation failed: {} \n validation report: {}",
+                            LOGGER.error("platform security scheme access token [{}] validation failed: {} \n validation report: {}",
                                     Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME,
                                     accessTokenValidation.getString("error"),
                                     accessTokenValidation.getJsonObject("validationreport"));
@@ -563,36 +563,36 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                             routingContext.next();
                         }
                     }, throwable -> {
-                        logger.error("error occured during platform security scheme access token [{}] validation: {} | {}", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME, throwable.getLocalizedMessage(), throwable.getStackTrace());
+                        LOGGER.error("error occured during platform security scheme access token [{}] validation: {} | {}", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME, throwable.getLocalizedMessage(), throwable.getStackTrace());
                         routingContext.fail(new InternalServerError500Exception(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()));
                     });
                 }
             } else if (securitySchemeIn == SecurityScheme.In.QUERY) {
                 if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME)) {
-                    logger.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
+                    LOGGER.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
                 } else if (Objects.equals(securityScheme.getName(), Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME)) {
-                    logger.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+                    LOGGER.error("unsupported platform security scheme [{}] as query parameter", Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
                     routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
                 }
             }
         } else if (securitySchemeType == SecurityScheme.Type.HTTP) {
-            logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            LOGGER.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
         } else if (securitySchemeType == SecurityScheme.Type.OAUTH2) {
-            logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            LOGGER.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
         } else if (securitySchemeType == SecurityScheme.Type.OPENIDCONNECT) {
-            logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            LOGGER.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
         } else {
-            //logger.error("unsupported platform security scheme [{}]", securitySchemeType.name());
+            //LOGGER.error("unsupported platform security scheme [{}]", securitySchemeType.name());
             routingContext.fail(new NotFound404Exception(HttpResponseStatus.NOT_FOUND.reasonPhrase()));
         }
     }
 
     void genericFailureHandler(RoutingContext routingContext) {
-        logger.error("AbstractGatewayVerticle - genericFailureHandler invoked {} | {} ", routingContext.failure().getLocalizedMessage(), routingContext.failure().getStackTrace());
+        LOGGER.error("AbstractGatewayVerticle - genericFailureHandler invoked {} | {} ", routingContext.failure().getLocalizedMessage(), routingContext.failure().getStackTrace());
 
         // This is the failure handler
         Throwable failure = routingContext.failure();
@@ -620,7 +620,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
     void genericOperationHandler(RoutingContext routingContext) {
-        logger.trace("---genericOperationHandler invoked");
+        LOGGER.trace("---genericOperationHandler invoked");
 
         class BusinessApi {
             private URL serverURL;
@@ -635,15 +635,15 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         if (routingContext.get("method") == null)
             routingContext.put("method", routingContext.request().method());
         else {
-            logger.trace("genericOperationHandler already executed, so skipping..");
+            LOGGER.trace("genericOperationHandler already executed, so skipping..");
             routingContext.next();
             return;
         }
         String requestUriPath = routingContext.request().path();
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
         String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36);
-        logger.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
-        logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
+        LOGGER.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
+        LOGGER.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
         JsonObject validationReport = routingContext.get("validationreport");
         JsonObject apiSpec = new JsonObject(validationReport.getString("businessapiopenapidocument"));
         HttpClientOptions httpClientOptions = new HttpClientOptions();
@@ -665,12 +665,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                         businessApiServerURL = new URL(businessApiServerURLStr + pathParameters);
                         return Single.just(new BusinessApi(businessApiServerURL, businessApiServerHttpProtocolVersion));
                     } catch (MalformedURLException e) {
-                        logger.error("malformed server url {}", businessApiServerURLStr);
+                        LOGGER.error("malformed server url {}", businessApiServerURLStr);
                         return Single.error(e);
                     }
                 })
                 .subscribe(businessApi -> {
-                            logger.trace("Business API Server URL : {} Path: {}", businessApi.serverURL, businessApi.serverURL.getPath());
+                            LOGGER.trace("Business API Server URL : {} Path: {}", businessApi.serverURL, businessApi.serverURL.getPath());
                             HttpClient httpClient = vertx.createHttpClient(httpClientOptions
                                     .setSsl("https".equals(businessApi.serverURL.getProtocol()))
                                     .setTrustAll(true) //TODO: re-engineering for parametric trust certificate of api
@@ -709,7 +709,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
 /*
                             request.endHandler(event -> {
-                                logger.trace("request stream ended");
+                                LOGGER.trace("request stream ended");
                                 routingContext.response().headers().setAll(request.headers());
                                 //routingContext.response().end();
                                 routingContext.response().setStatusCode(HttpResponseStatus.OK.code()).end();
@@ -724,7 +724,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                             request
                                     .toFlowable()
                                     .flatMap(httpClientResponse -> {
-                                        logger.trace("httpClientResponse statusCode: {} | statusMessage: {}", httpClientResponse.statusCode(), httpClientResponse.statusMessage());
+                                        LOGGER.trace("httpClientResponse statusCode: {} | statusMessage: {}", httpClientResponse.statusCode(), httpClientResponse.statusMessage());
                                         routingContext.response()
                                                 .setStatusCode(httpClientResponse.statusCode())
                                                 .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
@@ -732,12 +732,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                     })
                                     .doFinally(() -> {
                                         //the final
-                                        logger.trace("finally finished");
+                                        LOGGER.trace("finally finished");
                                         routingContext.response().end();
                                         routingContext.next();
                                     })
                                     .subscribe(data -> {
-                                        //logger.trace("httpClientResponse subcribe data: {}", data);
+                                        //LOGGER.trace("httpClientResponse subcribe data: {}", data);
                                         //////routingContext.response().write(data);
                                         routingContext.response().headers().setAll(request.headers());
                                         routingContext.response().setChunked(true); //TODO: Http Chunked Serving per request
@@ -746,13 +746,13 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                                 .write(data);
                                         //routingContext.next();
                                     }, throwable -> {
-                                        logger.error("error occured during business api invocation, error: {} | stack: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                        LOGGER.error("error occured during business api invocation, error: {} | stack: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                                         routingContext.fail(new InternalServerError500Exception(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()));
                                     });
                             request.end();
                         },
                         throwable -> {
-                            logger.error("error occured during business api spec parsing and server url extraction, error: {} | stack: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                            LOGGER.error("error occured during business api spec parsing and server url extraction, error: {} | stack: {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                             routingContext.fail(new InternalServerError500Exception(HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase()));
                         });
 
@@ -766,7 +766,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                         businessApiServerURL = new URL(businessApiServerURLStr);
                         return Single.just(businessApiServerURL);
                     } catch (MalformedURLException e) {
-                        logger.error("malformed server url {}", businessApiServerURLStr);
+                        LOGGER.error("malformed server url {}", businessApiServerURLStr);
                         return Single.error(e);
                     }
                 })
@@ -795,21 +795,21 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
 
 /*
-                .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
-                .doAfterSuccess(swaggerParseResult -> logger.trace("successfully loaded API proxy {}", apiUUID))
-                .doFinally(() -> logger.trace("+++++gatewayRouter route list: {}", gatewayRouter.getRoutes()))
+                .doOnError(throwable -> LOGGER.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                .doAfterSuccess(swaggerParseResult -> LOGGER.trace("successfully loaded API proxy {}", apiUUID))
+                .doFinally(() -> LOGGER.trace("+++++gatewayRouter route list: {}", gatewayRouter.getRoutes()))
                 .subscribe();
 */
 
     }
 
     void genericAuthorizationHandler(RoutingContext routingContext) {
-        logger.trace("---genericAuthorizationHandler invoked");
+        LOGGER.trace("---genericAuthorizationHandler invoked");
         String requestUriPath = routingContext.request().path();
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
         String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36);
-        logger.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
-        logger.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
+        LOGGER.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
+        LOGGER.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
         JsonObject validationReport = routingContext.get("validationreport");
 
         AuthorizationService authorizationService = new AuthorizationService(vertx);

@@ -20,7 +20,7 @@ import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
 import com.verapi.portal.controller.AbyssController;
 import com.verapi.portal.controller.IController;
-import com.verapi.portal.controller.PortalAbstractController;
+import com.verapi.portal.controller.AbstractPortalController;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.ClassAnnotationMatchProcessor;
 import io.vertx.core.Future;
@@ -35,11 +35,11 @@ import java.util.Arrays;
 
 public class PortalVerticle extends AbstractPortalVerticle {
 
-    private static Logger logger = LoggerFactory.getLogger(PortalVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PortalVerticle.class);
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.trace("PortalVerticle.start invoked");
+        LOGGER.trace("PortalVerticle.start invoked");
         super.setVerticleHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_SERVER_HOST));
         super.setServerPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_PORT));
         super.setVerticleType(Constants.VERTICLE_TYPE_PORTAL);
@@ -48,22 +48,22 @@ public class PortalVerticle extends AbstractPortalVerticle {
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
-        logger.trace("PortalVerticle.stop invoked");
+        LOGGER.trace("PortalVerticle.stop invoked");
         super.stop(stopFuture);
     }
 
     @Override
     protected void mountControllerRouters() {
-        logger.trace("PortalVerticle.mountControllerRouters() invoked");
+        LOGGER.trace("PortalVerticle.mountControllerRouters() invoked");
         new FastClasspathScanner("com.verapi") //TODO: refine scan spec to improve performance
                 //.verbose()
                 .matchClassesWithAnnotation(AbyssController.class, new ClassAnnotationMatchProcessor() {
                     @Override
                     public void processMatch(Class<?> classWithAnnotation) {
-                        logger.trace("AbyssController annotated class found and mounted : " + classWithAnnotation);
-                        IController<PortalAbstractController> requestHandlerInstance = null;
+                        LOGGER.trace("AbyssController annotated class found and mounted : " + classWithAnnotation);
+                        IController<AbstractPortalController> requestHandlerInstance = null;
                         try {
-                            requestHandlerInstance = (IController<PortalAbstractController>) classWithAnnotation
+                            requestHandlerInstance = (IController<AbstractPortalController>) classWithAnnotation
                                     .getConstructor(JDBCAuth.class, JDBCClient.class)
                                     .newInstance(jdbcAuth, jdbcClient);
                             if (!classWithAnnotation.getAnnotation(AbyssController.class).isPublic())
@@ -75,7 +75,7 @@ public class PortalVerticle extends AbstractPortalVerticle {
                                     .handler(requestHandlerInstance).failureHandler(PortalVerticle.super::failureHandler);
 
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            logger.error("PortalVerticle.mountControllerRouters() exception : " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+                            LOGGER.error("PortalVerticle.mountControllerRouters() exception : " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
                         }
                     }
                 })

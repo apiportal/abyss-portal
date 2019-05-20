@@ -39,7 +39,7 @@ import java.io.UnsupportedEncodingException;
 
 public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(Signup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Signup.class);
 
     private final JDBCClient jdbcClient;
 
@@ -58,7 +58,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("Signup.handle invoked..");
+        LOGGER.info("Signup.handle invoked..");
 
 
         /*
@@ -82,13 +82,13 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
         //TODO: OWASP Validate & Truncate the Fields that are going to be stored
 
-        logger.info("Received firstname:" + firstname);
-        logger.info("Received lastname:" + lastname);
-        logger.info("Received user:" + username);
-        logger.info("Received email:" + email);
-        logger.info("Received pass:" + password);
-        logger.info("Received pass2:" + password2);
-        logger.info("Received isAgreedToTerms:" + isAgreedToTerms);
+        LOGGER.info("Received firstname:" + firstname);
+        LOGGER.info("Received lastname:" + lastname);
+        LOGGER.info("Received user:" + username);
+        LOGGER.info("Received email:" + email);
+        LOGGER.info("Received pass:" + password);
+        LOGGER.info("Received pass2:" + password2);
+        LOGGER.info("Received isAgreedToTerms:" + isAgreedToTerms);
 
         jdbcClient.rxGetConnection().flatMap(resConn ->
                 resConn
@@ -102,16 +102,16 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
                                 subjectId = resultSet.getRows(true).get(0).getInteger("id");
-                                logger.info("user found: " + resultSet.toJson().encodePrettily());
+                                LOGGER.info("user found: " + resultSet.toJson().encodePrettily());
                                 if (resultSet.getRows(true).get(0).getBoolean("is_activated")) {
                                     return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
                                 } else {
                                     //TODO: Cancel previous activation - Is it really required.
-                                    logger.info("Username already exists but NOT activated, create and send new activation record..."); //Skip user creation
+                                    LOGGER.info("Username already exists but NOT activated, create and send new activation record..."); //Skip user creation
                                     return Single.just(resultSet);
                                 }
                             } else {
-                                logger.info("user NOT found, creating user and activation records...");
+                                LOGGER.info("user NOT found, creating user and activation records...");
                                 String salt = authProvider.generateSalt();
                                 String hash = authProvider.computeHash(password, salt);
 
@@ -150,9 +150,9 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                         .flatMap(updateResult -> {
                             if (updateResult instanceof UpdateResult) {
                                 subjectId = ((UpdateResult) updateResult).getKeys().getInteger(0);
-                                logger.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0:" + subjectId);
+                                LOGGER.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0:" + subjectId);
                             } else if (updateResult instanceof ResultSet) {
-                                logger.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | Integer Key @pos=0:" + ((ResultSet) updateResult).getRows(true).get(0).getInteger("id") + " subjectID:" + subjectId);
+                                LOGGER.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | Integer Key @pos=0:" + ((ResultSet) updateResult).getRows(true).get(0).getInteger("id") + " subjectID:" + subjectId);
                             }
 
 
@@ -163,10 +163,10 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                                 authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
                                         email,
                                         routingContext.vertx().getDelegate());
-                                logger.info("activation token is created successfully: " + authInfo.getToken());
+                                LOGGER.info("activation token is created successfully: " + authInfo.getToken());
                                 authToken = authInfo.getToken();
                             } catch (UnsupportedEncodingException e) {
-                                logger.error("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                                LOGGER.error("tokenGenerator.generateToken :" + e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
                             return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
@@ -202,7 +202,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.info("User record and activation token is created and persisted successfully");
+                            LOGGER.info("User record and activation token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
                             json.put(Constants.EB_MSG_TOKEN, authToken);
@@ -213,7 +213,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                                     Constants.ACTIVATION_TEXT));
 
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                logger.info(result.toString());
+                                LOGGER.info(result.toString());
                             });
 
                         })
@@ -222,18 +222,18 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
                         .doAfterTerminate(resConn::close)
 
         ).subscribe(result -> {
-                    logger.info("Subscription to Signup successfull:" + result);
-                    generateResponse(routingContext, logger, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "");
+                    LOGGER.info("Subscription to Signup successfull:" + result);
+                    generateResponse(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "");
                     //TODO: Send email to user
                 }, t -> {
-                    logger.error("Signup Error", t);
-                    generateResponse(routingContext, logger, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "");
+                    LOGGER.error("Signup Error", t);
+                    generateResponse(routingContext, LOGGER, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "");
                 }
         );
     }
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("Signup.pageRender invoked...");
+        LOGGER.info("Signup.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
@@ -252,7 +252,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
     }
 
     public String renderMailPage(RoutingContext routingContext, String activationUrl, String activationText) {
-        logger.info("renderMailPage invoked...");
+        LOGGER.info("renderMailPage invoked...");
 
 
         // In order to use a Thymeleaf template we first need to create an engine

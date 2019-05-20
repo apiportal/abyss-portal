@@ -18,21 +18,28 @@ package com.verapi.portal.common;
 
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class MailUtil {
-    private static Logger logger = LoggerFactory.getLogger(MailUtil.class);
+public final class MailUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailUtil.class);
+
+    private MailUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static String renderActivationMailBody(RoutingContext routingContext, String activationUrl, String activationText) {
-        logger.info("renderActivationMailBody invoked...");
+        LOGGER.info("renderActivationMailBody invoked...");
 
-        AtomicReference<String> result = new AtomicReference<String>();
+        AtomicReference<String> result = new AtomicReference<>();
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
@@ -46,12 +53,12 @@ public class MailUtil {
                 .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         // and now delegate to the engine to render it.
-        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_ACTIVATE, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_ACTIVATE, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
-                result.set(res.result().toString("UTF-8"));
+                result.set(res.result().toString(StandardCharsets.UTF_8));
             } else {
-                logger.error(res.cause().getLocalizedMessage());
-                logger.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
+                LOGGER.error(res.cause().getLocalizedMessage());
+                LOGGER.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
                 routingContext.fail(res.cause());
             }
         });
@@ -59,8 +66,8 @@ public class MailUtil {
     }
 
     public static String renderWelcomeMailBody(RoutingContext routingContext, String fullName) {
-        logger.info("renderWelcomeMailPage invoked...");
-        AtomicReference<String> result = new AtomicReference<String>();
+        LOGGER.info("renderWelcomeMailPage invoked...");
+        AtomicReference<String> result = new AtomicReference<>();
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
@@ -75,12 +82,12 @@ public class MailUtil {
                 .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         // and now delegate to the engine to render it.
-        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_WELCOME, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_WELCOME, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
-                result.set(res.result().toString("UTF-8"));
+                result.set(res.result().toString(StandardCharsets.UTF_8));
             } else {
-                logger.error(res.cause().getLocalizedMessage());
-                logger.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
+                LOGGER.error(res.cause().getLocalizedMessage());
+                LOGGER.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
                 routingContext.fail(res.cause());
             }
         });
@@ -88,8 +95,8 @@ public class MailUtil {
     }
 
     public static String renderForgotPasswordMailBody(RoutingContext routingContext, String resetpasswordUrl, String resetpasswordText) {
-        logger.info("renderForgotPasswordMailBody invoked...");
-        AtomicReference<String> result = new AtomicReference<String>();
+        LOGGER.info("renderForgotPasswordMailBody invoked...");
+        AtomicReference<String> result = new AtomicReference<>();
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
@@ -104,12 +111,12 @@ public class MailUtil {
                 .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         // and now delegate to the engine to render it.
-        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_FORGOTPASSWORD, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_FORGOTPASSWORD, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
-                result.set(res.result().toString("UTF-8"));
+                result.set(res.result().toString(StandardCharsets.UTF_8));
             } else {
-                logger.error(res.cause().getLocalizedMessage());
-                logger.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
+                LOGGER.error(res.cause().getLocalizedMessage());
+                LOGGER.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
                 routingContext.fail(res.cause());
             }
         });
@@ -117,8 +124,8 @@ public class MailUtil {
     }
 
     public static String renderPasswordResetMailBody(RoutingContext routingContext, String fullName) {
-        logger.info("renderForgotPasswordMailBody invoked...");
-        AtomicReference<String> result = new AtomicReference<String>();
+        LOGGER.info("renderForgotPasswordMailBody invoked...");
+        AtomicReference<String> result = new AtomicReference<>();
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
@@ -134,12 +141,12 @@ public class MailUtil {
 
 
         // and now delegate to the engine to render it.
-        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_RESETPASSWORD, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_RESETPASSWORD, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
-                result.set(res.result().toString("UTF-8"));
+                result.set(res.result().toString(StandardCharsets.UTF_8));
             } else {
-                logger.error(res.cause().getLocalizedMessage());
-                logger.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
+                LOGGER.error(res.cause().getLocalizedMessage());
+                LOGGER.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
                 routingContext.fail(res.cause());
             }
         });
@@ -148,9 +155,9 @@ public class MailUtil {
 
 
     public static String renderInviteUserMailBody(RoutingContext routingContext, String invitationUrl, String invitationText) {
-        logger.info("renderInviteUserMailBody invoked...");
+        LOGGER.info("renderInviteUserMailBody invoked...");
 
-        AtomicReference<String> result = new AtomicReference<String>();
+        AtomicReference<String> result = new AtomicReference<>();
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
 
@@ -164,12 +171,12 @@ public class MailUtil {
                 .put(Constants.MAIL_TEMPLATE_IMAGE_URL, Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_IMAGE_URL));
 
         // and now delegate to the engine to render it.
-        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_INVITE_USER, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_INVITE_USER, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
-                result.set(res.result().toString("UTF-8"));
+                result.set(res.result().toString(StandardCharsets.UTF_8));
             } else {
-                logger.error(res.cause().getLocalizedMessage());
-                logger.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
+                LOGGER.error(res.cause().getLocalizedMessage());
+                LOGGER.error(new JsonObject(routingContext.getDelegate().data()).encodePrettily());
                 routingContext.fail(res.cause());
             }
         });

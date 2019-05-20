@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.verapi.auth;
 
 /**
@@ -30,7 +31,7 @@ public class BearerTokenParseResult {
      * @param isFailed is parse failed
      * @param token    token
      */
-    public BearerTokenParseResult(Boolean isFailed, String token) {
+    BearerTokenParseResult(Boolean isFailed, String token) {
         this.isFailed = isFailed;
         this.token = token;
     }

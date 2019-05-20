@@ -21,9 +21,9 @@ import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.sql.builder.metadata.AbyssDatabaseMetadataDiscovery;
 import com.verapi.portal.common.AbyssJDBCService;
+import com.verapi.portal.controller.AbstractPortalController;
 import com.verapi.portal.controller.Controllers;
 import com.verapi.portal.controller.IController;
-import com.verapi.portal.controller.PortalAbstractController;
 import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import io.vertx.core.Future;
@@ -42,11 +42,11 @@ import java.lang.reflect.InvocationTargetException;
 
 public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
-    private static Logger logger = LoggerFactory.getLogger(AbstractPortalVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPortalVerticle.class);
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.trace("AbstractPortalVerticle.start invoked");
+        LOGGER.trace("AbstractPortalVerticle.start invoked");
         setAbyssJDBCService(new AbyssJDBCService(vertx));
         Disposable disposable
                 =
@@ -59,15 +59,15 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
                         .flatMap(verticleRouter -> createHttpServer())
                         .subscribe(httpServer -> {
                             super.start(startFuture);
-                            logger.trace("AbstractPortalVerticle httpServer started " + httpServer.toString());
+                            LOGGER.trace("AbstractPortalVerticle httpServer started " + httpServer.toString());
                         }, t -> {
-                            logger.error("AbstractPortalVerticle httpServer unable to start", t);
+                            LOGGER.error("AbstractPortalVerticle httpServer unable to start", t);
                             startFuture.fail(t);
                         });
     }
 
     private Single<Router> configureRouter() {
-        logger.trace("AbstractPortalVerticle.configureRouter() invoked");
+        LOGGER.trace("AbstractPortalVerticle.configureRouter() invoked");
         //verticleRouter.route().handler(LoggerHandler.create());
         verticleRouter.route().handler(ResponseTimeHandler.create());
 
@@ -81,9 +81,9 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
             context.session().remove(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME);
             context.session().remove(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
 
-            logger.trace("Cookie list before logout:");
+            LOGGER.trace("Cookie list before logout:");
             for (Cookie c : context.cookies()) {
-                logger.debug(c.getName() + ":" + c.getValue());
+                LOGGER.debug(c.getName() + ":" + c.getValue());
             }
 
             context.removeCookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME);
@@ -93,9 +93,9 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
             context.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME);
             context.removeCookie(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
 
-            logger.trace("Cookie list after logout:");
+            LOGGER.trace("Cookie list after logout:");
             for (Cookie c : context.cookies()) {
-                logger.debug(c.getName() + ":" + c.getValue());
+                LOGGER.debug(c.getName() + ":" + c.getValue());
             }
 
             context.response().putHeader("location", Constants.ABYSS_ROOT + "/index").setStatusCode(302).end();
@@ -112,20 +112,20 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
         abyssRouter.mountSubRouter(Constants.ABYSS_ROOT, verticleRouter);
 
         abyssRouter.route().handler(ctx -> {
-            logger.trace("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
+            LOGGER.trace("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
             ctx.fail(404);
         });
 
-        logger.trace("verticle routers : " + verticleRouter.getRoutes().toString());
-        logger.trace("abyss routers : " + abyssRouter.getRoutes().toString());
+        LOGGER.trace("verticle routers : " + verticleRouter.getRoutes().toString());
+        LOGGER.trace("abyss routers : " + abyssRouter.getRoutes().toString());
 
         return Single.just(verticleRouter);
     }
 
-    //protected <T extends PortalAbstractController> void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef, IController<T> requestHandler) throws IllegalAccessException, InstantiationException {
+    //protected <T extends AbstractPortalController> void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef, IController<T> requestHandler) throws IllegalAccessException, InstantiationException {
     void mountControllerRouter(JDBCAuth jdbcAuth, Controllers.ControllerDef controllerDef) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        logger.trace("AbstractPortalVerticle.mountControllerRouter invoked : " + controllerDef.className.getName());
-        IController<PortalAbstractController> requestHandlerInstance = (IController<PortalAbstractController>) controllerDef.className.getConstructor(JDBCAuth.class, JDBCClient.class).newInstance(jdbcAuth, jdbcClient);
+        LOGGER.trace("AbstractPortalVerticle.mountControllerRouter invoked : " + controllerDef.className.getName());
+        IController<AbstractPortalController> requestHandlerInstance = (IController<AbstractPortalController>) controllerDef.className.getConstructor(JDBCAuth.class, JDBCClient.class).newInstance(jdbcAuth, jdbcClient);
         if (!controllerDef.isPublic)
             verticleRouter.route("/" + controllerDef.routePathGET).handler(authHandler).failureHandler(this::failureHandler);
         verticleRouter.route(HttpMethod.GET, "/" + controllerDef.routePathGET).handler(requestHandlerInstance::defaultGetHandler).failureHandler(this::failureHandler);
@@ -136,12 +136,12 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
-        logger.trace("AbstractPortalVerticle.stop invoked");
+        LOGGER.trace("AbstractPortalVerticle.stop invoked");
         super.stop(stopFuture);
     }
 
     protected Single<HttpServer> createHttpServer() {
-        logger.trace("createHttpServer() running");
+        LOGGER.trace("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
 /*
                 // to enable http/2 support; setSSL true, set pem key cert, set use alpn true
@@ -153,7 +153,7 @@ public abstract class AbstractPortalVerticle extends AbyssAbstractVerticle {
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY))
                 .setAcceptBacklog(1000000);
         return vertx.createHttpServer(httpServerOptions)
-                .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
+                .exceptionHandler(event -> LOGGER.error(event.getLocalizedMessage(), event))
                 .requestHandler(abyssRouter)
                 .rxListen(serverPort, verticleHost);
     }

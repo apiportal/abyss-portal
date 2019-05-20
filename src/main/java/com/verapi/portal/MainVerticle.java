@@ -28,6 +28,7 @@ import com.verapi.portal.handler.Signup;
 import com.verapi.portal.handler.UserGroups;
 import com.verapi.portal.handler.Users;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpServerOptions;
@@ -35,7 +36,10 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
@@ -64,7 +68,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MainVerticle extends AbstractVerticle {
 
-    private static Logger logger = LoggerFactory.getLogger(MainVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MainVerticle.class);
 
     private JDBCClient jdbcClient;
 
@@ -72,7 +76,7 @@ public class MainVerticle extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) {
-        logger.info("MainVerticle is starting");
+        LOGGER.info("MainVerticle is starting");
 
         Record record = JDBCDataSource.createRecord(
                 Constants.PORTAL_DATA_SOURCE_SERVICE,
@@ -83,11 +87,11 @@ public class MainVerticle extends AbstractVerticle {
                         .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE))
         );
 
-        AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().publish(record, asyncResult -> {
+        AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().publish(record, (AsyncResult<Record> asyncResult) -> {
             if (asyncResult.succeeded()) {
-                logger.info("serviceDiscovery.publish OK..." + asyncResult.succeeded());
+                LOGGER.info("serviceDiscovery.publish OK... {}", asyncResult.succeeded());
             } else {
-                logger.error("serviceDiscovery.publish failed..." + asyncResult.cause());
+                LOGGER.error("serviceDiscovery.publish failed... {}", asyncResult.cause().getLocalizedMessage());
                 startFuture.fail(asyncResult.cause());
             }
         });
@@ -99,18 +103,18 @@ public class MainVerticle extends AbstractVerticle {
 //        .put("max_pool_size", Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBCONN_MAX_POOL_SIZE));
 //        
 //        JDBCClient jdbcClient = JDBCClient.createShared(vertx, jdbcConfig, Constants.PORTAL_DATA_SOURCE_SERVICE);
-//        logger.info("JDBCClient created... " + jdbcClient.toString());
+//        LOGGER.info("JDBCClient created... " + jdbcClient.toString());
 
         JDBCDataSource.rxGetJDBCClient(AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery(), new JsonObject().put("name", Constants.PORTAL_DATA_SOURCE_SERVICE)).subscribe((jdbcClient -> {
 
             //JDBCClient jdbcClient = resultHandler.result();
             this.jdbcClient = jdbcClient;
-            logger.info("JDBCClient created... " + jdbcClient.toString());
+            LOGGER.info("JDBCClient created... {}", jdbcClient.toString());
 
             //io.vertx.ext.auth.jdbc.JDBCAuth.create(vertx, jdbcClient);
 
             auth = JDBCAuth.create(vertx, jdbcClient);
-            logger.info("JDBCAuthProvider created... " + auth.toString());
+            LOGGER.info("JDBCAuthProvider created... {}", auth.toString());
 
             auth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
 
@@ -124,7 +128,7 @@ public class MainVerticle extends AbstractVerticle {
             auth.setRolesQuery("SELECT GROUP_NAME FROM portalschema.SUBJECT_GROUP UG, portalschema.SUBJECT_MEMBERSHIP UM, portalschema.SUBJECT U WHERE U.SUBJECT_NAME = ? AND UM.SUBJECT_ID = U.ID AND UM.GROUP_ID = UG.ID");
 
             //TODO: authProvider.setNonces();
-            logger.info("JDBCAuthProvider configuration done... ");
+            LOGGER.info("JDBCAuthProvider configuration done... ");
 
             // To simplify the development of the web components we use a Router to route all HTTP requests
             // to organize our code in a reusable way.
@@ -148,12 +152,17 @@ public class MainVerticle extends AbstractVerticle {
             //A handler that maintains a Session for each browser session
             //The session is available on the routing context with RoutingContext.session()
             //The session handler requires a CookieHandler to be on the routing chain before it
-            abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName(Constants.AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME));
+            abyssRouter.route()
+                    .handler(SessionHandler
+                            .create(LocalSessionStore
+                                    .create(vertx, "abyss.session"))
+                            .setSessionCookieName(Constants.AUTH_ABYSS_PORTAL_SESSION_COOKIE_NAME));
 
             //TODO: CSRF Handler for OWASP
             abyssRouter.route().handler(CSRFHandler.create("cok.cok.gizli"));
 
-            //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
+            //This handler should be used if you want to store the User object in the Session so it's available between different requests,
+            // without you having re-authenticate each time
             //It requires that the session handler is already present on previous matching routes
             //It requires an Auth provider so, if the user is deserialized from a clustered session it knows which Auth provider to associate the session with.
             abyssRouter.route().handler(UserSessionHandler.create(auth));
@@ -213,7 +222,7 @@ public class MainVerticle extends AbstractVerticle {
             Index index = new Index(auth);
             router.get("/index").handler(index::pageRender).failureHandler(this::failureHandler);
 
-            router.route("/logout").handler(context -> {
+            router.route("/logout").handler((RoutingContext context) -> {
                 context.user().clearCache();
                 context.clearUser();
 
@@ -233,7 +242,7 @@ public class MainVerticle extends AbstractVerticle {
                 context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
             });
 
-            router.route("/").handler(context -> {
+            router.route("/").handler((RoutingContext context) -> {
                 context.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
             });
 
@@ -258,31 +267,31 @@ public class MainVerticle extends AbstractVerticle {
             //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
             abyssRouter.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
 
-            abyssRouter.route().handler(ctx -> {
-                logger.info("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
+            abyssRouter.route().handler((RoutingContext ctx) -> {
+                LOGGER.info("router.route().handler invoked... the last bus stop, no any bus stop more, so it is firing 404 now...!.");
                 ctx.fail(404);
             });
 
 
-            logger.info("starting http server");
+            LOGGER.info("starting http server");
             HttpServerOptions httpServerOptions = new HttpServerOptions();
 
-            logger.warn("http server is running in plaintext mode. Enable SSL in config for production deployments.");
+            LOGGER.warn("http server is running in plaintext mode. Enable SSL in config for production deployments.");
             vertx.createHttpServer(httpServerOptions.setCompressionSupported(true))
-                    .requestHandler(abyssRouter::accept)
+                    .requestHandler(abyssRouter)
                     .listen(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_SERVER_PORT)
                             , Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_SERVER_HOST)
-                            , result -> {
+                            , (AsyncResult<HttpServer> result) -> {
                                 if (result.succeeded()) {
-                                    logger.info("http server started..." + result.succeeded());
+                                    LOGGER.info("http server started... {}", result.succeeded());
                                     startFuture.complete();
                                 } else {
-                                    logger.error("http server starting failed..." + result.cause());
+                                    LOGGER.error("http server starting failed... {}", result.cause().getLocalizedMessage());
                                     startFuture.fail(result.cause());
                                 }
                             });
-        }), t -> {
-            logger.error("serviceDiscovery.getJDBCClient failed..." + t);
+        }), (Throwable t) -> {
+            LOGGER.error("serviceDiscovery.getJDBCClient failed... {}", t.getLocalizedMessage());
             startFuture.fail(t);
         });
 
@@ -290,17 +299,16 @@ public class MainVerticle extends AbstractVerticle {
     }
 
     /**
-     * @param routingContext
+     * @param routingContext vertx routing context
      */
     private void createUser(RoutingContext routingContext) {
 
-        logger.info("executing createUser...");
+        LOGGER.info("executing createUser...");
 
         String username = routingContext.request().getParam("username");
         String password = routingContext.request().getParam("password");
 
-        logger.info("Received user:" + username);
-        logger.trace("Received pass:" + password);
+        LOGGER.info("Received user: {}", username);
 
 
         jdbcClient.getConnection(resConn -> {
@@ -308,37 +316,37 @@ public class MainVerticle extends AbstractVerticle {
 
                 SQLConnection connection = resConn.result();
 
-                connection.queryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(username), resQuery -> {
-                    if (resQuery.succeeded()) {
-                        ResultSet rs = resQuery.result();
-                        // Do something with results
-                        if (rs.getNumRows() > 0) {
-                            logger.info("user found: " + rs.toJson().encodePrettily());
-                        } else {
-                            logger.info("user NOT found, creating ...");
-                            String salt = auth.generateSalt();
-                            String hash = auth.computeHash(password, salt);
-                            // save to the database
-                            connection.updateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)", new JsonArray().add(username).add(hash).add(salt), resUpdate -> {
-                                if (resUpdate.succeeded()) {
-                                    logger.info("user created successfully");
+                connection.queryWithParams("SELECT * FROM portalschema.USER WHERE USERNAME = ?", new JsonArray().add(username)
+                        , (AsyncResult<ResultSet> resQuery) -> {
+                            if (resQuery.succeeded()) {
+                                ResultSet rs = resQuery.result();
+                                // Do something with results
+                                if (rs.getNumRows() > 0) {
+                                    LOGGER.info("user found: {} ", rs.toJson().encodePrettily());
                                 } else {
-                                    logger.error("user create error: " + resUpdate.cause().getLocalizedMessage());
-                                    resUpdate.failed();
+                                    LOGGER.info("user NOT found, creating ...");
+                                    String salt = auth.generateSalt();
+                                    String hash = auth.computeHash(password, salt);
+                                    // save to the database
+                                    connection.updateWithParams("INSERT INTO portalschema.user VALUES (?, ?, ?)"
+                                            , new JsonArray().add(username).add(hash).add(salt), (AsyncResult<UpdateResult> resUpdate) -> {
+                                                if (resUpdate.succeeded()) {
+                                                    LOGGER.info("user created successfully");
+                                                } else {
+                                                    LOGGER.error("user create error: {}", resUpdate.cause().getLocalizedMessage());
+                                                    resUpdate.failed();
+                                                }
+                                            });
                                 }
-                            });
-                        }
-                    } else {
-                        logger.error("SELECT user failed: " + resQuery.cause().getLocalizedMessage());
-                        connection.close();
-                        //jdbcClient.close();
-                    }
-                });
+                            } else {
+                                LOGGER.error("SELECT user failed: {}", resQuery.cause().getLocalizedMessage());
+                                connection.close();
+                            }
+                        });
             } else {
                 // Failed to get connection - deal with it
-                logger.error("JDBC getConnection failed: " + resConn.cause().getLocalizedMessage());
+                LOGGER.error("JDBC getConnection failed: {}", resConn.cause().getLocalizedMessage());
                 resConn.failed();
-                //jdbcClient.close();
             }
         });
     }
@@ -346,13 +354,12 @@ public class MainVerticle extends AbstractVerticle {
 
     private void pGenericHttpStatusCodeHandler(RoutingContext context) {
 
-        logger.info("pGenericHttpStatusCodeHandler invoked...");
+        LOGGER.info("pGenericHttpStatusCodeHandler invoked...");
         Integer statusCode = context.session().get(Constants.HTTP_STATUSCODE);
-        logger.info("pGenericHttpStatusCodeHandler - status code: " + statusCode);
+        LOGGER.info("pGenericHttpStatusCodeHandler - status code: {}", statusCode);
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(context.vertx());
-        //configureThymeleafEngine(engine);
 
         context.put(Constants.HTTP_STATUSCODE, statusCode);
         context.put(Constants.HTTP_URL, context.session().get(Constants.HTTP_URL));
@@ -378,36 +385,35 @@ public class MainVerticle extends AbstractVerticle {
 //        }
 
         // and now delegate to the engine to render it.
-        engine.render(templateContext, Constants.TEMPLATE_DIR_ROOT + templateFileName, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_ROOT + templateFileName, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
                 context.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 context.response().setStatusCode(statusCode);
                 context.response().end(res.result());
             } else {
-                logger.error("pGenericHttpStatusCodeHandler - engine render failed with cause:" + res.cause().getLocalizedMessage());
+                LOGGER.error("pGenericHttpStatusCodeHandler - engine render failed with cause: {}", res.cause().getLocalizedMessage());
                 context.fail(res.cause());
             }
         });
     }
 
     private void failureHandler(RoutingContext context) {
-        logger.info("failureHandler invoked.. statusCode: " + context.statusCode());
+        LOGGER.info("failureHandler invoked.. statusCode: {}", context.statusCode());
+        final String LOGGER_MESSAGE = "{} is put in context session: {}";
 
         //Use user's session for storage 
         context.session().put(Constants.HTTP_STATUSCODE, new Integer(context.statusCode()));
-        logger.info(Constants.HTTP_STATUSCODE + " is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
+        LOGGER.info(LOGGER_MESSAGE, Constants.HTTP_STATUSCODE, context.session().get(Constants.HTTP_STATUSCODE));
 
         context.session().put(Constants.HTTP_URL, context.request().path());
-        logger.info(Constants.HTTP_URL + " is put in context session:" + context.session().get(Constants.HTTP_URL));
+        LOGGER.info(LOGGER_MESSAGE, Constants.HTTP_URL, context.session().get(Constants.HTTP_URL));
 
         context.session().put(Constants.HTTP_ERRORMESSAGE, HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase());
-        logger.info(Constants.HTTP_ERRORMESSAGE + " is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
+        LOGGER.info(LOGGER_MESSAGE, Constants.HTTP_ERRORMESSAGE, context.session().get(Constants.HTTP_ERRORMESSAGE));
 
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
-        logger.info(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+        LOGGER.info("{} is put in context session: {}", Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
-
-        String strStatusCode = String.valueOf(context.statusCode());
 
         //if (strStatusCode.matches("[4|5][0|1]\")) //TODO: In the future...
 //        if (strStatusCode.matches("400|401|403|404|500")) {

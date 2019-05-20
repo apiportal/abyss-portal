@@ -28,7 +28,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 class FileUtil {
-    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
+    private static final String OPENAPI = "openapi";
 
     JsonArray getYamlFileList() {
         JsonArray yamlFileList = new JsonArray();
@@ -38,13 +39,13 @@ class FileUtil {
             Enumeration<JarEntry> entries = jf.entries();
             while (entries.hasMoreElements()) {
                 JarEntry je = entries.nextElement();
-                if (je.getName().startsWith("openapi") && (je.getName().toLowerCase(Locale.ENGLISH).endsWith(".yaml"))) {
+                if (je.getName().startsWith(OPENAPI) && (je.getName().toLowerCase(Locale.ENGLISH).endsWith(".yaml"))) {
                     String fileName = je.getName();
-                    yamlFileList.add(fileName.substring(fileName.lastIndexOf("openapi") + "openapi".length() + 1));
+                    yamlFileList.add(fileName.substring(fileName.lastIndexOf(OPENAPI) + OPENAPI.length() + 1));
                 }
             }
         } catch (IOException e) {
-            logger.error("error while getting resource files readMyResources {} - {}"
+            LOGGER.error("error while getting resource files readMyResources {} - {}"
                     , e.getLocalizedMessage(), e.getStackTrace());
         }
 

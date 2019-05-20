@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 
 public class OpenAPI3ResponseValidationHandlerImpl extends HTTPOperationRequestValidationHandlerImpl<Operation> implements OpenAPI3RequestValidationHandler {
 
-    private static Logger logger = LoggerFactory.getLogger(OpenAPI3ResponseValidationHandlerImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAPI3ResponseValidationHandlerImpl.class);
 
 
     /*private final static ParameterTypeValidator CONTENT_TYPE_VALIDATOR = new ParameterTypeValidator() {
@@ -76,7 +76,7 @@ public class OpenAPI3ResponseValidationHandlerImpl extends HTTPOperationRequestV
 
     public OpenAPI3ResponseValidationHandlerImpl(Operation pathSpec, OpenAPI spec) {
         super(pathSpec);
-        logger.trace("OpenAPI3ResponseValidationHandlerImpl constructor invoked: {} : {}", pathSpec.getOperationId(), spec.getInfo().getTitle());
+        LOGGER.trace("OpenAPI3ResponseValidationHandlerImpl constructor invoked: {} : {}", pathSpec.getOperationId(), spec.getInfo().getTitle());
         //this.resolvedParameters = resolvedParameters;
         this.spec = spec;
         //this.refsCache = refsCache;
@@ -85,7 +85,7 @@ public class OpenAPI3ResponseValidationHandlerImpl extends HTTPOperationRequestV
 
     @Override
     public void parseOperationSpec() {
-        logger.trace("parseOperationSpec invoked");
+        LOGGER.trace("parseOperationSpec invoked");
         // Extract from path spec parameters description
 /*        if (resolvedParameters!=null) {
             for (Parameter opParameter : resolvedParameters) {
@@ -104,7 +104,7 @@ public class OpenAPI3ResponseValidationHandlerImpl extends HTTPOperationRequestV
 
     /* Entry point for parse RequestBody object */
     private void parseApiResponse(ApiResponse apiResponse) {
-        logger.trace("parseApiResponse invoked");
+        LOGGER.trace("parseApiResponse invoked");
         if (apiResponse != null && apiResponse.getContent() != null) {
             for (Map.Entry<String, ? extends MediaType> mediaType : apiResponse.getContent().entrySet()) {
                 if (Utils.isJsonContentType(mediaType.getKey()) && mediaType.getValue().getSchema() != null) {

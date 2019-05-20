@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.verapi.key.generate.impl;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -39,13 +40,13 @@ import org.slf4j.LoggerFactory;
 
 class Cryptor {
 
-    private static Logger logger = LoggerFactory.getLogger(Cryptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Cryptor.class);
 
     private static final byte[] IV = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
 
     private static SecretKey aesEncKey = null;
 
-    //private	static SecretKey aesMacKey = null;
+    //private static SecretKey aesMacKey = null;
 
     private static final String GENERATE_ALGORITHM = "AES";
     private static final String CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding";
@@ -87,7 +88,7 @@ class Cryptor {
         } catch (NoSuchAlgorithmException e1) {
             // TODO: handle exception
             // TODO: log exception
-            logger.error("generateAesKey error: {} \n error stack: {}", e1.getLocalizedMessage(), e1.getStackTrace());
+            LOGGER.error("generateAesKey error: {} \n error stack: {}", e1.getLocalizedMessage(), e1.getStackTrace());
             //throw e1;
         }
     }
@@ -132,22 +133,22 @@ class Cryptor {
             aesCipher = Cipher.getInstance(CRYPT_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             // TODO Auto-generated catch block
-            logger.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             return new CryptoOperationResult(null, false, "NoSuchAlgorithmException", e);
         } catch (NoSuchPaddingException e) {
             // TODO Auto-generated catch block
-            logger.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             return new CryptoOperationResult(null, false, "NoSuchPaddingException", e);
         }
         try {
             aesCipher.init(operationMode, aesEncKey, ivParameterSpec);
         } catch (InvalidKeyException e) {
             // TODO Auto-generated catch block
-            logger.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             return new CryptoOperationResult(null, false, "InvalidKeyException", e);
         } catch (InvalidAlgorithmParameterException e) {
             // TODO Auto-generated catch block
-            logger.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             return new CryptoOperationResult(null, false, "InvalidAlgorithmParameterException", e);
         }
 
@@ -155,12 +156,12 @@ class Cryptor {
             outputBytes = aesCipher.doFinal(inputBytes);
         } catch (IllegalBlockSizeException e) {
             // TODO Auto-generated catch block
-            logger.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             return new CryptoOperationResult(null, false, "IllegalBlockSizeException", e);
 
         } catch (BadPaddingException e) {
             // TODO Auto-generated catch block
-            logger.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             return new CryptoOperationResult(null, false, "BadPaddingException", e);
         }
 

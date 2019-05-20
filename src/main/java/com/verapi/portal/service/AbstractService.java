@@ -42,7 +42,7 @@ import java.util.UUID;
 
 public abstract class AbstractService<T> implements IService<T> {
 
-    private static Logger logger = LoggerFactory.getLogger(AbstractService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractService.class);
 
     protected Vertx vertx;
     protected JDBCClient jdbcClient;
@@ -108,7 +108,7 @@ public abstract class AbstractService<T> implements IService<T> {
                     java.sql.Connection con = sqlConnection.getDelegate().unwrap();
                     databaseMetaData = con.getMetaData();
                     con.close();
-                    logger.trace("AbstractService - Got database metadata successfully: {} {}",
+                    LOGGER.trace("AbstractService - Got database metadata successfully: {} {}",
                             databaseMetaData.getDatabaseProductName(), databaseMetaData.getDatabaseProductVersion());
                     return Single.just(jdbcClient);
                 });*/
@@ -125,9 +125,9 @@ public abstract class AbstractService<T> implements IService<T> {
 /* TODO: aşağıdaki kodda vertx sapıtıyor ve hata üretiyor, JDBCClient.createShared hata fırlatıyor
         return AbyssServiceDiscovery.getInstance(vertx).getServiceDiscovery().rxGetRecord(new JsonObject().put("name", Constants.API_DATA_SOURCE_SERVICE))
                 .flatMap(record1 -> {
-                    logger.trace("AbstractService() initJDBCClient() getServiceDiscovery().rxGetRecord for " + Constants.API_DATA_SOURCE_SERVICE + ", record = " + record1.toJson().encodePrettily());
+                    LOGGER.trace("AbstractService() initJDBCClient() getServiceDiscovery().rxGetRecord for " + Constants.API_DATA_SOURCE_SERVICE + ", record = " + record1.toJson().encodePrettily());
                     JDBCClient jdbcClient = JDBCClient.createShared(vertx, record1.getMetadata(), Constants.API_DATA_SOURCE_SERVICE);
-                    logger.trace("AbstractService() initJDBCClient() JDBCClient.createShared for " + Constants.API_DATA_SOURCE_SERVICE + " jdbcClient = " + jdbcClient);
+                    LOGGER.trace("AbstractService() initJDBCClient() JDBCClient.createShared for " + Constants.API_DATA_SOURCE_SERVICE + " jdbcClient = " + jdbcClient);
                     return Single.just(jdbcClient);
                     //return Single.just(JDBCClient.createShared(vertx, record1.getMetadata(), dataSourceName));
                 });
@@ -178,7 +178,7 @@ public abstract class AbstractService<T> implements IService<T> {
     }
 
     private Single<CompositeResult> rxUpdateWithParams(String sql, JsonArray params) {
-        logger.trace("---rxUpdateWithParams invoked");
+        LOGGER.trace("---rxUpdateWithParams invoked");
         return (sqlConnection==null ? jdbcClient
                 .rxGetConnection() : Single.just(sqlConnection))
                 .flatMap(conn -> conn
@@ -203,30 +203,30 @@ public abstract class AbstractService<T> implements IService<T> {
                                     boolean isParamTable = true;
                                     String tableName = "";
                                     Boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
-                                    logger.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
+                                    LOGGER.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
                                     if (isOrganizationFilteringEnabled) {
                                         tableName = getTableNameFromSqlForUpdate(sql).toLowerCase();
-                                        logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+                                        LOGGER.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
                                         if (!tableName.isEmpty() && !tableName.equals("insert")) {
                                             isParamTable = AbyssDatabaseMetadataDiscovery.getInstance().getTableMetadata(tableName).isParamTable;
                                         } //TODO: Check organizationid == org uuid in session
 
                                         boolean isAdmin = false; //TODO: Admin Only
                                         boolean doesContainOrderBy = false; //TODO: Order By Handling
-                                        logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+                                        LOGGER.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
                                     }
 
 
                                     if (isParamTable || organizationUuid == null) {
                                         if (params == null) {
-                                            logger.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
+                                            LOGGER.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
                                             return conn.rxUpdate(sql);
                                         } else {
-                                            logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
+                                            LOGGER.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
                                             return conn.rxUpdateWithParams(sql, params);
                                         }
                                     } else {
-                                        logger.trace("Current organizationUuid: {}", organizationUuid);
+                                        LOGGER.trace("Current organizationUuid: {}", organizationUuid);
                                         String sqlWithOrganizationFilter;
                                         JsonArray paramWithOrganizationFilter;
                                         if (params == null) {
@@ -236,19 +236,19 @@ public abstract class AbstractService<T> implements IService<T> {
                                             sqlWithOrganizationFilter = sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_IS;
                                             paramWithOrganizationFilter = params.add(organizationUuid);
                                         }
-                                        logger.trace("{}::rxQueryWithParams Organization Filtered >> sql {} params {}", this.getClass().getName(), sqlWithOrganizationFilter, paramWithOrganizationFilter);
+                                        LOGGER.trace("{}::rxQueryWithParams Organization Filtered >> sql {} params {}", this.getClass().getName(), sqlWithOrganizationFilter, paramWithOrganizationFilter);
                                         return conn.rxUpdateWithParams(sqlWithOrganizationFilter, paramWithOrganizationFilter);
                                     }
                                 })
 
                                 .flatMap(resultSet -> {
                                     if (resultSet.getUpdated() == 0 && !sql.contains("ON CONFLICT DO NOTHING")) {
-                                        logger.error("unable to process sql with parameters");
-                                        logger.error("unable to process sql {} with parameters {}", sql, params);
+                                        LOGGER.error("unable to process sql with parameters");
+                                        LOGGER.error("unable to process sql {} with parameters {}", sql, params);
                                         //return Observable.error(new Exception("unable to process sql with parameters"));
                                         return Single.error(new Exception("unable to process sql with parameters"));
                                     }
-                                    logger.trace("{}::rxUpdateWithParams >> {} row(s) processed", this.getClass().getName(), resultSet.getUpdated());
+                                    LOGGER.trace("{}::rxUpdateWithParams >> {} row(s) processed", this.getClass().getName(), resultSet.getUpdated());
                                     //return Observable.just(resultSet);
                                     return Single.just(resultSet);
                                 })
@@ -265,7 +265,7 @@ public abstract class AbstractService<T> implements IService<T> {
 /*
                         // commit if all succeeded
                         .flatMap(updateResult -> {
-                            logger.trace("{}::rxUpdateWithParams >> commit processed", this.getClass().getName());
+                            LOGGER.trace("{}::rxUpdateWithParams >> commit processed", this.getClass().getName());
                             return conn.rxCommit().toSingleDefault(new CompositeResult(updateResult));
                         })
 */
@@ -275,24 +275,24 @@ public abstract class AbstractService<T> implements IService<T> {
                                 .onErrorResumeNext(ex -> conn.rxRollback().toSingleDefault(new CompositeResult(ex)).map(compositeResult -> compositeResult)
                                         .onErrorResumeNext(ex2 -> Single.just(new CompositeResult(new CompositeException(ex, ex2)))) //Single.error(new CompositeException(ex, ex2)))
                                         .flatMap(ignore -> {
-                                            logger.warn("rollback transaction completed");
-                                            logger.error(ex.getLocalizedMessage());
-                                            logger.error(Arrays.toString(ex.getStackTrace()));
+                                            LOGGER.warn("rollback transaction completed");
+                                            LOGGER.error(ex.getLocalizedMessage());
+                                            LOGGER.error(Arrays.toString(ex.getStackTrace()));
                                             //return Single.just(new UpdateResult().setKeys(new JsonArray().add(0)).setUpdated(1));
                                             return Single.just(new CompositeResult(ex));
                                         }))
 
 
 //                                .onErrorResumeNext(throwable -> {
-//                                    logger.warn("rollback transaction completed");
-//                                    logger.error(throwable.getLocalizedMessage());
-//                                    logger.error(Arrays.toString(throwable.getStackTrace()));
+//                                    LOGGER.warn("rollback transaction completed");
+//                                    LOGGER.error(throwable.getLocalizedMessage());
+//                                    LOGGER.error(Arrays.toString(throwable.getStackTrace()));
 //                                    conn.rxRollback().toSingleDefault(true);
 //                                    return Single.just(new CompositeResult(new UpdateResult(), throwable));
 //                                })
 //
                                 .doAfterSuccess(succ -> {
-                                    logger.trace("sql processed successfully");
+                                    LOGGER.trace("sql processed successfully");
                                 })
 
                                 // close the connection regardless succeeded or failed
@@ -305,21 +305,21 @@ public abstract class AbstractService<T> implements IService<T> {
     }
 
     private Single<ResultSet> rxQueryWithParams(String sql, JsonArray params) {
-        logger.trace("---rxQueryWithParams invoked");
+        LOGGER.trace("---rxQueryWithParams invoked");
 /*
         java.sql.ResultSet tableMetaDataResultSet = null;
         try {
             tableMetaDataResultSet = databaseMetaData.getColumns("", "abyss", "api", "");
             try {
                 while (tableMetaDataResultSet.next()) {
-                    logger.debug("metadata:: table name:{} column name:{}, data type:{}"
+                    LOGGER.debug("metadata:: table name:{} column name:{}, data type:{}"
                             , tableMetaDataResultSet.getString("TABLE_NAME"), tableMetaDataResultSet.getString("COLUMN_NAME"), tableMetaDataResultSet.getString("DATA_TYPE"));
                 }
             } finally {
                 tableMetaDataResultSet.close();
             }
         } catch (SQLException e) {
-            logger.error("an error occurred while getting columns metada of API table. {}", (Object) e.getStackTrace());
+            LOGGER.error("an error occurred while getting columns metada of API table. {}", (Object) e.getStackTrace());
         }
 */
         return (sqlConnection==null ? jdbcClient
@@ -338,11 +338,11 @@ public abstract class AbstractService<T> implements IService<T> {
                             boolean isParamTable = true;
                             String tableName = "";
                             Boolean isOrganizationFilteringEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ACCESS_CONTROL_ORGANIZATION_FILTERING_ENABLED);  //TODO: Organization Filter Disabled for testing
-                            logger.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
+                            LOGGER.trace("isOrganizationFilteringEnabled: {}", isOrganizationFilteringEnabled );
                             if (isOrganizationFilteringEnabled) {
 
                                 tableName = getTableNameFromSql(sql).toLowerCase();
-                                logger.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
+                                LOGGER.trace("TableName>>> {}\nSQL>>> {}\n", tableName, sql);
 
                                 if (operationId != null && !operationId.equals("getCurrentUser")) {
                                     if (!tableName.isEmpty()) {
@@ -352,20 +352,20 @@ public abstract class AbstractService<T> implements IService<T> {
 
                                 boolean isAdmin = false; //TODO: Admin Only
                                 boolean doesContainOrderBy = false; //TODO: Order By Handling
-                                logger.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
+                                LOGGER.trace("SQL>>>> params:{} isParamTable:{}\n", params==null, isParamTable);
                             }
 
 
                             if (isParamTable || organizationUuid == null) {
                                 if (params == null) {
-                                    logger.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
+                                    LOGGER.trace("{}::rxQuery >> sql {}", this.getClass().getName(), sql);
                                     return conn.rxQuery(sql);
                                 } else {
-                                    logger.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
+                                    LOGGER.trace("{}::rxQueryWithParams >> sql {} params {}", this.getClass().getName(), sql, params);
                                     return conn.rxQueryWithParams(sql, params);
                                 }
                             } else {
-                                logger.trace("Current organizationUuid: {}", organizationUuid);
+                                LOGGER.trace("Current organizationUuid: {}", organizationUuid);
                                 String sqlWithOrganizationFilter;
                                 JsonArray paramWithOrganizationFilter;
                                 if (params == null) {
@@ -375,12 +375,12 @@ public abstract class AbstractService<T> implements IService<T> {
                                     sqlWithOrganizationFilter = sql + SQL_AND + tableName + "."+ SQL_CONDITION_ORGANIZATION_INSIDE;
                                     paramWithOrganizationFilter = params.add(organizationUuid);
                                 }
-                                logger.trace("{}::rxQueryWithParams Organization Filtered >> sql {} params {}", this.getClass().getName(), sqlWithOrganizationFilter, paramWithOrganizationFilter);
+                                LOGGER.trace("{}::rxQueryWithParams Organization Filtered >> sql {} params {}", this.getClass().getName(), sqlWithOrganizationFilter, paramWithOrganizationFilter);
                                 return conn.rxQueryWithParams(sqlWithOrganizationFilter, paramWithOrganizationFilter);
                             }
                         })
                         .flatMap(resultSet -> {
-                            logger.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
+                            LOGGER.trace("{}::rxQueryWithParams >> {} row selected", this.getClass().getName(), resultSet.getNumRows());
 
                             return Single.just(resultSet);
                         })
@@ -390,7 +390,7 @@ public abstract class AbstractService<T> implements IService<T> {
     }
 
     protected Single<CompositeResult> insert(final JsonArray insertParams, final String insertQuery) {
-        logger.trace("---insert invoked");
+        LOGGER.trace("---insert invoked");
         return rxUpdateWithParams(insertQuery, insertParams);
     }
 
@@ -594,9 +594,9 @@ public abstract class AbstractService<T> implements IService<T> {
     protected static JsonObject evaluateCompositeResultAndReturnRecordStatus(CompositeResult result, JsonObject parentRecordStatus) { //TODO: Static?
         JsonObject recordStatus = new JsonObject();
         if (result.getThrowable() != null) {
-            logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-            logger.error(result.getThrowable().getLocalizedMessage());
-            logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+            LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable());
+            LOGGER.error(result.getThrowable().getLocalizedMessage());
+            LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
             recordStatus
                     .put("uuid", "0")
                     .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -607,11 +607,11 @@ public abstract class AbstractService<T> implements IService<T> {
                             .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                             .toJson());
         } else {
-            logger.trace("evaluateCompositeResultAndReturnRecordStatus>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+            LOGGER.trace("evaluateCompositeResultAndReturnRecordStatus>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
             if (result.getResultSet()!=null) {
-                logger.trace("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet {}", result.getResultSet().toJson().encodePrettily());
+                LOGGER.trace("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet {}", result.getResultSet().toJson().encodePrettily());
             } else {
-                logger.info("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet is null");
+                LOGGER.info("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet is null");
             }
 
             if (result.getResultSet()!=null && result.getResultSet().getNumRows()>0) {
@@ -642,7 +642,7 @@ public abstract class AbstractService<T> implements IService<T> {
      * @return recordStatus
      */
     public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
-        logger.trace("---insert invoked");
+        LOGGER.trace("---insert invoked");
 
         JsonArray insertParam = prepareInsertParameters(insertRecord);
         return insert(insertParam, getInsertSql())

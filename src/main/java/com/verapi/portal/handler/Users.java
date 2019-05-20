@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class Users extends PortalHandler implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(Users.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Users.class);
 
     private final JDBCClient jdbcClient;
 
@@ -43,7 +43,7 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("Users.handle invoked..");
+        LOGGER.info("Users.handle invoked..");
 
         //TODO: pagination eklenmeli
 
@@ -76,25 +76,25 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
                                 "FROM portalschema.SUBJECT ORDER BY SUBJECT_NAME", new JsonArray()))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
-                                logger.info("Number of users found:[" + resultSet.getNumRows() + "]");
+                                LOGGER.info("Number of users found:[" + resultSet.getNumRows() + "]");
                                 //result = resultSet.toJson().encode();
                                 return Single.just(resultSet);
                             } else {
-                                logger.info("No users found...");
+                                LOGGER.info("No users found...");
                                 return Single.error(new Exception("No users found"));
                             }
                         })
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
         ).subscribe(result -> {
-                    logger.info("Subscription to Users successfull:" + result);
+                    LOGGER.info("Subscription to Users successfull:" + result);
                     JsonObject usersResult = new JsonObject();
                     usersResult.put("userList", result.toJson().getValue("rows"));
                     usersResult.put("totalPages", 1).put("totalItems", result.getNumRows()).put("pageSize", 30).put("currentPage", 1).put("last", true).put("first", true).put("sort", "ASC SUBJECT NAME");
                     routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8").end(usersResult.toString(), "UTF-8");
                 }, t -> {
-                    logger.error("Users Error", t);
-                    generateResponse(routingContext, logger, 401, "Users Handling Error Occured", t.getLocalizedMessage(), "", "");
+                    LOGGER.error("Users Error", t);
+                    generateResponse(routingContext, LOGGER, 401, "Users Handling Error Occured", t.getLocalizedMessage(), "", "");
 
                 }
         );
@@ -102,7 +102,7 @@ public class Users extends PortalHandler implements Handler<RoutingContext> {
 
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("Users.pageRender invoked...");
+        LOGGER.info("Users.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());

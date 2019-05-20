@@ -19,15 +19,11 @@ package com.verapi.portal.common;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.servicediscovery.ServiceDiscovery;
 import io.vertx.servicediscovery.ServiceDiscoveryOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class AbyssServiceDiscovery implements AutoCloseable {
+public final class AbyssServiceDiscovery implements AutoCloseable {
 
-    private static Logger logger = LoggerFactory.getLogger(AbyssServiceDiscovery.class);
-
-    private static AbyssServiceDiscovery instance = null;
-    private static ServiceDiscovery serviceDiscovery;
+    private static AbyssServiceDiscovery instance;
+    private ServiceDiscovery serviceDiscovery;
 
     private AbyssServiceDiscovery(Vertx vertx) {
         serviceDiscovery = ServiceDiscovery.create(vertx,
@@ -37,8 +33,9 @@ public class AbyssServiceDiscovery implements AutoCloseable {
     }
 
     public static AbyssServiceDiscovery getInstance(Vertx vertx) {
-        if (instance == null)
+        if (instance == null) {
             instance = new AbyssServiceDiscovery(vertx);
+        }
         return instance;
     }
 

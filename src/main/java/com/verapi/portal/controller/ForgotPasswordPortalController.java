@@ -16,17 +16,22 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.key.generate.impl.Token;
-import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.key.generate.impl.Token;
+import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.MailUtil;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +39,8 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 
 @AbyssController(routePathGET = "forgot-password", routePathPOST = "forgot-password", htmlTemplateFile = "forgot-password.html", isPublic = true)
-public class ForgotPasswordController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(ForgotPasswordController.class);
+public class ForgotPasswordPortalController extends AbstractPortalController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForgotPasswordPortalController.class);
 
     private Integer subjectId;
     private String subjectUUID;
@@ -43,28 +48,28 @@ public class ForgotPasswordController extends PortalAbstractController {
     private String displayName;
     private String authToken;
 
-    public ForgotPasswordController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public ForgotPasswordPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("ForgotPasswordController.defaultGetHandler invoked...");
+        LOGGER.trace("ForgotPasswordPortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("ForgotPasswordController.handle invoked..");
+        LOGGER.trace("ForgotPasswordPortalController.handle invoked..");
 
         String username = routingContext.request().getFormAttribute("username");
-        logger.trace("Received username:" + username);
+        LOGGER.trace("Received username: {}", username);
 
 
         //TODO: OWASP Email Validate
 
 
-        jdbcClient.rxGetConnection().flatMap(resConn ->
+        jdbcClient.rxGetConnection().flatMap((SQLConnection resConn) ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
@@ -72,35 +77,41 @@ public class ForgotPasswordController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM subject WHERE subjectName = ? and isDeleted = false", new JsonArray().add(username)))
-                        .flatMap(resultSet -> {
+                        .flatMap((Boolean resQ) -> resConn.rxQueryWithParams("SELECT * FROM subject WHERE subjectName = ? and isDeleted = false"
+                                , new JsonArray().add(username)))
+                        .flatMap((ResultSet resultSet) -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
-                                logger.error("username NOT found...");
+                                LOGGER.error("username NOT found...");
                                 return Single.error(new Exception("Username not found in our records"));
                             } else if (numOfRows == 1) {
                                 JsonObject row = resultSet.getRows(true).get(0);
                                 if (!row.getBoolean("isActivated")) {
-                                    logger.error("account connected to username is NOT activated");
+                                    LOGGER.error("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
                                     subjectId = row.getInteger("id");
                                     subjectUUID = row.getString("uuid");
                                     email = row.getString("email");
                                     displayName = row.getString("display_name");
-                                    logger.info("Activated account found:[" + subjectId + " (" + subjectUUID + ")]. Email:[" + email + "]Reset password token is going to be created...");
+                                    LOGGER.info("Activated account found:[{}({})]. Email:[{}] Reset password token is going to be created..."
+                                            , subjectId, subjectUUID, email);
 
                                     //Generate and Persist Reset Password Token
                                     Token tokenGenerator = new Token();
                                     AuthenticationInfo authInfo;
                                     try {
-                                        authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.renewal.password.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
-                                                username,
-                                                routingContext.vertx().getDelegate());
-                                        logger.trace("Reset Password: token is created successfully: " + authInfo.getToken());
+                                        authInfo = tokenGenerator
+                                                .generateToken(Config
+                                                                .getInstance()
+                                                                .getConfigJsonObject()
+                                                                .getInteger("token.activation.renewal.password.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                                        username,
+                                                        routingContext.vertx().getDelegate());
+                                        LOGGER.trace("Reset Password: token is created successfully: {}", authInfo.getToken());
                                         authToken = authInfo.getToken();
                                     } catch (UnsupportedEncodingException e) {
-                                        logger.error("Reset Password: tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                                        LOGGER.error("Reset Password: tokenGenerator.generateToken: {}", e.getLocalizedMessage());
                                         return Single.error(new Exception("Reset Password: token could not be generated"));
                                     }
                                     return resConn.rxUpdateWithParams("INSERT INTO subject_activation (" +
@@ -127,12 +138,14 @@ public class ForgotPasswordController extends PortalAbstractController {
                                     );
                                 }
                             } else {
-                                logger.error("email is connected to multiple accounts [" + numOfRows + "]");
-                                return Single.error(new Exception("This email is connected to multiple accounts. Please correct the other accounts by getting help from administration of your organization and try again."));
+                                LOGGER.error("email is connected to multiple accounts [{}]", numOfRows);
+                                return Single.error(new Exception("This email is connected to multiple accounts. " +
+                                        "Please correct the other accounts by getting help from administration of your organization and try again."));
                             }
                         })
-                        .flatMap(updateResult -> {
-                            logger.trace("ForgotPasswordController - Deactivating Subject with id:[" + subjectId + " (" + subjectUUID + ")] -> " + updateResult.getKeys().encodePrettily());
+                        .flatMap((UpdateResult updateResult) -> {
+                            LOGGER.trace("ForgotPasswordPortalController - Deactivating Subject with id:[{}({})] -> {}"
+                                    , subjectId, subjectUUID, updateResult.getKeys().encodePrettily());
                             if (updateResult.getUpdated() == 1) {
 
                                 return resConn.rxUpdateWithParams("UPDATE subject SET " +
@@ -150,9 +163,9 @@ public class ForgotPasswordController extends PortalAbstractController {
 
                         })
                         // commit if all succeeded
-                        .flatMap(updateResult -> {
+                        .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
-                                logger.trace("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
+                                LOGGER.trace("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
                                 return resConn.rxCommit().toSingleDefault(true);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
@@ -164,41 +177,51 @@ public class ForgotPasswordController extends PortalAbstractController {
                                 .flatMap(ignore -> Single.error(ex))
                         )
 
-                        .doAfterSuccess(succ -> {
-                            logger.trace("Reset password token is created and persisted successfully");
+                        .doAfterSuccess((Boolean succ) -> {
+                            LOGGER.trace("Reset password token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
                             json.put(Constants.EB_MSG_TOKEN, authToken);
                             json.put(Constants.EB_MSG_TO_EMAIL, email);
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.RESET_PASSWORD_TOKEN);
-                            json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderForgotPasswordMailBody(routingContext,
-                                    Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.RESET_PASSWORD_PATH + "/?v=" + authToken,
-                                    Constants.RESET_PASSWORD_TEXT));
+                            json.put(Constants.EB_MSG_HTML_STRING,
+                                    MailUtil.renderForgotPasswordMailBody(routingContext,
+                                            Config
+                                                    .getInstance()
+                                                    .getConfigJsonObject()
+                                                    .getString(Constants.MAIL_BASE_URL) + Constants.RESET_PASSWORD_PATH + "/?v=" + authToken,
+                                            Constants.RESET_PASSWORD_TEXT));
 
-                            logger.trace("Forgot Password mail is rendered successfully");
-                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                if (result.succeeded()) {
-                                    logger.trace("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
-                                } else {
-                                    logger.error("Forgot Password Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
-                                }
+                            LOGGER.trace("Forgot Password mail is rendered successfully");
+                            routingContext.vertx().getDelegate().eventBus()
+                                    .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
+                                        if (result.succeeded()) {
+                                            LOGGER.trace("Forgot Password Mailing Event Bus Result: {} | Result: {}"
+                                                    , result.toString(), result.result().body().encodePrettily());
+                                        } else {
+                                            LOGGER.error("Forgot Password Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
+                                        }
 
-                            });
-                            logger.trace("Forgot Password mail is sent to Mail Verticle over Event Bus");
+                                    });
+                            LOGGER.trace("Forgot Password mail is sent to Mail Verticle over Event Bus");
 
                         })
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-        ).subscribe(result -> {
-                    logger.info("Subscription to Forgot Password successfull:" + result);
-                    showTrxResult(routingContext, logger, 200, "Reset Password Code is sent to your email address!", "Please check spam folder also...", "Please click the link inside the mail");
-                }, t -> {
-                    logger.error("Forgot Password Error", t);
+        ).subscribe((Boolean result) -> {
+                    LOGGER.info("Subscription to Forgot Password successfull: {}", result);
+                    showTrxResult(routingContext, LOGGER, 200
+                            , "Reset Password Code is sent to your email address!"
+                            , "Please check spam folder also...", "Please click the link inside the mail");
+                }, (Throwable t) -> {
+                    LOGGER.error("Forgot Password Error", t);
                     //Due to OWASP regulations same output should be given even if error occured.
-                    showTrxResult(routingContext, logger, 200, "Reset Password Code is sent to your email address!", "Please check spam folder also...", "Please click the link inside the mail");
-                    //showTrxResult(routingContext, logger, 401, "Error in Forgot Password Occured!", t.getLocalizedMessage(), "");
+                    showTrxResult(routingContext, LOGGER, 200
+                            , "Reset Password Code is sent to your email address!"
+                            , "Please check spam folder also...", "Please click the link inside the mail");
+                    //showTrxResult(routingContext, LOGGER, 401, "Error in Forgot Password Occured!", t.getLocalizedMessage(), "");
                 }
         );
 

@@ -16,46 +16,52 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.key.generate.impl.Token;
-import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.key.generate.impl.Token;
+import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.MailUtil;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
+import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AbyssController(routePathGET = "reset-password", routePathPOST = "reset-password", htmlTemplateFile = "reset-password.html", isPublic = true)
-public class ResetPasswordController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(ResetPasswordController.class);
+public class ResetPasswordPortalController extends AbstractPortalController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResetPasswordPortalController.class);
+    public static final String TOKEN_TYPE = "tokenType";
 
     private Integer tokenId;
     private String subjectId;
     private String email;
     private String displayName;
 
-    public ResetPasswordController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public ResetPasswordPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("ResetPasswordController.defaultGetHandler invoked...");
+        LOGGER.trace("ResetPasswordPortalController.defaultGetHandler invoked...");
 
         String token = routingContext.request().getParam("v");
-        logger.trace("Received token:" + token);
+        LOGGER.trace("Received token: {}", token);
 
         String path = routingContext.normalisedPath();
-        logger.trace("Received path:" + path);
+        LOGGER.trace("Received path: {}", path);
 
         //Get Stored Token Info
-        jdbcClient.rxGetConnection().flatMap(resConn ->
+        jdbcClient.rxGetConnection().flatMap((SQLConnection resConn) ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
@@ -63,23 +69,25 @@ public class ResetPasswordController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE TOKEN = ? and A.subjectId = S.uuid", new JsonArray().add(token)))
-                        .flatMap(resultSet -> {
+                        .flatMap(resQ -> resConn
+                                .rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE TOKEN = ? and A.subjectId = S.uuid"
+                                        , new JsonArray().add(token)))
+                        .flatMap((ResultSet resultSet) -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
-                                logger.error("token NOT found...");
+                                LOGGER.error("token NOT found...");
                                 return Single.error(new Exception("Token not found in our records"));
                             } else if (numOfRows == 1) {
                                 JsonObject row = resultSet.getRows(true).get(0);
-                                logger.trace("Token found:" + row.encodePrettily());
+                                LOGGER.trace("Token found: {}", row.encodePrettily());
 
                                 if (row.getBoolean("isDeleted")) {
-                                    logger.error("Received Token is deleted");
+                                    LOGGER.error("Received Token is deleted");
                                     return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
                                 }
 
-                                if (!(row.getString("tokenType", "").equals(Constants.RESET_PASSWORD_TOKEN))) {
-                                    logger.error("Received Token Type does not match: " + row.getString("tokenType", "NULL"));
+                                if (!(row.getString(TOKEN_TYPE, "").equals(Constants.RESET_PASSWORD_TOKEN))) {
+                                    LOGGER.error("Received Token Type does not match: {}", row.getString(TOKEN_TYPE, "NULL"));
                                     return Single.error(new Exception("Right token does not exist in our records. Please request a new token."));
                                 }
 
@@ -96,64 +104,62 @@ public class ResetPasswordController extends PortalAbstractController {
                                 AuthenticationInfo authResult = tokenValidator.validateToken(token, authInfo);
 
                                 if (authResult.isValid()) {
-                                    logger.trace("Received Token is valid.");
+                                    LOGGER.trace("Received Token is valid.");
 
                                     email = row.getString("email");
                                     displayName = row.getString("displayName");
 
                                     return Single.just(row);
                                 } else {
-                                    logger.error("Received Token is NOT valid: " + authResult.getResultText());
+                                    LOGGER.error("Received Token is NOT valid: {}", authResult.getResultText());
                                     return Single.error(new Exception("Token is not valid. Please request a new token."));
                                 }
 
                             } else {
-                                logger.error("Multiple tokens found...");
+                                LOGGER.error("Multiple tokens found...");
                                 return Single.error(new Exception("Valid token is not found in our records"));
                             }
                         })
-                        .doAfterSuccess(succ -> {
-                            logger.info("ResetPasswordController Get: Reset Password Token is validated.");
-                        })
+                        .doAfterSuccess((JsonObject succ) -> LOGGER.info("ResetPasswordPortalController Get: Reset Password Token is validated."))
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-        ).subscribe(result -> {
-            logger.info("Subscription to ResetPasswordController Get successful:" + result);
+        ).subscribe((JsonObject result) -> {
+            LOGGER.info("Subscription to ResetPasswordPortalController Get successful: {}", result);
             //showTrxResult(routingContext, logger, 200, "Your password has been successfully reset!", "Welcome to API Portal again", "");
             routingContext.session().put(Constants.RESET_PASSWORD_TOKEN, token);
             renderTemplate(routingContext, Controllers.RESET_PASSWORD.templateFileName);
-        }, t -> {
-            logger.error("ResetPasswordController Get -  Error", t);
-            showTrxResult(routingContext, logger, 401, "Reset Password Failed!", t.getLocalizedMessage(), "");
+        }, (Throwable t) -> {
+            LOGGER.error("ResetPasswordPortalController Get -  Error", t);
+            showTrxResult(routingContext, LOGGER, 401, "Reset Password Failed!", t.getLocalizedMessage(), "");
         });
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("ResetPasswordController.handle invoked..");
+        LOGGER.trace("ResetPasswordPortalController.handle invoked..");
 
         String token = routingContext.session().get(Constants.RESET_PASSWORD_TOKEN);
         String newPassword = routingContext.request().getFormAttribute("newPassword");
         String confirmPassword = routingContext.request().getFormAttribute("confirmPassword");
 
         if (newPassword == null || newPassword.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
-            logger.error("ResetPasswordController - Received new / confirm Password is null or empty");
-            showTrxResult(routingContext, logger, 403, "Please enter valid new & confirm password fields!", "", "");
+            LOGGER.error("ResetPasswordPortalController - Received new / confirm Password is null or empty");
+            showTrxResult(routingContext, LOGGER, 403, "Please enter valid new & confirm password fields!", "", "");
         }
 
-        if (!newPassword.equals(confirmPassword)) {
-            logger.error("ResetPasswordController - Passwords does NOT match!");
-            showTrxResult(routingContext, logger, 403, "Please enter SAME new & confirm password!", "", "");
+        if (newPassword != null && !newPassword.equals(confirmPassword)) {
+            LOGGER.error("ResetPasswordPortalController - Passwords does NOT match!");
+            showTrxResult(routingContext, LOGGER, 403, "Please enter SAME new & confirm password!", "", "");
         }
 
-        logger.trace("Received token:" + token);
+        LOGGER.trace("Received token: {}", token);
 
         String path = routingContext.normalisedPath();
-        logger.trace("Received path:" + path);
+        LOGGER.trace("Received path: {}", path);
 
         //Get Stored Token Info
-        jdbcClient.rxGetConnection().flatMap(resConn ->
+        jdbcClient.rxGetConnection().flatMap((SQLConnection resConn) ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
@@ -161,23 +167,25 @@ public class ResetPasswordController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.uuid", new JsonArray().add(token)))
-                        .flatMap(resultSet -> {
+                        .flatMap(resQ -> resConn
+                                .rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.uuid"
+                                        , new JsonArray().add(token)))
+                        .flatMap((ResultSet resultSet) -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
-                                logger.error("token NOT found...");
+                                LOGGER.error("token NOT found...");
                                 return Single.error(new Exception("Token not found in our records"));
                             } else if (numOfRows == 1) {
                                 JsonObject row = resultSet.getRows(true).get(0);
-                                logger.trace("Token found:" + row.encodePrettily());
+                                LOGGER.trace("Token found: {}", row.encodePrettily());
 
                                 if (row.getBoolean("isDeleted")) {
-                                    logger.error("Received Token is deleted");
+                                    LOGGER.error("Received Token is deleted");
                                     return Single.error(new Exception("Token does not exist in our records. Please request a new token."));
                                 }
 
-                                if (!(row.getString("tokenType", "").equals(Constants.RESET_PASSWORD_TOKEN))) {
-                                    logger.error("Received Token Type does not match: " + row.getString("tokenType", "NULL"));
+                                if (!(row.getString(TOKEN_TYPE, "").equals(Constants.RESET_PASSWORD_TOKEN))) {
+                                    LOGGER.error("Received Token Type does not match: {}", row.getString(TOKEN_TYPE, "NULL"));
                                     return Single.error(new Exception("Right token does not exist in our records. Please request a new token."));
                                 }
 
@@ -195,24 +203,24 @@ public class ResetPasswordController extends PortalAbstractController {
                                 AuthenticationInfo authResult = tokenValidator.validateToken(token, authInfo);
 
                                 if (authResult.isValid()) {
-                                    logger.trace("Received Token is valid.");
+                                    LOGGER.trace("Received Token is valid.");
 
                                     email = row.getString("email");
                                     displayName = row.getString("displayName");
 
                                     return Single.just(row);
                                 } else {
-                                    logger.error("Received Token is NOT valid: " + authResult.getResultText());
+                                    LOGGER.error("Received Token is NOT valid: {}", authResult.getResultText());
                                     return Single.error(new Exception("Token is not valid. Please request a new token."));
                                 }
 
                             } else {
-                                logger.error("Multiple tokens found...");
+                                LOGGER.error("Multiple tokens found...");
                                 return Single.error(new Exception("Valid token is not found in our records"));
                             }
                         })
-                        .flatMap(row -> {
-                                    logger.trace("ResetPasswordController - Updating Subject with uuid:[" + subjectId + "] -> " + row.encodePrettily());
+                        .flatMap((JsonObject row) -> {
+                                    LOGGER.trace("ResetPasswordPortalController - Updating Subject with uuid:[" + subjectId + "] -> " + row.encodePrettily());
 
                                     String salt = authProvider.generateSalt();
                                     String hash = authProvider.computeHash(newPassword, salt);
@@ -224,7 +232,10 @@ public class ResetPasswordController extends PortalAbstractController {
                                                     "password = ?," +
                                                     "passwordSalt = ?, " +
                                                     "isPasswordChangeRequired = false," +
-                                                    "passwordExpiresAt = NOW() + " + String.valueOf(Config.getInstance().getConfigJsonObject().getInteger(Constants.PASSWORD_EXPIRATION_DAYS)) + " * INTERVAL '1 DAY' " +
+                                                    "passwordExpiresAt = NOW() + " + String.valueOf(Config
+                                                    .getInstance()
+                                                    .getConfigJsonObject()
+                                                    .getInteger(Constants.PASSWORD_EXPIRATION_DAYS)) + " * INTERVAL '1 DAY' " +
                                                     " WHERE " +
                                                     "uuid = CAST(? AS uuid);",
                                             new JsonArray()
@@ -234,10 +245,10 @@ public class ResetPasswordController extends PortalAbstractController {
                                                     .add(subjectId));
                                 }
                         )
-                        .flatMap(updateResult -> {
-                            logger.trace("ResetPasswordController - Updating Subject... Number of rows updated:" + updateResult.getUpdated());
-                            //logger.info("Activate Account - Subject Update Result information:" + updateResult.getKeys().encodePrettily());
-                            logger.trace("ResetPasswordController - Updating Subject Activation...");
+                        .flatMap((UpdateResult updateResult) -> {
+                            LOGGER.trace("ResetPasswordPortalController - Updating Subject... Number of rows updated:" + updateResult.getUpdated());
+                            //LOGGER.info("Activate Account - Subject Update Result information:" + updateResult.getKeys().encodePrettily());
+                            LOGGER.trace("ResetPasswordPortalController - Updating Subject Activation...");
                             if (updateResult.getUpdated() == 1) {
                                 return resConn.rxUpdateWithParams("UPDATE subject_activation SET " +
                                                 "deleted = now()," +
@@ -249,14 +260,16 @@ public class ResetPasswordController extends PortalAbstractController {
                                                 .add(Constants.SYSTEM_USER_UUID)
                                                 .add(tokenId));
                             } else {
-                                logger.error("ResetPasswordController - Activation Update Error Occurred - update result in not 1: " + updateResult.getUpdated());
+                                LOGGER.error("ResetPasswordPortalController - Activation Update Error Occurred - update result in not 1: {}"
+                                        , updateResult.getUpdated());
                                 return Single.error(new Exception("Activation Update Error Occurred"));
                             }
                         })
                         // commit if all succeeded
-                        .flatMap(updateResult -> {
+                        .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
-                                logger.trace("ResetPasswordController - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
+                                LOGGER.trace("ResetPasswordPortalController - Subject Activation Update Result information: {}"
+                                        , updateResult.getKeys().encodePrettily());
                                 return resConn.rxCommit().toSingleDefault(true);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
@@ -270,8 +283,8 @@ public class ResetPasswordController extends PortalAbstractController {
                                 .flatMap(ignore -> Single.error(ex))
                         )
 
-                        .doAfterSuccess(succ -> {
-                            logger.trace("ResetPasswordController: User password is reset and token is deleted. Both persisted successfully");
+                        .doAfterSuccess((Boolean succ) -> {
+                            LOGGER.trace("ResetPasswordPortalController: User password is reset and token is deleted. Both persisted successfully");
 
                             JsonObject json = new JsonObject();
                             json.put(Constants.EB_MSG_TOKEN, "");
@@ -279,28 +292,34 @@ public class ResetPasswordController extends PortalAbstractController {
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.PASSWORD_RESET_TOKEN);
                             json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderPasswordResetMailBody(routingContext, displayName));
 
-                            logger.trace("Password Reset mail is rendered successfully");
-                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                if (result.succeeded()) {
-                                    logger.trace("Password Reset Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
-                                } else {
-                                    logger.error("Password Reset Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
-                                }
+                            LOGGER.trace("Password Reset mail is rendered successfully");
+                            routingContext.vertx().getDelegate().eventBus()
+                                    .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
+                                        if (result.succeeded()) {
+                                            LOGGER.trace("Password Reset Mailing Event Bus Result: {} | Result: {}"
+                                                    , result.toString(), result.result().body().encodePrettily());
+                                        } else {
+                                            LOGGER.error("Password Reset Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
+                                        }
 
-                            });
-                            logger.trace("Password Reset mail is sent to Mail Verticle over Event Bus");
+                                    });
+                            LOGGER.trace("Password Reset mail is sent to Mail Verticle over Event Bus");
 
                         })
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-        ).subscribe(result -> {
-                    logger.trace("Subscription to ResetPasswordController successful:" + result);
-                    showTrxResult(routingContext, logger, 200, "Your password has been successfully reset!", "Welcome to API Portal again", "");
-                }, t -> {
-                    logger.error("ResetPasswordController Error", t);
-                    showTrxResult(routingContext, logger, 401, "Reset Password Failed!", t.getLocalizedMessage(), "");
+        ).subscribe((Boolean result) -> {
+                    LOGGER.trace("Subscription to ResetPasswordPortalController successful: {}", result);
+                    showTrxResult(routingContext, LOGGER, 200
+                            , "Your password has been successfully reset!"
+                            , "Welcome to API Portal again", "");
+                }, (Throwable t) -> {
+                    LOGGER.error("ResetPasswordPortalController Error", t);
+                    showTrxResult(routingContext, LOGGER, 401
+                            , "Reset Password Failed!"
+                            , t.getLocalizedMessage(), "");
                 }
         );
     }

@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.verapi.key.generate.intf;
+
+import com.verapi.key.model.AuthenticationInfo;
+import com.verapi.key.model.TokenRequest;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
-
-import com.verapi.key.model.AuthenticationInfo;
-import com.verapi.key.model.TokenRequest;
 
 /**
  * @author faik.saglar
@@ -29,10 +30,11 @@ import com.verapi.key.model.TokenRequest;
  */
 public interface TokenRemoteIntf extends Remote {
 
-	AuthenticationInfo encodeToken(TokenRequest tokenRequest) throws UnsupportedEncodingException, NoSuchAlgorithmException, RemoteException;
-	
-	AuthenticationInfo decodeAndValidateToken(String token, AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
-	AuthenticationInfo decodeAndValidateToken(AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
+    AuthenticationInfo encodeToken(TokenRequest tokenRequest) throws UnsupportedEncodingException, NoSuchAlgorithmException, RemoteException;
 
-	
+    AuthenticationInfo decodeAndValidateToken(String token, AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
+
+    AuthenticationInfo decodeAndValidateToken(AuthenticationInfo authInfo) throws UnsupportedEncodingException, RemoteException;
+
+
 }

@@ -52,10 +52,14 @@ public class MessageService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -65,7 +69,7 @@ public class MessageService extends AbstractService<UpdateResult> {
                 .add(insertRecord.getString("messagetypeid"))
                 .add(insertRecord.getString("parentmessageid")) //TODO: Change parent for receiver???
                 .add(insertRecord.getString("ownersubjectid")); //TODO: Change owner for receiver
-        if (conversationId>0) { //if zero-->nullify then get new id from sequence
+        if (conversationId > 0) { //if zero-->nullify then get new id from sequence
             insertParam.add(insertRecord.getInteger("conversationid")); //TODO: Add sender's conversation id for receiver
         }
         insertParam
@@ -116,11 +120,11 @@ public class MessageService extends AbstractService<UpdateResult> {
                     conversationId = jsonObj.getInteger("conversationid");
                     senderJson = jsonObj;
                     JsonArray insertParam = prepareInsertParameters(jsonObj);
-                    return insert(insertParam, conversationId>0 ? SQL_INSERT : SQL_INSERT_NEW_CONVERSATION).toObservable();
+                    return insert(insertParam, conversationId > 0 ? SQL_INSERT : SQL_INSERT_NEW_CONVERSATION).toObservable();
                 })
                 .flatMap(insertResult -> {
                     if (insertResult.getThrowable() == null) {
-                        if (conversationId==0) {
+                        if (conversationId == 0) {
                             conversationId = insertResult.getUpdateResult().getKeys().getInteger(11);
                         }
                         senderRecordId = insertResult.getUpdateResult().getKeys().getInteger(0);
@@ -139,11 +143,11 @@ public class MessageService extends AbstractService<UpdateResult> {
                                 .add(senderJson.getString("bodycontenttype"))
                                 .add(senderJson.getString("body"))
                                 .add(senderJson.getString("priority"));
-                                //.add(senderJson.getBoolean("isstarred"))
-                                //.add(jsonObj.getBoolean("isread"))
-                                //.add(jsonObj.getInstant("sentat"))
-                                //.add(jsonObj.getInstant("readat"))
-                                //.add(jsonObj.getBoolean("istrashed"));
+                        //.add(senderJson.getBoolean("isstarred"))
+                        //.add(jsonObj.getBoolean("isread"))
+                        //.add(jsonObj.getInstant("sentat"))
+                        //.add(jsonObj.getInstant("readat"))
+                        //.add(jsonObj.getBoolean("istrashed"));
                         return insert(insertReceiverParam, SQL_INSERT).toObservable();
                     } else {
                         return Observable.just(insertResult);
@@ -392,8 +396,8 @@ public class MessageService extends AbstractService<UpdateResult> {
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
 
     public static final String SQL_FIND_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_UUID_IS +
-                                                    SQL_AND + SQL_CONDITION_ONLY_NOTDELETED +
-                                                    SQL_ORDERBY_CONVERSATION_AND_SENTAT;
+            SQL_AND + SQL_CONDITION_ONLY_NOTDELETED +
+            SQL_ORDERBY_CONVERSATION_AND_SENTAT;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 

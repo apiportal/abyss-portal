@@ -16,19 +16,22 @@
 
 package com.verapi.portal.controller;
 
-import com.verapi.key.generate.impl.Token;
-import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.key.generate.impl.Token;
+import com.verapi.key.model.AuthenticationInfo;
 import com.verapi.portal.common.MailUtil;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,27 +39,27 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 
 @AbyssController(routePathGET = "signup", routePathPOST = "sign-up", htmlTemplateFile = "signup.html", isPublic = true)
-public class SignupController extends PortalAbstractController {
+public class SignupPortalController extends AbstractPortalController {
 
-    private static Logger logger = LoggerFactory.getLogger(SignupController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SignupPortalController.class);
 
     private Integer subjectId;
     private String subjectUUID;
     private String authToken;
 
-    public SignupController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public SignupPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("SignupController.defaultGetHandler invoked...");
+        LOGGER.trace("SignupPortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("SignupController.handle invoked...");
+        LOGGER.trace("SignupPortalController.handle invoked...");
 
         String firstname = routingContext.request().getFormAttribute("firstname");
         String lastname = routingContext.request().getFormAttribute("lastname");
@@ -69,15 +72,15 @@ public class SignupController extends PortalAbstractController {
 
         //TODO: OWASP Validate & Truncate the Fields that are going to be stored
 
-        logger.trace("Received firstname:" + firstname);
-        logger.trace("Received lastname:" + lastname);
-        logger.trace("Received user:" + username);
-        logger.trace("Received email:" + email);
-        logger.trace("Received pass:" + password);
-        logger.trace("Received pass2:" + password2);
-        logger.trace("Received isAgreedToTerms:" + isAgreedToTerms);
+        LOGGER.trace("Received firstname: {}", firstname);
+        LOGGER.trace("Received lastname: {}", lastname);
+        LOGGER.trace("Received user: {}", username);
+        LOGGER.trace("Received email: {}", email);
+        LOGGER.trace("Received pass: {}", password);
+        LOGGER.trace("Received pass2: {}", password2);
+        LOGGER.trace("Received isAgreedToTerms: {}", isAgreedToTerms);
 
-        jdbcClient.rxGetConnection().flatMap(resConn ->
+        jdbcClient.rxGetConnection().flatMap((SQLConnection resConn) ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
@@ -85,21 +88,22 @@ public class SignupController extends PortalAbstractController {
                         // Switch from Completable to default Single value
                         .toSingleDefault(false)
                         //Check if user already exists
-                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM subject WHERE subjectName = ?", new JsonArray().add(username))) //DO NOT CHECK: isDeleted = false
-                        .flatMap(resultSet -> {
+                        .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM subject WHERE subjectName = ?"
+                                , new JsonArray().add(username))) //DO NOT CHECK: isDeleted = false
+                        .flatMap((ResultSet resultSet) -> {
                             if (resultSet.getNumRows() > 0) {
                                 subjectId = resultSet.getRows(true).get(0).getInteger("id");
                                 subjectUUID = resultSet.getRows(true).get(0).getString("uuid");
-                                logger.trace("user found: " + resultSet.toJson().encodePrettily());
+                                LOGGER.trace("user found: {}", resultSet.toJson().encodePrettily());
                                 if (resultSet.getRows(true).get(0).getBoolean("isActivated")) {
                                     return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
                                 } else {
                                     //TODO: Cancel previous activation - Is it really required.
-                                    logger.trace("Username already exists but NOT activated, create and send new activation record..."); //Skip user creation
+                                    LOGGER.trace("Username already exists but NOT activated, create and send new activation record..."); //Skip user creation
                                     return Single.just(resultSet);
                                 }
                             } else {
-                                logger.trace("user NOT found, creating user and activation records...");
+                                LOGGER.trace("user NOT found, creating user and activation records...");
                                 String salt = authProvider.generateSalt();
                                 String hash = authProvider.computeHash(password, salt);
 
@@ -139,13 +143,22 @@ public class SignupController extends PortalAbstractController {
                                                 .add(Constants.INTERNAL_SUBJECT_DIRECTORY_UUID));
                             }
                         })
-                        .flatMap(updateResult -> {
+                        .flatMap((Object updateResult) -> {
                             if (updateResult instanceof UpdateResult) {
                                 subjectId = ((UpdateResult) updateResult).getKeys().getInteger(0);
                                 subjectUUID = ((UpdateResult) updateResult).getKeys().getString(1);
-                                logger.trace("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0 (subjectId):" + subjectId + " | String Key @pos=1 (subjectUUID):" + subjectUUID);
+                                LOGGER.trace("[{}] user created successfully: {} | Integer Key @pos=0 (subjectId): {} | String Key @pos=1 (subjectUUID): {}"
+                                        , ((UpdateResult) updateResult).getUpdated()
+                                        , ((UpdateResult) updateResult).getKeys().encodePrettily()
+                                        , subjectId
+                                        , subjectUUID);
                             } else if (updateResult instanceof ResultSet) {
-                                logger.trace("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | subjectID:" + subjectId + " | subjectUUID:" + subjectUUID);
+                                LOGGER.trace("[{}] inactive user found: {} | subjectID: {} | subjectUUID: {}"
+                                        , ((ResultSet) updateResult).getNumRows()
+                                        , ((ResultSet) updateResult).toJson().encodePrettily()
+                                        , subjectId
+                                        , subjectUUID
+                                );
                             }
 
 
@@ -153,13 +166,16 @@ public class SignupController extends PortalAbstractController {
                             Token tokenGenerator = new Token();
                             AuthenticationInfo authInfo;
                             try {
-                                authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                authInfo = tokenGenerator.generateToken(Config
+                                                .getInstance()
+                                                .getConfigJsonObject()
+                                                .getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
                                         email,
                                         routingContext.vertx().getDelegate());
-                                logger.trace("activation token is created successfully: " + authInfo.getToken());
+                                LOGGER.trace("activation token is created successfully: " + authInfo.getToken());
                                 authToken = authInfo.getToken();
                             } catch (UnsupportedEncodingException e) {
-                                logger.trace("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                                LOGGER.error("tokenGenerator.generateToken : {}", e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
                             return resConn.rxUpdateWithParams("INSERT INTO subject_activation (" +
@@ -194,40 +210,46 @@ public class SignupController extends PortalAbstractController {
                                 .flatMap(ignore -> Single.error(ex))
                         )
 
-                        .doAfterSuccess(succ -> {
-                            logger.trace("User record and activation token is created and persisted successfully");
+                        .doAfterSuccess((Boolean succ) -> {
+                            LOGGER.trace("User record and activation token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
                             json.put(Constants.EB_MSG_TOKEN, authToken);
                             json.put(Constants.EB_MSG_TO_EMAIL, email);
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.ACTIVATION_TOKEN);
                             json.put(Constants.EB_MSG_HTML_STRING, MailUtil.renderActivationMailBody(routingContext,
-                                    Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + authToken,
+                                    Config
+                                            .getInstance()
+                                            .getConfigJsonObject()
+                                            .getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + authToken,
                                     Constants.ACTIVATION_TEXT));
 
-                            logger.trace("User activation mail is rendered successfully");
-                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                if (result.succeeded()) {
-                                    logger.trace("Activation Mailing Event Bus Result:" + result.toString() + " | Result:" + result.result().body().encodePrettily());
-                                } else {
-                                    logger.error("Activation Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
-                                }
+                            LOGGER.trace("User activation mail is rendered successfully");
+                            routingContext.vertx().getDelegate().eventBus()
+                                    .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
+                                        if (result.succeeded()) {
+                                            LOGGER.trace("Activation Mailing Event Bus Result: {} | Result: {}"
+                                                    , result.toString(), result.result().body().encodePrettily());
+                                        } else {
+                                            LOGGER.error("Activation Mailing Event Bus Result: {}  | Cause: {}"
+                                                    , result.toString(), result.cause());
+                                        }
 
-                            });
-                            logger.trace("User activation mail is sent to Mail Verticle over Event Bus");
+                                    });
+                            LOGGER.trace("User activation mail is sent to Mail Verticle over Event Bus");
 
                         })
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-        ).subscribe(result -> {
-                    logger.trace("Subscription to Signup successfull:" + result);
-                    showTrxResult(routingContext, logger, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "");
+        ).subscribe((Boolean result) -> {
+                    LOGGER.trace("Subscription to Signup successfull: {}", result);
+                    showTrxResult(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "");
                     //TODO: Send email to user
-                }, t -> {
-                    logger.error("Signup Error", t);
-                    showTrxResult(routingContext, logger, 403, "Signup Error Occured", t.getLocalizedMessage(), "");
+                }, (Throwable t) -> {
+                    LOGGER.error("Signup Error", t);
+                    showTrxResult(routingContext, LOGGER, 403, "Signup Error Occured", t.getLocalizedMessage(), "");
                 }
         );
         super.handle(routingContext);

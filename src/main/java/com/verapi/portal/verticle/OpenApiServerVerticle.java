@@ -44,7 +44,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class OpenApiServerVerticle extends AbyssAbstractVerticle {
-    private static Logger logger = LoggerFactory.getLogger(OpenApiServerVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenApiServerVerticle.class);
 
 
     /**
@@ -54,19 +54,19 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
      */
     static {
         Json.mapper.getFactory().setCharacterEscapes(new OwaspCharacterEscapes());
-        logger.debug("OwaspCharacterEscapes has been set");
+        LOGGER.debug("OwaspCharacterEscapes has been set");
     }
 
 
     @Override
     protected Single<HttpServer> createHttpServer() {
-        logger.trace("createHttpServer() running");
+        LOGGER.trace("createHttpServer() running");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
                 .setCompressionSupported(Config.getInstance().getConfigJsonObject().getBoolean(Constants.HTTP_OPENAPI_SERVER_ENABLE_COMPRESSION_SUPPORT))
                 .setLogActivity(Config.getInstance().getConfigJsonObject().getBoolean(Constants.LOG_HTTPSERVER_ACTIVITY))
                 .setAcceptBacklog(1000000);
         return vertx.createHttpServer(httpServerOptions)
-                .exceptionHandler(event -> logger.error(event.getLocalizedMessage(), event))
+                .exceptionHandler(event -> LOGGER.error(event.getLocalizedMessage(), event))
                 .requestHandler(abyssRouter)
                 //.requestHandler(verticleRouter::accept)
                 .rxListen(serverPort, verticleHost);
@@ -74,7 +74,7 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.trace("OpenApiServerVerticle.start invoked");
+        LOGGER.trace("OpenApiServerVerticle.start invoked");
 
         super.setVerticleHost(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_OPENAPI_SERVER_HOST));
         super.setServerPort(Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_OPENAPI_SERVER_PORT));
@@ -91,15 +91,15 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
                         .flatMap(verticleRouter -> createHttpServer())
                         .subscribe(httpServer -> {
                             super.start(startFuture);
-                            logger.trace("OpenApiServerVerticle httpServer started " + httpServer.toString());
+                            LOGGER.trace("OpenApiServerVerticle httpServer started " + httpServer.toString());
                         }, t -> {
-                            logger.error("OpenApiServerVerticle httpServer unable to start", t);
+                            LOGGER.error("OpenApiServerVerticle httpServer unable to start", t);
                             startFuture.fail(t);
                         });
     }
 
     Single<Router> enableCorsSupport(Router router) {
-        logger.trace("enableCorsSupport() running");
+        LOGGER.trace("enableCorsSupport() running");
         Set<String> allowHeaders = new HashSet<>();
         allowHeaders.add("x-requested-with");
         allowHeaders.add("Access-Control-Allow-Origin");
@@ -123,20 +123,20 @@ public class OpenApiServerVerticle extends AbyssAbstractVerticle {
     }
 
     private Single<Router> configureRouter() {
-        logger.trace("configureRouter() running");
+        LOGGER.trace("configureRouter() running");
 
         //create instances for each Api Controller annotated by @AbyssApiController
         new FastClasspathScanner("com.verapi")
                 //.verbose()
                 .matchClassesWithAnnotation(AbyssApiController.class, classWithAnnotation -> {
-                    logger.trace("creating a new instance of {} which has an annonation of {}", classWithAnnotation.getName(), AbyssApiController.class.getName());
+                    LOGGER.trace("creating a new instance of {} which has an annonation of {}", classWithAnnotation.getName(), AbyssApiController.class.getName());
                     try {
                         AbstractApiController apiControllerInstance = (AbstractApiController) classWithAnnotation
                                 .getConstructor(Vertx.class, Router.class, JDBCAuth.class)
                                 .newInstance(vertx, abyssRouter, jdbcAuth);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                        logger.error(e.getLocalizedMessage());
-                        logger.error(Arrays.toString(e.getStackTrace()));
+                        LOGGER.error(e.getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(e.getStackTrace()));
                     }
                 })
                 .scan();

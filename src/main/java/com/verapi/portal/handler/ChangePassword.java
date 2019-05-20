@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class ChangePassword extends PortalHandler implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(ChangePassword.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChangePassword.class);
 
     private final JDBCClient jdbcClient;
 
@@ -49,7 +49,7 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("ChangePassword.handle invoked..");
+        LOGGER.info("ChangePassword.handle invoked..");
 
         String username = routingContext.user().principal().getString("username");
         String oldPassword = routingContext.request().getFormAttribute("oldPassword");
@@ -57,28 +57,28 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
         //TODO: should password consistency check be performed @FE or @BE or BOTH?
         String confirmPassword = routingContext.request().getFormAttribute("confirmPassword");
 
-        logger.info("Context user:" + username);
-        logger.info("Received old Password:" + oldPassword);
-        logger.info("Received new Password:" + newPassword);
-        logger.info("Received confirm Password:" + confirmPassword);
+        LOGGER.info("Context user:" + username);
+        LOGGER.info("Received old Password:" + oldPassword);
+        LOGGER.info("Received new Password:" + newPassword);
+        LOGGER.info("Received confirm Password:" + confirmPassword);
 
         //TODO: OWASP Validate
 
         if (oldPassword == null || oldPassword.isEmpty()) {
-            logger.info("oldPassword is null or empty");
-            generateResponse(routingContext, logger, 401, "Change Password Error Occured", "Please enter Old Password field", "", "");
+            LOGGER.info("oldPassword is null or empty");
+            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "Please enter Old Password field", "", "");
         }
         if (newPassword == null || newPassword.isEmpty()) {
-            logger.info("newPassword is null or empty");
-            generateResponse(routingContext, logger, 401, "Change Password Error Occured", "Please enter New Password field", "", "");
+            LOGGER.info("newPassword is null or empty");
+            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "Please enter New Password field", "", "");
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
-            logger.info("newPassword is null or empty");
-            generateResponse(routingContext, logger, 401, "Change Password Error Occured", "Please enter Confirm Password field", "", "");
+            LOGGER.info("newPassword is null or empty");
+            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "Please enter Confirm Password field", "", "");
         }
         if (!(newPassword.equals(confirmPassword))) {
-            logger.info("newPassword and confirmPassword does not match");
-            generateResponse(routingContext, logger, 401, "Change Password Error Occured", "New Password and Confirm Password does not match", "Please check and enter again", "");
+            LOGGER.info("newPassword and confirmPassword does not match");
+            generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", "New Password and Confirm Password does not match", "Please check and enter again", "");
         }
 
         JsonObject creds = new JsonObject()
@@ -95,9 +95,9 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
                         .toSingleDefault(false)
                         .flatMap(checkAuth -> authProvider.rxAuthenticate(creds))
                         .flatMap(user -> {
-                            logger.info("Authenticated User with Old Password: " + user.principal().encodePrettily());
+                            LOGGER.info("Authenticated User with Old Password: " + user.principal().encodePrettily());
 
-                            logger.info("Updating user records...");
+                            LOGGER.info("Updating user records...");
                             String salt = authProvider.generateSalt();
                             String hash = authProvider.computeHash(newPassword, salt);
 
@@ -124,19 +124,19 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.info("Change Password: User record is updated and persisted successfully");
+                            LOGGER.info("Change Password: User record is updated and persisted successfully");
                         })
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
         ).subscribe(result -> {
-                    logger.info("Subscription to ChangePassword successfull:" + result);
-                    generateResponse(routingContext, logger, 200, "Password is changed.", "Please use your new password.", "", "");
+                    LOGGER.info("Subscription to ChangePassword successfull:" + result);
+                    generateResponse(routingContext, LOGGER, 200, "Password is changed.", "Please use your new password.", "", "");
                     //TODO: Send email to user
                 }, t -> {
-                    logger.error("ChangePassword Error", t);
-                    generateResponse(routingContext, logger, 401, "Change Password Error Occured", t.getLocalizedMessage(), "", "");
+                    LOGGER.error("ChangePassword Error", t);
+                    generateResponse(routingContext, LOGGER, 401, "Change Password Error Occured", t.getLocalizedMessage(), "", "");
 
                 }
         );
@@ -144,7 +144,7 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
     }
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("ChangePassword.pageRender invoked...");
+        LOGGER.info("ChangePassword.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());

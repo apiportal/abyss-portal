@@ -29,11 +29,11 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 public class EchoServerVerticle extends AbstractVerticle {
-    private static Logger logger = LoggerFactory.getLogger(EchoServerVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EchoServerVerticle.class);
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.trace("---start invoked");
+        LOGGER.trace("---start invoked");
         HttpServer server = vertx.createHttpServer();
         server.requestStream().toFlowable().subscribe(req -> {
                     HttpServerResponse resp = req.response();
@@ -51,28 +51,28 @@ public class EchoServerVerticle extends AbstractVerticle {
                     );
                 },
                 t -> {
-                    logger.error("EchoServerVerticle error");
-                    logger.error(t.getLocalizedMessage());
-                    logger.error(Arrays.toString(t.getStackTrace()));
+                    LOGGER.error("EchoServerVerticle error");
+                    LOGGER.error(t.getLocalizedMessage());
+                    LOGGER.error(Arrays.toString(t.getStackTrace()));
                 });
         server.listen(
                 Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_ECHO_SERVER_PORT),
                 Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_ECHO_SERVER_HOST)
                 , result -> {
                     if (result.succeeded()) {
-                        logger.trace("echo server started");
+                        LOGGER.trace("echo server started");
                         try {
                             super.start(startFuture);
                         } catch (Exception e) {
-                            logger.error("echo server is unable to start");
-                            logger.error(result.cause().getLocalizedMessage());
-                            logger.error(Arrays.toString(result.cause().getStackTrace()));
+                            LOGGER.error("echo server is unable to start");
+                            LOGGER.error(result.cause().getLocalizedMessage());
+                            LOGGER.error(Arrays.toString(result.cause().getStackTrace()));
                             startFuture.fail(e);
                         }
                     } else {
-                        logger.error("echo server is unable to start");
-                        logger.error(result.cause().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.cause().getStackTrace()));
+                        LOGGER.error("echo server is unable to start");
+                        LOGGER.error(result.cause().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.cause().getStackTrace()));
                         startFuture.fail(result.cause());
                     }
                 });

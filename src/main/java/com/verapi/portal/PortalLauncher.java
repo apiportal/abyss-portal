@@ -54,6 +54,7 @@ import java.util.concurrent.TimeoutException;
 
 public class PortalLauncher extends VertxCommandLauncher implements VertxLifecycleHooks {
 
+    public static final int SCAN_PERIOD = 10000;
     private Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void main(String[] args) {
@@ -63,15 +64,17 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
             System.setProperty("vertx.logger-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
         }
         try {
-            System.setProperty("abyss-jar.name", new java.io.File(FilenameUtils.getName(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getName());
+            System.setProperty("abyss-jar.name",
+                    new java.io.File(FilenameUtils.getName(PortalLauncher.class.getProtectionDomain().getCodeSource().getLocation().getPath()))
+                            .getName());
         } catch (Exception e) {
             System.setProperty("abyss-jar.name", "abyss-portal.jar");
         }
 
         try {
-            System.setProperty("es.server.api.bulk.url", getProperty("es.server.api.bulk.url"));
+            System.setProperty(Constants.ES_SERVER_API_BULK_URL, getProperty(Constants.ES_SERVER_API_BULK_URL));
         } catch (Exception e) {
-            System.setProperty("es.server.api.bulk.url", "http://localhost:9200/_bulk");
+            System.setProperty(Constants.ES_SERVER_API_BULK_URL, "http://localhost:9200/_bulk");
         }
 
 
@@ -116,7 +119,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                         .setUserName(getProperty(Constants.INFLUXDB_DBUSER_NAME))
                         .setPassword(getProperty(Constants.INFLUXDB_DBUSER_PASSWORD)
                         )
-                        .setEnabled((getProperty(Constants.INFLUXDB_LOGGER_ENABLED).equals("true")))
+                        .setEnabled(("true".equals(getProperty(Constants.INFLUXDB_LOGGER_ENABLED))))
                 )
                 .setEnabled(true));
 
@@ -125,11 +128,13 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void afterStartingVertx(Vertx vertx) {
-        logger.trace(String.format("%s vertx started", vertx.toString()));
-        logger.trace(String.format("vertx is clustered : %s", vertx.isClustered()));
+        if (vertx.isClustered()) {
+            logger.trace("running cluster mode");
+        }
 
-        //MetricsService service = MetricsService.create(vertx);
-        logger.trace(String.format("vertx is metric enabled : %s", vertx.isMetricsEnabled()));
+        if (vertx.isMetricsEnabled()) {
+            logger.trace("Vertx metrics enabled");
+        }
 
         //load abyss-portal-config.properties
         ConfigStoreOptions file = new ConfigStoreOptions()
@@ -138,7 +143,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                 .setConfig(new JsonObject().put("path", "abyss-portal-config.properties"));
         ConfigRetrieverOptions options = new ConfigRetrieverOptions()
                 .addStore(file)
-                .setScanPeriod(10000);
+                .setScanPeriod(SCAN_PERIOD);
         logger.trace("ConfigRetrieverOptions set OK..");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
         logger.trace("ConfigRetriever OK..");
@@ -146,12 +151,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         retriever.getConfig(ar -> {
             if (ar.failed()) {
                 future.completeExceptionally(ar.cause());
-                logger.error("afterStartingVertx ConfigRetriever getConfig failed " + ar.cause());
+                logger.error("afterStartingVertx ConfigRetriever getConfig failed: {} ", ar.cause().getLocalizedMessage());
             } else {
-                Config config = Config.getInstance().setConfig(ar.result());
+                Config.getInstance().setConfig(ar.result());
                 future.complete(ar.result());
                 logger.info("afterStartingVertx ConfigRetriever getConfig OK..");
-                logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+                logger.debug("Config loaded... \n {} ", Config.getInstance().getConfigJsonObject().encodePrettily());
                 ElasticSearchService elasticSearchService = new ElasticSearchService();
                 elasticSearchService.indexDocument("configuration-audit", "configuration",
                         new JsonObject()
@@ -160,16 +165,17 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                                 .put("new", new JsonObject()));
             }
         });
+        final int CONFIGFILEREADTIMEOUT = 60;
         try {
-            future.get(60, TimeUnit.SECONDS);
+            future.get(CONFIGFILEREADTIMEOUT, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error(e.getLocalizedMessage());
-            vertx.close();
+            Thread.currentThread().interrupt();
         }
         retriever.listen(configChange -> {
-            Config config = Config.getInstance().setConfig(configChange.getNewConfiguration());
+            Config.getInstance().setConfig(configChange.getNewConfiguration());
             logger.info("Config changed and reloaded... ");
-            logger.debug("Config changed and reloaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+            logger.debug("Config changed and reloaded...\n {} ", Config.getInstance().getConfigJsonObject().encodePrettily());
             ElasticSearchService elasticSearchService = new ElasticSearchService();
             elasticSearchService.indexDocument("configuration-audit", "configuration",
                     new JsonObject()
@@ -178,11 +184,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                             .put("new", configChange.getNewConfiguration()));
         });
         vertx.exceptionHandler((Throwable event) -> {
-            logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + Arrays.toString(event.getStackTrace()));
+            logger.error("vertx global uncaught exceptionHandler >>> {}\n{}", event.getLocalizedMessage(), Arrays.toString(event.getStackTrace()));
             try {
                 throw event;
             } catch (Throwable throwable) {
-                logger.error("vertx global uncaught exceptionHandler >>> " + event + " throws exception: " + Arrays.toString(throwable.getStackTrace()));
+                logger.error("vertx global uncaught exceptionHandler >>> {}\n{}", throwable.getLocalizedMessage(), Arrays.toString(throwable.getStackTrace()));
             }
         });
 
@@ -262,7 +268,9 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
         loggerList.forEach(tmpLogger -> {
             if (tmpLogger.getName().startsWith("com.verapi") || tmpLogger.getName().startsWith("io.vertx")) {
-                logger.trace("setting log level [{}] for the class: {}", Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL), tmpLogger.getName());
+                logger.trace("setting log level [{}] for the class: {}"
+                        , Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL)
+                        , tmpLogger.getName());
                 tmpLogger.setLevel(Level.toLevel(Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL)));
             }
         });
@@ -275,7 +283,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void beforeDeployingVerticle(DeploymentOptions deploymentOptions) {
-
+        logger.info("deploying verticles...");
     }
 
     @Override
@@ -290,7 +298,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void handleDeployFailed(Vertx vertx, String s, DeploymentOptions deploymentOptions, Throwable throwable) {
-
+        throw new UnsupportedOperationException();
     }
 
     private static void attachShutDownHook() {

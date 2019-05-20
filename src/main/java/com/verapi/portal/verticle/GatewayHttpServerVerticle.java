@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2019 Verapi Inc
  *
@@ -47,12 +46,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implements IGatewayVerticle {
-    private static Logger logger = LoggerFactory.getLogger(GatewayHttpServerVerticle.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GatewayHttpServerVerticle.class);
     private Boolean attachAbyssGatewayUserSessionHandler = false;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        logger.trace("---start invoked");
+        LOGGER.trace("---start invoked");
         verticleConf = new VerticleConf(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST),
                 Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT),
                 false,
@@ -61,37 +60,37 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                 .andThen(Completable.defer(this::registerEchoHttpService))
                 .andThen(Completable.defer(this::testEchoHttpService))
                 //.andThen(Completable.defer(this::loadAllProxyApis))
-                .doOnError(throwable -> logger.error("[doOnError]error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                .doOnError(throwable -> LOGGER.error("[doOnError]error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
                 .subscribe(() -> {
-                            logger.trace("started");
+                            LOGGER.trace("started");
                             super.start(startFuture);
                             loadAllProxyApis().subscribe(() -> {
-                                        logger.trace("loadAllProxyApis completed successfully");
+                                        LOGGER.trace("loadAllProxyApis completed successfully");
                                     }
                                     , throwable -> {
-                                        logger.error("loadAllProxyApis error:{} \n stack trace:{}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                        LOGGER.error("loadAllProxyApis error:{} \n stack trace:{}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                                     });
                         }
                         , throwable -> {
-                            logger.error("[subscribe]start error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                            LOGGER.error("[subscribe]start error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                             startFuture.fail(throwable);
                         });
     }
 
     @Override
     public void stop(Future<Void> stopFuture) throws Exception {
-        logger.trace("---stop invoked");
+        LOGGER.trace("---stop invoked");
         super.stop(stopFuture);
     }
 
     public void routingContextHandler(RoutingContext context) {
-        logger.trace("---routingContextHandler invoked");
+        LOGGER.trace("---routingContextHandler invoked");
         //String apiUUIDParamValue = context.request().getParam("apiUUID");
         String apiUUIDParamValue = context.request().path().substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
         //String apiPathParamValue = context.request().getParam("apiPath");
         String apiPathParamValue = context.request().path().substring(("/" + Constants.ABYSS_GW + "/").length() + 36, context.request().path().length());
-        logger.trace("captured path parameter: {} | {}", apiUUIDParamValue, apiPathParamValue);
-        logger.trace("captured mountpoint: {} | method: {}", context.mountPoint(), context.request().method().toString());
+        LOGGER.trace("captured path parameter: {} | {}", apiUUIDParamValue, apiPathParamValue);
+        LOGGER.trace("captured mountpoint: {} | method: {}", context.mountPoint(), context.request().method().toString());
 
 /* 2018 07 19 14 45
         lookupHttpService(apiUUIDParamValue)
@@ -99,21 +98,21 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     JsonObject apiSpec = new JsonObject(abyssServiceReference.serviceReference.record().getMetadata().getString("apiSpec"));
                     if (apiSpec.getJsonObject("paths").getJsonObject(apiPathParamValue).containsKey(context.request().method().toString().toLowerCase())) {
                         JsonObject apiPath = apiSpec.getJsonObject("paths").getJsonObject(apiPathParamValue).getJsonObject(context.request().method().toString().toLowerCase());
-                        logger.trace("invocation response | {}", apiPath.encode());
+                        LOGGER.trace("invocation response | {}", apiPath.encode());
                         context.response().setStatusCode(HttpResponseStatus.OK.code()).end(apiPath.encode());
                         return Single.just(abyssServiceReference);
                     } else {
-                        logger.error("requested path {}-{} not found inside openapi spec", context.request().method().toString().toLowerCase(), apiPathParamValue);
+                        LOGGER.error("requested path {}-{} not found inside openapi spec", context.request().method().toString().toLowerCase(), apiPathParamValue);
                         return Single.error(RouterFactoryException.createPathNotFoundException(""));
                     }
                 })
                 .doAfterSuccess(abyssServiceReference -> releaseHttpService(abyssServiceReference.serviceReference))
                 .subscribe(
                         abyssServiceReference -> {
-                            logger.trace("invocation completed");
+                            LOGGER.trace("invocation completed");
                         }
                         , throwable -> {
-                            logger.error("invocation error | {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
+                            LOGGER.error("invocation error | {} | {}", throwable.getLocalizedMessage(), throwable.getStackTrace());
                         }
                 );
 */
@@ -129,7 +128,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
     }
 
     public Completable loadAllProxyApis() {
-        logger.trace("---loadAllProxyApis invoked");
+        LOGGER.trace("---loadAllProxyApis invoked");
         ApiService apiService = new ApiService(vertx);
         return Completable.fromObservable(apiService.initJDBCClient()
                 .delay(3, TimeUnit.SECONDS)
@@ -146,7 +145,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                 .flatMap(o -> {
                             createSubRouter("old-" + o.getString("uuid"))
                                     .flatMap(this::enableCorsSupport)
-                                    .doOnError(throwable -> logger.error("loadAllProxyApis createSubRouter error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                                    .doOnError(throwable -> LOGGER.error("loadAllProxyApis createSubRouter error {} {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
                                     .subscribe();
                             return Observable.just(o);
                         }
@@ -185,7 +184,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                                 Handler<io.vertx.ext.web.RoutingContext> responseValidationHandler = new OpenAPI3ResponseValidationHandlerImpl(operation, swaggerParseResult.getOpenAPI());
                                                 factory.getDelegate().addHandlerByOperationId(operation.getOperationId(), responseValidationHandler);
 
-                                                logger.trace("added handlers for operation {}", operation.getOperationId());
+                                                LOGGER.trace("added handlers for operation {}", operation.getOperationId());
                                             });
                                         });
                                         // set router factory behaviours
@@ -197,7 +196,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         // Now you have to generate the router
                                         Router router = factory.setOptions(factoryOptions).getRouter();
 
-                                        //attach logger handler to generate logs into Cassandra
+                                        //attach LOGGER handler to generate logs into Cassandra
                                         //router.route().handler(LoggerHandler.create());
 
                                         //router.route().handler(BodyHandler.create());
@@ -209,26 +208,26 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                         if (attachAbyssGatewayUserSessionHandler) {
                                             router.route().handler(UserSessionHandler.create(jdbcAuth));
                                             //AuthenticationApiController authenticationApiController = new AuthenticationApiController(vertx, router, jdbcAuth);
-                                            //logger.info("Loading Platform Authentication API for user API {}", apiUUID);
+                                            //LOGGER.info("Loading Platform Authentication API for user API {}", apiUUID);
                                         }
 
-                                        logger.trace("+++++ {} openapi router route list: {}", apiUUID, router.getRoutes());
+                                        LOGGER.trace("+++++ {} openapi router route list: {}", apiUUID, router.getRoutes());
 
                                     } else {
                                         //throw new RuntimeException("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
-                                        logger.error("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
+                                        LOGGER.error("OpenAPI3RouterFactory creation failed, cause: " + openAPI3RouterFactoryAsyncResult.cause());
                                     }
                                 });
                                 return Single.just(o);
                             })
-//                            .doOnError(throwable -> logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
+//                            .doOnError(throwable -> LOGGER.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
 
                             .onErrorResumeNext(throwable -> {
-                                logger.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace());
+                                LOGGER.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace());
                                 return Single.just(new JsonObject());
                             })
 
-                            .doAfterSuccess(swaggerParseResult -> logger.trace("successfully loaded API proxy {}", apiUUID))
+                            .doAfterSuccess(swaggerParseResult -> LOGGER.trace("successfully loaded API proxy {}", apiUUID))
                             .toObservable();
                 })
                 .flatMap(o -> {
@@ -259,7 +258,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                 .rxPublish(record)
                                 .toObservable();
                 })
-                //.doOnError(throwable -> logger.error("loadAllProxyApis() error: {} \n stack trace: {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
+                //.doOnError(throwable -> LOGGER.error("loadAllProxyApis() error: {} \n stack trace: {}", throwable.getLocalizedMessage(), throwable.getStackTrace()))
 
 //                .onErrorResumeNext(Completable::error)
 //                .onErrorResumeNext(throwable -> Completable.fromObservable(Observable.empty()))
@@ -272,10 +271,10 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                     Router subRouter = Router.router(vertx);
                     subRouter.route().handler(this::echoContextHandler);
                     gatewayRouter.mountSubRouter(mountPoint, subRouter);
-                    //logger.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
-                    //logger.trace("subRouter route list: {}", subRouter.getRoutes());
-                    logger.info("Loading All API proxies stage completed");
-                    logger.info("loadAllProxyApis() completed");
+                    //LOGGER.trace("gatewayRouter route list: {}", gatewayRouter.getRoutes());
+                    //LOGGER.trace("subRouter route list: {}", subRouter.getRoutes());
+                    LOGGER.info("Loading All API proxies stage completed");
+                    LOGGER.info("loadAllProxyApis() completed");
                 }));
     }
 
@@ -285,21 +284,21 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                 securityRequirement.forEach((key, value) -> {
                     SecurityScheme securityScheme = openAPI.getComponents().getSecuritySchemes().get(key);
                     if (securityScheme == null) {
-                        logger.warn("missing security scheme for security requirement: {}", key);
+                        LOGGER.warn("missing security scheme for security requirement: {}", key);
                     } else {
                         SecurityScheme.Type type = securityScheme.getType();
                         SecurityScheme.In in = securityScheme.getIn();
                         String name = securityScheme.getName();
-                        logger.trace("***** detected security requirement key: {}\nvalue: {}\ntype: {}\nIn: {}\nname: {}", key, value.toArray(), type, in, name);
+                        LOGGER.trace("***** detected security requirement key: {}\nvalue: {}\ntype: {}\nIn: {}\nname: {}", key, value.toArray(), type, in, name);
                         if ((name != null) && (name.equals(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME))) {
                             if ((type == SecurityScheme.Type.APIKEY) && (in == SecurityScheme.In.COOKIE)) {
                                 attachAbyssGatewayUserSessionHandler = true;
                                 factory.addSecurityHandler(key, routingContext -> {
                                     genericSecuritySchemaHandler(securityScheme, routingContext);
                                 });
-                                logger.trace("added security schema handlers for security schema {}", key);
+                                LOGGER.trace("added security schema handlers for security schema {}", key);
                             } else {
-                                logger.warn("Configured to use Abyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
+                                LOGGER.warn("Configured to use Abyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
                             }
                         } else if ((name != null) && (name.equals(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME))) {
                             if ((type == SecurityScheme.Type.APIKEY)
@@ -308,15 +307,15 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                 factory.addSecurityHandler(key, routingContext -> {
                                     genericSecuritySchemaHandler(securityScheme, routingContext);
                                 });
-                                logger.trace("added security schema handlers for security schema {}", key);
+                                LOGGER.trace("added security schema handlers for security schema {}", key);
                             } else {
-                                logger.warn("Configured to use Abyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
+                                LOGGER.warn("Configured to use Abyss Platform security scheme [{}] but its type [{}] and in [{}] settings are invalid", key, type, in);
                             }
                         } else {
                             factory.addSecurityHandler(key, routingContext -> {
                                 dummySecuritySchemaHandler(securityScheme, routingContext);
                             });
-                            logger.trace("added dummy security schema handlers for security schema {}", key);
+                            LOGGER.trace("added dummy security schema handlers for security schema {}", key);
                         }
                     }
                 });
@@ -325,7 +324,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
     }
 
     private void echoContextHandler(RoutingContext context) {
-        logger.trace("---echoContextHandler invoked");
+        LOGGER.trace("---echoContextHandler invoked");
         context.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
     }
 }

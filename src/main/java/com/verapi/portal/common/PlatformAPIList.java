@@ -17,34 +17,31 @@
 package com.verapi.portal.common;
 
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class PlatformAPIList {
-    private static final Logger logger = LoggerFactory.getLogger(FileUtil.class);
+public final class PlatformAPIList {
 
     private static PlatformAPIList instance;
-    private JsonArray platformApiList;
+    private JsonArray platformApis;
 
     private PlatformAPIList() {
     }
 
     public static PlatformAPIList getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new PlatformAPIList();
+        }
         return instance;
     }
 
     public JsonArray getPlatformAPIList() {
-        if (platformApiList == null)
+        if (platformApis == null) {
             setPlatformAPIList(new FileUtil().getYamlFileList());
-        return platformApiList;
+        }
+        return platformApis;
     }
 
-    private PlatformAPIList setPlatformAPIList(JsonArray platformApiList) {
-        this.platformApiList = platformApiList;
-        return this;
+    private void setPlatformAPIList(JsonArray platformApiList) {
+        this.platformApis = platformApiList;
     }
 
 }

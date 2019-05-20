@@ -42,7 +42,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class ForgotPassword extends PortalHandler implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(ForgotPassword.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ForgotPassword.class);
 
     private final JDBCClient jdbcClient;
 
@@ -61,10 +61,10 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("ForgotPasswordController.handle invoked..");
+        LOGGER.info("ForgotPasswordPortalController.handle invoked..");
 
         String username = routingContext.request().getFormAttribute("username");
-        logger.info("Received username:" + username);
+        LOGGER.info("Received username:" + username);
 
 
         //TODO: OWASP Email Validate
@@ -82,16 +82,16 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                         .flatMap(resultSet -> {
                             int numOfRows = resultSet.getNumRows();
                             if (numOfRows == 0) {
-                                logger.info("username NOT found...");
+                                LOGGER.info("username NOT found...");
                                 return Single.error(new Exception("Username not found in our records"));
                             } else if (numOfRows == 1) {
                                 if (!resultSet.getRows(true).get(0).getBoolean("is_activated")) {
-                                    logger.info("account connected to username is NOT activated");
+                                    LOGGER.info("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
                                     subjectId = resultSet.getRows(true).get(0).getInteger("id");
                                     email = resultSet.getRows(true).get(0).getString("email");
-                                    logger.info("Activated account found:[" + subjectId + "]. Email:[" + email + "]Reset password token is going to be created...");
+                                    LOGGER.info("Activated account found:[" + subjectId + "]. Email:[" + email + "]Reset password token is going to be created...");
 
 
                                     //Generate and Persist Reset Password Token
@@ -101,10 +101,10 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                                         authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.renewal.password.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
                                                 username,
                                                 routingContext.vertx().getDelegate());
-                                        logger.info("Reset Password: token is created successfully: " + authInfo.getToken());
+                                        LOGGER.info("Reset Password: token is created successfully: " + authInfo.getToken());
                                         authToken = authInfo.getToken();
                                     } catch (UnsupportedEncodingException e) {
-                                        logger.error("Reset Password: tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                                        LOGGER.error("Reset Password: tokenGenerator.generateToken :" + e.getLocalizedMessage());
                                         return Single.error(new Exception("Reset Password: token could not be generated"));
                                     }
                                     return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
@@ -131,7 +131,7 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                                     );
                                 }
                             } else {
-                                logger.info("email is connected to multiple accounts [" + numOfRows + "]");
+                                LOGGER.info("email is connected to multiple accounts [" + numOfRows + "]");
                                 return Single.error(new Exception("This email is connected to multiple accounts. Please correct the other accounts by getting help from administration of your organization and try again."));
                             }
                         })
@@ -145,7 +145,7 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                         )
 
                         .doAfterSuccess(succ -> {
-                            logger.info("Reset password token is created and persisted successfully");
+                            LOGGER.info("Reset password token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
                             json.put(Constants.EB_MSG_TOKEN, authToken);
@@ -153,7 +153,7 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                             json.put(Constants.EB_MSG_TOKEN_TYPE, Constants.RESET_PASSWORD_TOKEN);
 
                             routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                logger.info(result.toString());
+                                LOGGER.info(result.toString());
                             });
 
                         })
@@ -162,12 +162,12 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
                         .doAfterTerminate(resConn::close)
 
         ).subscribe(result -> {
-                    logger.info("Subscription to Forgot Password successfull:" + result);
-                    generateResponse(routingContext, logger, 200, "Reset Password Code is sent to your email address.", "Please check spam folder also...", "Please click the link inside the mail.", "");
+                    LOGGER.info("Subscription to Forgot Password successfull:" + result);
+                    generateResponse(routingContext, LOGGER, 200, "Reset Password Code is sent to your email address.", "Please check spam folder also...", "Please click the link inside the mail.", "");
                     //TODO: Send email to user
                 }, t -> {
-                    logger.error("Forgot Password Error", t);
-                    generateResponse(routingContext, logger, 401, "Error in Forgot Password Occured", t.getLocalizedMessage(), "", "");
+                    LOGGER.error("Forgot Password Error", t);
+                    generateResponse(routingContext, LOGGER, 401, "Error in Forgot Password Occured", t.getLocalizedMessage(), "", "");
                 }
         );
 
@@ -176,7 +176,7 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
 
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("ForgotPasswordController.pageRender invoked...");
+        LOGGER.info("ForgotPasswordPortalController.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());

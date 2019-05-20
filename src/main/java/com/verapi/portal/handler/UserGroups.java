@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 public class UserGroups extends PortalHandler implements Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(UserGroups.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserGroups.class);
 
     private final JDBCClient jdbcClient;
 
@@ -43,7 +43,7 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.info("UserGroups.handle invoked..");
+        LOGGER.info("UserGroups.handle invoked..");
 
         //TODO: pagination eklenmeli
 
@@ -71,25 +71,25 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
                                 "FROM portalschema.SUBJECT_GROUP ORDER BY group_name", new JsonArray()))
                         .flatMap(resultSet -> {
                             if (resultSet.getNumRows() > 0) {
-                                logger.info("Number of groups found:[" + resultSet.getNumRows() + "]");
+                                LOGGER.info("Number of groups found:[" + resultSet.getNumRows() + "]");
                                 //result = resultSet.toJson().encode();
                                 return Single.just(resultSet);
                             } else {
-                                logger.info("No groups found...");
+                                LOGGER.info("No groups found...");
                                 return Single.error(new Exception("No groups found"));
                             }
                         })
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
         ).subscribe(result -> {
-                    logger.info("Subscription to UserGroups successfull:" + result);
+                    LOGGER.info("Subscription to UserGroups successfull:" + result);
                     JsonObject groupsResult = new JsonObject();
                     groupsResult.put("groupList", result.toJson().getValue("rows"));
                     groupsResult.put("totalPages", 1).put("totalItems", result.getNumRows()).put("pageSize", 30).put("currentPage", 1).put("last", true).put("first", true).put("sort", "ASC GROUP NAME");
                     routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8").end(groupsResult.toString(), "UTF-8");
                 }, t -> {
-                    logger.error("UserGroups Error", t);
-                    generateResponse(routingContext, logger, 401, "UserGroups Handling Error Occured", t.getLocalizedMessage(), "", "");
+                    LOGGER.error("UserGroups Error", t);
+                    generateResponse(routingContext, LOGGER, 401, "UserGroups Handling Error Occured", t.getLocalizedMessage(), "", "");
 
                 }
         );
@@ -97,7 +97,7 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
 
 
     public void pageRender(RoutingContext routingContext) {
-        logger.info("UserGroups.pageRender invoked...");
+        LOGGER.info("UserGroups.pageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());
@@ -116,7 +116,7 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
     }
 
     public void dirPageRender(RoutingContext routingContext) {
-        logger.info("UserGroups.dirPageRender invoked...");
+        LOGGER.info("UserGroups.dirPageRender invoked...");
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());

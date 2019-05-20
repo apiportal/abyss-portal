@@ -21,19 +21,18 @@ import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.io.SerializedString;
 
 /**
- *
  * @author Rob Winch
  * Ref: https://github.com/rwinch/spring-jackson-owasp/blob/master/spring-jackson-owasp-java/src/main/java/sample/OwaspConfig.java
- *
  */
 public class OwaspCharacterEscapes extends CharacterEscapes {
-    private final int[] ESCAPES;
+    private static final long serialVersionUID = -8563148725548277440L;
+    private final int[] escapes;
 
     public OwaspCharacterEscapes() {
-        ESCAPES = standardAsciiEscapesForJSON();
-        for(int i=0;i<ESCAPES.length;i++) {
-            if(!(Character.isAlphabetic(i) || Character.isDigit(i))) {
-                ESCAPES[i] = CharacterEscapes.ESCAPE_CUSTOM;
+        escapes = standardAsciiEscapesForJSON();
+        for (int i = 0; i < escapes.length; i++) {
+            if (!(Character.isAlphabetic(i) || Character.isDigit(i))) {
+                escapes[i] = CharacterEscapes.ESCAPE_CUSTOM;
             }
         }
     }
@@ -42,15 +41,13 @@ public class OwaspCharacterEscapes extends CharacterEscapes {
     public SerializableString getEscapeSequence(int ch) {
         String unicode = String.format("\\u%04x", ch);
 
-       // ***** System.out.print("\\u"+Integer.toHexString(0x10000 | ch).substring(1).toUpperCase());
-
+        // ***** System.out.print("\\u"+Integer.toHexString(0x10000 | ch).substring(1).toUpperCase());
 
         return new SerializedString(unicode);
     }
 
     @Override
     public int[] getEscapeCodesForAscii() {
-        return ESCAPES;
+        return escapes.clone();
     }
-
 }

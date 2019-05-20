@@ -31,7 +31,7 @@ import java.util.UUID;
  */
 public class ApiKey implements ApiKeyRemoteIntf {
 
-    private static Logger logger = LoggerFactory.getLogger(ApiKey.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiKey.class);
 
     private Base64.Encoder base64UrlEncoder = Base64.getUrlEncoder();
     private Base64.Decoder base64UrlDecoder = Base64.getUrlDecoder();
@@ -67,6 +67,6 @@ public class ApiKey implements ApiKeyRemoteIntf {
     public static void main(String[] args) {
         ApiKey apiKey = new ApiKey();
         String uuidAllBase64Str = apiKey.generateRandomKey();
-        logger.trace("generateAPiKey: {}", uuidAllBase64Str);
+        LOGGER.trace("generateAPiKey: {}", uuidAllBase64Str);
     }
 }

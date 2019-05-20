@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.verapi.key.generate.intf;
 
 import java.rmi.Remote;
@@ -20,16 +21,15 @@ import java.rmi.RemoteException;
 
 /**
  * @author faik.saglar
- *
  */
 public interface HashRemoteIntf extends Remote {
-	
-	String generateHash(String inputData) throws RemoteException;
-	
-	String generateSaltedPasswordHash(String password) throws RemoteException;
-	
-	boolean isSaltedPasswordHashCorrect(String enteredPassword, String storedSaltedPasswordHash) throws RemoteException;
 
-	String generateRandomPassword(int length) throws RemoteException;
-	
+    String generateHash(String inputData) throws RemoteException;
+
+    String generateSaltedPasswordHash(String password) throws RemoteException;
+
+    boolean isSaltedPasswordHashCorrect(String enteredPassword, String storedSaltedPasswordHash) throws RemoteException;
+
+    String generateRandomPassword(int length) throws RemoteException;
+
 }

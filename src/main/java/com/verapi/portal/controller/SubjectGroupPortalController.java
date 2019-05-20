@@ -22,23 +22,23 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@AbyssController(routePathGET = "my-policies", routePathPOST = "my-policies", htmlTemplateFile = "my-policies.html")
-public class MyPoliciesController extends PortalAbstractController {
-    private static Logger logger = LoggerFactory.getLogger(MyPoliciesController.class);
+@AbyssController(routePathGET = "user-groups", routePathPOST = "user-groups", htmlTemplateFile = "user-groups.html")
+public class SubjectGroupPortalController extends AbstractPortalController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectGroupPortalController.class);
 
-    public MyPoliciesController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public SubjectGroupPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
     }
 
     @Override
     public void defaultGetHandler(RoutingContext routingContext) {
-        logger.trace("MyPoliciesController.defaultGetHandler invoked...");
+        LOGGER.trace("SubjectGroupPortalController.defaultGetHandler invoked...");
         renderTemplate(routingContext, getClass().getAnnotation(AbyssController.class).htmlTemplateFile());
     }
 
     @Override
     public void handle(RoutingContext routingContext) {
-        logger.trace("MyPoliciesController.handle invoked...");
+        LOGGER.trace("SubjectGroupPortalController.handle invoked...");
     }
 
 }

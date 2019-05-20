@@ -386,11 +386,11 @@ public abstract class AbstractApiController implements IApiController {
                                     routingContext.next();
                                 },
                                 throwable -> {
-                                    logger.error("LoginController.handle() subjectService.findBySubjectName replied error : {}\n{}", throwable.getLocalizedMessage(), Arrays.toString(throwable.getStackTrace()));
+                                    logger.error("LoginPortalController.handle() subjectService.findBySubjectName replied error : {}\n{}", throwable.getLocalizedMessage(), Arrays.toString(throwable.getStackTrace()));
                                     throwApiException(routingContext, UnAuthorized401Exception.class);
                                 });
                     } catch (Exception e) {
-                        logger.error("LoginController.handle() subjectService error : ", Arrays.toString(e.getStackTrace()));
+                        logger.error("LoginPortalController.handle() subjectService error : ", Arrays.toString(e.getStackTrace()));
                         throwApiException(routingContext, UnAuthorized401Exception.class);
                     }
                 } else {

@@ -29,14 +29,14 @@ import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class PortalAbstractController<T> implements IController<T>, Handler<RoutingContext> {
+public abstract class AbstractPortalController<T> implements IController<T>, Handler<RoutingContext> {
 
-    private static Logger logger = LoggerFactory.getLogger(PortalAbstractController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPortalController.class);
 
     protected final JDBCAuth authProvider;
     protected JDBCClient jdbcClient;
 
-    public PortalAbstractController(JDBCAuth authProvider, JDBCClient jdbcClient) {
+    public AbstractPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
     }
@@ -61,10 +61,10 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
         templateEngine.render(context, Constants.TEMPLATE_DIR_ROOT + templateFileName, res -> {
             if (res.succeeded()) {
                 responseHTML(routingContext, res.result(), statusCode);
-                logger.trace("renderTemplate using " + templateFileName + " finished successfully");
+                LOGGER.trace("renderTemplate using " + templateFileName + " finished successfully");
             } else {
                 routingContext.fail(res.cause());
-                logger.trace("renderTemplate using " + templateFileName + " failed with " + res.cause().getLocalizedMessage());
+                LOGGER.trace("renderTemplate using " + templateFileName + " failed with " + res.cause().getLocalizedMessage());
             }
         });
     }
@@ -98,15 +98,15 @@ public abstract class PortalAbstractController<T> implements IController<T>, Han
 
     public void redirect(RoutingContext routingContext, String redirectTo, int redirectCode) {
         routingContext.response().putHeader("location", redirectTo).setStatusCode(redirectCode).end();
-        logger.trace("redirecting into " + redirectTo + " with http status code " + redirectCode);
+        LOGGER.trace("redirecting into " + redirectTo + " with http status code " + redirectCode);
     }
 
     public void redirect(RoutingContext routingContext, String redirectTo) {
         redirect(routingContext, redirectTo, 302);
     }
 
-    protected void showTrxResult(RoutingContext routingContext, Logger logger, int statusCode, String errorMessage, String errorAtUrl, String contextFailureMessage) {
-        logger.trace("showTrxResult invoked...");
+    protected void showTrxResult(RoutingContext routingContext, Logger LOGGER, int statusCode, String errorMessage, String errorAtUrl, String contextFailureMessage) {
+        LOGGER.trace("showTrxResult invoked...");
 
         //Use user's session for storage
         routingContext.session().put(Constants.HTTP_STATUSCODE, statusCode);
