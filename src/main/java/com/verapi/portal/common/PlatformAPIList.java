@@ -18,28 +18,30 @@ package com.verapi.portal.common;
 
 import io.vertx.core.json.JsonArray;
 
-public class PlatformAPIList {
+public final class PlatformAPIList {
 
     private static PlatformAPIList instance;
-    private JsonArray platformApiList;
+    private JsonArray platformApis;
 
     private PlatformAPIList() {
     }
 
     public static PlatformAPIList getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new PlatformAPIList();
+        }
         return instance;
     }
 
     public JsonArray getPlatformAPIList() {
-        if (platformApiList == null)
+        if (platformApis == null) {
             setPlatformAPIList(new FileUtil().getYamlFileList());
-        return platformApiList;
+        }
+        return platformApis;
     }
 
     private PlatformAPIList setPlatformAPIList(JsonArray platformApiList) {
-        this.platformApiList = platformApiList;
+        this.platformApis = platformApiList;
         return this;
     }
 
