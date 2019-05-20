@@ -147,6 +147,10 @@ public class ApiService extends AbstractService<UpdateResult> {
         return update(updateParams, (updateRecord.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID);
     }
 
+    public Single<CompositeResult> updateLifecycle(UUID uuid, JsonArray updateParams) {
+        return update(updateParams.add(uuid.toString()), SQL_UPDATE_API_LIFECYCLE);
+    }
+
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
         updateRecords.forEach(updateRow -> jsonArray.add(new JsonObject(updateRow.getValue().toString()).put("uuid", updateRow.getKey())));
@@ -494,6 +498,15 @@ public class ApiService extends AbstractService<UpdateResult> {
             "and a.isdeleted = false\n" + // --Not Deleted
             "and a.apivisibilityid = 'e63c2874-aa12-433c-9dcf-65c1e8738a14'::uuid\n" + // --Public
             "and a.apistateid = '1425993f-f6be-4ca0-84fe-8a83e983ffd9'::uuid"; // --Promoted
+
+    private static final String SQL_UPDATE_API_LIFECYCLE = "UPDATE\napi\n" +
+            "SET\n" +
+            "    updated         = now()\n" +
+            "  , crudsubjectid   = CAST(? AS uuid)\n" +
+            "  , apistateid      = CAST(? AS uuid)\n" +
+            "  , apivisibilityid = CAST(? AS uuid)\n" +
+            SQL_WHERE + SQL_CONDITION_UUID_IS +
+            SQL_AND + SQL_CONDITION_IS_PROXYAPI;
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
