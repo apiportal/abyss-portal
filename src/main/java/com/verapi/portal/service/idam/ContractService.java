@@ -422,6 +422,10 @@ public class ContractService extends AbstractService<UpdateResult> {
 
     private static final String SQL_CONDITION_APPID_IS = "subjectid = CAST(? AS uuid)\n";
 
+    private static final String SQL_CONDITION_APIS_OF_USERID_IS = "apiid in (select distinct uuid from api where subjectid = CAST(? AS uuid) and isdeleted = false and isproxyapi = true)\n";
+
+    private static final String SQL_CONDITION_APPS_OF_USERID_IS = "subjectid in (select distinct s.uuid from subject s, subject_membership sm where sm.subjectid = CAST(? AS uuid) and sm.subjectgroupid = s.uuid and s.subjecttypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6' and sm.subjectgrouptypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6')\n";
+
     private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
 
     private static final String SQL_CONDITION_LICENSEID_IN = "licenseid in (select distinct uuid from license where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
@@ -449,6 +453,10 @@ public class ContractService extends AbstractService<UpdateResult> {
     public static final String FILTER_BY_APIID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
 
     public static final String FILTER_BY_APPID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPID_IS;
+
+    public static final String FILTER_BY_APIS_OF_USERID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIS_OF_USERID_IS;
+
+    public static final String FILTER_BY_APPS_OF_USERID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPS_OF_USERID_IS;
 
     static final String FILTER_BY_SUBJECTPERMISSIONID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECTPERMISSIONID_IS;
 
