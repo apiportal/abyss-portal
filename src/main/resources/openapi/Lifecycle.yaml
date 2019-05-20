@@ -1,0 +1,194 @@
+openapi: 3.0.0
+servers:
+  - url: 'http://192.168.21.99:38083/abyss/oapi'
+  - url: 'http://192.168.21.139:38083/abyss/oapi'
+  - url: 'http://192.168.10.46:38083/abyss/oapi'
+  - url: '/abyss/oapi'
+info:
+  description: 'Abyss platform Lifecycle APIs'
+  version: '1.0.0'
+  title: 'Abyss Lifecycle'
+  termsOfService: 'https://apiportal.com/terms/'
+  contact:
+    email: 'info@apiportal.com'
+    name: 'Abyss'
+    url: 'https://apiportal.com'
+  license:
+    name: 'Abyss 1.0'
+    url: 'https://apiportal.com/licenses/LICENSE-1.0.html'
+tags:
+  - name: Lifecycle
+    externalDocs:
+      url: 'https://apiportal.com'
+      description: 'Find out more'
+    description: 'Abyss plaftorm APIs : Lifecycle operations'
+paths:
+  /lifecycle/{uuid}:
+    put:
+      tags:
+        - Lifecycle
+      summary: 'Update Lifecycle of an existing entity'
+      description: 'Update Lifecycle of an existing entity'
+      operationId: updateLifecycle
+      parameters:
+        - name: uuid
+          in: path
+          description: 'Uuid of the entity that the lifecycle is going to be changed'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/200'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '422':
+          $ref: '#/components/responses/422'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+        default:
+          $ref: '#/components/responses/default'
+      requestBody:
+        $ref: '#/components/requestBodies/LifecycleChangeBody'
+externalDocs:
+  description: 'See Abyss example'
+  url: 'https://apiportal.com/apidocs/index.html'
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - usermessage
+      properties:
+        code:
+          type: integer
+          format: int32
+        usermessage:
+          type: string
+        internalmessage:
+          type: string
+        details:
+          type: string
+        recommendation:
+          type: string
+        moreinfo:
+          type: string
+          format: uri
+    LifecycleChange:
+      type: object
+      properties:
+        currentstateid:
+          type: string
+          description: 'Active state uuid of the entity'
+        nextstateid:
+          type: string
+          description: 'Target state uuid of the entity'
+  requestBodies:
+    LifecycleChangeBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LifecycleChange'
+      description: 'LifecycleChange object that needs to be added or updated'
+      required: true
+  responses:
+    '200':
+      description: 'Successful operation'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LifecycleChange'
+    '204':
+      description: 'The Contract resource was successfully deleted'
+    '304':
+      description: 'Not Modified – The client can use cached data'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LifecycleChange'
+    '400':
+      description: 'Invalid UUID supplied'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '401':
+      description: 'Authorization information is missing or invalid'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: 'Forbidden – The server understood the request, but is refusing it or the access is not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: 'Not found – There is no resource behind the URI'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '405':
+      description: 'Method not allowed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '422':
+      description: 'Unprocessable Entity – server cannot process the request'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: 'Too many request(rate limiting)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: 'Internal server error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    default:
+      description: 'error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters: {}
+  securitySchemes:
+    abyssCookieAuth:
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+    abyssHttpBasicAuth:
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+    abyssApiKeyAuth:
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+    abyssJWTBearerAuth:
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+    abyssAppAccessTokenAuth:
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+    abyssAppAccessTokenCookieAuth:
+      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+  links: {}
+  callbacks: {}
+security:
+  - abyssCookieAuth: []
+  - abyssHttpBasicAuth: []
+  - abyssApiKeyAuth: []
+  - abyssJWTBearerAuth: []
+  - abyssAppAccessTokenAuth: []
+  - abyssAppAccessTokenCookieAuth: []
