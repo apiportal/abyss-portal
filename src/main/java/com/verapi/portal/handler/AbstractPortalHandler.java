@@ -21,7 +21,10 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
-abstract class PortalHandler {
+abstract class AbstractPortalHandler {
+
+    AbstractPortalHandler() {
+    }
 
     void generateResponse(RoutingContext context, Logger logger, int statusCode, String message1, String message2, String message3) {
         logger.info("generateResponse invoked...");
@@ -32,7 +35,7 @@ abstract class PortalHandler {
         context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
 
-        if (statusCode== HttpStatus.SC_OK) {
+        if (statusCode == HttpStatus.SC_OK) {
             context.response().putHeader("location", "/abyss/success").setStatusCode(HttpStatus.SC_MOVED_TEMPORARILY).end();
         } else {
             context.response().putHeader("location", "/abyss/httperror").setStatusCode(HttpStatus.SC_MOVED_TEMPORARILY).end();

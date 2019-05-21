@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce Vertx Verticles for the Platform verticle and http server requirements.
+ * <p>
+ * These classes contain Gateway, Portal, Echo, Mail verticles.
+ *
+ */
 package com.verapi.portal.verticle;

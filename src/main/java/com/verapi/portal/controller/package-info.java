@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the View Controllers of MVC pattern.
+ * <p>
+ * These classes contain View Controller handlers.
+ *
+ */
 package com.verapi.portal.controller;

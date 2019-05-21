@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the Byte Utils for the API Key and Token generation Layer.
+ * <p>
+ * These classes contain Byte utility routines.
+ *
+ */
 package com.verapi.key.util;

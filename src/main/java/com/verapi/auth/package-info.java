@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the API token parser Implementation for the API Key and Token authentication Layer.
+ * <p>
+ * These classes contain Basic Token Parser routines.
+ *
+ */
 package com.verapi.auth;

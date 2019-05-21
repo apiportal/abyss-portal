@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the API token and key Models for the API Key and Token generation Layer.
+ * <p>
+ * These classes contain API Key, Token and Hash models.
+ *
+ */
 package com.verapi.key.model;

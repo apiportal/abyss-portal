@@ -36,7 +36,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ChangePassword extends PortalHandler implements Handler<RoutingContext> {
+public class ChangePassword extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChangePassword.class);
     @SuppressWarnings("squid:S2068")
@@ -49,6 +49,7 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
     //private Integer subjectId;
 
     public ChangePassword(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        super();
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
     }

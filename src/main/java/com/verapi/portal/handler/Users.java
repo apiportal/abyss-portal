@@ -34,16 +34,17 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Users extends PortalHandler implements Handler<RoutingContext> {
+public class Users extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Users.class);
-    public static final int PAGESIZE = 30;
+    private static final int PAGESIZE = 30;
 
     private final JDBCClient jdbcClient;
 
     //private String result;
 
     public Users(JDBCClient jdbcClient) {
+        super();
         this.jdbcClient = jdbcClient;
     }
 

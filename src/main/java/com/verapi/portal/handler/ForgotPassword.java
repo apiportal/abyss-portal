@@ -46,7 +46,7 @@ import java.io.UnsupportedEncodingException;
  * Reset password using activation mail sent to selected email
  * TODO: same email may be connected to multiple usernames/accounts???
  */
-public class ForgotPassword extends PortalHandler implements Handler<RoutingContext> {
+public class ForgotPassword extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ForgotPassword.class);
 
@@ -60,6 +60,7 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
     private String authToken;
 
     public ForgotPassword(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        super();
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
     }

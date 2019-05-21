@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the Service Layer for the RESTful API controllers.
+ * <p>
+ * These classes contain domain DML queries.
+ *
+ */
 package com.verapi.portal.service.idam;

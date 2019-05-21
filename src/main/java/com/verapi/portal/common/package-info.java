@@ -14,4 +14,12 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the Common Services for the platform.
+ * <p>
+ * These classes contain JDBC, Service Discovery, File and Mail utilities, OWASP and Platform API Listing utilities.
+ * <p>
+ * Notice that soon these classes will be migrated into Abyss Common project
+ *
+ */
 package com.verapi.portal.common;

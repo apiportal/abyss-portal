@@ -34,7 +34,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserGroups extends PortalHandler implements Handler<RoutingContext> {
+public class UserGroups extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGroups.class);
     private static final int PAGESIZE = 30;
@@ -44,6 +44,7 @@ public class UserGroups extends PortalHandler implements Handler<RoutingContext>
     //private String result;
 
     public UserGroups(JDBCClient jdbcClient) {
+        super();
         this.jdbcClient = jdbcClient;
     }
 

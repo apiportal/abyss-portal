@@ -38,7 +38,7 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ActivateAccount extends PortalHandler implements Handler<RoutingContext> {
+public class ActivateAccount extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivateAccount.class);
 
@@ -53,6 +53,7 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
     private String htmlString;
 
     public ActivateAccount(JDBCClient jdbcClient) {
+        super();
         this.jdbcClient = jdbcClient;
     }
 

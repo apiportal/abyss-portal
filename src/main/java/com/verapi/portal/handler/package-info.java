@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the Handlers for the http server routings.
+ * <p>
+ * These classes contain Onboarding and Users and Groups page handlers.
+ *
+ */
 package com.verapi.portal.handler;

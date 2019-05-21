@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the Shell and CLI Services Layer for the platform.
+ * <p>
+ * These classes contain platform version and metrics CLI shell command implementations.
+ *
+ */
 package com.verapi.shell;

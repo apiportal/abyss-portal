@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the Elastic Search Indexing Service Layer for the RESTful API controllers.
+ * <p>
+ * These classes contain Elastic Search asynch indexing routines.
+ *
+ */
 package com.verapi.portal.service.es;

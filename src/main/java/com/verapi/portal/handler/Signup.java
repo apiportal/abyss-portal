@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
-public class Signup extends PortalHandler implements Handler<RoutingContext> {
+public class Signup extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Signup.class);
 
@@ -52,6 +52,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
     private String htmlString;
 
     public Signup(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        super();
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
     }

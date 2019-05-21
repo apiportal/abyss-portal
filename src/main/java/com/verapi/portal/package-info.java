@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Domain classes used to produce the all Portal Services Layer for the platform.
+ * <p>
+ * These classes contain common routines, controllers, handlers, oapi services, verticles.
+ *
+ */
 package com.verapi.portal;
