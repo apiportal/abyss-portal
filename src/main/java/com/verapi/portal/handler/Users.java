@@ -34,6 +34,8 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+
 public class Users extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Users.class);
@@ -104,7 +106,10 @@ public class Users extends AbstractPortalHandler implements Handler<RoutingConte
                             .put("last", true)
                             .put("first", true)
                             .put("sort", "ASC SUBJECT NAME");
-                    routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8").end(usersResult.toString(), "UTF-8");
+                    routingContext
+                            .response()
+                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                            .end(usersResult.toString(), StandardCharsets.UTF_8.toString());
                 }, (Throwable t) -> {
                     LOGGER.error("Users Error", t);
                     generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "Users Handling Error Occured", t.getLocalizedMessage(), "");

@@ -22,16 +22,21 @@ import com.verapi.key.generate.impl.Token;
 import com.verapi.key.model.AuthenticationInfo;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
+import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
+import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,15 +88,13 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
 
         //TODO: OWASP Validate & Truncate the Fields that are going to be stored
 
-        LOGGER.info("Received firstname:" + firstname);
-        LOGGER.info("Received lastname:" + lastname);
-        LOGGER.info("Received user:" + username);
-        LOGGER.info("Received email:" + email);
-        LOGGER.info("Received pass:" + password);
-        LOGGER.info("Received pass2:" + password2);
-        LOGGER.info("Received isAgreedToTerms:" + isAgreedToTerms);
+        LOGGER.info("Received firstname: {}", firstname);
+        LOGGER.info("Received lastname: {}", lastname);
+        LOGGER.info("Received user: {}", username);
+        LOGGER.info("Received email: {}", email);
+        LOGGER.info("Received isAgreedToTerms: {}", isAgreedToTerms);
 
-        jdbcClient.rxGetConnection().flatMap(resConn ->
+        jdbcClient.rxGetConnection().flatMap((SQLConnection resConn) ->
                 resConn
                         .setQueryTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.PORTAL_DBQUERY_TIMEOUT))
                         // Disable auto commit to handle transaction manually
@@ -100,15 +103,17 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                         .toSingleDefault(false)
                         //Check if user already exists
                         .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?", new JsonArray().add(username)))
-                        .flatMap(resultSet -> {
+                        .flatMap((ResultSet resultSet) -> {
                             if (resultSet.getNumRows() > 0) {
                                 subjectId = resultSet.getRows(true).get(0).getInteger("id");
-                                LOGGER.info("user found: " + resultSet.toJson().encodePrettily());
+                                LOGGER.info("user found: {}", resultSet.toJson().encodePrettily());
                                 if (resultSet.getRows(true).get(0).getBoolean("is_activated")) {
-                                    return Single.error(new Exception("Username already exists / Username already taken")); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
+                                    // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
+                                    return Single.error(new Exception("Username already exists / Username already taken"));
                                 } else {
                                     //TODO: Cancel previous activation - Is it really required.
-                                    LOGGER.info("Username already exists but NOT activated, create and send new activation record..."); //Skip user creation
+                                    //Skip user creation
+                                    LOGGER.info("Username already exists but NOT activated, create and send new activation record...");
                                     return Single.just(resultSet);
                                 }
                             } else {
@@ -148,12 +153,18 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                                                 .add(salt));
                             }
                         })
-                        .flatMap(updateResult -> {
+                        .flatMap((Object updateResult) -> {
                             if (updateResult instanceof UpdateResult) {
                                 subjectId = ((UpdateResult) updateResult).getKeys().getInteger(0);
-                                LOGGER.info("[" + ((UpdateResult) updateResult).getUpdated() + "] user created successfully: " + ((UpdateResult) updateResult).getKeys().encodePrettily() + " | Integer Key @pos=0:" + subjectId);
+                                LOGGER.info("[{}] user created successfully: {} | Integer Key @pos=0: {}"
+                                        , ((UpdateResult) updateResult).getUpdated(), ((UpdateResult) updateResult).getKeys().encodePrettily(), subjectId);
                             } else if (updateResult instanceof ResultSet) {
-                                LOGGER.info("[" + ((ResultSet) updateResult).getNumRows() + "] inactive user found: " + ((ResultSet) updateResult).toJson().encodePrettily() + " | Integer Key @pos=0:" + ((ResultSet) updateResult).getRows(true).get(0).getInteger("id") + " subjectID:" + subjectId);
+                                LOGGER.info("[{}] inactive user found: {} | Integer Key @pos=0: {} | subjectID: {}"
+                                        , ((ResultSet) updateResult).getNumRows()
+                                        , ((ResultSet) updateResult).toJson().encodePrettily()
+                                        , ((ResultSet) updateResult).getRows(true).get(0).getInteger("id")
+                                        , subjectId
+                                );
                             }
 
 
@@ -161,13 +172,17 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                             Token tokenGenerator = new Token();
                             AuthenticationInfo authInfo;
                             try {
-                                authInfo = tokenGenerator.generateToken(Config.getInstance().getConfigJsonObject().getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
-                                        email,
-                                        routingContext.vertx().getDelegate());
-                                LOGGER.info("activation token is created successfully: " + authInfo.getToken());
+                                authInfo = tokenGenerator
+                                        .generateToken(Config
+                                                        .getInstance()
+                                                        .getConfigJsonObject()
+                                                        .getInteger("token.activation.signup.ttl") * (long) Constants.ONE_MINUTE_IN_SECONDS,
+                                                email,
+                                                routingContext.vertx().getDelegate());
+                                LOGGER.info("activation token is created successfully: {}", authInfo.getToken());
                                 authToken = authInfo.getToken();
                             } catch (UnsupportedEncodingException e) {
-                                LOGGER.error("tokenGenerator.generateToken :" + e.getLocalizedMessage());
+                                LOGGER.error("tokenGenerator.generateToken: {}", e.getLocalizedMessage());
                                 return Single.error(new Exception("activation token could not be generated"));
                             }
                             return resConn.rxUpdateWithParams("INSERT INTO portalschema.subject_activation (" +
@@ -202,7 +217,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                                 .flatMap(ignore -> Single.error(ex))
                         )
 
-                        .doAfterSuccess(succ -> {
+                        .doAfterSuccess((Boolean succ) -> {
                             LOGGER.info("User record and activation token is created and persisted successfully");
 
                             JsonObject json = new JsonObject();
@@ -213,22 +228,21 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                                     Config.getInstance().getConfigJsonObject().getString(Constants.MAIL_BASE_URL) + Constants.ACTIVATION_PATH + "/?v=" + authToken,
                                     Constants.ACTIVATION_TEXT));
 
-                            routingContext.vertx().getDelegate().eventBus().<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, result -> {
-                                LOGGER.info(result.toString());
-                            });
+                            routingContext.vertx().getDelegate().eventBus()
+                                    .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> LOGGER.info(result.toString()));
 
                         })
 
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
-        ).subscribe(result -> {
+        ).subscribe((Boolean result) -> {
                     LOGGER.info("Subscription to Signup successfull:" + result);
-                    generateResponse(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "");
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_OK, "Activation Code is sent to your email address", "Please check spam folder also...", "");
                     //TODO: Send email to user
-                }, t -> {
+                }, (Throwable t) -> {
                     LOGGER.error("Signup Error", t);
-                    generateResponse(routingContext, LOGGER, 401, "Signup Error Occured", t.getLocalizedMessage(), "");
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "Signup Error Occured", t.getLocalizedMessage(), "");
                 }
         );
     }
@@ -242,7 +256,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
         // we define a hardcoded title for our application
         //routingContext.put("signin", "Sign in Abyss");
         // and now delegate to the engine to render it.
-        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_SIGNUP, res -> {
+        engine.render(new JsonObject(), Constants.TEMPLATE_DIR_ROOT + Constants.HTML_SIGNUP, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
                 routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 routingContext.response().end(res.result());
@@ -252,7 +266,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
         });
     }
 
-    public String renderMailPage(RoutingContext routingContext, String activationUrl, String activationText) {
+    private String renderMailPage(RoutingContext routingContext, String activationUrl, String activationText) {
         LOGGER.info("renderMailPage invoked...");
 
 
@@ -270,7 +284,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
 
 
         // and now delegate to the engine to render it.
-        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_ACTIVATE, res -> {
+        engine.render(templateContext, Constants.TEMPLATE_DIR_EMAIL + Constants.HTML_ACTIVATE, (AsyncResult<Buffer> res) -> {
             if (res.succeeded()) {
                 //routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 //routingContext.response().end(res.result());
