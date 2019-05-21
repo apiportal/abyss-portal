@@ -447,12 +447,16 @@ public class ApiService extends AbstractService<UpdateResult> {
 
     public static final String FILTER_BY_LICENSE = SQL_SELECT2 + ", api_license\n" +
             SQL_WHERE + "api.uuid = api_license.apiid\n" +
-            SQL_AND + "api_license.licenseid = CAST(? AS uuid)\n";
+            SQL_AND + "api_license.licenseid = CAST(? AS uuid)\n" +
+            SQL_AND + "api_license.isdeleted = false\n" +
+            SQL_AND + "api_license.isactive = true";
 
     public static final String FILTER_BY_POLICY = SQL_SELECT2 + SQL_WHERE + "uuid in (\n" +
             "    select apiid\n" +
             "    from api_license\n" +
-            "    where licenseid in (\n" +
+            "    where isdeleted = false\n" +
+            "    and isactive = true\n" +
+            "    and licenseid in (\n" +
             "        select uuid\n" +
             "        from license\n" +
             "        where licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb))";
@@ -490,7 +494,7 @@ public class ApiService extends AbstractService<UpdateResult> {
             "\t\t\t\t'crudsubjectid', l.crudsubjectid, 'name', l.\"name\", 'version', l.\"version\", 'subjectid', l.subjectid, 'licensedocument', l.licensedocument, 'isactive', l.isactive)\n" +
             "\t\t) from license l\n" +
             "\t\t\t\tjoin api_license al on al.apiid = a.uuid\n" +
-            "\t\t\twhere al.licenseid = l.uuid\n" +
+            "\t\t\twhere al.licenseid = l.uuid and al.isdeleted = false and al.isactive = true\n" +
             "\t\t\t), '[]') as availablelicenses\n" +
             "FROM\napi\na\n" +
             "\tjoin subject s on s.uuid = a.subjectid\n" +
