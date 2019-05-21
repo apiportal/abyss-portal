@@ -44,6 +44,9 @@ public class ContractApiController extends AbstractApiController {
 
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.NESTED_COLUMN_USER_RESOURCES);
+        add(Constants.NESTED_COLUMN_USER_PERMISSIONS);
+        add(Constants.NESTED_COLUMN_USER_LICENSES);
+        add(Constants.NESTED_COLUMN_APP_OWNERS);
     }};
 
     /**

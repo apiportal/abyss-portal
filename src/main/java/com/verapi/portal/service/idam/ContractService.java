@@ -471,4 +471,46 @@ public class ContractService extends AbstractService<UpdateResult> {
 
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
+
+    public static final String SQL_SUBSCRIPTION = "select\tc.uuid, c.organizationid, c.created, c.updated, c.deleted, c.isdeleted, c.crudsubjectid, c.\"name\", c.description, c.apiid, c.subjectid, c.environment, \n" +
+            "\t\tc.contractstateid, c.status, c.isrestrictedtosubsetofapi, c.licenseid, c.subjectpermissionid,\n" +
+            "\t\tapp.displayname as appdisplayname, \n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', s.uuid, 'displayname', s.displayname)\n" +
+            "\t\t\t\t\t) FROM subject s\n" +
+            "\t\t\t\t\t\twhere sm.subjectid = s.uuid and s.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'\n" +
+            "\t\t\t), '[]') as appowners,\n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, 'isdeleted', r.isdeleted, \n" +
+            "\t\t\t\t\t\t\t\t\t'crudsubjectid', r.crudsubjectid, 'resourcetypeid', r.resourcetypeid, 'resourcename', r.resourcename, 'description', r.description, \n" +
+            "\t\t\t\t\t\t\t\t\t'resourcerefid', r.resourcerefid, 'isactive', r.isactive, 'subresourcename', r.subresourcename)\n" +
+            "\t\t\t\t\t) FROM resource r\n" +
+            "\t\t\t\t\t\twhere c.uuid = r.resourcerefid\n" +
+            "\t\t\t), '[]') as resources,\n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', sp.uuid, 'organizationid', sp.organizationid, 'created', sp.created, 'updated', sp.updated, 'deleted', sp.deleted, \n" +
+            "\t\t\t\t\t\t\t\t\t'isdeleted', sp.isdeleted, 'crudsubjectid', sp.crudsubjectid, \n" +
+            "\t\t\t\t\t\t\t\t\t'permission', sp.permission, 'description', sp.description, 'effectivestartdate', sp.effectivestartdate, 'effectiveenddate', sp.effectiveenddate, \n" +
+            "\t\t\t\t\t\t\t\t\t'subjectid', sp.subjectid, 'resourceid', sp.resourceid, 'resourceactionid', sp.resourceactionid, 'accessmanagerid', sp.accessmanagerid, 'isactive', sp.isactive,\n" +
+            "\t\t\t\t\t\t\t\t\t'accesstokens', COALESCE((select json_agg(\n" +
+            "\t\t\t\t\t\t\t\t\t\t\tjson_build_object('uuid', rat.uuid, 'organizationid', rat.organizationid, 'created', rat.created, 'updated', rat.updated, 'deleted', rat.deleted, 'isdeleted', rat.isdeleted, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t'crudsubjectid', rat.crudsubjectid, 'subjectpermissionid', rat.subjectpermissionid, 'resourcetypeid', rat.resourcetypeid, 'resourcerefid', rat.resourcerefid, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t'token', rat.token, 'expiredate', rat.expiredate, 'isactive', rat.isactive)\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t) from resource_access_token rat\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\twhere rat.subjectpermissionid = sp.uuid\n" +
+            "\t\t\t\t\t\t\t\t\t\t), '[]')\t\t\t\t\t\t\t\t\t\n" +
+            "\t\t\t\t\t\t\t\t)\n" +
+            "\t\t\t\t\t) FROM subject_permission sp\n" +
+            "\t\t\t\t\t\twhere sp.uuid = c.subjectpermissionid\n" +
+            "\t\t\t), '[]') as permissions,\n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', l.uuid, 'organizationid', l.organizationid, 'created', l.created, 'updated', l.updated, 'deleted', l.deleted, 'isdeleted', l.isdeleted, \n" +
+            "\t\t\t\t\t\t\t\t\t'crudsubjectid', l.crudsubjectid, 'name', l.\"name\", 'version', l.\"version\", 'subjectid', l.subjectid, 'licensedocument', l.licensedocument, 'isactive', l.isactive)\n" +
+            "\t\t\t\t\t) from license l\n" +
+            "\t\t\t\t\t\twhere c.licenseid = l.uuid\n" +
+            "\t\t\t), '[]') as licenses\n" +
+            "FROM\ncontract\nc, subject app, subject_membership sm\n" +
+            "where c.subjectid = app.uuid\n" +
+            "and c.subjectid = sm.subjectgroupid and sm.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09' and sm.subjectgrouptypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6'\n" +
+            "and c.apiid = CAST(? AS uuid)";
 }

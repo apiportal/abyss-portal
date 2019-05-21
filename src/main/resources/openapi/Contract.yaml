@@ -251,7 +251,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /contracts/subscribe/:
+  /contracts/subscribe/api/{uuid}:
     get:
       tags:
         - Subscription
@@ -259,6 +259,12 @@ paths:
       description: 'Returns list of Subscriptions'
       operationId: getSubscriptions
       parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of user'
+          required: true
+          schema:
+            type: string
         - name: byname
           in: query
           required: false
@@ -292,6 +298,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /contracts/subscribe/:
     post:
       tags:
         - Subscription
