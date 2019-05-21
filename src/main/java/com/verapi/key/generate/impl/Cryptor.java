@@ -16,9 +16,10 @@
 
 package com.verapi.key.generate.impl;
 
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import com.verapi.key.model.CryptoOperationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -26,10 +27,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-
-import com.verapi.key.model.CryptoOperationResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Encrypt Decrypt Library
@@ -43,20 +43,13 @@ class Cryptor {
     private static final Logger LOGGER = LoggerFactory.getLogger(Cryptor.class);
 
     private static final byte[] IV = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
-
-    private static SecretKey aesEncKey = null;
-
-    //private static SecretKey aesMacKey = null;
-
     private static final String GENERATE_ALGORITHM = "AES";
+
     private static final String CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding";
-    //private static final String KEY_FILE = "secret.key";
     private static final int KEY_SIZE = 128; //bit
-    //private static final int BLOCK_SIZE = 32; //bytes
-
     private static final IvParameterSpec ivParameterSpec = new IvParameterSpec(IV);
-
-    //create the singleton object of AES
+    private static final String CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK = "CryptoOperationResult error: {} \n error stack: {}";
+    private static SecretKey aesEncKey;
     private static Cryptor instance = new Cryptor();
 
     private Cryptor() {
@@ -126,50 +119,39 @@ class Cryptor {
     private CryptoOperationResult crypt(byte[] inputBytes, int operationMode) {
 
         Cipher aesCipher;
-        //String cipherText = "";
         byte[] outputBytes;
 
         try {
             aesCipher = Cipher.getInstance(CRYPT_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
-            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, false, "NoSuchAlgorithmException", e);
+            LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
+            return new CryptoOperationResult(null, Boolean.FALSE, "NoSuchAlgorithmException", e);
         } catch (NoSuchPaddingException e) {
-            // TODO Auto-generated catch block
-            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, false, "NoSuchPaddingException", e);
+            LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
+            return new CryptoOperationResult(null, Boolean.FALSE, "NoSuchPaddingException", e);
         }
         try {
             aesCipher.init(operationMode, aesEncKey, ivParameterSpec);
         } catch (InvalidKeyException e) {
-            // TODO Auto-generated catch block
-            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, false, "InvalidKeyException", e);
+            LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
+            return new CryptoOperationResult(null, Boolean.FALSE, "InvalidKeyException", e);
         } catch (InvalidAlgorithmParameterException e) {
-            // TODO Auto-generated catch block
-            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, false, "InvalidAlgorithmParameterException", e);
+            LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
+            return new CryptoOperationResult(null, Boolean.FALSE, "InvalidAlgorithmParameterException", e);
         }
 
         try {
             outputBytes = aesCipher.doFinal(inputBytes);
         } catch (IllegalBlockSizeException e) {
-            // TODO Auto-generated catch block
-            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, false, "IllegalBlockSizeException", e);
+            LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
+            return new CryptoOperationResult(null, Boolean.FALSE, "IllegalBlockSizeException", e);
 
         } catch (BadPaddingException e) {
-            // TODO Auto-generated catch block
-            LOGGER.error("CryptoOperationResult error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, false, "BadPaddingException", e);
+            LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
+            return new CryptoOperationResult(null, Boolean.FALSE, "BadPaddingException", e);
         }
 
-        //System.out.println("Len:"+outputBytes.length); //TODO Kaldır
-
-
-        return new CryptoOperationResult(outputBytes, true, "SUCCESSFULL", null);
-
+        return new CryptoOperationResult(outputBytes, Boolean.TRUE, "SUCCESSFULL", null);
     }
 
 }

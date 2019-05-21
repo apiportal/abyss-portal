@@ -42,7 +42,7 @@ public class BasicTokenParser {
     public static BasicTokenParseResult authorizationBasicTokenParser(String authorizationBasicToken) {
         if (authorizationBasicToken == null || authorizationBasicToken.isEmpty()) {
             LOGGER.error("authorizationBasicToken is null or empty: {}", authorizationBasicToken);
-            return new BasicTokenParseResult(true, "", "");
+            return new BasicTokenParseResult(Boolean.TRUE, "", "");
         }
 
         String[] pieces = authorizationBasicToken.split(" "); //May contain "Basic / Bearer" SPACE before TOKEN
@@ -51,12 +51,12 @@ public class BasicTokenParser {
 
         if (pieces.length < 2) {
             LOGGER.error("token type is null or empty: {}", authorizationBasicToken);
-            return new BasicTokenParseResult(true, "", "");
+            return new BasicTokenParseResult(Boolean.TRUE, "", "");
         }
 
         if (!("Basic".equals(pieces[0]))) {
             LOGGER.error("token type is wrong: {}", authorizationBasicToken);
-            return new BasicTokenParseResult(true, "", "");
+            return new BasicTokenParseResult(Boolean.TRUE, "", "");
         }
 
         String credentials;
@@ -66,15 +66,15 @@ public class BasicTokenParser {
             credentials = new String(bytes, "UTF8");//TODO: Charset
         } catch (UnsupportedEncodingException | IllegalArgumentException e) {
             LOGGER.error("Exception while converting bytes of authorizationBasicToken to String: {}", e.getMessage());
-            return new BasicTokenParseResult(true, "", "");
+            return new BasicTokenParseResult(Boolean.TRUE, "", "");
         }
         String[] parts = credentials.split(":"); //parts => user name | password
 
         if (parts.length < 2) {
             LOGGER.error("authorization header does not contain (:) splitter -> {}", authorizationBasicToken);
-            return new BasicTokenParseResult(true, "", "");
+            return new BasicTokenParseResult(Boolean.TRUE, "", "");
         }
-        return new BasicTokenParseResult(false, parts[0], parts[1]);
+        return new BasicTokenParseResult(Boolean.FALSE, parts[0], parts[1]);
     }
 
     /**
@@ -86,7 +86,7 @@ public class BasicTokenParser {
     public static BearerTokenParseResult authorizationBearerTokenParser(String authorizationBearerToken) {
         if (authorizationBearerToken == null || authorizationBearerToken.isEmpty()) {
             LOGGER.error("authorizationBearerToken is null or empty: {}", authorizationBearerToken);
-            return new BearerTokenParseResult(true, "");
+            return new BearerTokenParseResult(Boolean.TRUE, "");
         }
 
         String[] pieces = authorizationBearerToken.split(" "); //May contain "Basic / Bearer" SPACE before TOKEN
@@ -94,14 +94,14 @@ public class BasicTokenParser {
         LOGGER.info(pieces[0]);
         if (pieces.length < 2) {
             LOGGER.error("token type is null or empty: {}", authorizationBearerToken);
-            return new BearerTokenParseResult(true, "");
+            return new BearerTokenParseResult(Boolean.TRUE, "");
         }
 
         if ("Bearer".equals(pieces[0])) {
-            return new BearerTokenParseResult(false, pieces[1]);
+            return new BearerTokenParseResult(Boolean.FALSE, pieces[1]);
         } else {
             LOGGER.error("token type is wrong: {}", authorizationBearerToken);
-            return new BearerTokenParseResult(true, "");
+            return new BearerTokenParseResult(Boolean.TRUE, "");
         }
     }
 
