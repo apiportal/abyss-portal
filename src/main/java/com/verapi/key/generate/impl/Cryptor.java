@@ -119,39 +119,39 @@ class Cryptor {
     private CryptoOperationResult crypt(byte[] inputBytes, int operationMode) {
 
         Cipher aesCipher;
-        byte[] outputBytes;
 
         try {
             aesCipher = Cipher.getInstance(CRYPT_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, Boolean.FALSE, "NoSuchAlgorithmException", e);
+            return new CryptoOperationResult(inputBytes, false, "NoSuchAlgorithmException", e);
         } catch (NoSuchPaddingException e) {
             LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, Boolean.FALSE, "NoSuchPaddingException", e);
+            return new CryptoOperationResult(inputBytes, false, "NoSuchPaddingException", e);
         }
         try {
             aesCipher.init(operationMode, aesEncKey, ivParameterSpec);
         } catch (InvalidKeyException e) {
             LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, Boolean.FALSE, "InvalidKeyException", e);
+            return new CryptoOperationResult(inputBytes, false, "InvalidKeyException", e);
         } catch (InvalidAlgorithmParameterException e) {
             LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, Boolean.FALSE, "InvalidAlgorithmParameterException", e);
+            return new CryptoOperationResult(inputBytes, false, "InvalidAlgorithmParameterException", e);
         }
 
+        byte[] outputBytes;
         try {
             outputBytes = aesCipher.doFinal(inputBytes);
         } catch (IllegalBlockSizeException e) {
             LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, Boolean.FALSE, "IllegalBlockSizeException", e);
+            return new CryptoOperationResult(inputBytes, false, "IllegalBlockSizeException", e);
 
         } catch (BadPaddingException e) {
             LOGGER.error(CRYPTO_OPERATION_RESULT_ERROR_ERROR_STACK, e.getLocalizedMessage(), e.getStackTrace());
-            return new CryptoOperationResult(null, Boolean.FALSE, "BadPaddingException", e);
+            return new CryptoOperationResult(inputBytes, false, "BadPaddingException", e);
         }
 
-        return new CryptoOperationResult(outputBytes, Boolean.TRUE, "SUCCESSFULL", null);
+        return new CryptoOperationResult(outputBytes, true, "SUCCESSFULL", null);
     }
 
 }
