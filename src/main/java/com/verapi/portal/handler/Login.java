@@ -26,6 +26,7 @@ import io.vertx.reactivex.ext.auth.AuthProvider;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,10 +63,10 @@ public class Login implements Handler<RoutingContext> {
                 routingContext.put(USERNAME, userName);
                 routingContext.session().regenerateId();
                 routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME, userName);
-                routingContext.response().putHeader("location", "/abyss/index").setStatusCode(302).end();
+                routingContext.response().putHeader("location", "/abyss/index").setStatusCode(HttpStatus.SC_MOVED_TEMPORARILY).end();
                 LOGGER.info("redirected../index");
             } else {
-                routingContext.fail(401);
+                routingContext.fail(HttpStatus.SC_UNAUTHORIZED);
             }
         });
     }

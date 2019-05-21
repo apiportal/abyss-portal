@@ -33,6 +33,7 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +106,7 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                                                 .generateToken(Config
                                                                 .getInstance()
                                                                 .getConfigJsonObject()
-                                                                .getInteger("token.activation.renewal.password.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                                                .getInteger("token.activation.renewal.password.ttl") * (long) Constants.ONE_MINUTE_IN_SECONDS,
                                                         username,
                                                         routingContext.vertx().getDelegate());
                                         LOGGER.trace("Reset Password: token is created successfully: {}", authInfo.getToken());
@@ -165,7 +166,7 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                         // commit if all succeeded
                         .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
-                                LOGGER.trace("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
+                                LOGGER.trace("Activate Account - Subject Activation Update Result information: {}", updateResult.getKeys().encodePrettily());
                                 return resConn.rxCommit().toSingleDefault(true);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
@@ -197,7 +198,7 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                                     .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
                                         if (result.succeeded()) {
                                             LOGGER.trace("Forgot Password Mailing Event Bus Result: {} | Result: {}"
-                                                    , result.toString(), result.result().body().encodePrettily());
+                                                    , result, result.result().body().encodePrettily());
                                         } else {
                                             LOGGER.error("Forgot Password Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
                                         }
@@ -212,13 +213,13 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
 
         ).subscribe((Boolean result) -> {
                     LOGGER.info("Subscription to Forgot Password successfull: {}", result);
-                    showTrxResult(routingContext, LOGGER, 200
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_OK
                             , "Reset Password Code is sent to your email address!"
                             , "Please check spam folder also...", "Please click the link inside the mail");
                 }, (Throwable t) -> {
                     LOGGER.error("Forgot Password Error", t);
                     //Due to OWASP regulations same output should be given even if error occured.
-                    showTrxResult(routingContext, LOGGER, 200
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_OK
                             , "Reset Password Code is sent to your email address!"
                             , "Please check spam folder also...", "Please click the link inside the mail");
                     //showTrxResult(routingContext, LOGGER, 401, "Error in Forgot Password Occured!", t.getLocalizedMessage(), "");

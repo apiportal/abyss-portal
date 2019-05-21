@@ -19,6 +19,8 @@ package com.verapi.portal.oapi;
 //import com.atlassian.oai.validator.SwaggerRequestResponseValidator;
 
 import com.google.json.JsonSanitizer;
+import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.abyss.exception.BadRequest400Exception;
@@ -30,8 +32,6 @@ import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.abyss.exception.UnProcessableEntity422Exception;
 import com.verapi.auth.BasicTokenParseResult;
 import com.verapi.auth.BasicTokenParser;
-import com.verapi.abyss.common.Constants;
-import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.IService;
 import com.verapi.portal.service.es.ElasticSearchService;
@@ -43,8 +43,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.reactivex.exceptions.CompositeException;
 import io.swagger.parser.util.ClasspathHelper;
-import io.vertx.core.http.HttpHeaders;
 import io.swagger.v3.oas.models.Operation;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
@@ -55,6 +55,7 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
+import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -66,6 +67,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
@@ -77,11 +79,12 @@ import static com.verapi.portal.common.Util.nnvl;
 
 public abstract class AbstractApiController implements IApiController {
     private static final Logger logger = LoggerFactory.getLogger(AbstractApiController.class);
+    private static final String OPEN_API_OPERATION = "openApiOperation";
 
-    protected static ElasticSearchService elasticSearchService = new ElasticSearchService();
+    private static ElasticSearchService elasticSearchService = new ElasticSearchService();
     protected Vertx vertx;
-    private Router abyssRouter;
     protected JDBCAuth authProvider;
+    private Router abyssRouter;
     private String apiSpec;
 
     protected AbstractApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
@@ -112,7 +115,7 @@ public abstract class AbstractApiController implements IApiController {
                             if (method.getAnnotation(AbyssApiOperationHandler.class) != null) {
                                 logger.trace("adding OpenAPI handler for the class {} and the method {}", getClass().getName(), method.getName());
 
-                                final String  methodName = method.getName();
+                                final String methodName = method.getName();
 
                                 // Add a failure handler
                                 factory.addFailureHandlerByOperationId(methodName, this::failureHandler);
@@ -121,14 +124,16 @@ public abstract class AbstractApiController implements IApiController {
                                 factory.addHandlerByOperationId(methodName, this::abyssPathAuthorizationHandler);
 
                                 // Now you can use the factory to mount map endpoints to Vert.x handlers
-                                factory.addHandlerByOperationId(methodName, routingContext -> {
+                                factory.addHandlerByOperationId(methodName, (RoutingContext routingContext) -> {
                                     try {
                                         getClass().getDeclaredMethod(methodName, RoutingContext.class).invoke(this, routingContext);
                                     } catch (NoSuchMethodException | IllegalAccessException e) {
-                                        logger.error("{}.{} invocation error: {} \n stack trace: {}", getClass().getName(), method.getName(), e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
+                                        logger.error("{}.{} invocation error: {} \n stack trace: {}"
+                                                , getClass().getName(), method.getName(), e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
                                         throwApiException(routingContext, InternalServerError500Exception.class, e);
                                     } catch (InvocationTargetException eITE) {
-                                        logger.error("{}.{} invocation error: {} \n stack trace:\n{}\ntarget error msg: {}\n target stack trace:\n{}\n", getClass().getName(), method.getName(),
+                                        logger.error("{}.{} invocation error: {} \n stack trace:\n{}\ntarget error msg: {}\n target stack trace:\n{}\n"
+                                                , getClass().getName(), method.getName(),
                                                 eITE.getLocalizedMessage(), Arrays.toString(eITE.getStackTrace()),
                                                 eITE.getTargetException().getLocalizedMessage(), Arrays.toString(eITE.getTargetException().getStackTrace())
                                         );
@@ -140,25 +145,26 @@ public abstract class AbstractApiController implements IApiController {
                                 ResourceService resourceService = new ResourceService(vertx);
 
                                 resourceService.initJDBCClient()
-                                        .flatMap(jdbcClient1 -> { return resourceService.insertAllWithConflict(new JsonArray().add(new JsonObject()
-                                                .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
-                                                .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
-                                                .put("resourcetypeid", Constants.RESOURCE_TYPE_OPENAPI_OPERATION)
-                                                .put("resourcename", methodName)
-                                                .put("description", apiSpec+"-"+classCanonicalName + "-" + methodName)
-                                                .put("resourcerefid", Constants.RESOURCE_TYPE_OPENAPI_OPERATION)
-                                                .put("isactive", true)
-                                        ));
-                                        })
-                                        .subscribe(jsonObjects -> {
-                                            if (jsonObjects.isEmpty() || jsonObjects.get(0).size()==0) {
+                                        .flatMap((JDBCClient jdbcClient1) ->
+                                                resourceService.insertAllWithConflict(new JsonArray().add(new JsonObject()
+                                                        .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
+                                                        .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
+                                                        .put("resourcetypeid", Constants.RESOURCE_TYPE_OPENAPI_OPERATION)
+                                                        .put("resourcename", methodName)
+                                                        .put("description", apiSpec + "-" + classCanonicalName + "-" + methodName)
+                                                        .put("resourcerefid", Constants.RESOURCE_TYPE_OPENAPI_OPERATION)
+                                                        .put("isactive", true)
+                                                ))
+                                        )
+                                        .subscribe((List<JsonObject> jsonObjects) -> {
+                                            if (jsonObjects.isEmpty() || jsonObjects.get(0).size() == 0) {
                                                 logger.trace("Resource Record exists for operation: {}", methodName);
                                             } else {
-                                                logger.trace("Resource Record {}\n for operation: {} inserted", jsonObjects.get(0).encodePrettily(), methodName);
+                                                logger.trace("Resource Record {}\n for operation: {} inserted"
+                                                        , jsonObjects.get(0).encodePrettily(), methodName);
                                             }
-                                        }, throwable -> {
-                                            logger.error("Resource Recording [{}] error {} | {}: ", methodName, throwable.getLocalizedMessage(), throwable.getStackTrace());
-                                        });
+                                        }, throwable -> logger.error("Resource Recording [{}] error {} | {}: "
+                                                , methodName, throwable.getLocalizedMessage(), throwable.getStackTrace()));
                             }
                         }
 
@@ -180,7 +186,7 @@ public abstract class AbstractApiController implements IApiController {
                                 .setMountValidationFailureHandler(true) // Disable mounting of dedicated validation failure handler
                                 .setMountResponseContentTypeHandler(true) // Mount ResponseContentTypeHandler automatically
                                 .setMountNotImplementedHandler(true)
-                                .setOperationModelKey("openApiOperation");
+                                .setOperationModelKey(OPEN_API_OPERATION);
                         // Now you have to generate the router
                         Router router = factory.setOptions(factoryOptions).getRouter();
 
@@ -189,11 +195,11 @@ public abstract class AbstractApiController implements IApiController {
                         //Mount router into main router
                         abyssRouter.mountSubRouter(mountPoint, router);
 
-                        logger.trace("generated router : " + router.getRoutes().toString());
-                        logger.trace("Abyss router : " + abyssRouter.getRoutes().toString());
+                        logger.trace("generated router : {}", router.getRoutes().toString());
+                        logger.trace("Abyss router : {}", abyssRouter.getRoutes().toString());
 
                     } else {
-                        logger.error("OpenAPI3RouterFactory creation failed, cause: " + ar.cause());
+                        logger.error("OpenAPI3RouterFactory creation failed, cause: {}", ar.cause());
                         throw new RuntimeException("OpenAPI3RouterFactory creation failed, cause: " + ar.cause());
                     }
                 }
@@ -210,7 +216,7 @@ public abstract class AbstractApiController implements IApiController {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             abyssApiException = new InternalServerError500Exception("new instance");
             httpResponseStatus = abyssApiException.getHttpResponseStatus();
-            logger.error(e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+            logger.error("throwApiException {}\n{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
         }
 
         throwApiException(routingContext, clazz, httpResponseStatus.reasonPhrase(), null, null, null);
@@ -234,12 +240,14 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     public <T> void throwApiException(RoutingContext routingContext, Class<T> clazz, String userMessage, String detailedMessage, String recommendation, String moreInfo) {
-        logger.trace("throwApiException for " + userMessage);
+        logger.trace("throwApiException for {}", userMessage);
         //replace Vertx Routing Context prohibited characters
-        if (userMessage != null)
+        if (userMessage != null) {
             userMessage = nnvl(userMessage, userMessage.replace("\r", "").replace("\n", ""));
-        if (detailedMessage != null)
+        }
+        if (detailedMessage != null) {
             detailedMessage = nnvl(detailedMessage, detailedMessage.replace("\r", "").replace("\n", ""));
+        }
 
 
         ApiSchemaError apiSchemaError = new ApiSchemaError();
@@ -256,17 +264,19 @@ public abstract class AbstractApiController implements IApiController {
             abyssApiException = (AbyssApiException) clazz.getConstructor(ApiSchemaError.class).newInstance(apiSchemaError);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             abyssApiException = new InternalServerError500Exception(apiSchemaError);
-            logger.error("Error occurred during AbyssApiException instance constructing error:{} \n stack trace:{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
+            logger.error("Error occurred during AbyssApiException instance constructing error:{} \n stack trace:{}"
+                    , e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
         }
         routingContext.fail(abyssApiException);
     }
 
     public void failureHandler(RoutingContext routingContext) {
         Throwable failure;
-        if (routingContext.failure() == null)
+        if (routingContext.failure() == null) {
             failure = new InternalServerError500Exception("Routing Context Failure is null!");
-        else
+        } else {
             failure = routingContext.failure();
+        }
 
         logger.trace("failureHandler invoked; error: {} \n stack trace: {} "
                 , failure.getLocalizedMessage()
@@ -278,21 +288,24 @@ public abstract class AbstractApiController implements IApiController {
         }
         // This is the failure handler
         if (failure instanceof ValidationException)
-            // Handle Validation Exception
+        // Handle Validation Exception
+        {
             routingContext.response()
                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.UNPROCESSABLE_ENTITY.code())
                     .setStatusMessage(HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase() + " " + ((ValidationException) failure).type().name() + " " + failure.getLocalizedMessage())
                     .end();
-        else if (failure instanceof AbyssApiException)
-            //Handle Abyss Api Exception
+        } else if (failure instanceof AbyssApiException)
+        //Handle Abyss Api Exception
+        {
             routingContext.response()
                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getApiError().getCode())
                     .setStatusMessage(((AbyssApiException) failure).getApiError().getUsermessage())
-                    .end(JsonSanitizer.sanitize(((AbyssApiException) failure).getApiError().toJson().toString()), "UTF-8");
-        else
-            // Handle other exception
+                    .end(JsonSanitizer.sanitize(((AbyssApiException) failure).getApiError().toJson().toString()), StandardCharsets.UTF_8.toString());
+        } else
+        // Handle other exception
+        {
             routingContext.response()
                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -304,15 +317,16 @@ public abstract class AbstractApiController implements IApiController {
                             .setRecommendation(null)
                             .setMoreinfo(null)
                             .toJson()
-                            .toString()), "UTF-8"
+                            .toString()), StandardCharsets.UTF_8.toString()
                     );
+        }
 
     }
 
     public void abyssCookieAuthSecurityHandler(RoutingContext routingContext) {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        logger.trace(methodName + " invoked");
+        logger.trace("{} invoked", methodName);
 
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
@@ -332,15 +346,16 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.next();
     }
 
-    public void abyssHttpBasicAuthSecurityHandler(RoutingContext routingContext) {
+    private void abyssHttpBasicAuthSecurityHandler(RoutingContext routingContext) {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        logger.trace(methodName + " invoked");
+        logger.trace("{} invoked", methodName);
 
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
         //secondly check if the previous security handler's flag is set, if so  then route next
-        if (routingContext.session().get("abyssCookieAuthSecurityHandler")!=null && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
+        if (routingContext.session().get("abyssCookieAuthSecurityHandler") != null
+                && routingContext.session().get("abyssCookieAuthSecurityHandler").toString().equals("OK")) {
             routingContext.next();
             return;
         }
@@ -472,7 +487,8 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssPathAuthorizationHandler(RoutingContext routingContext) {
-        String methodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        String methodName = new Object() {
+        }.getClass().getEnclosingMethod().getName();
         //logger.trace(methodName + " invoked");
 
         String organizationUuidTemp = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
@@ -487,7 +503,7 @@ public abstract class AbstractApiController implements IApiController {
         }
         String userUuid = userUuidTemp;
 
-        String operationId = ((Operation) routingContext.data().get("openApiOperation")).getOperationId();
+        String operationId = ((Operation) routingContext.data().get(OPEN_API_OPERATION)).getOperationId();
         routingContext.put(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID, operationId);
 
         //Get and check resource ID is a valid uuid
@@ -525,7 +541,7 @@ public abstract class AbstractApiController implements IApiController {
 
                 routingContext.data().keySet(),
                 routingContext.session().data().keySet(),
-                ((Operation) routingContext.data().get("openApiOperation")).getOperationId());  //Operation
+                ((Operation) routingContext.data().get(OPEN_API_OPERATION)).getOperationId());  //Operation
 
 
         //TODO: TEST
@@ -592,7 +608,7 @@ public abstract class AbstractApiController implements IApiController {
                             throwApiException(routingContext, Forbidden403Exception.class);
                         });
             }
-        } catch(Exception e){
+        } catch (Exception e) {
             logger.error("abyssPathAuthorizationHandler() subjectPermissionService.findAll error : {}\n{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
             throwApiException(routingContext, Forbidden403Exception.class);
         }
@@ -603,7 +619,7 @@ public abstract class AbstractApiController implements IApiController {
 
     private void processException(RoutingContext routingContext, Throwable throwable) {
         if (throwable instanceof CompositeException) {
-            for (Throwable t: ((CompositeException) throwable).getExceptions()) {
+            for (Throwable t : ((CompositeException) throwable).getExceptions()) {
                 if (t instanceof UnAuthorized401Exception) {
                     logger.error("response has errors: {} | {}", t.getCause().getLocalizedMessage(), throwable.getStackTrace());
                     throwApiException(routingContext, UnAuthorized401Exception.class, t.getCause().getLocalizedMessage());
@@ -1054,8 +1070,8 @@ public abstract class AbstractApiController implements IApiController {
         String parts[] = sourceData.split(",");
         String imageString = parts[1];
 
-        String contentType = parts[0].substring(parts[0].indexOf(':')+1, parts[0].indexOf(';'));
-        String imageFormat = "." + contentType.substring(contentType.indexOf('/')+1);
+        String contentType = parts[0].substring(parts[0].indexOf(':') + 1, parts[0].indexOf(';'));
+        String imageFormat = "." + contentType.substring(contentType.indexOf('/') + 1);
         logger.trace("imageColumnName: {}. contentType: {}. imageFormat: {}", imageColumnName, contentType, imageFormat);
 
         Base64.Decoder base64Decoder = Base64.getDecoder();

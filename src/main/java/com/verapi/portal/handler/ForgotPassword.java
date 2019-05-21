@@ -35,6 +35,7 @@ import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,14 +173,14 @@ public class ForgotPassword extends PortalHandler implements Handler<RoutingCont
 
         ).subscribe((Boolean result) -> {
                     LOGGER.info("Subscription to Forgot Password successfull:" + result);
-                    generateResponse(routingContext, LOGGER, 200
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_OK
                             , "Reset Password Code is sent to your email address."
                             , "Please check spam folder also..."
-                            , "Please click the link inside the mail.", "");
+                            , "Please click the link inside the mail.");
                     //TODO: Send email to user
                 }, (Throwable t) -> {
                     LOGGER.error("Forgot Password Error", t);
-                    generateResponse(routingContext, LOGGER, 401, "Error in Forgot Password Occured", t.getLocalizedMessage(), "", "");
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "Error in Forgot Password Occured", t.getLocalizedMessage(), "");
                 }
         );
 

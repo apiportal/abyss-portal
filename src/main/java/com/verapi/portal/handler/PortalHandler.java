@@ -18,11 +18,12 @@ package com.verapi.portal.handler;
 
 import com.verapi.abyss.common.Constants;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
-public abstract class PortalHandler {
+abstract class PortalHandler {
 
-    protected void generateResponse(RoutingContext context, Logger logger, int statusCode, String message1, String message2, String message3, String message4) {
+    void generateResponse(RoutingContext context, Logger logger, int statusCode, String message1, String message2, String message3) {
         logger.info("generateResponse invoked...");
 
         //Use user's session for storage
@@ -31,10 +32,10 @@ public abstract class PortalHandler {
         context.session().put(Constants.HTTP_ERRORMESSAGE, message1);
         context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, message3);
 
-        if (statusCode==200) {
-            context.response().putHeader("location", "/abyss/success").setStatusCode(302).end();
+        if (statusCode== HttpStatus.SC_OK) {
+            context.response().putHeader("location", "/abyss/success").setStatusCode(HttpStatus.SC_MOVED_TEMPORARILY).end();
         } else {
-            context.response().putHeader("location", "/abyss/httperror").setStatusCode(302).end();
+            context.response().putHeader("location", "/abyss/httperror").setStatusCode(HttpStatus.SC_MOVED_TEMPORARILY).end();
         }
     }
 

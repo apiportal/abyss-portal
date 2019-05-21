@@ -17,7 +17,7 @@
 package com.verapi.portal.controller;
 
 import com.verapi.abyss.common.Constants;
-import io.vertx.core.Handler;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -26,10 +26,11 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractPortalController<T> implements IController<T>, Handler<RoutingContext> {
+public abstract class AbstractPortalController<T> implements IController<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPortalController.class);
 
@@ -41,54 +42,42 @@ public abstract class AbstractPortalController<T> implements IController<T>, Han
         this.jdbcClient = jdbcClient;
     }
 
-    public abstract void defaultGetHandler(RoutingContext routingContext);
-
-    protected void renderTemplate(RoutingContext routingContext, String templateFileName) {
-        renderTemplate(routingContext, new JsonObject(), templateFileName, 200);
-    }
-
-    protected void renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName) {
-        renderTemplate(routingContext, context, templateFileName, 200);
-    }
-
-    protected void renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName, int statusCode) {
-        _renderTemplate(routingContext, context, templateFileName, statusCode);
-    }
-
-    private void _renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName, int statusCode) {
-        final ThymeleafTemplateEngine templateEngine = ThymeleafTemplateEngine.create(routingContext.vertx());
-        //templateEngine.render(routingContext, Constants.TEMPLATE_DIR_ROOT, templateFileName, res -> {
-        templateEngine.render(context, Constants.TEMPLATE_DIR_ROOT + templateFileName, res -> {
-            if (res.succeeded()) {
-                responseHTML(routingContext, res.result(), statusCode);
-                LOGGER.trace("renderTemplate using " + templateFileName + " finished successfully");
-            } else {
-                routingContext.fail(res.cause());
-                LOGGER.trace("renderTemplate using " + templateFileName + " failed with " + res.cause().getLocalizedMessage());
-            }
-        });
-    }
-
-    protected void renderJson(RoutingContext routingContext, Object object) {
-        responseJSON(routingContext, object);
-    }
-
-    private void responseHTML(RoutingContext routingContext, Buffer chunk, int statusCode) {
+    private static void responseHTML(RoutingContext routingContext, Buffer chunk, int statusCode) {
         routingContext.response()
                 .putHeader(HttpHeaders.CONTENT_TYPE, "text/html; charset=utf-8")
                 .setStatusCode(statusCode)
                 .end(chunk);
     }
 
-    private void responseHTML(RoutingContext routingContext, Buffer chunk) {
-        responseHTML(routingContext, chunk, 200);
-    }
-
-
-    private void responseJSON(RoutingContext routingContext, Object chunk) {
+    private static void responseJSON(RoutingContext routingContext, Object chunk) {
         routingContext.response()
                 .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                 .end(Json.encode(chunk));
+    }
+
+    protected void renderTemplate(RoutingContext routingContext, String templateFileName) {
+        renderTemplate(routingContext, new JsonObject(), templateFileName, HttpStatus.SC_OK);
+    }
+
+    protected void renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName) {
+        renderTemplate(routingContext, context, templateFileName, HttpStatus.SC_OK);
+    }
+
+    protected void renderTemplate(RoutingContext routingContext, JsonObject context, String templateFileName, int statusCode) {
+        final ThymeleafTemplateEngine templateEngine = ThymeleafTemplateEngine.create(routingContext.vertx());
+        templateEngine.render(context, Constants.TEMPLATE_DIR_ROOT + templateFileName, (AsyncResult<Buffer> res) -> {
+            if (res.succeeded()) {
+                responseHTML(routingContext, res.result(), statusCode);
+                LOGGER.trace("renderTemplate using {} finished successfully", templateFileName);
+            } else {
+                routingContext.fail(res.cause());
+                LOGGER.trace("renderTemplate using {} failed with {}", templateFileName, res.cause().getLocalizedMessage());
+            }
+        });
+    }
+
+    protected void renderJson(RoutingContext routingContext, Object object) {
+        responseJSON(routingContext, object);
     }
 
     @Override
@@ -98,15 +87,15 @@ public abstract class AbstractPortalController<T> implements IController<T>, Han
 
     public void redirect(RoutingContext routingContext, String redirectTo, int redirectCode) {
         routingContext.response().putHeader("location", redirectTo).setStatusCode(redirectCode).end();
-        LOGGER.trace("redirecting into " + redirectTo + " with http status code " + redirectCode);
+        LOGGER.trace("redirecting into {} with http status code {}", redirectTo, redirectCode);
     }
 
     public void redirect(RoutingContext routingContext, String redirectTo) {
-        redirect(routingContext, redirectTo, 302);
+        redirect(routingContext, redirectTo, HttpStatus.SC_MOVED_TEMPORARILY);
     }
 
-    protected void showTrxResult(RoutingContext routingContext, Logger LOGGER, int statusCode, String errorMessage, String errorAtUrl, String contextFailureMessage) {
-        LOGGER.trace("showTrxResult invoked...");
+    void showTrxResult(RoutingContext routingContext, Logger logger, int statusCode, String errorMessage, String errorAtUrl, String contextFailureMessage) {
+        logger.trace("showTrxResult invoked...");
 
         //Use user's session for storage
         routingContext.session().put(Constants.HTTP_STATUSCODE, statusCode);
@@ -114,7 +103,7 @@ public abstract class AbstractPortalController<T> implements IController<T>, Han
         routingContext.session().put(Constants.HTTP_ERRORMESSAGE, errorMessage);
         routingContext.session().put(Constants.CONTEXT_FAILURE_MESSAGE, contextFailureMessage);
 
-        if (statusCode == 200) {
+        if (statusCode == HttpStatus.SC_OK) {
             redirect(routingContext, Constants.ABYSS_ROOT + "/success");
         } else {
             redirect(routingContext, Constants.ABYSS_ROOT + "/failure");

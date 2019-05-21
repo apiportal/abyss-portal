@@ -223,11 +223,11 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
         ).subscribe(result -> {
                     LOGGER.info("Subscription to Signup successfull:" + result);
-                    generateResponse(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "");
+                    generateResponse(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "");
                     //TODO: Send email to user
                 }, t -> {
                     LOGGER.error("Signup Error", t);
-                    generateResponse(routingContext, LOGGER, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "");
+                    generateResponse(routingContext, LOGGER, 401, "Signup Error Occured", t.getLocalizedMessage(), "");
                 }
         );
     }

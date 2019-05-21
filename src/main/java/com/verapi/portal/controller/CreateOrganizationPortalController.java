@@ -26,6 +26,7 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -129,7 +130,7 @@ public class CreateOrganizationPortalController extends AbstractPortalController
 
                     } catch (UnsupportedEncodingException e) {
                         LOGGER.error("SelectOrganizationPortalController - POST handler : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
-                        showTrxResult(routingContext, LOGGER, 400, "Organization Selection Failed!", e.getLocalizedMessage(), "");
+                        showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "Organization Selection Failed!", e.getLocalizedMessage(), "");
                     }
 
                 }, (Throwable throwable) -> LOGGER.error("CreateOrganizationPortalController.handle() error {} | {}: "

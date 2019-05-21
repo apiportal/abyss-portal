@@ -27,6 +27,7 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,23 +62,23 @@ public class ChangePasswordPortalController extends AbstractPortalController {
 
         if (oldPassword == null || oldPassword.isEmpty()) {
             LOGGER.warn("oldPassword is null or empty");
-            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+            showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
                     , "Please enter Old Password field", "");
         }
         if (newPassword == null || newPassword.isEmpty()) {
             LOGGER.warn("newPassword is null or empty");
-            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+            showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
                     , "Please enter New Password field", "");
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             LOGGER.warn("confirmPassword is null or empty");
-            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+            showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
                     , "Please enter Confirm Password field", "");
         }
 
         if (newPassword != null && !(newPassword.equals(confirmPassword))) {
             LOGGER.warn("newPassword and confirmPassword does not match");
-            showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+            showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
                     , "New Password and Confirm Password does not match", "Please check and enter again");
         }
 
@@ -95,7 +96,7 @@ public class ChangePasswordPortalController extends AbstractPortalController {
                         .toSingleDefault(false)
                         .flatMap(checkAuth -> authProvider.rxAuthenticate(creds))
                         .flatMap((User user) -> {
-                            LOGGER.trace("Authenticated User with Old Password: " + user.principal().encodePrettily());
+                            LOGGER.trace("Authenticated User with Old Password: {}",user.principal().encodePrettily());
 
                             LOGGER.trace("Updating user records...");
                             String salt = authProvider.generateSalt();
@@ -130,12 +131,12 @@ public class ChangePasswordPortalController extends AbstractPortalController {
 
         ).subscribe((Boolean result) -> {
                     LOGGER.info("Subscription to ChangePassword successfull: {}", result);
-                    showTrxResult(routingContext, LOGGER, 200, "Password has been successfully changed!"
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_OK, "Password has been successfully changed!"
                             , "You may login using your new password", "");
                     //TODO: Send email to user
                 }, (Throwable t) -> {
                     LOGGER.error("ChangePassword Error", t);
-                    showTrxResult(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
                             , t.getLocalizedMessage(), "");
                 }
         );
