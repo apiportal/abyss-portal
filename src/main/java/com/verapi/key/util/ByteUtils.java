@@ -24,9 +24,13 @@ import java.nio.ByteBuffer;
 /**
  * @author faik.saglar
  */
-public class ByteUtils {
+public final class ByteUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(ByteUtils.class);
     private static ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);    //TODO: is thread safe?
+
+    private ByteUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static byte[] longToBytes(long x) {
         buffer.putLong(0, x);
