@@ -95,7 +95,7 @@ public class ApiApiController extends AbstractApiController {
                     (((JsonObject) requestItem).getValue("image") == ""))
                 try {
                     InputStream in = getClass().getResourceAsStream(Constants.RESOURCE_DEFAULT_API_AVATAR);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) {

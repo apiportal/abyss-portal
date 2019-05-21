@@ -838,7 +838,7 @@ public abstract class AbstractApiController implements IApiController {
                 .putHeader("Vary", ORIGIN)
                 .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                 .setStatusCode(httpResponseStatus)
-                .end(JsonSanitizer.sanitize(response.encode()), "UTF-8");
+                .end(JsonSanitizer.sanitize(response.encode()), StandardCharsets.UTF_8.toString());
     }
 
     void subscribeAndResponseJsonObject(RoutingContext routingContext, Single<JsonObject> response, int httpResponseStatus) {
@@ -902,7 +902,7 @@ public abstract class AbstractApiController implements IApiController {
         String filterLikeNameParameter = null;
         if (!routingContext.queryParams().isEmpty()) {
             if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).isEmpty()) {
-                filterByNameParameter = URLDecoder.decode(routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0), "UTF-8");
+                filterByNameParameter = URLDecoder.decode(routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0), StandardCharsets.UTF_8.toString());
             }
             if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).isEmpty()) {
                 if (filterByNameParameter != null && !filterByNameParameter.isEmpty()) {

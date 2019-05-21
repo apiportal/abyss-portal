@@ -34,6 +34,8 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+
 public class UserGroups extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGroups.class);
@@ -99,7 +101,7 @@ public class UserGroups extends AbstractPortalHandler implements Handler<Routing
                             .put("last", Boolean.TRUE)
                             .put("first", Boolean.TRUE)
                             .put("sort", "ASC GROUP NAME");
-                    routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8").end(groupsResult.toString(), "UTF-8");
+                    routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8").end(groupsResult.toString(), StandardCharsets.UTF_8.toString());
                 }, (Throwable t) -> {
                     LOGGER.error("UserGroups Error", t);
                     generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "UserGroups Handling Error Occured", t.getLocalizedMessage(), "");

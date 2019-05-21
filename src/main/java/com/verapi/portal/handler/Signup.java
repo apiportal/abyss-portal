@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 public class Signup extends AbstractPortalHandler implements Handler<RoutingContext> {
 
@@ -289,7 +290,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                 //routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 //routingContext.response().end(res.result());
 
-                this.htmlString = res.result().toString("UTF-8");
+                this.htmlString = res.result().toString(StandardCharsets.UTF_8);
             } else {
                 routingContext.fail(res.cause());
             }

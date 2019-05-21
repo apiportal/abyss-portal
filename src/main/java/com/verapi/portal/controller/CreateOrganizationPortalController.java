@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @AbyssController(routePathGET = "create-organization", routePathPOST = "create-organization", htmlTemplateFile = "create-organization.html", isPublic = true)
@@ -115,8 +116,8 @@ public class CreateOrganizationPortalController extends AbstractPortalController
                 .subscribe((List<JsonObject> jsonObjects) -> {
                     try {
                         //Url Encode for cookie compliance
-                        String userLoginOrganizationName = URLEncoder.encode(name, "UTF-8");
-                        String userLoginOrganizationUUID = URLEncoder.encode(organizationUuid, "UTF-8");
+                        String userLoginOrganizationName = URLEncoder.encode(name, StandardCharsets.UTF_8.toString());
+                        String userLoginOrganizationUUID = URLEncoder.encode(organizationUuid, StandardCharsets.UTF_8.toString());
 
                         routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName);
                         routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID);

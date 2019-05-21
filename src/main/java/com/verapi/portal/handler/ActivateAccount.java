@@ -38,6 +38,8 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+
 public class ActivateAccount extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivateAccount.class);
@@ -247,7 +249,7 @@ public class ActivateAccount extends AbstractPortalHandler implements Handler<Ro
                 //routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 //routingContext.response().end(res.result());
 
-                this.htmlString = res.result().toString("UTF-8");
+                this.htmlString = res.result().toString(StandardCharsets.UTF_8);
             } else {
                 routingContext.fail(res.cause());
             }
