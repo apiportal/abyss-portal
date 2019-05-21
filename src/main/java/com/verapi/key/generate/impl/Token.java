@@ -87,7 +87,7 @@ public class Token implements TokenRemoteIntf {
 
         AuthenticationInfo authInfo = null;
         try {
-            authInfo = token.encodeToken(new TokenRequest("userData123@xyz", 60 * 10));
+            authInfo = token.encodeToken(new TokenRequest("userData123@xyz", (long) 60 * 10));
 
 
             LOGGER.trace("{}", authInfo.getToken());
@@ -105,7 +105,7 @@ public class Token implements TokenRemoteIntf {
 
 
             //----------------------- USAGE EXAMPLE
-            AuthenticationInfo authInfo2 = token.generateToken(60 * 10, "userData123@xyz", Vertx.vertx());
+            AuthenticationInfo authInfo2 = token.generateToken((long) 60 * 10, "userData123@xyz", Vertx.vertx());
 
             LOGGER.trace("{}", authInfo2.getToken());
             LOGGER.trace("{}", SEPARATOR);
@@ -148,9 +148,8 @@ public class Token implements TokenRemoteIntf {
 //private void printDateTime(DateTime date, String name) {
 //System.out.println(name + ":" + date.toString(ISO_DATETIME_FORMATTER));
 //}
-    private void printDateTime(Instant date, String name) {
-        //System.out.println(name + ":" + date.toString());
-        LOGGER.info(name + ":" + date.toString());
+    private static void printDateTime(Instant date, String name) {
+        LOGGER.info("{} : {}", name, date);
     }
 
     /**
@@ -160,7 +159,7 @@ public class Token implements TokenRemoteIntf {
      * @return boolean true if expired, false otherwise
      * @author faik.saglar
      */
-    private boolean isExpired(String receivedExpireDateStr) {
+    private static boolean isExpired(String receivedExpireDateStr) {
 
         //ZonedDateTime receivedDate;
         //DateTime receivedDate;
@@ -190,7 +189,7 @@ public class Token implements TokenRemoteIntf {
      * @return boolean true if expired, false otherwise
      * @author faik.saglar
      */
-    private boolean isExpired(Instant expireDate) {
+    private static boolean isExpired(Instant expireDate) {
 
         Instant currentDate = Instant.now();
 
@@ -240,7 +239,8 @@ public class Token implements TokenRemoteIntf {
         ///////////////////////////////////////////////////////////////////
         // Concat Data
 
-        String input = HEADER_WITH_SPLITTER + nonceBase64 + SPLITTER + userDataBase64Hash + SPLITTER + expireDateStrHash; //TODO  + Hash/Crc + HMAC / Signature ;
+        //TODO  + Hash/Crc + HMAC / Signature ;
+        String input = HEADER_WITH_SPLITTER + nonceBase64 + SPLITTER + userDataBase64Hash + SPLITTER + expireDateStrHash;
 
         ///////////////////////////////////////////////////////////////////
         // Prepare Token for Export
@@ -250,7 +250,7 @@ public class Token implements TokenRemoteIntf {
         return new AuthenticationInfo(token, nonceBase64, expireDate, userData);
     }
 
-    private AuthenticationInfo doPreChecksBeforeValidateToken(String token, AuthenticationInfo authInfo) {
+    private static AuthenticationInfo doPreChecksBeforeValidateToken(String token, AuthenticationInfo authInfo) {
 
         ///////////////////////////////////////////////////////////////////
         //Check authInfo
@@ -402,9 +402,11 @@ public class Token implements TokenRemoteIntf {
         ///////////////////////////////////////////////////////////////////
         // Prepare Data for Enc
 
-        String input = HEADER_WITH_SPLITTER + nonceBase64 + SPLITTER + userDataBase64 + SPLITTER + expireDateStr; //TODO  + Hash/Crc ;
+        //TODO  + Hash/Crc ;
+        String input = HEADER_WITH_SPLITTER + nonceBase64 + SPLITTER + userDataBase64 + SPLITTER + expireDateStr;
 
-        Cryptor aes = Cryptor.getInstance(); //TODO: Switch to A.E.
+        //TODO: Switch to A.E.
+        Cryptor aes = Cryptor.getInstance();
 
         byte[] inputBytes = input.getBytes(StandardCharsets.UTF_8);
 

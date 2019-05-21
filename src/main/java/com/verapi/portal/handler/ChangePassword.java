@@ -101,7 +101,7 @@ public class ChangePassword extends AbstractPortalHandler implements Handler<Rou
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         .flatMap(checkAuth -> authProvider.rxAuthenticate(creds))
                         .flatMap((User user) -> {
                             LOGGER.info("Authenticated User with Old Password: {}", user.principal().encodePrettily());
@@ -124,10 +124,10 @@ public class ChangePassword extends AbstractPortalHandler implements Handler<Rou
                                             .add(username));
                         })
                         // commit if all succeeded
-                        .flatMap(updateResult -> resConn.rxCommit().toSingleDefault(true))
+                        .flatMap(updateResult -> resConn.rxCommit().toSingleDefault(Boolean.TRUE))
 
                         // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
+                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(Boolean.TRUE)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> Single.error(ex))
                         )

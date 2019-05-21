@@ -265,7 +265,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addBusinessApis(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("isproxyapi", false));
+        addEntities(routingContext, new JsonObject().put("isproxyapi", Boolean.FALSE));
     }
 
     @AbyssApiOperationHandler
@@ -302,7 +302,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addApiProxies(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("isproxyapi", true));
+        addEntities(routingContext, new JsonObject().put("isproxyapi", Boolean.TRUE));
     }
 
     @AbyssApiOperationHandler
@@ -351,7 +351,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addBusinessApisOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", false));
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", Boolean.FALSE));
     }
 
     @AbyssApiOperationHandler
@@ -389,7 +389,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addApiProxiesOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", true));
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", Boolean.TRUE));
     }
 
     @AbyssApiOperationHandler

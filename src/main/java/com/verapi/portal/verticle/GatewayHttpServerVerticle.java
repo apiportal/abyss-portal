@@ -47,15 +47,15 @@ import java.util.concurrent.TimeUnit;
 
 public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implements IGatewayVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(GatewayHttpServerVerticle.class);
-    private Boolean attachAbyssGatewayUserSessionHandler = false;
+    private Boolean attachAbyssGatewayUserSessionHandler = Boolean.FALSE;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
         LOGGER.trace("---start invoked");
         verticleConf = new VerticleConf(Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_GATEWAY_SERVER_HOST),
                 Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_GATEWAY_SERVER_PORT),
-                false,
-                false);
+                Boolean.FALSE,
+                Boolean.FALSE);
         initializeServer()
                 .andThen(Completable.defer(this::registerEchoHttpService))
                 .andThen(Completable.defer(this::testEchoHttpService))
@@ -154,7 +154,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                 .flatMap(o -> {
                     JsonObject apiSpec = new JsonObject(o.getString("openapidocument"));
                     String apiUUID = o.getString("uuid");
-                    attachAbyssGatewayUserSessionHandler = false;
+                    attachAbyssGatewayUserSessionHandler = Boolean.FALSE;
                     return OpenAPIUtil.openAPIParser(apiSpec)
                             .flatMap(swaggerParseResult -> {
                                 OpenAPIUtil.createOpenAPI3RouterFactory(vertx, swaggerParseResult.getOpenAPI(), openAPI3RouterFactoryAsyncResult -> {
@@ -292,7 +292,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                         LOGGER.trace("***** detected security requirement key: {}\nvalue: {}\ntype: {}\nIn: {}\nname: {}", key, value.toArray(), type, in, name);
                         if ((name != null) && (name.equals(Constants.AUTH_ABYSS_GATEWAY_COOKIE_NAME))) {
                             if ((type == SecurityScheme.Type.APIKEY) && (in == SecurityScheme.In.COOKIE)) {
-                                attachAbyssGatewayUserSessionHandler = true;
+                                attachAbyssGatewayUserSessionHandler = Boolean.TRUE;
                                 factory.addSecurityHandler(key, routingContext -> {
                                     genericSecuritySchemaHandler(securityScheme, routingContext);
                                 });
@@ -303,7 +303,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                         } else if ((name != null) && (name.equals(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME))) {
                             if ((type == SecurityScheme.Type.APIKEY)
                                     && (in == SecurityScheme.In.HEADER)) {
-                                attachAbyssGatewayUserSessionHandler = true;
+                                attachAbyssGatewayUserSessionHandler = Boolean.TRUE;
                                 factory.addSecurityHandler(key, routingContext -> {
                                     genericSecuritySchemaHandler(securityScheme, routingContext);
                                 });

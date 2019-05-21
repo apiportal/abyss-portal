@@ -81,7 +81,7 @@ public class CreateOrganizationPortalController extends AbstractPortalController
                                 .put("name", name)
                                 .put("description", description)
                                 .put("url", url)
-                                .put("isactive", true)
+                                .put("isactive", Boolean.TRUE)
                                 .put("picture", "")))
 
                 )
@@ -98,8 +98,8 @@ public class CreateOrganizationPortalController extends AbstractPortalController
                                 .put("crudsubjectid", userUuid)
                                 .put("subjectid", userUuid)
                                 .put("organizationrefid", organizationUuid)
-                                .put("isowner", true)
-                                .put("isactive", true)))
+                                .put("isowner", Boolean.TRUE)
+                                .put("isactive", Boolean.TRUE)))
                 )
                 .flatMap((List<JsonObject> jsonObjects) -> {
                     LOGGER.trace("CreateOrganizationPortalController - subjectOrganizationService.insertAll successfull: {}", jsonObjects.get(0).encodePrettily());

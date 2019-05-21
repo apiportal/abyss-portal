@@ -83,7 +83,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                                 .put("resourceid", insertRequest.getString("resourceidofapi"))
                                 .put("resourceactionid", Constants.RESOURCE_ACTION_INVOKE_API)
                                 .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
                         return subjectPermissionService.initJDBCClient(sessionOrganizationId)
@@ -107,7 +107,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                                 .put("environment", insertRequest.getString("environment"))
                                 .put("contractstateid", Constants.CONTRACT_STATE_IS_ACTIVATED)
                                 .put("status", Constants.CONTRACT_STATUS_IS_INFORCE)
-                                .put("isrestrictedtosubsetofapi", false)
+                                .put("isrestrictedtosubsetofapi", Boolean.FALSE)
                                 .put("licenseid", insertRequest.getString("licenseid"))
                                 .put("subjectpermissionid", recordStatus.getString("uuid"));
 
@@ -129,7 +129,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                                 .put("resourcename", contractInsertResult.getString("name") + " CONTRACT RESOURCE " + contractInsertResult.getString("uuid"))
                                 .put("description", contractInsertResult.getString("description") + " CONTRACT RESOURCE")
                                 .put("resourcerefid", contractInsertResult.getString("uuid"))
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         ResourceService resourceService = new ResourceService(routingContext.vertx());
                         return resourceService.initJDBCClient(sessionOrganizationId)
@@ -157,7 +157,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                                 .put("subjectpermissionid", subjectPermissionId)
                                 .put("resourcetypeid", Constants.RESOURCE_TYPE_API_PROXY)
                                 .put("resourcerefid", apiId)
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
                         return resourceAccessTokenService.initJDBCClient(sessionOrganizationId)

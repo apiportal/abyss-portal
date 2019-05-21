@@ -72,7 +72,7 @@ public class ActivateAccountPortalController extends AbstractPortalController {
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //Check if user already exists
                         .flatMap(resQ -> resConn
                                 .rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.uuid"
@@ -161,7 +161,7 @@ public class ActivateAccountPortalController extends AbstractPortalController {
                         .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
                                 LOGGER.trace("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
-                                return resConn.rxCommit().toSingleDefault(true);
+                                return resConn.rxCommit().toSingleDefault(Boolean.TRUE);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
                             }
@@ -169,7 +169,7 @@ public class ActivateAccountPortalController extends AbstractPortalController {
                         })
 
                         // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
+                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(Boolean.TRUE)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> Single.error(ex))
                         )

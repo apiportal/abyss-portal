@@ -241,7 +241,7 @@ public abstract class AbstractApiController implements IApiController {
                                                         .put("resourcename", methodName)
                                                         .put("description", apiSpec + "-" + classCanonicalName + "-" + methodName)
                                                         .put("resourcerefid", Constants.RESOURCE_TYPE_OPENAPI_OPERATION)
-                                                        .put("isactive", true)
+                                                        .put("isactive", Boolean.TRUE)
                                                 ))
                                         )
                                         .subscribe((List<JsonObject> jsonObjects) -> {

@@ -223,7 +223,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("name", temporaryOrganizationName)
                                             .put("description", temporaryOrganizationName)
                                             .put("url", "")
-                                            .put("isactive", true)
+                                            .put("isactive", Boolean.TRUE)
                                             .put("picture", "")));
 
                                 })
@@ -240,8 +240,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("crudsubjectid", userUUID)
                                             .put("subjectid", userUUID)
                                             .put("organizationrefid", organizationUuid)
-                                            .put("isowner", true)
-                                            .put("isactive", true)));
+                                            .put("isowner", Boolean.TRUE)
+                                            .put("isactive", Boolean.TRUE)));
                                 })
                                 .flatMap(jsonObjects2 -> {
                                     logger.trace("CreateOrganizationPortalController - subjectOrganizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
@@ -257,7 +257,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
                                             .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                             .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE)
-                                            .put("isactive", true)));
+                                            .put("isactive", Boolean.TRUE)));
                                 })
                                 .flatMap(jsonObjects2 -> {
                                     logger.trace("CreateOrganizationPortalController - subjectMembershipService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
@@ -452,7 +452,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         userRecord
                                 .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
                                 .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
-                                .put("isactivated", false)
+                                .put("isactivated", Boolean.FALSE)
                                 .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                 .put("subjectname", username)
                                 .put("firstname", firstname)
@@ -465,8 +465,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 .put("passwordsalt", salt)
                                 .put("picture", "")
                                 .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
-                                .put("islocked", false)
-                                .put("issandbox", false)
+                                .put("islocked", Boolean.FALSE)
+                                .put("issandbox", Boolean.FALSE)
                                 .put("url", "");
 
                         return signupMetadata.subjectService.insertAll(new JsonArray().add(userRecord))
@@ -667,7 +667,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         JsonObject updateJson = new JsonObject()
                                 .put("organizationid", forgotPasswordMetadata.subjectRow.getString("organizationid"))
                                 .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
-                                .put("isactivated", false)
+                                .put("isactivated", Boolean.FALSE)
                                 .put("subjecttypeid", forgotPasswordMetadata.subjectRow.getString("subjecttypeid"))
                                 .put("subjectname", forgotPasswordMetadata.subjectRow.getString("subjectname"))
                                 .put("firstname", forgotPasswordMetadata.subjectRow.getString("firstname"))
@@ -987,7 +987,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
     public Single<JsonObject> validateAccessToken(String token) {
         logger.trace("validateAccessToken invoked");
-        JsonObject validationStatus = new JsonObject().put("status", false).put("error", "").put("validationreport", new JsonObject());
+        JsonObject validationStatus = new JsonObject().put("status", Boolean.FALSE).put("error", "").put("validationreport", new JsonObject());
 
         return rxValidateToken(token)
                 .flatMap(jsonObject -> {
@@ -1030,7 +1030,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     if (!Objects.equals(jsonObject.getString("contractstatus"), Constants.CONTRACT_STATUS_IS_INFORCE))
                         return Single.error(new Exception("contract status is not 'inforce'"));
 
-                    return Single.just(validationStatus.put("status", true));
+                    return Single.just(validationStatus.put("status", Boolean.TRUE));
                 });
         //.doAfterSuccess(validateAccessTokenStatus -> validationStatus.put("status", true).put("error", "").put("validationreport", validateAccessTokenStatus))
 /*
