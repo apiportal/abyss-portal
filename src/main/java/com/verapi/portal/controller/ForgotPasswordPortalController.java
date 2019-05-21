@@ -167,7 +167,7 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                         .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
                                 LOGGER.trace("Activate Account - Subject Activation Update Result information: {}", updateResult.getKeys().encodePrettily());
-                                return resConn.rxCommit().toSingleDefault(true);
+                                return resConn.rxCommit().toSingleDefault(Boolean.TRUE);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
                             }

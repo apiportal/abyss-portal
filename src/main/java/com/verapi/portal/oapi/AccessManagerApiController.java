@@ -32,16 +32,19 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/AccessManager.yaml")
 public class AccessManagerApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(AccessManagerApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccessManagerApiController.class);
+    private static final String PARSED_PARAMETERS = "parsedParameters";
+    private static final String EXCEPTION_LOG_FORMAT = "{}\n{}";
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_ACCESS_MANAGER_ATTRIBUTES);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
+
+    static {
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_ACCESS_MANAGER_ATTRIBUTES);
+    }
 
 
     /**
@@ -60,8 +63,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             getEntities(routingContext, AccessManagerService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -69,7 +71,7 @@ public class AccessManagerApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addAccessManagers(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -77,8 +79,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             addEntities(routingContext, AccessManagerService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -86,7 +87,7 @@ public class AccessManagerApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateAccessManagers(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -95,8 +96,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, AccessManagerService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -106,22 +106,17 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, AccessManagerService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getAccessManager(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntity(routingContext, AccessManagerService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -130,7 +125,7 @@ public class AccessManagerApiController extends AbstractApiController {
     public void updateAccessManager(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -138,8 +133,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, AccessManagerService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -150,8 +144,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, AccessManagerService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

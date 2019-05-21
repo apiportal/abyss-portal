@@ -85,6 +85,10 @@ public abstract class AbstractApiController implements IApiController {
     private static final String ABYSS_HTTP_BASIC_AUTH_SECURITY_HANDLER = "abyssHttpBasicAuthSecurityHandler";
     private static final String ABYSS_API_KEY_AUTH_SECURITY_HANDLER = "abyssApiKeyAuthSecurityHandler";
     private static final String RESPONSE_HAS_ERRORS = "response has errors: {} | {}";
+    private static final String ORIGIN = "Origin";
+    private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+    private static final String METHOD_INVOKED = "{} invoked";
+    private static final String NO_DATA_FOUND = "no_data_found";
     private static ElasticSearchService elasticSearchService = new ElasticSearchService();
     protected Vertx vertx;
     protected JDBCAuth authProvider;
@@ -224,7 +228,8 @@ public abstract class AbstractApiController implements IApiController {
                                     }
                                 });
 
-                                //TODO: Try to Insert to DB all operationIDs of all API Proxies to Resource -> INSERT ... ON CONFLICT DO NOTHING/UPDATE   |   method.getName() IS EQUAL TO openAPI Operation ID
+                                //TODO: Try to Insert to DB all operationIDs of all API Proxies to Resource -> INSERT ... ON CONFLICT DO NOTHING/UPDATE
+                                // |   method.getName() IS EQUAL TO openAPI Operation ID
                                 ResourceService resourceService = new ResourceService(vertx);
 
                                 resourceService.initJDBCClient()
@@ -355,7 +360,7 @@ public abstract class AbstractApiController implements IApiController {
     private void abyssCookieAuthSecurityHandler(RoutingContext routingContext) {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        LOGGER.trace("{} invoked", methodName);
+        LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
@@ -378,7 +383,7 @@ public abstract class AbstractApiController implements IApiController {
     private void abyssHttpBasicAuthSecurityHandler(RoutingContext routingContext) {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        LOGGER.trace("{} invoked", methodName);
+        LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
@@ -449,7 +454,7 @@ public abstract class AbstractApiController implements IApiController {
     private void abyssApiKeyAuthSecurityHandler(RoutingContext routingContext) {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        LOGGER.trace(methodName + " invoked");
+        LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
@@ -484,7 +489,7 @@ public abstract class AbstractApiController implements IApiController {
     private void abyssJWTBearerAuthSecurityHandler(RoutingContext routingContext) {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        LOGGER.trace(methodName + " invoked");
+        LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
         routingContext.session().remove(methodName);
@@ -524,7 +529,7 @@ public abstract class AbstractApiController implements IApiController {
     private void abyssPathAuthorizationHandler(RoutingContext routingContext) {
         String methodName = new Object() {
         }.getClass().getEnclosingMethod().getName();
-        //LOGGER.trace(methodName + " invoked");
+        LOGGER.trace(METHOD_INVOKED, methodName);
 
         String organizationUuidTemp = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
         if (organizationUuidTemp == null || organizationUuidTemp.isEmpty()) {
@@ -549,8 +554,6 @@ public abstract class AbstractApiController implements IApiController {
                 resourceIdTemp = null;
             }
         }
-        String resourceId = resourceIdTemp;
-
 
         LOGGER.trace("abyssPathAuthorizationHandler invoked,\n" +
                         "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
@@ -821,8 +824,8 @@ public abstract class AbstractApiController implements IApiController {
                                             .toLowerCase(Locale.ENGLISH) + "-api", ((JsonObject) arrayItem).getJsonObject("response")));
                             routingContext.response()
                                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
-                                    .putHeader("Vary", "Origin")
-                                    .putHeader("Access-Control-Allow-Credentials", "true")
+                                    .putHeader("Vary", ORIGIN)
+                                    .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                                     .setStatusCode(httpResponseStatus)
                                     .end(JsonSanitizer.sanitize(arr.encode()), StandardCharsets.UTF_8.toString());
                         },
@@ -832,8 +835,8 @@ public abstract class AbstractApiController implements IApiController {
     protected void subscribeAndResponse(RoutingContext routingContext, JsonArray response, int httpResponseStatus) {
         routingContext.response()
                 .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
-                .putHeader("Vary", "Origin")
-                .putHeader("Access-Control-Allow-Credentials", "true")
+                .putHeader("Vary", ORIGIN)
+                .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                 .setStatusCode(httpResponseStatus)
                 .end(JsonSanitizer.sanitize(response.encode()), "UTF-8");
     }
@@ -850,15 +853,15 @@ public abstract class AbstractApiController implements IApiController {
             if (onlyStatus) {
                 routingContext.response()
                         .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
-                        .putHeader("Vary", "Origin")
-                        .putHeader("Access-Control-Allow-Credentials", "true")
+                        .putHeader("Vary", ORIGIN)
+                        .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                         .setStatusCode(httpResponseStatus)
                         .end(".");
             } else {
                 routingContext.response()
                         .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
-                        .putHeader("Vary", "Origin")
-                        .putHeader("Access-Control-Allow-Credentials", "true")
+                        .putHeader("Vary", ORIGIN)
+                        .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                         .setStatusCode(httpResponseStatus)
                         .end(JsonSanitizer.sanitize(jsonObject.encode()));
             }
@@ -870,15 +873,15 @@ public abstract class AbstractApiController implements IApiController {
             if (onlyStatus) {
                 routingContext.response()
                         .putHeader(HttpHeaders.CONTENT_TYPE, "application/text; charset=utf-8")
-                        .putHeader("Vary", "Origin")
-                        .putHeader("Access-Control-Allow-Credentials", "true")
+                        .putHeader("Vary", ORIGIN)
+                        .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                         .setStatusCode(httpResponseStatus)
                         .end(".");
             } else {
                 routingContext.response()
                         .putHeader(HttpHeaders.CONTENT_TYPE, "application/text; charset=utf-8")
-                        .putHeader("Vary", "Origin")
-                        .putHeader("Access-Control-Allow-Credentials", "true")
+                        .putHeader("Vary", ORIGIN)
+                        .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                         .setStatusCode(httpResponseStatus)
                         .end(stringObject);
             }
@@ -902,9 +905,10 @@ public abstract class AbstractApiController implements IApiController {
                 filterByNameParameter = URLDecoder.decode(routingContext.queryParam(Constants.RESTAPI_FILTERING_BY_NAME).get(0), "UTF-8");
             }
             if (!routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).isEmpty()) {
-                if (filterByNameParameter != null && !filterByNameParameter.isEmpty())
+                if (filterByNameParameter != null && !filterByNameParameter.isEmpty()) {
                     throwApiException(routingContext, UnProcessableEntity422Exception.class
                             , "Both Filter By Name AND Filter Like Name CANNOT BE used at the same time, choose only one");
+                }
                 filterLikeNameParameter = routingContext.queryParam(Constants.RESTAPI_FILTERING_LIKE_NAME).get(0);
             }
         }
@@ -952,7 +956,7 @@ public abstract class AbstractApiController implements IApiController {
 */
                 .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
-                        return Single.error(new NoDataFoundException("no_data_found"));
+                        return Single.error(new NoDataFoundException(NO_DATA_FOUND));
                     } else {
                         return Single.just(resultSet);
                     }
@@ -1031,7 +1035,7 @@ public abstract class AbstractApiController implements IApiController {
                         .findById(UUID.fromString(routingContext.pathParam("uuid")))) //TODO: CompositeResult success & # of rows should be checked
                 .flatMap(resultSet -> {
                     if (resultSet.getNumRows() == 0) {
-                        return Single.error(new NoDataFoundException("no_data_found"));
+                        return Single.error(new NoDataFoundException(NO_DATA_FOUND));
                     } else {
                         return Single.just(resultSet);
                     }
@@ -1066,7 +1070,7 @@ public abstract class AbstractApiController implements IApiController {
                 .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
                 .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
-                        return Single.error(new NoDataFoundException("no_data_found"));
+                        return Single.error(new NoDataFoundException(NO_DATA_FOUND));
                     } else {
                         return Single.just(resultSet);
                     }
@@ -1086,7 +1090,7 @@ public abstract class AbstractApiController implements IApiController {
                         .invoke(service, routingContext, authProvider))
                 .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
-                        return Single.error(new NoDataFoundException("no_data_found"));
+                        return Single.error(new NoDataFoundException(NO_DATA_FOUND));
                     } else {
                         return Single.just(resultSet);
                     }
@@ -1114,7 +1118,7 @@ public abstract class AbstractApiController implements IApiController {
                 (Throwable throwable) -> processException(routingContext, throwable));
     }
 
-    private void logHandler(RoutingContext routingContext) {
+    private static void logHandler(RoutingContext routingContext) {
 /*
         routingContext.request().bodyHandler(event -> {
         LOGGER.warn("Request BODY handler logging: {}", event);
