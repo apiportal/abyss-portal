@@ -33,6 +33,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpHeaders;
@@ -70,12 +71,12 @@ import org.slf4j.LoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -221,6 +222,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         }
     }
 
+    @SuppressWarnings("findsecbugs:HARD_CODE_PASSWORD")
     private Single<HttpServer> createHttpServer(Router router, String serverHost, int serverPort, Boolean isSSL) {
         LOGGER.trace("---createHttpServer invoked");
         HttpServerOptions httpServerOptions = new HttpServerOptions()
@@ -400,7 +402,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         JsonObject apiSpec = new JsonObject(abyssHttpRequest.abyssServiceReference.serviceReference.record().getMetadata().getString("apiSpec"));
         JsonArray servers = apiSpec.getJsonArray(OpenAPIUtil.OPENAPI_SECTION_SERVERS);
         URL serverURL;
-        int serverPosition = new Random().nextInt(servers.size());
+        int serverPosition = new SecureRandom().nextInt(servers.size());
         try {
             serverURL = new URL(servers.getJsonObject(serverPosition).getString("url"));
         } catch (MalformedURLException e) {
@@ -596,23 +598,29 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         String requestedApi = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length(), ("/" + Constants.ABYSS_GW + "/").length() + 36);
         String pathParameters = requestUriPath.substring(("/" + Constants.ABYSS_GW + "/").length() + 36);
         LOGGER.trace("captured uri: {} | path parameter: {}", requestUriPath, pathParameters);
-        LOGGER.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method().toString());
+        LOGGER.trace("captured mountpoint: {} | method: {}", routingContext.mountPoint(), routingContext.request().method());
         JsonObject validationReport = routingContext.get("validationreport");
         JsonObject apiSpec = new JsonObject(validationReport.getString("businessapiopenapidocument"));
         HttpClientOptions httpClientOptions = new HttpClientOptions();
 
         OpenAPIUtil.openAPIParser(apiSpec)
-                .flatMap(swaggerParseResult -> {
+                .flatMap((SwaggerParseResult swaggerParseResult) -> {
                     List<Server> serversList = swaggerParseResult.getOpenAPI().getServers();
                     URL businessApiServerURL;
-                    int serverPosition = new Random().nextInt(serversList.size());
+                    int serverPosition = new SecureRandom().nextInt(serversList.size());
                     String businessApiServerURLStr = serversList.get(serverPosition).getUrl();
                     HttpVersion businessApiServerHttpProtocolVersion;
 
-                    if (serversList.get(serverPosition).getExtensions() != null && serversList.get(serverPosition).getExtensions().containsKey(Constants.OPENAPI_HTTP_PROTOCOL_VERSION))
-                        businessApiServerHttpProtocolVersion = HttpVersion.valueOf(serversList.get(serverPosition).getExtensions().get(Constants.OPENAPI_HTTP_PROTOCOL_VERSION).toString());
-                    else
+                    if (serversList.get(serverPosition).getExtensions() != null
+                            && serversList.get(serverPosition).getExtensions().containsKey(Constants.OPENAPI_HTTP_PROTOCOL_VERSION)) {
+                        businessApiServerHttpProtocolVersion = HttpVersion.valueOf(serversList
+                                .get(serverPosition)
+                                .getExtensions()
+                                .get(Constants.OPENAPI_HTTP_PROTOCOL_VERSION)
+                                .toString());
+                    } else {
                         businessApiServerHttpProtocolVersion = HttpVersion.HTTP_1_1;
+                    }
 
                     try {
                         businessApiServerURL = new URL(businessApiServerURLStr + pathParameters);
@@ -622,7 +630,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                         return Single.error(e);
                     }
                 })
-                .subscribe(businessApi -> {
+                .subscribe((BusinessApi businessApi) -> {
                             LOGGER.trace("Business API Server URL : {} Path: {}", businessApi.serverURL, businessApi.serverURL.getPath());
                             HttpClient httpClient = vertx.createHttpClient(httpClientOptions
                                     .setSsl("https".equals(businessApi.serverURL.getProtocol()))
@@ -637,8 +645,9 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                             if (businessApi.serverURL.getPort() != -1) {
                                 requestOptions.setPort(businessApi.serverURL.getPort());
                             } else {
-                                if ("https".equals(businessApi.serverURL.getProtocol()))
+                                if ("https".equals(businessApi.serverURL.getProtocol())) {
                                     requestOptions.setPort(443);
+                                }
                             }
                             requestOptions
                                     .setSsl("https".equals(businessApi.serverURL.getProtocol()))

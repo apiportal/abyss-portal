@@ -16,12 +16,12 @@
 
 package com.verapi.shell;
 
-import io.vertx.core.cli.CLIException;
 import io.vertx.core.cli.annotations.Description;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.impl.launcher.commands.VersionCommand;
 import io.vertx.core.spi.launcher.DefaultCommand;
+import org.apache.commons.io.FilenameUtils;
 
 
 @Name("version")
@@ -30,8 +30,8 @@ import io.vertx.core.spi.launcher.DefaultCommand;
 public class PortalVersionCommand extends DefaultCommand {
 
     @Override
-    public void run() throws CLIException {
-        out.println("Portal : " + new java.io.File(PortalVersionCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName());
+    public void run() {
+        out.println("Portal : " + new java.io.File(FilenameUtils.getName(PortalVersionCommand.class.getProtectionDomain().getCodeSource().getLocation().getPath())).getName());
         out.println("Vert.x : " + VersionCommand.getVersion());
     }
 
