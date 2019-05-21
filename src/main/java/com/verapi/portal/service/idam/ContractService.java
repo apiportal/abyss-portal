@@ -472,7 +472,7 @@ public class ContractService extends AbstractService<UpdateResult> {
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 
-    public static final String SQL_SUBSCRIPTION = "select\tc.uuid, c.organizationid, c.created, c.updated, c.deleted, c.isdeleted, c.crudsubjectid, c.\"name\", c.description, c.apiid, c.subjectid, c.environment, \n" +
+    public static final String SQL_SUBSCRIPTIONS_OF_API = "select\tc.uuid, c.organizationid, c.created, c.updated, c.deleted, c.isdeleted, c.crudsubjectid, c.\"name\", c.description, c.apiid, c.subjectid, c.environment, \n" +
             "\t\tc.contractstateid, c.status, c.isrestrictedtosubsetofapi, c.licenseid, c.subjectpermissionid,\n" +
             "\t\tapp.displayname as appdisplayname, \n" +
             "\t\tCOALESCE((select json_agg(\n" +
