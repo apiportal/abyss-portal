@@ -52,7 +52,7 @@ public abstract class AbstractService<T> implements IService<T> {
     protected String organizationUuid;// = Constants.DEFAULT_ORGANIZATION_UUID;
     protected String operationId;
 
-    protected Boolean autoCommit = true;
+    protected Boolean autoCommit = Boolean.TRUE;
     protected SQLConnection sqlConnection = null;
 
     public static final String SQL_AND = "and\n";
@@ -186,7 +186,7 @@ public abstract class AbstractService<T> implements IService<T> {
                                 // Disable auto commit to handle transaction manually
                                 .rxSetAutoCommit(false)
                                 // Switch from Completable to default Single value
-                                .toSingleDefault(false)
+                                .toSingleDefault(Boolean.FALSE)
                                 //.toObservable()
                                 //execute query
 //                                .flatMap(insertConn -> (params == null) ? conn.rxUpdate(sql)
@@ -329,7 +329,7 @@ public abstract class AbstractService<T> implements IService<T> {
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //execute query
                         //.flatMap(conn1 -> (params == null) ? conn.rxQuery(sql) : conn.rxQueryWithParams(sql, params))
                         .flatMap(conn1 -> { //TODO: Improve Organization Filter

@@ -18,13 +18,13 @@ package com.verapi.portal.verticle;
 
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
-import com.verapi.abyss.common.OpenAPIUtil;
 import com.verapi.portal.service.idam.AuthenticationService;
 import com.verapi.portal.service.idam.AuthorizationService;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -45,19 +45,16 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.auth.jdbc.JDBCHashStrategy;
 import io.vertx.ext.web.api.validation.ValidationException;
-import io.vertx.reactivex.RxHelper;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpClient;
 import io.vertx.reactivex.core.http.HttpClientRequest;
 import io.vertx.reactivex.core.http.HttpClientResponse;
 import io.vertx.reactivex.core.http.HttpServer;
-import io.vertx.reactivex.core.http.HttpServerRequest;
 import io.vertx.reactivex.ext.auth.User;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import io.vertx.reactivex.ext.web.handler.BodyHandler;
 import io.vertx.reactivex.ext.web.handler.CookieHandler;
 import io.vertx.reactivex.ext.web.handler.CorsHandler;
 import io.vertx.reactivex.ext.web.handler.ResponseTimeHandler;
@@ -72,7 +69,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -91,11 +88,10 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGatewayVerticle.class);
 
     static Router gatewayRouter;
-    private AbyssJDBCService abyssJDBCService;
-    private JDBCClient jdbcClient;
     JDBCAuth jdbcAuth;
     VerticleConf verticleConf;
-
+    private AbyssJDBCService abyssJDBCService;
+    private JDBCClient jdbcClient;
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -356,7 +352,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                         "/", resp -> {
                                             //System.out.println("Got echo response " + resp.statusCode());
                                             //resp.handler(buf -> System.out.println(buf.toString("UTF-8")));
-                                            resp.handler(buf -> LOGGER.trace("status:{} response:{}", resp.statusCode(), buf.toString("UTF-8")));
+                                            resp.handler(buf -> LOGGER.trace("status:{} response:{}", resp.statusCode(), buf.toString(StandardCharsets.UTF_8)));
                                         })
                                         .setChunked(true)
                                         .putHeader(HttpHeaders.CONTENT_TYPE, "text/plain")
@@ -373,24 +369,6 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                             LOGGER.error(Arrays.toString(throwable.getStackTrace()));
                         })
         );
-    }
-
-    public class AbyssServiceReference {
-        ServiceReference serviceReference;
-        HttpClient httpClient;
-
-        AbyssServiceReference(ServiceReference serviceReference, HttpClient httpClient) {
-            this.serviceReference = serviceReference;
-            this.httpClient = httpClient;
-        }
-
-        public ServiceReference getServiceReference() {
-            return serviceReference;
-        }
-
-        public HttpClient getHttpClient() {
-            return httpClient;
-        }
     }
 
     Single<AbyssServiceReference> lookupHttpService(String serviceName) {
@@ -415,16 +393,6 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         } else {
             LOGGER.error("releaseHttpService error");
             return Completable.error(Throwable::new);
-        }
-    }
-
-    public class AbyssHttpRequest {
-        AbyssServiceReference abyssServiceReference;
-        RoutingContext context;
-
-        public AbyssHttpRequest(AbyssServiceReference abyssServiceReference, RoutingContext context) {
-            this.abyssServiceReference = abyssServiceReference;
-            this.context = context;
         }
     }
 
@@ -481,7 +449,6 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
     }
 
-
     Completable loadAllProxyApis() {
         LOGGER.trace("---loadAllProxyApis invoked");
         return Completable.complete();
@@ -489,21 +456,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
     public void routingContextHandler(RoutingContext context) {
         LOGGER.trace("---routingContextHandler invoked");
-        context.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), "UTF-8");
-    }
-
-    static final class VerticleConf {
-        String serverHost;
-        int serverPort;
-        Boolean isSSL = Boolean.FALSE;
-        Boolean isSandbox = Boolean.FALSE;
-
-        VerticleConf(String serverHost, int serverPort, Boolean isSSL, Boolean isSandbox) {
-            this.serverHost = serverHost;
-            this.serverPort = serverPort;
-            this.isSSL = isSSL;
-            this.isSandbox = isSandbox;
-        }
+        context.response().setStatusCode(HttpResponseStatus.OK.code()).end(HttpResponseStatus.OK.reasonPhrase(), StandardCharsets.UTF_8.toString());
     }
 
     void dummySecuritySchemaHandler(SecurityScheme securityScheme, RoutingContext routingContext) {
@@ -609,7 +562,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                     .setStatusCode(((AbyssApiException) failure).getHttpResponseStatus().code())
                     .setStatusMessage(((AbyssApiException) failure).getHttpResponseStatus().reasonPhrase())
-                    .end(((AbyssApiException) failure).getApiError().toJson().toString(), "UTF-8");
+                    .end(((AbyssApiException) failure).getApiError().toJson().toString(), StandardCharsets.UTF_8.toString());
         else
             // Handle other exception
             routingContext.response()
@@ -827,6 +780,48 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         else
             routingContext.fail(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
 
+    }
+
+    static final class VerticleConf {
+        String serverHost;
+        int serverPort;
+        Boolean isSSL = Boolean.FALSE;
+        Boolean isSandbox = Boolean.FALSE;
+
+        VerticleConf(String serverHost, int serverPort, Boolean isSSL, Boolean isSandbox) {
+            this.serverHost = serverHost;
+            this.serverPort = serverPort;
+            this.isSSL = isSSL;
+            this.isSandbox = isSandbox;
+        }
+    }
+
+    public class AbyssServiceReference {
+        ServiceReference serviceReference;
+        HttpClient httpClient;
+
+        AbyssServiceReference(ServiceReference serviceReference, HttpClient httpClient) {
+            this.serviceReference = serviceReference;
+            this.httpClient = httpClient;
+        }
+
+        public ServiceReference getServiceReference() {
+            return serviceReference;
+        }
+
+        public HttpClient getHttpClient() {
+            return httpClient;
+        }
+    }
+
+    public class AbyssHttpRequest {
+        AbyssServiceReference abyssServiceReference;
+        RoutingContext context;
+
+        public AbyssHttpRequest(AbyssServiceReference abyssServiceReference, RoutingContext context) {
+            this.abyssServiceReference = abyssServiceReference;
+            this.context = context;
+        }
     }
 
 }

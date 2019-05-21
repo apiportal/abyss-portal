@@ -62,7 +62,7 @@ public class Users extends AbstractPortalHandler implements Handler<RoutingConte
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //Check if user already exists
                         .flatMap(resQ -> resConn.rxQueryWithParams("SELECT " +
                                 "uuid," +
@@ -103,8 +103,8 @@ public class Users extends AbstractPortalHandler implements Handler<RoutingConte
                             .put("totalItems", result.getNumRows())
                             .put("pageSize", PAGESIZE)
                             .put("currentPage", 1)
-                            .put("last", true)
-                            .put("first", true)
+                            .put("last", Boolean.TRUE)
+                            .put("first", Boolean.TRUE)
                             .put("sort", "ASC SUBJECT NAME");
                     routingContext
                             .response()

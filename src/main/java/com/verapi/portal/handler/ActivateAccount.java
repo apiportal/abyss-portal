@@ -38,6 +38,8 @@ import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
+
 public class ActivateAccount extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivateAccount.class);
@@ -74,7 +76,7 @@ public class ActivateAccount extends AbstractPortalHandler implements Handler<Ro
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //Check if user already exists
                         .flatMap((Boolean resQ) -> resConn
                                 .rxQueryWithParams("SELECT A.*, S.display_name FROM portalschema.SUBJECT_ACTIVATION A, portalschema.SUBJECT S " +
@@ -162,7 +164,7 @@ public class ActivateAccount extends AbstractPortalHandler implements Handler<Ro
                         .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
                                 LOGGER.info("Activate Account - Subject Activation Update Result information: {}", updateResult.getKeys().encodePrettily());
-                                return resConn.rxCommit().toSingleDefault(true);
+                                return resConn.rxCommit().toSingleDefault(Boolean.TRUE);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
                             }
@@ -170,7 +172,7 @@ public class ActivateAccount extends AbstractPortalHandler implements Handler<Ro
                         })
 
                         // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
+                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(Boolean.TRUE)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> Single.error(ex))
                         )
@@ -247,7 +249,7 @@ public class ActivateAccount extends AbstractPortalHandler implements Handler<Ro
                 //routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 //routingContext.response().end(res.result());
 
-                this.htmlString = res.result().toString("UTF-8");
+                this.htmlString = res.result().toString(StandardCharsets.UTF_8);
             } else {
                 routingContext.fail(res.cause());
             }

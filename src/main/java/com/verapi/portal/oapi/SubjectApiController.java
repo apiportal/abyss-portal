@@ -17,9 +17,9 @@
 package com.verapi.portal.oapi;
 
 
+import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.BadRequest400Exception;
 import com.verapi.abyss.exception.InternalServerError500Exception;
-import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.NoDataFoundException;
 import com.verapi.portal.service.ApiFilterQuery;
 import com.verapi.portal.service.idam.SubjectService;
@@ -121,7 +121,7 @@ public class SubjectApiController extends AbstractApiController {
                 try {
                     logger.trace("addEntities - adding default avatar");
                     InputStream in = getClass().getResourceAsStream(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR);
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(in, "utf-8"));
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) {
@@ -287,7 +287,7 @@ public class SubjectApiController extends AbstractApiController {
         Single<ResultSet> updateCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> subjectService.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
                 .flatMap(resultSet -> subjectService.findAll(new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS)
-                        .setFilterQueryParams(new JsonArray().add((String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME)))
+                        .setFilterQueryParams(new JsonArray().add((String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME)))
                         .addFilterQuery(SubjectService.FILTER_APP_UUID)
                         .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")))
                 ))
@@ -450,9 +450,9 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addAppsCascaded(RoutingContext routingContext) {
         addEntities(routingContext, new JsonObject()
-                .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
-                .put("crudsubjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
-                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)),
+                        .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
+                        .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                        .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)),
                 true
         );
     }
@@ -461,23 +461,22 @@ public class SubjectApiController extends AbstractApiController {
     public void updateAppCascaded(RoutingContext routingContext) {
         updateEntityCascaded(routingContext, new JsonObject()
                 .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
-                .put("organizationid", (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                .put("crudsubjectid" , (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
+                .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
         );
     }
-
 
 
     @AbyssApiOperationHandler
     public void getCurrentUser(RoutingContext routingContext) {
         getEntities(routingContext, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USER_WITH_ORGANIZATIONS)
-                .setFilterQueryParams(new JsonArray().add((String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))));
+                .setFilterQueryParams(new JsonArray().add((String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))));
     }
 
     @AbyssApiOperationHandler
     public void getSubjectImage(RoutingContext routingContext) {
 
-        if (routingContext.pathParam("uuid")==null || routingContext.pathParam("uuid").isEmpty()) {
+        if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
             logger.error("getSubjectImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getSubjectImage uuid null or empty");
         }

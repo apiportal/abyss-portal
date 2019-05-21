@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 public class Signup extends AbstractPortalHandler implements Handler<RoutingContext> {
 
@@ -100,7 +101,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //Check if user already exists
                         .flatMap(resQ -> resConn.rxQueryWithParams("SELECT * FROM portalschema.SUBJECT WHERE SUBJECT_NAME = ?", new JsonArray().add(username)))
                         .flatMap((ResultSet resultSet) -> {
@@ -209,10 +210,10 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                             );
                         })
                         // commit if all succeeded
-                        .flatMap(updateResult -> resConn.rxCommit().toSingleDefault(true))
+                        .flatMap(updateResult -> resConn.rxCommit().toSingleDefault(Boolean.TRUE))
 
                         // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
+                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(Boolean.TRUE)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> Single.error(ex))
                         )
@@ -289,7 +290,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                 //routingContext.response().putHeader(HttpHeaders.CONTENT_TYPE, "text/html");
                 //routingContext.response().end(res.result());
 
-                this.htmlString = res.result().toString("UTF-8");
+                this.htmlString = res.result().toString(StandardCharsets.UTF_8);
             } else {
                 routingContext.fail(res.cause());
             }

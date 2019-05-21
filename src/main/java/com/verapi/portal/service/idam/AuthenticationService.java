@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,37 +65,12 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     private String temporaryOrganizationName;
     private String userOrganizationUUID;
 
-    class SignUpUser implements io.vertx.ext.auth.User {
+    public AuthenticationService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
+        super(vertx, abyssJDBCService);
+    }
 
-        private String username;
-        private JsonObject principal;
-
-        SignUpUser(String username) {
-            this.username = username;
-        }
-
-        @Override
-        public io.vertx.ext.auth.User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
-            return null;
-        }
-
-        @Override
-        public io.vertx.ext.auth.User clearCache() {
-            return null;
-        }
-
-        @Override
-        public JsonObject principal() {
-            if (principal == null) {
-                principal = new JsonObject().put("username", username);
-            }
-            return principal;
-        }
-
-        @Override
-        public void setAuthProvider(AuthProvider authProvider) {
-
-        }
+    public AuthenticationService(Vertx vertx) {
+        super(vertx);
     }
 
     @Override
@@ -110,14 +86,6 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
         return null;
-    }
-
-    public AuthenticationService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
-        super(vertx, abyssJDBCService);
-    }
-
-    public AuthenticationService(Vertx vertx) {
-        super(vertx);
     }
 
     public Single<JsonObject> login(RoutingContext routingContext, JDBCAuth jdbcAuth) {
@@ -223,7 +191,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("name", temporaryOrganizationName)
                                             .put("description", temporaryOrganizationName)
                                             .put("url", "")
-                                            .put("isactive", true)
+                                            .put("isactive", Boolean.TRUE)
                                             .put("picture", "")));
 
                                 })
@@ -240,8 +208,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("crudsubjectid", userUUID)
                                             .put("subjectid", userUUID)
                                             .put("organizationrefid", organizationUuid)
-                                            .put("isowner", true)
-                                            .put("isactive", true)));
+                                            .put("isowner", Boolean.TRUE)
+                                            .put("isactive", Boolean.TRUE)));
                                 })
                                 .flatMap(jsonObjects2 -> {
                                     logger.trace("CreateOrganizationPortalController - subjectOrganizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
@@ -257,7 +225,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                             .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
                                             .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                             .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE)
-                                            .put("isactive", true)));
+                                            .put("isactive", Boolean.TRUE)));
                                 })
                                 .flatMap(jsonObjects2 -> {
                                     logger.trace("CreateOrganizationPortalController - subjectMembershipService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
@@ -270,8 +238,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                         logger.trace("Subject's Organization updated with newly created one successfully");
                                         try {
                                             //Url Encode for cookie compliance
-                                            String userLoginOrganizationName = URLEncoder.encode(temporaryOrganizationName, "UTF-8");
-                                            String userLoginOrganizationUUID = URLEncoder.encode(organizationUuid, "UTF-8");
+                                            String userLoginOrganizationName = URLEncoder.encode(temporaryOrganizationName, StandardCharsets.UTF_8.toString());
+                                            String userLoginOrganizationUUID = URLEncoder.encode(organizationUuid, StandardCharsets.UTF_8.toString());
 
                                             routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME, userLoginOrganizationName);
                                             routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME, userLoginOrganizationUUID);
@@ -327,13 +295,12 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     private boolean isOrganizationUndeleletedAndActive(JsonObject organizationJsonObject) throws UnsupportedEncodingException {
         if ((!organizationJsonObject.getBoolean("isdeleted")) && (organizationJsonObject.getBoolean("isactive"))) {
             //Url Encode for cookie compliance
-            organizationUuid = URLEncoder.encode(organizationJsonObject.getString("uuid"), "UTF-8");
-            temporaryOrganizationName = URLEncoder.encode(organizationJsonObject.getString("name"), "UTF-8");
+            organizationUuid = URLEncoder.encode(organizationJsonObject.getString("uuid"), StandardCharsets.UTF_8.toString());
+            temporaryOrganizationName = URLEncoder.encode(organizationJsonObject.getString("name"), StandardCharsets.UTF_8.toString());
             return true;
         }
         return false;
     }
-
 
     public Single<JsonObject> logout(RoutingContext routingContext) {
         if (logger.isErrorEnabled())
@@ -452,7 +419,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         userRecord
                                 .put("organizationid", Constants.DEFAULT_ORGANIZATION_UUID)
                                 .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
-                                .put("isactivated", false)
+                                .put("isactivated", Boolean.FALSE)
                                 .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                 .put("subjectname", username)
                                 .put("firstname", firstname)
@@ -465,8 +432,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 .put("passwordsalt", salt)
                                 .put("picture", "")
                                 .put("subjectdirectoryid", Constants.INTERNAL_SUBJECT_DIRECTORY_UUID)
-                                .put("islocked", false)
-                                .put("issandbox", false)
+                                .put("islocked", Boolean.FALSE)
+                                .put("issandbox", Boolean.FALSE)
                                 .put("url", "");
 
                         return signupMetadata.subjectService.insertAll(new JsonArray().add(userRecord))
@@ -667,7 +634,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         JsonObject updateJson = new JsonObject()
                                 .put("organizationid", forgotPasswordMetadata.subjectRow.getString("organizationid"))
                                 .put("crudsubjectid", Constants.SYSTEM_USER_UUID)
-                                .put("isactivated", false)
+                                .put("isactivated", Boolean.FALSE)
                                 .put("subjecttypeid", forgotPasswordMetadata.subjectRow.getString("subjecttypeid"))
                                 .put("subjectname", forgotPasswordMetadata.subjectRow.getString("subjectname"))
                                 .put("firstname", forgotPasswordMetadata.subjectRow.getString("firstname"))
@@ -755,8 +722,8 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     public Single<JsonObject> setCurrentOrganization(RoutingContext routingContext) {
         logger.trace("setCurrentOrganization invoked");
         try {
-            organizationUuid = URLEncoder.encode(routingContext.getBodyAsJson().getString("organizationid"), "UTF-8");
-            temporaryOrganizationName = URLEncoder.encode(routingContext.getBodyAsJson().getString("organizationname"), "UTF-8");
+            organizationUuid = URLEncoder.encode(routingContext.getBodyAsJson().getString("organizationid"), StandardCharsets.UTF_8.toString());
+            temporaryOrganizationName = URLEncoder.encode(routingContext.getBodyAsJson().getString("organizationname"), StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
 
         }
@@ -823,7 +790,6 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                             .toJson());
                 });
     }
-
 
     private Single<JsonObject> rxValidateToken(String token) {
         logger.trace("rxValidateToken invoked");
@@ -987,7 +953,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
     public Single<JsonObject> validateAccessToken(String token) {
         logger.trace("validateAccessToken invoked");
-        JsonObject validationStatus = new JsonObject().put("status", false).put("error", "").put("validationreport", new JsonObject());
+        JsonObject validationStatus = new JsonObject().put("status", Boolean.FALSE).put("error", "").put("validationreport", new JsonObject());
 
         return rxValidateToken(token)
                 .flatMap(jsonObject -> {
@@ -1030,7 +996,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     if (!Objects.equals(jsonObject.getString("contractstatus"), Constants.CONTRACT_STATUS_IS_INFORCE))
                         return Single.error(new Exception("contract status is not 'inforce'"));
 
-                    return Single.just(validationStatus.put("status", true));
+                    return Single.just(validationStatus.put("status", Boolean.TRUE));
                 });
         //.doAfterSuccess(validateAccessTokenStatus -> validationStatus.put("status", true).put("error", "").put("validationreport", validateAccessTokenStatus))
 /*
@@ -1118,5 +1084,38 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     @Override
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return null;
+    }
+
+    class SignUpUser implements io.vertx.ext.auth.User {
+
+        private String username;
+        private JsonObject principal;
+
+        SignUpUser(String username) {
+            this.username = username;
+        }
+
+        @Override
+        public io.vertx.ext.auth.User isAuthorized(String authority, Handler<AsyncResult<Boolean>> resultHandler) {
+            return null;
+        }
+
+        @Override
+        public io.vertx.ext.auth.User clearCache() {
+            return null;
+        }
+
+        @Override
+        public JsonObject principal() {
+            if (principal == null) {
+                principal = new JsonObject().put("username", username);
+            }
+            return principal;
+        }
+
+        @Override
+        public void setAuthProvider(AuthProvider authProvider) {
+
+        }
     }
 }

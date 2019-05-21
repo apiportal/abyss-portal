@@ -76,7 +76,7 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //Check if user already exists
                         .flatMap((Boolean resQ) -> resConn.rxQueryWithParams("SELECT * FROM subject WHERE subjectName = ? and isDeleted = false"
                                 , new JsonArray().add(username)))
@@ -167,13 +167,13 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                         .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
                                 LOGGER.trace("Activate Account - Subject Activation Update Result information: {}", updateResult.getKeys().encodePrettily());
-                                return resConn.rxCommit().toSingleDefault(true);
+                                return resConn.rxCommit().toSingleDefault(Boolean.TRUE);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
                             }
                         })
                         // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
+                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(Boolean.TRUE)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> Single.error(ex))
                         )

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -99,16 +99,16 @@ public class Hash implements HashRemoteIntf {
 
         try {
 
-            MessageDigest md = MessageDigest.getInstance("SHA-256"); //TODO: Singleton ya da Pool yapılmalı mı?
+            //TODO: Singleton ya da Pool yapılmalı mı?
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
 
-            byte[] hashBytes = md.digest((inputData).getBytes("UTF-8"));
+            byte[] hashBytes = md.digest((inputData).getBytes(StandardCharsets.UTF_8));
 
-            digestText = base64UrlEncoder.encodeToString(hashBytes); //TODO: is thread-safe?
+            //TODO: is thread-safe?
+            digestText = base64UrlEncoder.encodeToString(hashBytes);
 
         } catch (NoSuchAlgorithmException e) {
             LOGGER.error("generateHash NoSuchAlgorithmException error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("generateHash UnsupportedEncodingException error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
         }
 
         return digestText;
@@ -187,14 +187,11 @@ public class Hash implements HashRemoteIntf {
             // TODO: handle exception
             LOGGER.error("generateSaltedPasswordHash error: {} \n error stack: {}", e.getLocalizedMessage(), e.getStackTrace());
             throw new RuntimeException(e);
-        } finally { //Sensitive data should be cleared after you have used it (set the array elements to zero).
-            spec.clearPassword();
-//   try {
-//    key.destroy();  //javax.security.auth.DestroyFailedException at javax.security.auth.Destroyable.destroy(Unknown Source)
-//   } catch (DestroyFailedException e) {
-//    // TODO Auto-generated catch block
-//    e.printStackTrace();
-//   }
+        } finally {
+            //Sensitive data should be cleared after you have used it (set the array elements to zero).
+            if (spec != null) {
+                spec.clearPassword();
+            }
         }
 
         return saltPlusHashedPasswordString;
@@ -212,12 +209,8 @@ public class Hash implements HashRemoteIntf {
 
         byte[] decodedBytes = base64UrlDecoder.decode(storedSaltedPasswordHash);
 
-        //ByteUtils.printByteArray(decodedBytes, "decodedBytes"); //TEST
-
         byte[] storedSalt = new byte[SALT_LENGTH];
         System.arraycopy(decodedBytes, 0, storedSalt, 0, SALT_LENGTH);
-
-        //ByteUtils.printByteArray(storedSalt, "storedSalt"); //TEST
 
         return storedSalt;
     }

@@ -78,7 +78,7 @@ public class Login implements Handler<RoutingContext> {
         if (isUserActivated == null) {
             isUserActivated = Boolean.FALSE;
         }
-        routingContext.session().put(IS_USER_ACTIVATED, false);
+        routingContext.session().put(IS_USER_ACTIVATED, Boolean.FALSE);
 
         // In order to use a Thymeleaf template we first need to create an engine
         final ThymeleafTemplateEngine engine = ThymeleafTemplateEngine.create(routingContext.vertx());

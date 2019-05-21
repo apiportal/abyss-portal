@@ -99,7 +99,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                                 .put("resourcename", appInsertResult.getString("displayname") + " APP")
                                 .put("description", appInsertResult.getString("description"))
                                 .put("resourcerefid", appInsertResult.getString("uuid"))
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         ResourceService resourceService = new ResourceService(routingContext.vertx());
                         return resourceService.initJDBCClient(sessionOrganizationId)
@@ -125,7 +125,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                                 .put("resourceid", resourceInsertResult.getString("uuid"))
                                 .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
                                 .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
                         return subjectPermissionService.initJDBCClient(sessionOrganizationId)
@@ -149,7 +149,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                                 .put("subjectpermissionid", permissionInsertResult.getString("uuid"))
                                 .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
                                 .put("resourcerefid", appUuid)
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
                         return resourceAccessTokenService.initJDBCClient(sessionOrganizationId)
@@ -176,7 +176,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                                 .put("subjectdirectoryid", appRecord.getString("subjectdirectoryid"))
                                 .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                 .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP)
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         SubjectMembershipService subjectMembershipService = new SubjectMembershipService(routingContext.vertx());
                         return subjectMembershipService.initJDBCClient(sessionOrganizationId)
@@ -226,7 +226,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return new JsonArray()
                 .add(insertRecord.getString("organizationid"))
                 .add(insertRecord.getString("crudsubjectid")) //TODO: Make it readOnly in Yaml
-                .add(insertRecord.containsKey("isactivated") ? insertRecord.getBoolean("isactivated") : false)
+                .add(insertRecord.containsKey("isactivated") ? insertRecord.getBoolean("isactivated") : Boolean.FALSE)
                 .add(insertRecord.getString("subjecttypeid"))
                 .add(insertRecord.getString("subjectname"))
                 .add(insertRecord.getString("firstname"))
@@ -243,7 +243,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(insertRecord.getBoolean("islocked"))
                 .add(insertRecord.getBoolean("issandbox"))
                 .add(insertRecord.getString("url"))
-                .add(insertRecord.containsKey("isrestrictedtoprocessing") ? insertRecord.getBoolean("isrestrictedtoprocessing") : false)
+                .add(insertRecord.containsKey("isrestrictedtoprocessing") ? insertRecord.getBoolean("isrestrictedtoprocessing") : Boolean.FALSE)
                 .add(insertRecord.containsKey("description") ? insertRecord.getString("description") : "")
                 .add(insertRecord.containsKey("distinguishedname") ? insertRecord.getString("distinguishedname") : "")
                 .add(insertRecord.containsKey("uniqueid") ? insertRecord.getString("uniqueid") : "")
@@ -288,7 +288,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
         return new JsonArray()
                 .add(updateRecord.getString("organizationid"))
                 .add(updateRecord.getString("crudsubjectid"))
-                .add(updateRecord.containsKey("isactivated") ? updateRecord.getBoolean("isactivated") : false)
+                .add(updateRecord.containsKey("isactivated") ? updateRecord.getBoolean("isactivated") : Boolean.FALSE)
                 .add(updateRecord.getString("subjecttypeid"))
                 .add(updateRecord.getString("subjectname"))
                 .add(updateRecord.getString("firstname"))
@@ -307,7 +307,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .add(updateRecord.getBoolean("islocked"))
                 .add(updateRecord.getBoolean("issandbox"))
                 .add(updateRecord.getString("url"))
-                .add(updateRecord.containsKey("isrestrictedtoprocessing") ? updateRecord.getBoolean("isrestrictedtoprocessing") : false)
+                .add(updateRecord.containsKey("isrestrictedtoprocessing") ? updateRecord.getBoolean("isrestrictedtoprocessing") : Boolean.FALSE)
                 .add(updateRecord.containsKey("description") ? updateRecord.getString("description") : "")
                 .add(updateRecord.containsKey("distinguishedname") ? updateRecord.getString("distinguishedname") : "")
                 .add(updateRecord.containsKey("uniqueid") ? updateRecord.getString("uniqueid") : "")

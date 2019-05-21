@@ -76,7 +76,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
                                         .getJsonObject("info")
                                         .getString("description") )
                                 .put("resourcerefid", licenseInsertResult.getString("uuid"))
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         ResourceService resourceService = new ResourceService(routingContext.vertx());
                         return resourceService.initJDBCClient(sessionOrganizationId)
@@ -100,7 +100,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
                                 .put("resourceid", resourceInsertResult.getString("uuid"))
                                 .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_LICENSE_ACTION)
                                 .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
-                                .put("isactive", true);
+                                .put("isactive", Boolean.TRUE);
 
                         SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
                         return subjectPermissionService.initJDBCClient(sessionOrganizationId)

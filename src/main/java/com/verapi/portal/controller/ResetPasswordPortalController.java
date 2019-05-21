@@ -68,7 +68,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //Check if user already exists
                         .flatMap(resQ -> resConn
                                 .rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE TOKEN = ? and A.subjectId = S.uuid"
@@ -166,7 +166,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                         // Disable auto commit to handle transaction manually
                         .rxSetAutoCommit(false)
                         // Switch from Completable to default Single value
-                        .toSingleDefault(false)
+                        .toSingleDefault(Boolean.FALSE)
                         //Check if user already exists
                         .flatMap(resQ -> resConn
                                 .rxQueryWithParams("SELECT A.*, S.displayName FROM subject_activation A, subject S WHERE token = ? and A.subjectId = S.uuid"
