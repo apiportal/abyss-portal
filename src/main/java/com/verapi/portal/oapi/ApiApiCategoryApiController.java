@@ -31,11 +31,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 @AbyssApiController(apiSpec = "/openapi/ApiApiCategory.yaml")
 public class ApiApiCategoryApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(ApiApiCategoryApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiApiCategoryApiController.class);
+    private static final String PARSED_PARAMETERS = "parsedParameters";
+    private static final String EXCEPTION_LOG_FORMAT = "{}\n{}";
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -53,8 +54,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ApiApiCategoryService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -62,7 +62,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addApiApiCategories(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -70,8 +70,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ApiApiCategoryService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -79,7 +78,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateApiApiCategories(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -88,8 +87,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ApiApiCategoryService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -99,22 +97,17 @@ public class ApiApiCategoryApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ApiApiCategoryService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiApiCategory(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntity(routingContext, ApiApiCategoryService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -123,7 +116,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
     public void updateApiApiCategory(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -131,8 +124,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ApiApiCategoryService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -143,17 +135,13 @@ public class ApiApiCategoryApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, ApiApiCategoryService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiCategoriesByApi(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiCategoryService.class,
@@ -162,17 +150,13 @@ public class ApiApiCategoryApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiCategoryService.SQL_LIST_API_CATEGORIES)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiCategoriesOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiCategoryService.class,
@@ -181,17 +165,13 @@ public class ApiApiCategoryApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiCategoryService.SQL_LIST_SUBJECT_API_CATEGORIES)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getBusinessesApiCategoriesOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiCategoryService.class,
@@ -200,17 +180,13 @@ public class ApiApiCategoryApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiCategoryService.SQL_LIST_SUBJECT_BUSINESS_API_CATEGORIES)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getProxyApiCategoriesOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiCategoryService.class,
@@ -219,17 +195,13 @@ public class ApiApiCategoryApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiCategoryService.SQL_LIST_SUBJECT_PROXY_API_CATEGORIES)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiApiCategoryByApiAndCategory(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiCategoryService.class,
@@ -238,8 +210,7 @@ public class ApiApiCategoryApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiCategoryService.SQL_API_API_CATEGORIES_BY_API_AND_CATEGORY)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")).add(routingContext.pathParam("categoryuuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

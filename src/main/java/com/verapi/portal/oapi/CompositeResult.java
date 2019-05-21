@@ -64,6 +64,7 @@ public class CompositeResult {
         return this;
     }
 
+    @SuppressWarnings({"squid:S00121", "squid:S00122", "squid:S2162", "squid:S1142", "squid:S1774", "squid:S864"})
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -76,6 +77,7 @@ public class CompositeResult {
         return getThrowable() != null ? getThrowable().equals(that.getThrowable()) : that.getThrowable() == null;
     }
 
+    @SuppressWarnings("squid:S1774")
     @Override
     public int hashCode() {
         int result = getUpdateResult() != null ? getUpdateResult().hashCode() : 0;
