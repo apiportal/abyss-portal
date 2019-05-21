@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
-public class Signup extends PortalHandler implements Handler<RoutingContext> {
+public class Signup extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Signup.class);
 
@@ -52,6 +52,7 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
     private String htmlString;
 
     public Signup(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        super();
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
     }
@@ -223,11 +224,11 @@ public class Signup extends PortalHandler implements Handler<RoutingContext> {
 
         ).subscribe(result -> {
                     LOGGER.info("Subscription to Signup successfull:" + result);
-                    generateResponse(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "", "");
+                    generateResponse(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "");
                     //TODO: Send email to user
                 }, t -> {
                     LOGGER.error("Signup Error", t);
-                    generateResponse(routingContext, LOGGER, 401, "Signup Error Occured", t.getLocalizedMessage(), "", "");
+                    generateResponse(routingContext, LOGGER, 401, "Signup Error Occured", t.getLocalizedMessage(), "");
                 }
         );
     }

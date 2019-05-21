@@ -33,6 +33,7 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +128,8 @@ public class SignupPortalController extends AbstractPortalController {
                                                 "isPasswordChangeRequired," +
                                                 "passwordExpiresAt," +
                                                 "subjectDirectoryId) " +
-                                                "VALUES (CAST(? AS uuid), CAST(? AS uuid), false, CAST(? AS uuid), ?, ?, ?, ?, ?, now(), ?, ?, false, NOW() + ? * INTERVAL '1 DAY', CAST(? AS uuid)) RETURNING id, uuid",
+                                                "VALUES (CAST(? AS uuid), CAST(? AS uuid), false, CAST(? AS uuid), ?, ?, ?, ?, ?, now(), ?, ?, " +
+                                                "false, NOW() + ? * INTERVAL '1 DAY', CAST(? AS uuid)) RETURNING id, uuid",
                                         new JsonArray()
                                                 .add(Constants.DEFAULT_ORGANIZATION_UUID)
                                                 .add(Constants.SYSTEM_USER_UUID)
@@ -169,10 +171,10 @@ public class SignupPortalController extends AbstractPortalController {
                                 authInfo = tokenGenerator.generateToken(Config
                                                 .getInstance()
                                                 .getConfigJsonObject()
-                                                .getInteger("token.activation.signup.ttl") * Constants.ONE_MINUTE_IN_SECONDS,
+                                                .getInteger("token.activation.signup.ttl") * (long) Constants.ONE_MINUTE_IN_SECONDS,
                                         email,
                                         routingContext.vertx().getDelegate());
-                                LOGGER.trace("activation token is created successfully: " + authInfo.getToken());
+                                LOGGER.trace("activation token is created successfully: {}", authInfo.getToken());
                                 authToken = authInfo.getToken();
                             } catch (UnsupportedEncodingException e) {
                                 LOGGER.error("tokenGenerator.generateToken : {}", e.getLocalizedMessage());
@@ -229,10 +231,10 @@ public class SignupPortalController extends AbstractPortalController {
                                     .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
                                         if (result.succeeded()) {
                                             LOGGER.trace("Activation Mailing Event Bus Result: {} | Result: {}"
-                                                    , result.toString(), result.result().body().encodePrettily());
+                                                    , result, result.result().body().encodePrettily());
                                         } else {
                                             LOGGER.error("Activation Mailing Event Bus Result: {}  | Cause: {}"
-                                                    , result.toString(), result.cause());
+                                                    , result, result.cause());
                                         }
 
                                     });
@@ -245,11 +247,11 @@ public class SignupPortalController extends AbstractPortalController {
 
         ).subscribe((Boolean result) -> {
                     LOGGER.trace("Subscription to Signup successfull: {}", result);
-                    showTrxResult(routingContext, LOGGER, 200, "Activation Code is sent to your email address", "Please check spam folder also...", "");
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_OK, "Activation Code is sent to your email address", "Please check spam folder also...", "");
                     //TODO: Send email to user
                 }, (Throwable t) -> {
                     LOGGER.error("Signup Error", t);
-                    showTrxResult(routingContext, LOGGER, 403, "Signup Error Occured", t.getLocalizedMessage(), "");
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_FORBIDDEN, "Signup Error Occured", t.getLocalizedMessage(), "");
                 }
         );
         super.handle(routingContext);

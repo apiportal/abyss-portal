@@ -32,10 +32,11 @@ import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ChangePassword extends PortalHandler implements Handler<RoutingContext> {
+public class ChangePassword extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChangePassword.class);
     @SuppressWarnings("squid:S2068")
@@ -48,6 +49,7 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
     //private Integer subjectId;
 
     public ChangePassword(JDBCAuth authProvider, JDBCClient jdbcClient) {
+        super();
         this.authProvider = authProvider;
         this.jdbcClient = jdbcClient;
     }
@@ -69,23 +71,23 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
 
         if (oldPassword == null || oldPassword.isEmpty()) {
             LOGGER.info("oldPassword is null or empty");
-            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
-                    , "Please enter Old Password field", "", "");
+            generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter Old Password field", "");
         }
         if (newPassword == null || newPassword.isEmpty()) {
             LOGGER.info("newPassword is null or empty");
-            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
-                    , "Please enter New Password field", "", "");
+            generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter New Password field", "");
         }
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             LOGGER.info("newPassword is null or empty");
-            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
-                    , "Please enter Confirm Password field", "", "");
+            generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "Please enter Confirm Password field", "");
         }
         if (newPassword != null && !(newPassword.equals(confirmPassword))) {
             LOGGER.info("newPassword and confirmPassword does not match");
-            generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED
-                    , "New Password and Confirm Password does not match", "Please check and enter again", "");
+            generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED
+                    , "New Password and Confirm Password does not match", "Please check and enter again");
         }
 
         JsonObject creds = new JsonObject()
@@ -137,11 +139,11 @@ public class ChangePassword extends PortalHandler implements Handler<RoutingCont
 
         ).subscribe((Boolean result) -> {
                     LOGGER.info("Subscription to ChangePassword successfull: {}", result);
-                    generateResponse(routingContext, LOGGER, 200, "Password is changed.", "Please use your new password.", "", "");
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_OK, "Password is changed.", "Please use your new password.", "");
                     //TODO: Send email to user
                 }, (Throwable t) -> {
                     LOGGER.error("ChangePassword Error", t);
-                    generateResponse(routingContext, LOGGER, 401, CHANGE_PASSWORD_ERROR_OCCURED, t.getLocalizedMessage(), "", "");
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, CHANGE_PASSWORD_ERROR_OCCURED, t.getLocalizedMessage(), "");
 
                 }
         );

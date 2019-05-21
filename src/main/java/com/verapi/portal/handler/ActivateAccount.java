@@ -34,10 +34,11 @@ import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.templ.thymeleaf.ThymeleafTemplateEngine;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ActivateAccount extends PortalHandler implements Handler<RoutingContext> {
+public class ActivateAccount extends AbstractPortalHandler implements Handler<RoutingContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActivateAccount.class);
 
@@ -52,6 +53,7 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
     private String htmlString;
 
     public ActivateAccount(JDBCClient jdbcClient) {
+        super();
         this.jdbcClient = jdbcClient;
     }
 
@@ -75,7 +77,8 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
                         .toSingleDefault(false)
                         //Check if user already exists
                         .flatMap((Boolean resQ) -> resConn
-                                .rxQueryWithParams("SELECT A.*, S.display_name FROM portalschema.SUBJECT_ACTIVATION A, portalschema.SUBJECT S WHERE TOKEN = ? and A.subject_id = S.id"
+                                .rxQueryWithParams("SELECT A.*, S.display_name FROM portalschema.SUBJECT_ACTIVATION A, portalschema.SUBJECT S " +
+                                                "WHERE TOKEN = ? and A.subject_id = S.id"
                                         , new JsonArray().add(token)))
                         .flatMap((ResultSet resultSet) -> {
                             int numOfRows = resultSet.getNumRows();
@@ -182,9 +185,7 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
                             json.put(Constants.EB_MSG_HTML_STRING, renderMailPage(routingContext, displayName));
 
                             routingContext.vertx().getDelegate().eventBus()
-                                    .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
-                                        LOGGER.info(result.toString());
-                                    });
+                                    .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> LOGGER.info(result.toString()));
                         })
 
                         // close the connection regardless succeeded or failed
@@ -192,11 +193,11 @@ public class ActivateAccount extends PortalHandler implements Handler<RoutingCon
 
         ).subscribe((Boolean result) -> {
                     LOGGER.info("Subscription to ActivateAccount successful:" + result);
-                    generateResponse(routingContext, LOGGER, 200, "Activation Successful!", "Welcome to API Portal.", "", "");
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_OK, "Activation Successful!", "Welcome to API Portal.", "");
                     //TODO: Send email to user
                 }, (Throwable t) -> {
                     LOGGER.error("ActivateAccount Error", t);
-                    generateResponse(routingContext, LOGGER, 401, "Activation Failed!", t.getLocalizedMessage(), "", "");
+                    generateResponse(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "Activation Failed!", t.getLocalizedMessage(), "");
 
                 }
         );

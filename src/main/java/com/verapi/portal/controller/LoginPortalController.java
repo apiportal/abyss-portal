@@ -32,6 +32,7 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.web.Cookie;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,9 @@ import java.util.UUID;
 public class LoginPortalController extends AbstractPortalController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginPortalController.class);
+    private static final String USERNAME = "username";
+    @SuppressWarnings("squid:S2068")
+    private static final String PASSWORD = "password";
 
     public LoginPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
         super(authProvider, jdbcClient);
@@ -59,14 +63,14 @@ public class LoginPortalController extends AbstractPortalController {
     public void handle(RoutingContext routingContext) {
         LOGGER.trace("LoginPortalController.handle invoked..");
 
-        String username = routingContext.request().getFormAttribute("username");
-        String password = routingContext.request().getFormAttribute("password");
+        String username = routingContext.request().getFormAttribute(USERNAME);
+        String password = routingContext.request().getFormAttribute(PASSWORD);
 
         LOGGER.debug("Received user: {}", username);
 
         JsonObject creds = new JsonObject()
-                .put("username", username)
-                .put("password", password);
+                .put(USERNAME, username)
+                .put(PASSWORD, password);
 
         authProvider.authenticate(creds, (AsyncResult<User> authResult) -> {
             if (authResult.succeeded()) {
@@ -94,14 +98,14 @@ public class LoginPortalController extends AbstractPortalController {
                                 routingContext.session().regenerateId();
                                 routingContext.session().destroy();
                                 routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME
-                                        , user.principal().getString("username"));
+                                        , user.principal().getString(USERNAME));
                                 routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
                                 routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME, displayName);
                                 routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID)); //TODO: Remove for OWASP Compliance
 //                                        .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
 
                                 LOGGER.debug("Logged in user: {}", user.principal().encodePrettily());
-                                routingContext.put("username", user.principal().getString("username"));
+                                routingContext.put(USERNAME, user.principal().getString(USERNAME));
                                 //redirect(routingContext, Constants.ABYSS_ROOT + "/index");
 
                                 // --------- getOrganizationListOfSubject(userUUID);--------------
@@ -152,19 +156,18 @@ public class LoginPortalController extends AbstractPortalController {
 
                                                     }
                                                 }
-                                                , (Throwable throwable) -> {
-                                                    LOGGER.error("LoginPortalController.handle() findByIdResult.subscribe replied error {} | {}: ", throwable.getLocalizedMessage(), throwable.getStackTrace());
-                                                });
+                                                , (Throwable throwable) -> LOGGER.error("LoginPortalController.handle() findByIdResult.subscribe replied error {} | {}: "
+                                                        , throwable.getLocalizedMessage(), throwable.getStackTrace()));
 
                             },
                             throwable -> LOGGER.error("LoginPortalController.handle() subjectService.findBySubjectName replied error {} | {}: "
                                     , throwable.getLocalizedMessage(), throwable.getStackTrace()));
                 } catch (Exception e) {
-                    LOGGER.error("LoginPortalController.handle() subjectService error : {}", Arrays.toString(e.getStackTrace()));
-                    routingContext.fail(500);
+                    LOGGER.error("LoginPortalController.handle() subjectService error : {}\n{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
+                    routingContext.fail(HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 }
             } else {
-                routingContext.fail(401);
+                routingContext.fail(HttpStatus.SC_UNAUTHORIZED);
             }
         });
 

@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class OrganizationService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(OrganizationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationService.class);
 
     public OrganizationService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -66,7 +66,7 @@ public class OrganizationService extends AbstractService<UpdateResult> {
     }
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
-        logger.trace("---insertAll invoked");
+        LOGGER.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -90,9 +90,9 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -103,7 +103,7 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -153,9 +153,9 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("updateAll>> update/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -166,7 +166,7 @@ public class OrganizationService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus

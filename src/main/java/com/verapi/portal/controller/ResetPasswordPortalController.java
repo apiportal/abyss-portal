@@ -33,13 +33,14 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @AbyssController(routePathGET = "reset-password", routePathPOST = "reset-password", htmlTemplateFile = "reset-password.html", isPublic = true)
 public class ResetPasswordPortalController extends AbstractPortalController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResetPasswordPortalController.class);
-    public static final String TOKEN_TYPE = "tokenType";
+    private static final String TOKEN_TYPE = "tokenType";
 
     private Integer tokenId;
     private String subjectId;
@@ -131,7 +132,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
             renderTemplate(routingContext, Controllers.RESET_PASSWORD.templateFileName);
         }, (Throwable t) -> {
             LOGGER.error("ResetPasswordPortalController Get -  Error", t);
-            showTrxResult(routingContext, LOGGER, 401, "Reset Password Failed!", t.getLocalizedMessage(), "");
+            showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "Reset Password Failed!", t.getLocalizedMessage(), "");
         });
     }
 
@@ -145,12 +146,12 @@ public class ResetPasswordPortalController extends AbstractPortalController {
 
         if (newPassword == null || newPassword.isEmpty() || confirmPassword == null || confirmPassword.isEmpty()) {
             LOGGER.error("ResetPasswordPortalController - Received new / confirm Password is null or empty");
-            showTrxResult(routingContext, LOGGER, 403, "Please enter valid new & confirm password fields!", "", "");
+            showTrxResult(routingContext, LOGGER, HttpStatus.SC_FORBIDDEN, "Please enter valid new & confirm password fields!", "", "");
         }
 
         if (newPassword != null && !newPassword.equals(confirmPassword)) {
             LOGGER.error("ResetPasswordPortalController - Passwords does NOT match!");
-            showTrxResult(routingContext, LOGGER, 403, "Please enter SAME new & confirm password!", "", "");
+            showTrxResult(routingContext, LOGGER, HttpStatus.SC_FORBIDDEN, "Please enter SAME new & confirm password!", "", "");
         }
 
         LOGGER.trace("Received token: {}", token);
@@ -220,7 +221,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                             }
                         })
                         .flatMap((JsonObject row) -> {
-                                    LOGGER.trace("ResetPasswordPortalController - Updating Subject with uuid:[" + subjectId + "] -> " + row.encodePrettily());
+                                    LOGGER.trace("ResetPasswordPortalController - Updating Subject with uuid:[{}] -> {}", subjectId, row.encodePrettily());
 
                                     String salt = authProvider.generateSalt();
                                     String hash = authProvider.computeHash(newPassword, salt);
@@ -232,10 +233,8 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                                                     "password = ?," +
                                                     "passwordSalt = ?, " +
                                                     "isPasswordChangeRequired = false," +
-                                                    "passwordExpiresAt = NOW() + " + String.valueOf(Config
-                                                    .getInstance()
-                                                    .getConfigJsonObject()
-                                                    .getInteger(Constants.PASSWORD_EXPIRATION_DAYS)) + " * INTERVAL '1 DAY' " +
+                                                    "passwordExpiresAt = NOW() + " + Config.getInstance().getConfigJsonObject()
+                                                    .getInteger(Constants.PASSWORD_EXPIRATION_DAYS) + " * INTERVAL '1 DAY' " +
                                                     " WHERE " +
                                                     "uuid = CAST(? AS uuid);",
                                             new JsonArray()
@@ -246,8 +245,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                                 }
                         )
                         .flatMap((UpdateResult updateResult) -> {
-                            LOGGER.trace("ResetPasswordPortalController - Updating Subject... Number of rows updated:" + updateResult.getUpdated());
-                            //LOGGER.info("Activate Account - Subject Update Result information:" + updateResult.getKeys().encodePrettily());
+                            LOGGER.trace("ResetPasswordPortalController - Updating Subject... Number of rows updated: {}", updateResult.getUpdated());
                             LOGGER.trace("ResetPasswordPortalController - Updating Subject Activation...");
                             if (updateResult.getUpdated() == 1) {
                                 return resConn.rxUpdateWithParams("UPDATE subject_activation SET " +
@@ -297,7 +295,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                                     .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
                                         if (result.succeeded()) {
                                             LOGGER.trace("Password Reset Mailing Event Bus Result: {} | Result: {}"
-                                                    , result.toString(), result.result().body().encodePrettily());
+                                                    , result, result.result().body().encodePrettily());
                                         } else {
                                             LOGGER.error("Password Reset Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
                                         }
@@ -312,12 +310,12 @@ public class ResetPasswordPortalController extends AbstractPortalController {
 
         ).subscribe((Boolean result) -> {
                     LOGGER.trace("Subscription to ResetPasswordPortalController successful: {}", result);
-                    showTrxResult(routingContext, LOGGER, 200
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_OK
                             , "Your password has been successfully reset!"
                             , "Welcome to API Portal again", "");
                 }, (Throwable t) -> {
                     LOGGER.error("ResetPasswordPortalController Error", t);
-                    showTrxResult(routingContext, LOGGER, 401
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED
                             , "Reset Password Failed!"
                             , t.getLocalizedMessage(), "");
                 }
