@@ -251,14 +251,20 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
-  /contracts/subscribe/:
+  /contracts/subscribe/api/{uuid}:
     get:
       tags:
         - Subscription
       summary: 'Get list of Subscriptions'
       description: 'Returns list of Subscriptions'
-      operationId: getSubscriptions
+      operationId: getSubscriptionsOfApi
       parameters:
+        - name: uuid
+          in: path
+          description: 'uuid of user'
+          required: true
+          schema:
+            type: string
         - name: byname
           in: query
           required: false
@@ -292,6 +298,7 @@ paths:
           $ref: '#/components/responses/500'
         default:
           $ref: '#/components/responses/default'
+  /contracts/subscribe/:
     post:
       tags:
         - Subscription
@@ -785,18 +792,38 @@ archived - Indicates that the active life of the contract is over. The workflow 
         - $ref: '#/components/schemas/Contract'
         - type: object
           properties:
+            appdisplayname:
+              type: string
+              description: 'Display name of the App'
+            appowners:
+              type: object
+              properties:
+                uuid:
+                  type: string
+                  readOnly: true
+                  description: 'Uui of the User'
+                displayname:
+                  type: string
+                  description: 'Display name of the User'
+        - type: object
+          properties:
             resources:
               allOf:
                 - $ref: './Resource.yaml#/components/schemas/Resource'
+        - type: object
+          properties:
+            permissions:
+              allOf:
+                - $ref: './SubjectPermission.yaml#/components/schemas/SubjectPermission'
                 - type: object
                   properties:
-                    permissions:
-                      allOf:
-                        - $ref: './SubjectPermission.yaml#/components/schemas/SubjectPermission'
-                        - type: object
-                          properties:
-                            accesstoken:
-                              $ref: './ResourceAccessToken.yaml#/components/schemas/ResourceAccessToken'
+                    accesstoken:
+                      $ref: './ResourceAccessToken.yaml#/components/schemas/ResourceAccessToken'
+        - type: object
+          properties:
+            licenses:
+              allOf:
+                - $ref: './License.yaml#/components/schemas/License'
     Subscription:
       type: object
       properties:
@@ -1009,17 +1036,17 @@ archived - Indicates that the active life of the contract is over. The workflow 
       description: 'The numbers of items to return'
   securitySchemes:
     abyssCookieAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
+      $ref: './AbyssSecuritySchemes.yaml#/securitySchemes/abyssCookieAuth'
     abyssHttpBasicAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
+      $ref: './AbyssSecuritySchemes.yaml#/securitySchemes/abyssHttpBasicAuth'
     abyssApiKeyAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
+      $ref: './AbyssSecuritySchemes.yaml#/securitySchemes/abyssApiKeyAuth'
     abyssJWTBearerAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
+      $ref: './AbyssSecuritySchemes.yaml#/securitySchemes/abyssJWTBearerAuth'
     abyssAppAccessTokenAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
+      $ref: './AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyAuth'
     abyssAppAccessTokenCookieAuth:
-      $ref: '/openapi/AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
+      $ref: './AbyssSecuritySchemes.yaml#/securitySchemes/abyssAppKeyCookieAuth'
   links: {}
   callbacks: {}
 security:
