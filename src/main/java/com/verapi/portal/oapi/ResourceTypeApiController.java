@@ -101,9 +101,6 @@ public class ResourceTypeApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourceType(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ResourceTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

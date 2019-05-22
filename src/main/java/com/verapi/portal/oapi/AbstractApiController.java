@@ -79,9 +79,9 @@ import java.util.UUID;
 import static com.verapi.portal.common.Util.nnvl;
 
 public abstract class AbstractApiController implements IApiController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiController.class);
     protected static final String PARSED_PARAMETERS = "parsedParameters";
     protected static final String EXCEPTION_LOG_FORMAT = "{}\n{}";
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiController.class);
     private static final String OPEN_API_OPERATION = "openApiOperation";
     private static final String ABYSS_COOKIE_AUTH_SECURITY_HANDLER = "abyssCookieAuthSecurityHandler";
     private static final String ABYSS_HTTP_BASIC_AUTH_SECURITY_HANDLER = "abyssHttpBasicAuthSecurityHandler";
@@ -91,9 +91,12 @@ public abstract class AbstractApiController implements IApiController {
     private static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
     private static final String METHOD_INVOKED = "{} invoked";
     private static final String NO_DATA_FOUND = "no_data_found";
+    private static final String API_CONTROLLER = "ApiController";
+    private static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=utf-8";
     private static ElasticSearchService elasticSearchService = new ElasticSearchService();
     protected Vertx vertx;
     protected JDBCAuth authProvider;
+    private String mountPoint = Constants.ABYSS_ROOT + "/oapi";
     private Router abyssRouter;
     private String apiSpec;
 
@@ -137,18 +140,6 @@ public abstract class AbstractApiController implements IApiController {
                 .end();
     }
 
-    private static void logHandler(RoutingContext routingContext) {
-/*
-        routingContext.request().bodyHandler(event -> {
-        LOGGER.warn("Request BODY handler logging: {}", event);
-        });
-        routingContext.request().endHandler(event -> {
-            LOGGER.warn("Request END handler logging: {}", event);
-        });
-*/
-
-    }
-
     private void failureHandler(RoutingContext routingContext) {
         Throwable failure;
         if (routingContext.failure() == null) {
@@ -169,7 +160,7 @@ public abstract class AbstractApiController implements IApiController {
         if (failure instanceof ValidationException) {
             // Handle Validation Exception
             routingContext.response()
-                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                     .setStatusCode(HttpResponseStatus.UNPROCESSABLE_ENTITY.code())
                     .setStatusMessage(HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase() + " "
                             + ((ValidationException) failure).type().name() + " "
@@ -178,14 +169,14 @@ public abstract class AbstractApiController implements IApiController {
         } else if (failure instanceof AbyssApiException) {
             //Handle Abyss Api Exception
             routingContext.response()
-                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                     .setStatusCode(((AbyssApiException) failure).getApiError().getCode())
                     .setStatusMessage(((AbyssApiException) failure).getApiError().getUsermessage())
                     .end(JsonSanitizer.sanitize(((AbyssApiException) failure).getApiError().toJson().toString()), StandardCharsets.UTF_8.toString());
         } else {
             // Handle other exception
             routingContext.response()
-                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                    .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                     .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .setStatusMessage("Exception thrown! " + failure.getLocalizedMessage())
                     .end(JsonSanitizer.sanitize(new ApiSchemaError().setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -565,6 +556,7 @@ public abstract class AbstractApiController implements IApiController {
         if (resourceIdTemp != null) {
             String[] components = resourceIdTemp.split("-");
             if (components.length != 5) {
+                //remove the following useless assignment
                 resourceIdTemp = null;
             }
         }
@@ -713,7 +705,7 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponseStatusOnly(RoutingContext routingContext, Single<CompositeResult> updateResultSingle, int httpResponseStatus) {
         updateResultSingle.subscribe((CompositeResult resp) ->
                         routingContext.response()
-                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                                .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                                 .setStatusCode(httpResponseStatus)
                                 .end()
                 ,
@@ -723,10 +715,10 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponseDeleteStatusOnly(RoutingContext routingContext, Single<ResultSet> updateResultSingle, int httpResponseStatus) {
         updateResultSingle.subscribe((ResultSet resp) -> {
                     resp.getRows().forEach((JsonObject jsonObject) -> elasticSearchService
-                            .indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "")
+                            .indexDocument(routingContext, this.getClass().getSimpleName().replace(API_CONTROLLER, "")
                                     .toLowerCase(Locale.ENGLISH) + "-api", jsonObject));
                     routingContext.response()
-                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                             .setStatusCode(httpResponseStatus)
                             .end();
                 },
@@ -736,7 +728,7 @@ public abstract class AbstractApiController implements IApiController {
     private void subscribeAndResponseStatusOnlyList(RoutingContext routingContext, Single<List<UpdateResult>> updateResultListSingle, int httpResponseStatus) {
         updateResultListSingle.subscribe((List<UpdateResult> resp) ->
                         routingContext.response()
-                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                                .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                                 .setStatusCode(httpResponseStatus)
                                 .end()
                 ,
@@ -774,10 +766,10 @@ public abstract class AbstractApiController implements IApiController {
                         });
                     }
                     arr.forEach((Object arrayItem) -> elasticSearchService
-                            .indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "")
+                            .indexDocument(routingContext, this.getClass().getSimpleName().replace(API_CONTROLLER, "")
                                     .toLowerCase(Locale.ENGLISH) + "-api", (JsonObject) arrayItem));
                     routingContext.response()
-                            .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                            .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                             .setStatusCode(httpResponseStatus)
                             .end(JsonSanitizer.sanitize(arr.encode()), StandardCharsets.UTF_8.toString());
                 },
@@ -787,7 +779,7 @@ public abstract class AbstractApiController implements IApiController {
     protected void subscribeAndResponseBulk(RoutingContext routingContext, Single<JsonArray> jsonArraySingle, int httpResponseStatus) {
         jsonArraySingle.subscribe((JsonArray resp) ->
                         routingContext.response()
-                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                                .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                                 .setStatusCode(httpResponseStatus)
                                 .end(JsonSanitizer.sanitize(resp.encode()), StandardCharsets.UTF_8.toString())
                 ,
@@ -836,10 +828,10 @@ public abstract class AbstractApiController implements IApiController {
                                 });
                             }
                             arr.forEach((Object arrayItem) -> elasticSearchService
-                                    .indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "")
+                                    .indexDocument(routingContext, this.getClass().getSimpleName().replace(API_CONTROLLER, "")
                                             .toLowerCase(Locale.ENGLISH) + "-api", ((JsonObject) arrayItem).getJsonObject("response")));
                             routingContext.response()
-                                    .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                                    .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                                     .putHeader("Vary", ORIGIN)
                                     .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                                     .setStatusCode(httpResponseStatus)
@@ -850,7 +842,7 @@ public abstract class AbstractApiController implements IApiController {
 
     protected void subscribeAndResponse(RoutingContext routingContext, JsonArray response, int httpResponseStatus) {
         routingContext.response()
-                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                 .putHeader("Vary", ORIGIN)
                 .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                 .setStatusCode(httpResponseStatus)
@@ -864,18 +856,18 @@ public abstract class AbstractApiController implements IApiController {
     void subscribeAndResponseJsonObject(RoutingContext routingContext, Single<JsonObject> response, int httpResponseStatus, boolean onlyStatus) {
         response.subscribe((JsonObject jsonObject) -> {
             elasticSearchService
-                    .indexDocument(routingContext, this.getClass().getSimpleName().replace("ApiController", "")
+                    .indexDocument(routingContext, this.getClass().getSimpleName().replace(API_CONTROLLER, "")
                             .toLowerCase(Locale.ENGLISH) + "-api", jsonObject);
             if (onlyStatus) {
                 routingContext.response()
-                        .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                        .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                         .putHeader("Vary", ORIGIN)
                         .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                         .setStatusCode(httpResponseStatus)
                         .end(".");
             } else {
                 routingContext.response()
-                        .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
+                        .putHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_CHARSET_UTF_8)
                         .putHeader("Vary", ORIGIN)
                         .putHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                         .setStatusCode(httpResponseStatus)
@@ -1046,10 +1038,12 @@ public abstract class AbstractApiController implements IApiController {
                         .session()
                         .get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service
-                        .update(UUID.fromString(routingContext.pathParam("uuid")), requestBody)) //TODO:  an overloaded version of update() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
+                        //TODO:  an overloaded version of update() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
+                        .update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
                 .flatMap(resultSet -> service
-                        .findById(UUID.fromString(routingContext.pathParam("uuid")))) //TODO: CompositeResult success & # of rows should be checked
-                .flatMap(resultSet -> {
+                        //TODO: CompositeResult success & # of rows should be checked
+                        .findById(UUID.fromString(routingContext.pathParam("uuid"))))
+                .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException(NO_DATA_FOUND));
                     } else {
@@ -1072,14 +1066,16 @@ public abstract class AbstractApiController implements IApiController {
         deleteEntities(routingContext, clazz, new ApiFilterQuery());
     }
 
-    <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz, ApiFilterQuery apiFilterQuery)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<CompositeResult> deleteAllResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.deleteAll(apiFilterQuery));
         subscribeAndResponseStatusOnly(routingContext, deleteAllResult, HttpResponseStatus.NO_CONTENT.code());
     }
 
-    <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> deleteResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))))
@@ -1094,12 +1090,14 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponseDeleteStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
     }
 
-    <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, String method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, String method)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> funcResult = service
                 .initJDBCClient(routingContext
                         .session()
-                        .get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)) //TODO: access control
+                        //TODO: access control
+                        .get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> (Single<ResultSet>) service
                         .getClass()
                         .getDeclaredMethod(method, RoutingContext.class, JDBCAuth.class)

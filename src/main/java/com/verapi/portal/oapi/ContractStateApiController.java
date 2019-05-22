@@ -101,9 +101,6 @@ public class ContractStateApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getContractState(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ContractStateService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -131,7 +128,6 @@ public class ContractStateApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void deleteContractState(RoutingContext routingContext) {
-
         try {
             deleteEntity(routingContext, ContractStateService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

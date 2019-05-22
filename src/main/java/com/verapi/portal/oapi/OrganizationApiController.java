@@ -106,9 +106,6 @@ public class OrganizationApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getOrganization(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, OrganizationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -154,7 +151,9 @@ public class OrganizationApiController extends AbstractApiController {
         }
 
         OrganizationService organizationService = new OrganizationService(vertx);
-        Single<ResultSet> resultSetSingle = organizationService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
+        Single<ResultSet> resultSetSingle = organizationService.initJDBCClient(
+                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)
+                , routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
                 .flatMap(jdbcClient -> organizationService.findAll(
                         new ApiFilterQuery()
                                 .setFilterQuery(OrganizationService.SQL_GET_IMAGE_BY_UUID)

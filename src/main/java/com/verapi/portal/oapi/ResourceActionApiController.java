@@ -102,9 +102,6 @@ public class ResourceActionApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourceAction(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ResourceActionService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -143,9 +140,6 @@ public class ResourceActionApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourceActionsOfResourceType(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ResourceActionService.class,

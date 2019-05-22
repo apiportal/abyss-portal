@@ -34,14 +34,17 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @AbyssApiController(apiSpec = "/openapi/Policy.yaml")
 public class PolicyApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyApiController.class);
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_POLICY_POLICYINSTANCE);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
+
+    static {
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_POLICY_POLICYINSTANCE);
+    }
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -70,11 +73,9 @@ public class PolicyApiController extends AbstractApiController {
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
-        requestBody.forEach(requestItem -> {
+        requestBody.forEach((Object requestItem) -> {
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
-                appendRequestBody.forEach(entry -> {
-                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
-                });
+                appendRequestBody.forEach((Map.Entry<String, Object> entry) -> ((JsonObject) requestItem).put(entry.getKey(), entry.getValue()));
             }
         });
 
@@ -133,9 +134,6 @@ public class PolicyApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getPolicy(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, PolicyService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

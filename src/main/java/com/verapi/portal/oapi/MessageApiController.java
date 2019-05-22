@@ -39,10 +39,12 @@ import java.util.List;
 public class MessageApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageApiController.class);
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_MESSAGE_RECEIVER);
-        add(Constants.JSONB_COLUMN_MESSAGE_SENDER);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
+
+    static {
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_MESSAGE_RECEIVER);
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_MESSAGE_SENDER);
+    }
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -91,7 +93,8 @@ public class MessageApiController extends AbstractApiController {
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, MessageService.class, requestBody, jsonbColumnsList); //TODO: jsonbColumnsList Lazım mı?
+            //TODO: jsonbColumnsList Lazım mı?
+            updateEntities(routingContext, MessageService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -110,9 +113,6 @@ public class MessageApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getMessage(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, MessageService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -131,7 +131,8 @@ public class MessageApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         try {
-            updateEntity(routingContext, MessageService.class, requestBody, jsonbColumnsList); //TODO: jsonbColumnsList Lazım mı?
+            //TODO: jsonbColumnsList Lazım mı?
+            updateEntity(routingContext, MessageService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -140,7 +141,6 @@ public class MessageApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void deleteMessage(RoutingContext routingContext) {
-
         try {
             deleteEntity(routingContext, MessageService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -152,12 +152,12 @@ public class MessageApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getMessagesOfSubject(RoutingContext routingContext) {
         try {
+            //Get uuid from session
             String userUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
             getEntities(routingContext, MessageService.class, jsonbColumnsList,
                     new ApiFilterQuery()
                             .setFilterQuery(MessageService.SQL_FIND_BY_SUBJECT)
-                            //.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-                            .setFilterQueryParams(new JsonArray().add(userUuid))); //Get uuid from session
+                            .setFilterQueryParams(new JsonArray().add(userUuid)));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

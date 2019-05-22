@@ -102,9 +102,6 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourceAccessToken(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ResourceAccessTokenService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -143,9 +140,6 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourceAccessTokenBySubjectPermission(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntities(routingContext,
                     ResourceAccessTokenService.class,

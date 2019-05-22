@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 @AbyssApiController(apiSpec = "/openapi/SubjectPermission.yaml")
 public class SubjectPermissionApiController extends AbstractApiController {
@@ -63,11 +64,9 @@ public class SubjectPermissionApiController extends AbstractApiController {
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
-        requestBody.forEach(requestItem -> {
+        requestBody.forEach((Object requestItem) -> {
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
-                appendRequestBody.forEach(entry -> {
-                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
-                });
+                appendRequestBody.forEach((Map.Entry<String, Object> entry) -> ((JsonObject) requestItem).put(entry.getKey(), entry.getValue()));
             }
         });
 
@@ -108,73 +107,25 @@ public class SubjectPermissionApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectPermissions(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery());
-/*
-        try {
-            getEntities(routingContext, SubjectPermissionService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void addSubjectPermissions(RoutingContext routingContext) {
         addEntities(routingContext, null);
-/*
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
-        // We get an user JSON array validated by Vert.x Open API validator
-        JsonArray requestBody = requestParameters.body().getJsonArray();
-
-        try {
-            addEntities(routingContext, SubjectPermissionService.class, requestBody);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void updateSubjectPermissions(RoutingContext routingContext) {
         updateEntities(routingContext, null);
-/*
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
-        // We get an user JSON object validated by Vert.x Open API validator
-        JsonObject requestBody = requestParameters.body().getJsonObject();
-
-        //now it is time to update entities
-        try {
-            updateEntities(routingContext, SubjectPermissionService.class, requestBody);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void deleteSubjectPermissions(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery());
-/*
-        try {
-            deleteEntities(routingContext, SubjectPermissionService.class);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
-            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
-        }
-*/
     }
 
     @AbyssApiOperationHandler
     public void getSubjectPermission(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, SubjectPermissionService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

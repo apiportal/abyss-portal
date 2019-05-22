@@ -46,26 +46,24 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectApiController.class);
+    private static final String PICTURE = "picture";
+    private static final String SUBJECTTYPEID = "subjecttypeid";
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.NESTED_COLUMN_USER_GROUPS);
-        add(Constants.NESTED_COLUMN_USER_PERMISSIONS);
-        add(Constants.NESTED_COLUMN_USER_RESOURCES);
-        add(Constants.NESTED_COLUMN_USER_CONTRACTS);
-        add(Constants.NESTED_COLUMN_USER_ORGANIZATIONS);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
 
-
-/*
-    private final SwaggerRequestResponseValidator validator = SwaggerRequestResponseValidator
-            .createFor("/openapi/Subject.yaml")
-            .build();
-*/
+    static {
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_USER_GROUPS);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_USER_PERMISSIONS);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_USER_RESOURCES);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_USER_CONTRACTS);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_USER_ORGANIZATIONS);
+    }
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -105,17 +103,17 @@ public class SubjectApiController extends AbstractApiController {
 
         // 1- generate password salt and password
         // 2-check subject request contains picture, if not then load default avatar picture
-        requestBody.forEach(requestItem -> {
+        requestBody.forEach((Object requestItem) -> {
             String salt = authProvider.generateSalt();
             String hash = authProvider.computeHash(((JsonObject) requestItem).getString("password"), salt);
             ((JsonObject) requestItem).put("password", hash);
             ((JsonObject) requestItem).put("passwordsalt", salt);
 
 
-            //insert default avatar image TODO: later use request base
-            if ((!((JsonObject) requestItem).containsKey("picture")) ||
-                    (((JsonObject) requestItem).getValue("picture") == null) ||
-                    (((JsonObject) requestItem).getValue("picture") == ""))
+            //insert default avatar image
+            if ((!((JsonObject) requestItem).containsKey(PICTURE)) ||
+                    (((JsonObject) requestItem).getValue(PICTURE) == null) ||
+                    (((JsonObject) requestItem).getValue(PICTURE) == "")) {
                 try {
                     LOGGER.trace("addEntities - adding default avatar");
                     InputStream in = getClass().getResourceAsStream(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR);
@@ -126,15 +124,15 @@ public class SubjectApiController extends AbstractApiController {
                         sb.append(line).append("\n");
                     }
                     in.close();
-                    ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + new String(Base64.getEncoder().encode(sb.toString().getBytes()), StandardCharsets.UTF_8));
+                    ((JsonObject) requestItem).put(PICTURE
+                            , "data:image/jpeg;base64," + new String(Base64.getEncoder().encode(sb.toString().getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
                 }
+            }
 
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
-                appendRequestBody.forEach(entry -> {
-                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
-                });
+                appendRequestBody.forEach((Map.Entry<String, Object> entry) -> ((JsonObject) requestItem).put(entry.getKey(), entry.getValue()));
             }
 
         });
@@ -144,8 +142,8 @@ public class SubjectApiController extends AbstractApiController {
             if (isCascaded) {
                 LOGGER.trace("---adding entities in a cascaded way");
                 SubjectService subjectService = new SubjectService(routingContext.vertx());
-                //subjectService.setAutoCommit(false);
-                Single<List<JsonObject>> insertAllCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                Single<List<JsonObject>> insertAllCascadedResult = subjectService
+                        .initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                         .flatMap(jdbcClient -> subjectService.insertAllCascaded(routingContext, requestBody));
                 subscribeAndResponseBulkList(routingContext, insertAllCascadedResult, null, HttpResponseStatus.MULTI_STATUS.code());
             } else {
@@ -182,7 +180,7 @@ public class SubjectApiController extends AbstractApiController {
         }
     }
 
-    void execServiceMethod(RoutingContext routingContext, String method) {
+    private void execServiceMethod(RoutingContext routingContext, String method) {
         try {
             execServiceMethod(routingContext, SubjectService.class, null, method);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -198,25 +196,6 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addSubjects(RoutingContext routingContext) {
-
-/*
-        // ### STAR - request swagger validation using Atlassian SwaggerRequestResponseValidator ###
-        Method requestMethod = Method.valueOf(routingContext.request().method().toString());
-        String requestPath = routingContext.request().path().substring(routingContext.request().path().lastIndexOf(mountPoint) + mountPoint.length() + 1);
-        SimpleRequest.Builder requestBuilder = new SimpleRequest.Builder(requestMethod, requestPath)
-                .withBody(routingContext.getBodyAsJson().encode());
-        routingContext.queryParams().names().forEach(paramName -> requestBuilder.withQueryParam(paramName, routingContext.queryParam(paramName)));
-        routingContext.request().headers().names().forEach(headerName -> requestBuilder.withHeader(headerName, routingContext.request().getHeader(headerName)));
-        ValidationReport report = validator.validateRequest(requestBuilder.build());
-        List<ValidationReport.Message> messages = report.getMessages();
-        if (!messages.isEmpty()) {
-            LOGGER.error(messages.toString());
-            throwApiException(routingContext, UnProcessableEntity422Exception.class, HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase(), messages.toString());
-            return;
-        }
-        // ### END - request swagger validation using Atlassian SwaggerRequestResponseValidator ###
-*/
-
         addEntities(routingContext, null);
     }
 
@@ -232,9 +211,6 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -243,10 +219,7 @@ public class SubjectApiController extends AbstractApiController {
         }
     }
 
-    void getSubject(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
+    private void getSubject(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         try {
             getEntity(routingContext,
                     SubjectService.class,
@@ -258,7 +231,7 @@ public class SubjectApiController extends AbstractApiController {
         }
     }
 
-    void updateEntityCascaded(RoutingContext routingContext, JsonObject appendRequestBody) {
+    private void updateEntityCascaded(RoutingContext routingContext, JsonObject appendRequestBody) {
         LOGGER.trace("---updating entities in a cascaded way");
 
         // Get the parsed parameters
@@ -268,13 +241,10 @@ public class SubjectApiController extends AbstractApiController {
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
-            appendRequestBody.forEach(entry -> {
-                requestBody.put(entry.getKey(), entry.getValue());
-            });
+            appendRequestBody.forEach((Map.Entry<String, Object> entry) -> requestBody.put(entry.getKey(), entry.getValue()));
         }
 
         SubjectService subjectService = new SubjectService(routingContext.vertx());
-        //subjectService.setAutoCommit(false);
         Single<ResultSet> updateCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> subjectService.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
                 .flatMap(resultSet -> subjectService.findAll(new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS)
@@ -282,11 +252,12 @@ public class SubjectApiController extends AbstractApiController {
                         .addFilterQuery(SubjectService.FILTER_APP_UUID)
                         .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")))
                 ))
-                .flatMap(resultSet -> {
+                .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException("no_data_found"));
-                    } else
+                    } else {
                         return Single.just(resultSet);
+                    }
                 });
         subscribeAndResponse(routingContext, updateCascadedResult, jsonbColumnsList, HttpResponseStatus.OK.code());
     }
@@ -326,7 +297,7 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addApps(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_APP));
+        addEntities(routingContext, new JsonObject().put(SUBJECTTYPEID, Constants.SUBJECT_TYPE_APP));
     }
 
     @AbyssApiOperationHandler
@@ -346,7 +317,7 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addUsers(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_USER));
+        addEntities(routingContext, new JsonObject().put(SUBJECTTYPEID, Constants.SUBJECT_TYPE_USER));
     }
 
     @AbyssApiOperationHandler
@@ -366,7 +337,7 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addGroups(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_GROUP));
+        addEntities(routingContext, new JsonObject().put(SUBJECTTYPEID, Constants.SUBJECT_TYPE_GROUP));
     }
 
     @AbyssApiOperationHandler
@@ -387,7 +358,7 @@ public class SubjectApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addRoles(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjecttypeid", Constants.SUBJECT_TYPE_ROLE));
+        addEntities(routingContext, new JsonObject().put(SUBJECTTYPEID, Constants.SUBJECT_TYPE_ROLE));
     }
 
     @AbyssApiOperationHandler
@@ -439,7 +410,7 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addAppsCascaded(RoutingContext routingContext) {
         addEntities(routingContext, new JsonObject()
-                        .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
+                        .put(SUBJECTTYPEID, Constants.SUBJECT_TYPE_APP)
                         .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
                         .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)),
                 true
@@ -449,7 +420,7 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateAppCascaded(RoutingContext routingContext) {
         updateEntityCascaded(routingContext, new JsonObject()
-                .put("subjecttypeid", Constants.SUBJECT_TYPE_APP)
+                .put(SUBJECTTYPEID, Constants.SUBJECT_TYPE_APP)
                 .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
         );
@@ -471,14 +442,15 @@ public class SubjectApiController extends AbstractApiController {
         }
 
         SubjectService subjectService = new SubjectService(vertx);
-        Single<ResultSet> resultSetSingle = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
+        Single<ResultSet> resultSetSingle = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)
+                , routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
                 .flatMap(jdbcClient -> subjectService.findAll(
                         new ApiFilterQuery()
                                 .setFilterQuery(SubjectService.SQL_GET_IMAGE_BY_UUID)
                                 .setFilterQueryParams(new JsonArray()
                                         .add(routingContext.pathParam("uuid"))))
                 );
-        subscribeForImage(routingContext, resultSetSingle, "getSubjectImage", "picture");
+        subscribeForImage(routingContext, resultSetSingle, "getSubjectImage", PICTURE);
     }
 
 }

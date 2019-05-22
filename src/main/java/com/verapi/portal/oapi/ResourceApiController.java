@@ -102,9 +102,6 @@ public class ResourceApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResource(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ResourceService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -143,9 +140,6 @@ public class ResourceApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourcesOfResourceReference(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ResourceService.class,
@@ -161,9 +155,6 @@ public class ResourceApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourcesOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ResourceService.class,
@@ -179,9 +170,6 @@ public class ResourceApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourcesOfResourceType(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ResourceService.class,
@@ -197,9 +185,6 @@ public class ResourceApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getResourcesOfOrganization(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ResourceService.class,

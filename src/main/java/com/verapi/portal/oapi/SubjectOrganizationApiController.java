@@ -102,9 +102,6 @@ public class SubjectOrganizationApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubjectOrganization(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, SubjectOrganizationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -143,9 +140,6 @@ public class SubjectOrganizationApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getOrganizationsOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     SubjectOrganizationService.class,
@@ -161,9 +155,6 @@ public class SubjectOrganizationApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubjectsOfOrganization(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     SubjectOrganizationService.class,

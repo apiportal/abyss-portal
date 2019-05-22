@@ -161,11 +161,11 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     }
 
 /*
-    Single<Router> createSubRouter(String mountPoint) {
+    Single<Router> createSubRouter(String MOUNT_POINT) {
         LOGGER.trace("---createSubRouter invoked");
 
-        if (!mountPoint.startsWith("/"))
-            mountPoint = "/" + mountPoint;
+        if (!MOUNT_POINT.startsWith("/"))
+            MOUNT_POINT = "/" + MOUNT_POINT;
         Router subRouter = Router.router(vertx);
 
         //log HTTP requests
@@ -184,7 +184,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
         subRouter.route().failureHandler(this::failureHandler);
 
-        subRouter.route(mountPoint + "/:apipath*").handler(this::routingContextHandler);
+        subRouter.route(MOUNT_POINT + "/:apipath*").handler(this::routingContextHandler);
 
         gatewayRouter.mountSubRouter(Constants.ABYSS_GATEWAY_ROOT, subRouter);
 

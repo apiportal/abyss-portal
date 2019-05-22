@@ -101,9 +101,6 @@ public class SubjectTypeApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubjectType(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, SubjectTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

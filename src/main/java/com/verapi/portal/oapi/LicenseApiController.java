@@ -36,15 +36,18 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @AbyssApiController(apiSpec = "/openapi/License.yaml")
 public class LicenseApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LicenseApiController.class);
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_LICENSE_LICENSEDOCUMENT);
-        add(Constants.NESTED_COLUMN_USER_RESOURCES);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
+
+    static {
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_LICENSE_LICENSEDOCUMENT);
+        jsonbColumnsList.add(Constants.NESTED_COLUMN_USER_RESOURCES);
+    }
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -77,11 +80,9 @@ public class LicenseApiController extends AbstractApiController {
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
-        requestBody.forEach(requestItem -> {
+        requestBody.forEach((Object requestItem) -> {
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
-                appendRequestBody.forEach(entry -> {
-                    ((JsonObject) requestItem).put(entry.getKey(), entry.getValue());
-                });
+                appendRequestBody.forEach((Map.Entry<String, Object> entry) -> ((JsonObject) requestItem).put(entry.getKey(), entry.getValue()));
             }
         });
 
@@ -89,8 +90,10 @@ public class LicenseApiController extends AbstractApiController {
             if (isCascaded) {
                 LOGGER.trace("---adding entities in a cascaded way");
                 LicenseService licenseService = new LicenseService(routingContext.vertx());
-                //licenseService.setAutoCommit(false);
-                Single<List<JsonObject>> insertAllCascadedResult = licenseService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                Single<List<JsonObject>> insertAllCascadedResult = licenseService.initJDBCClient(
+                        routingContext
+                                .session()
+                                .get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                         .flatMap(jdbcClient -> licenseService.insertAllCascaded(routingContext, requestBody));
                 subscribeAndResponseBulkList(routingContext, insertAllCascadedResult, jsonbColumnsList, HttpResponseStatus.MULTI_STATUS.code());
             } else {
@@ -149,9 +152,6 @@ public class LicenseApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getLicense(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, LicenseService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

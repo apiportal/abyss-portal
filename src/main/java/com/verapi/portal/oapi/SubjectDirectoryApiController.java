@@ -39,9 +39,11 @@ import java.util.List;
 public class SubjectDirectoryApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDirectoryApiController.class);
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
+
+    static {
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_DIRECTORYATTRIBUTES);
+    }
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -109,9 +111,6 @@ public class SubjectDirectoryApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getSubjectDirectory(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, SubjectDirectoryService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

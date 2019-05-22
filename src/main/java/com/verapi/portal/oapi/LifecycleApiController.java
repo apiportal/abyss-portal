@@ -26,9 +26,6 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//import com.verapi.abyss.common.api.AbyssApiController;
-//import com.verapi.abyss.common.api.AbyssApiOperationHandler;
-
 @AbyssApiController(apiSpec = "/openapi/Lifecycle.yaml")
 public class LifecycleApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LifecycleApiController.class);
@@ -56,5 +53,4 @@ public class LifecycleApiController extends AbstractApiController {
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
-
 }

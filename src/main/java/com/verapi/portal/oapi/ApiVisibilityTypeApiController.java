@@ -101,9 +101,6 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiVisibilityType(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ApiVisibilityTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

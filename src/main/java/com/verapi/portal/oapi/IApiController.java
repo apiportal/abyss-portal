@@ -16,8 +16,6 @@
 
 package com.verapi.portal.oapi;
 
-import com.verapi.abyss.common.Constants;
+interface IApiController {
 
-public interface IApiController {
-    String mountPoint = Constants.ABYSS_ROOT + "/oapi";
 }

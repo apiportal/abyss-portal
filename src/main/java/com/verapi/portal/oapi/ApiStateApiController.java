@@ -101,9 +101,6 @@ public class ApiStateApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiState(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ApiStateService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

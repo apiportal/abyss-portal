@@ -38,9 +38,11 @@ import java.util.List;
 public class PolicyTypeApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(PolicyTypeApiController.class);
 
-    private static List<String> jsonbColumnsList = new ArrayList<String>() {{
-        add(Constants.JSONB_COLUMN_POLICY_TYPE_TEMPLATE);
-    }};
+    private static List<String> jsonbColumnsList = new ArrayList<>();
+
+    static {
+        jsonbColumnsList.add(Constants.JSONB_COLUMN_POLICY_TYPE_TEMPLATE);
+    }
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -108,9 +110,6 @@ public class PolicyTypeApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getPolicyType(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, PolicyTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
