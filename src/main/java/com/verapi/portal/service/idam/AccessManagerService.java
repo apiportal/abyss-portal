@@ -20,6 +20,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "access_manager")
 public class AccessManagerService extends AbstractService<UpdateResult> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccessManagerService.class);
     private static final String SQL_INSERT = "insert into access_manager (organizationid, crudsubjectid, accessmanagername, description,\n" +

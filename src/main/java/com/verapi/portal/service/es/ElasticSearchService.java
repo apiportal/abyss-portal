@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.UUID;
 
 public class ElasticSearchService extends AbstractElasticSearchService {
@@ -45,7 +45,7 @@ public class ElasticSearchService extends AbstractElasticSearchService {
     public void indexDocument(RoutingContext routingContext, String type, JsonObject source) {
         LOGGER.trace("indexDocument() invoked");
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM");
-        String index = type + "-" + f.format(LocalDate.now());
+        String index = type + "-" + f.format(new Date());
         indexDocument(routingContext, index, type, source);
     }
 }
