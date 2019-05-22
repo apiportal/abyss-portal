@@ -95,8 +95,8 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                                     subjectUUID = row.getString("uuid");
                                     email = row.getString("email");
                                     displayName = row.getString("display_name");
-                                    LOGGER.info("Activated account found:[{}({})]. Email:[{}] Reset password token is going to be created..."
-                                            , subjectId, subjectUUID, email);
+                                    LOGGER.info("Activated account found:[{}({})]. Email:[{}] Display Name:[{}] Reset password token is going to be created..."
+                                            , subjectId, subjectUUID, email, displayName);
 
                                     //Generate and Persist Reset Password Token
                                     Token tokenGenerator = new Token();
@@ -200,7 +200,7 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                                             LOGGER.trace("Forgot Password Mailing Event Bus Result: {} | Result: {}"
                                                     , result, result.result().body().encodePrettily());
                                         } else {
-                                            LOGGER.error("Forgot Password Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
+                                            LOGGER.error("Forgot Password Mailing Event Bus Result: {} | Cause: {}", result, result.cause().getMessage());
                                         }
 
                                     });

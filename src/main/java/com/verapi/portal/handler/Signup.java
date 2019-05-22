@@ -237,7 +237,7 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
                         .doAfterTerminate(resConn::close)
 
         ).subscribe((Boolean result) -> {
-                    LOGGER.info("Subscription to Signup successfull:" + result);
+                    LOGGER.info("Subscription to Signup successfull: {}", result);
                     generateResponse(routingContext, LOGGER, HttpStatus.SC_OK, "Activation Code is sent to your email address", "Please check spam folder also...", "");
                     //TODO: Send email to user
                 }, (Throwable t) -> {

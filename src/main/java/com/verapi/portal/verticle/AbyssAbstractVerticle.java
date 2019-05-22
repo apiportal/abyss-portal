@@ -36,6 +36,8 @@ import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.handler.*;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
+import io.vertx.servicediscovery.Record;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,26 +46,38 @@ import java.util.Set;
 
 public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
+    private static final int ONE_MINUTE_IS_60_SECS = 60;
+    private static final int ONE_SEC_IS_1000_MILLISECS = 1000;
     private static final Logger LOGGER = LoggerFactory.getLogger(AbyssAbstractVerticle.class);
+    private static final String IS_PUT_IN_CONTEXT_SESSION = "{} is put in context session: {}";
     //####### static #######
     static Router abyssRouter;
     //##### static - end #####
-
-    private AbyssJDBCService abyssJDBCService;
     JDBCClient jdbcClient;
     AuthHandler authHandler;
     JDBCAuth jdbcAuth;
     String verticleHost;
-
-    @Override
-    public void stop() throws Exception {
-        super.stop();
-    }
-
     int serverPort;
     Router verticleRouter;
+    private AbyssJDBCService abyssJDBCService;
     private String verticleType = "";
 
+    private void globalJavascript(RoutingContext context) {
+        String filecontent =
+                "var hostProtocol='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_PROTOCOL) + "';\n" +
+                        "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';\n" +
+                        "var hostPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_OPENAPI_SERVER_PORT) + "';\n" +
+                        "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_SERVER_PORT) + "';\n" +
+                        "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";\n" +
+                        "var version='" + BuildProperties.getInstance().getConfigJsonObject().getString(Constants.ABYSS_BUILD_TIMESTAMP) + "';\n" +
+                        "var gatewayContext='" + Constants.ABYSS_GW + "';\n" +
+                        "var gatewayPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_GATEWAY_SERVER_PORT) + "';\n" +
+                        "var httpBinUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_BIN_URL) + "';\n" +
+                        "var searchAllUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.ES_SERVER_URL) /*+ "/_search"*/ + "';\n";
+        context.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/javascript");
+        context.response().setStatusCode(HttpStatus.SC_OK);
+        context.response().end(filecontent);
+    }
 
     //#########################################################
     public Router getVerticleRouter() {
@@ -90,11 +104,11 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         this.abyssJDBCService = abyssJDBCService;
     }
 
+    //#########################################################
+
     void setVerticleType(String verticleType) {
         this.verticleType = verticleType;
     }
-
-    //#########################################################
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -111,7 +125,6 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         super.stop(stopFuture);
     }
 
-
     //#########################################################
     Single<Router> createRouters() {
         abyssRouter = Router.router(vertx);
@@ -121,16 +134,16 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
     Single<JDBCClient> initializeJdbcClient(String dataSourceName) {
 
-        LOGGER.trace("AbyssAbstractVerticle.initializeJdbcClient() running for " + dataSourceName);
+        LOGGER.trace("AbyssAbstractVerticle.initializeJdbcClient() running for {}", dataSourceName);
 
         return abyssJDBCService.publishDataSource(dataSourceName)
-                .flatMap(rec -> {
+                .flatMap((Record rec) -> {
                     LOGGER.trace("AbyssAbstractVerticle - getting Jdbc Data Service ...");
                     return abyssJDBCService.getJDBCServiceObject(dataSourceName);
                 })
-                .flatMap(jdbcClient1 -> {
+                .flatMap((JDBCClient jdbcClient1) -> {
                     this.jdbcClient = jdbcClient1;
-                    LOGGER.trace("AbyssAbstractVerticle - Got jdbcClient successfully - " + jdbcClient1.toString());
+                    LOGGER.trace("AbyssAbstractVerticle - Got jdbcClient successfully - {}", jdbcClient1);
                     return Single.just(jdbcClient1);
                 });
     }
@@ -158,7 +171,15 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //A handler that maintains a Session for each browser session
         //The session is available on the routing context with RoutingContext.session()
         //The session handler requires a CookieHandler to be on the routing chain before it
-        abyssRouter.route().handler(SessionHandler.create(LocalSessionStore.create(vertx, "abyss.session")).setSessionCookieName("abyss.session").setSessionTimeout(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60 * 1000));
+        abyssRouter.route().handler(SessionHandler
+                .create(LocalSessionStore.create(vertx, "abyss.session"))
+                .setSessionCookieName("abyss.session")
+                .setSessionTimeout((long) Config
+                        .getInstance()
+                        .getConfigJsonObject()
+                        .getInteger(Constants.SESSION_IDLE_TIMEOUT) * ONE_MINUTE_IS_60_SECS * ONE_SEC_IS_1000_MILLISECS
+                )
+        );
 
         //This handler should be used if you want to store the User object in the Session so it's available between different requests, without you having re-authenticate each time
         //It requires that the session handler is already present on previous matching routes
@@ -166,10 +187,11 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         //fourthly install Cassandra LOGGER
         Boolean isCassandraLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.CASSANDRA_LOGGER_ENABLED);
-        if (isCassandraLoggerEnabled)
+        if (isCassandraLoggerEnabled) {
             abyssRouter.route().handler(LoggerHandler.create());
+        }
 
-        LOGGER.debug("createRouter() - " + jdbcClient.toString());
+        LOGGER.debug("createRouter() - {}", jdbcClient);
         jdbcAuth = JDBCAuth.create(vertx, jdbcClient);
 
         jdbcAuth.getDelegate().setHashStrategy(JDBCHashStrategy.createPBKDF2(vertx.getDelegate()));
@@ -178,7 +200,8 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
 
         jdbcAuth.setPermissionsQuery("select permission from subject_permission up, subject u where um.subjectname = ? and up.subjectid = u.id");
 
-        jdbcAuth.setRolesQuery("select groupname from subject_group ug, subject_membership um, subject u where u.subjectname = ? and um.subjectid = u.id and um.groupId = ug.id");
+        jdbcAuth.setRolesQuery("select groupname from subject_group ug, subject_membership um, subject u " +
+                "where u.subjectname = ? and um.subjectid = u.id and um.groupId = ug.id");
 
         abyssRouter.route().handler(UserSessionHandler.create(jdbcAuth));
 
@@ -216,10 +239,11 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         abyssRouter.get(Constants.ABYSS_ROOT + "/failure").handler(failureController);
 
         //if verticle is Portal type verticle then handle failures with Abyss error pages
-        if (verticleType.equals(Constants.VERTICLE_TYPE_PORTAL))
+        if (verticleType.equals(Constants.VERTICLE_TYPE_PORTAL)) {
             //only rendering page routings' failures shall be handled by using regex
             //The regex below will match any string, or line without a line break, not containing the (sub)string '.'
             abyssRouter.routeWithRegex("^((?!\\.).)*$").failureHandler(this::failureHandler);
+        }
 
         return Single.just(abyssRouter);
     }
@@ -251,40 +275,23 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
     void failureHandler(RoutingContext context) {
         if (verticleType.equals(Constants.VERTICLE_TYPE_PORTAL)) {
 
-            LOGGER.trace("VERTICLE_TYPE_PORTAL failureHandler invoked.. statusCode: " + context.statusCode());
+            LOGGER.trace("VERTICLE_TYPE_PORTAL failureHandler invoked.. statusCode: {}", context.statusCode());
 
             //Use user's session for storage
             context.session().put(Constants.HTTP_STATUSCODE, context.statusCode());
-            LOGGER.trace(Constants.HTTP_STATUSCODE + " is put in context session:" + context.session().get(Constants.HTTP_STATUSCODE));
+            LOGGER.trace(IS_PUT_IN_CONTEXT_SESSION, Constants.HTTP_STATUSCODE, context.session().get(Constants.HTTP_STATUSCODE));
 
             context.session().put(Constants.HTTP_URL, context.request().path());
-            LOGGER.trace(Constants.HTTP_URL + " is put in context session:" + context.session().get(Constants.HTTP_URL));
+            LOGGER.trace(IS_PUT_IN_CONTEXT_SESSION, Constants.HTTP_URL, context.session().get(Constants.HTTP_URL));
 
             context.session().put(Constants.HTTP_ERRORMESSAGE, context.statusCode() > 0 ? HttpResponseStatus.valueOf(context.statusCode()).reasonPhrase() : "0");
-            LOGGER.trace(Constants.HTTP_ERRORMESSAGE + " is put in context session:" + context.session().get(Constants.HTTP_ERRORMESSAGE));
+            LOGGER.trace(IS_PUT_IN_CONTEXT_SESSION, Constants.HTTP_ERRORMESSAGE, context.session().get(Constants.HTTP_ERRORMESSAGE));
 
             context.session().put(Constants.CONTEXT_FAILURE_MESSAGE, "-");//context.failed()?context.failure().getLocalizedMessage():"-");
-            LOGGER.trace(Constants.CONTEXT_FAILURE_MESSAGE + " is put in context session:" + context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
+            LOGGER.trace(IS_PUT_IN_CONTEXT_SESSION, Constants.CONTEXT_FAILURE_MESSAGE, context.session().get(Constants.CONTEXT_FAILURE_MESSAGE));
 
-            context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(302).end();
+            context.response().putHeader("location", Constants.ABYSS_ROOT + "/failure").setStatusCode(HttpStatus.SC_MOVED_TEMPORARILY).end();
         }
-    }
-
-    private void globalJavascript(RoutingContext context) {
-        String filecontent =
-                "var hostProtocol='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST_PROTOCOL) + "';\n" +
-                        "var host='" + Config.getInstance().getConfigJsonObject().getString(Constants.HOST) + "';\n" +
-                        "var hostPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_OPENAPI_SERVER_PORT) + "';\n" +
-                        "var hostJsonPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_SERVER_PORT) + "';\n" +
-                        "var abyssSandbox=" + Config.getInstance().getConfigJsonObject().getBoolean(Constants.ISSANDBOX) + ";\n" +
-                        "var version='" + BuildProperties.getInstance().getConfigJsonObject().getString(Constants.ABYSS_BUILD_TIMESTAMP) + "';\n" +
-                        "var gatewayContext='" + Constants.ABYSS_GW + "';\n" +
-                        "var gatewayPort='" + Config.getInstance().getConfigJsonObject().getInteger(Constants.HTTP_PROXY_GATEWAY_SERVER_PORT) + "';\n" +
-                        "var httpBinUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.HTTP_BIN_URL) + "';\n" +
-                        "var searchAllUrl='" + Config.getInstance().getConfigJsonObject().getString(Constants.ES_SERVER_URL) /*+ "/_search"*/ + "';\n";
-        context.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/javascript");
-        context.response().setStatusCode(200);
-        context.response().end(filecontent);
     }
 
 }

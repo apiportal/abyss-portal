@@ -195,7 +195,7 @@ public class ActivateAccount extends AbstractPortalHandler implements Handler<Ro
                         .doAfterTerminate(resConn::close)
 
         ).subscribe((Boolean result) -> {
-                    LOGGER.info("Subscription to ActivateAccount successful:" + result);
+                    LOGGER.info("Subscription to ActivateAccount successful: {}", result);
                     generateResponse(routingContext, LOGGER, HttpStatus.SC_OK, "Activation Successful!", "Welcome to API Portal.", "");
                     //TODO: Send email to user
                 }, (Throwable t) -> {

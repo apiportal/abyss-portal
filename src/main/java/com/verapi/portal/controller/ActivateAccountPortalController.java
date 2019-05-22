@@ -192,7 +192,7 @@ public class ActivateAccountPortalController extends AbstractPortalController {
                                         if (result.succeeded()) {
                                             LOGGER.trace("Welcome Mailing Event Bus Result: {} | Result: {}", result, result.result().body().encodePrettily());
                                         } else {
-                                            LOGGER.error("Welcome Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
+                                            LOGGER.error("Welcome Mailing Event Bus Result: {} | Cause: {}", result, result.cause().getMessage());
                                         }
                                     });
                             LOGGER.trace("Welcome mail is sent to Mail Verticle over Event Bus");

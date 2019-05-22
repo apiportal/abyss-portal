@@ -268,7 +268,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                             if (updateResult.getUpdated() == 1) {
                                 LOGGER.trace("ResetPasswordPortalController - Subject Activation Update Result information: {}"
                                         , updateResult.getKeys().encodePrettily());
-                                return resConn.rxCommit().toSingleDefault(true);
+                                return resConn.rxCommit().toSingleDefault(Boolean.TRUE);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
                             }
@@ -276,7 +276,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                         })
 
                         // Rollback if any failed with exception propagation
-                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(true)
+                        .onErrorResumeNext(ex -> resConn.rxRollback().toSingleDefault(Boolean.TRUE)
                                 .onErrorResumeNext(ex2 -> Single.error(new CompositeException(ex, ex2)))
                                 .flatMap(ignore -> Single.error(ex))
                         )
@@ -297,7 +297,7 @@ public class ResetPasswordPortalController extends AbstractPortalController {
                                             LOGGER.trace("Password Reset Mailing Event Bus Result: {} | Result: {}"
                                                     , result, result.result().body().encodePrettily());
                                         } else {
-                                            LOGGER.error("Password Reset Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
+                                            LOGGER.error("Password Reset Mailing Event Bus Result: {} | Cause: {}", result, result.cause().getMessage());
                                         }
 
                                     });

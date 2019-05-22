@@ -95,7 +95,7 @@ public class Users extends AbstractPortalHandler implements Handler<RoutingConte
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
         ).subscribe((ResultSet result) -> {
-                    LOGGER.info("Subscription to Users successfull:" + result);
+                    LOGGER.info("Subscription to Users successfull: {}", result);
                     JsonObject usersResult = new JsonObject();
                     usersResult.put("userList", result.toJson().getValue("rows"));
                     usersResult

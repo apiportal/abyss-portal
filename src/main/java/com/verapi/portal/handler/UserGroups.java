@@ -90,7 +90,7 @@ public class UserGroups extends AbstractPortalHandler implements Handler<Routing
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
         ).subscribe((ResultSet result) -> {
-                    LOGGER.info("Subscription to UserGroups successfull:" + result);
+                    LOGGER.info("Subscription to UserGroups successfull: {}", result);
                     JsonObject groupsResult = new JsonObject();
                     groupsResult.put("groupList", result.toJson().getValue("rows"));
                     groupsResult

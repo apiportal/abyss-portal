@@ -173,7 +173,7 @@ public class ForgotPassword extends AbstractPortalHandler implements Handler<Rou
                         .doAfterTerminate(resConn::close)
 
         ).subscribe((Boolean result) -> {
-                    LOGGER.info("Subscription to Forgot Password successfull:" + result);
+                    LOGGER.info("Subscription to Forgot Password successfull: {}", result);
                     generateResponse(routingContext, LOGGER, HttpStatus.SC_OK
                             , "Reset Password Code is sent to your email address."
                             , "Please check spam folder also..."

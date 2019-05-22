@@ -54,6 +54,12 @@ public class SelectOrganizationPortalController extends AbstractPortalController
             private OrganizationTuple(String uuid, String name) {
                 this.uuid = uuid;
                 this.name = name;
+                LOGGER.trace("[{} - {}]", this.uuid, this.name);
+            }
+
+            @Override
+            public String toString() {
+                return this.uuid + "-" + this.name;
             }
         }
 
