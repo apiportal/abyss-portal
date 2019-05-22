@@ -35,12 +35,11 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/License.yaml")
 public class LicenseApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(LicenseApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LicenseApiController.class);
 
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.JSONB_COLUMN_LICENSE_LICENSEDOCUMENT);
@@ -62,8 +61,7 @@ public class LicenseApiController extends AbstractApiController {
         try {
             getEntities(routingContext, LicenseService.class, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -74,7 +72,7 @@ public class LicenseApiController extends AbstractApiController {
 
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody, boolean isCascaded) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -89,7 +87,7 @@ public class LicenseApiController extends AbstractApiController {
 
         try {
             if (isCascaded) {
-                logger.trace("---adding entities in a cascaded way");
+                LOGGER.trace("---adding entities in a cascaded way");
                 LicenseService licenseService = new LicenseService(routingContext.vertx());
                 //licenseService.setAutoCommit(false);
                 Single<List<JsonObject>> insertAllCascadedResult = licenseService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
@@ -99,15 +97,14 @@ public class LicenseApiController extends AbstractApiController {
                 addEntities(routingContext, LicenseService.class, requestBody, jsonbColumnsList);
             }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -116,8 +113,7 @@ public class LicenseApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, LicenseService.class, requestBody, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -126,8 +122,7 @@ public class LicenseApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, LicenseService.class, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -155,13 +150,12 @@ public class LicenseApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getLicense(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, LicenseService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -170,7 +164,7 @@ public class LicenseApiController extends AbstractApiController {
     public void updateLicense(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -178,8 +172,7 @@ public class LicenseApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, LicenseService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -190,8 +183,7 @@ public class LicenseApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, LicenseService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

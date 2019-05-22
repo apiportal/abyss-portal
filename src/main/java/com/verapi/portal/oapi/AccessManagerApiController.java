@@ -37,8 +37,6 @@ import java.util.List;
 @AbyssApiController(apiSpec = "/openapi/AccessManager.yaml")
 public class AccessManagerApiController extends AbstractApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccessManagerApiController.class);
-    private static final String PARSED_PARAMETERS = "parsedParameters";
-    private static final String EXCEPTION_LOG_FORMAT = "{}\n{}";
 
     private static List<String> jsonbColumnsList = new ArrayList<>();
 
@@ -63,7 +61,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             getEntities(routingContext, AccessManagerService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -79,7 +77,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             addEntities(routingContext, AccessManagerService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -96,7 +94,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, AccessManagerService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -106,7 +104,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, AccessManagerService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -116,7 +114,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             getEntity(routingContext, AccessManagerService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -133,7 +131,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, AccessManagerService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -144,7 +142,7 @@ public class AccessManagerApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, AccessManagerService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getLocalizedMessage(), e.getStackTrace());
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

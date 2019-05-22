@@ -31,11 +31,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 @AbyssApiController(apiSpec = "/openapi/ApiApiTag.yaml")
 public class ApiApiTagApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(ApiApiTagApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiApiTagApiController.class);
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -53,8 +52,7 @@ public class ApiApiTagApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ApiApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -62,7 +60,7 @@ public class ApiApiTagApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addApiApiTags(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -70,8 +68,7 @@ public class ApiApiTagApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ApiApiTagService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -79,7 +76,7 @@ public class ApiApiTagApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateApiApiTags(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -88,8 +85,7 @@ public class ApiApiTagApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ApiApiTagService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -99,22 +95,17 @@ public class ApiApiTagApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ApiApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiApiTag(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
-
         try {
             getEntity(routingContext, ApiApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -123,7 +114,7 @@ public class ApiApiTagApiController extends AbstractApiController {
     public void updateApiApiTag(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -131,29 +122,23 @@ public class ApiApiTagApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ApiApiTagService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void deleteApiApiTag(RoutingContext routingContext) {
-
         try {
             deleteEntity(routingContext, ApiApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiTagsByApi(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiTagService.class,
@@ -162,17 +147,13 @@ public class ApiApiTagApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiTagService.SQL_LIST_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiTagsOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiTagService.class,
@@ -181,17 +162,13 @@ public class ApiApiTagApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiTagService.SQL_LIST_SUBJECT_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getBusinessApiTagsOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiTagService.class,
@@ -200,17 +177,13 @@ public class ApiApiTagApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiTagService.SQL_LIST_SUBJECT_BUSINESS_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getProxyApiTagsOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiTagService.class,
@@ -219,17 +192,13 @@ public class ApiApiTagApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiTagService.SQL_LIST_SUBJECT_PROXY_API_TAGS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void getApiApiTagByApiAndTag(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiApiTagService.class,
@@ -238,8 +207,7 @@ public class ApiApiTagApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiTagService.SQL_API_API_TAGS_BY_API_AND_TAG)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")).add(routingContext.pathParam("taguuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

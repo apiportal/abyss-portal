@@ -17,8 +17,6 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.abyss.exception.InternalServerError500Exception;
-//import com.verapi.abyss.common.api.AbyssApiController;
-//import com.verapi.abyss.common.api.AbyssApiOperationHandler;
 import com.verapi.portal.service.idam.LifecycleService;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.reactivex.core.Vertx;
@@ -28,11 +26,12 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+//import com.verapi.abyss.common.api.AbyssApiController;
+//import com.verapi.abyss.common.api.AbyssApiOperationHandler;
 
 @AbyssApiController(apiSpec = "/openapi/Lifecycle.yaml")
 public class LifecycleApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(LifecycleApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LifecycleApiController.class);
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -49,12 +48,11 @@ public class LifecycleApiController extends AbstractApiController {
     public void updateLifecycle(RoutingContext routingContext) {
 
         try {
-            logger.trace("updateLifecycle invoked");
+            LOGGER.trace("updateLifecycle invoked");
             LifecycleService lifecycleService = new LifecycleService(vertx);
             subscribeAndResponseJsonObject(routingContext, lifecycleService.updateLifecycle(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

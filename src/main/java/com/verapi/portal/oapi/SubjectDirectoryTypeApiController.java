@@ -16,8 +16,8 @@
 
 package com.verapi.portal.oapi;
 
-import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.common.Constants;
+import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.portal.service.idam.SubjectDirectoryTypeService;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -32,12 +32,11 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/SubjectDirectoryType.yaml")
 public class SubjectDirectoryTypeApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(SubjectDirectoryTypeApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDirectoryTypeApiController.class);
 
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.JSONB_COLUMN_SUBJECT_DIRECTORY_TYPE_ATTRIBUTE_TEMPLATE);
@@ -59,8 +58,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectDirectoryTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -76,8 +74,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectDirectoryTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -94,8 +91,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectDirectoryTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -105,8 +101,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectDirectoryTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -119,8 +114,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         try {
             getEntity(routingContext, SubjectDirectoryTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -137,8 +131,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, SubjectDirectoryTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -149,8 +142,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, SubjectDirectoryTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

@@ -32,11 +32,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 @AbyssApiController(apiSpec = "/openapi/SubjectMembership.yaml")
 public class SubjectMembershipApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(SubjectMembershipApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectMembershipApiController.class);
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -54,8 +53,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -63,7 +61,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addSubjectMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -71,8 +69,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -80,7 +77,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateSubjectMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -89,8 +86,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -100,8 +96,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -109,13 +104,12 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectMembership(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -124,7 +118,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     public void updateSubjectMembership(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -132,8 +126,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -144,8 +137,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -153,7 +145,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getMembershipsOfSubject(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -163,8 +155,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.FILTER_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -172,7 +163,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getMembershipsOfGroup(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -182,8 +173,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.FILTER_BY_GROUP)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -197,8 +187,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.SQL_DELETE_GROUPS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -206,7 +195,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getMembershipsUnderDirectory(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -216,8 +205,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.FILTER_BY_DIRECTORY)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -229,8 +217,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_GROUP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -238,7 +225,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addUserGroupMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -251,8 +238,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -260,17 +246,16 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateUserGroupMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, SubjectMembershipService.class, requestBody,null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_GROUP_MEMBERSHIP));
+            updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_GROUP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -280,8 +265,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_GROUP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -294,8 +278,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -303,7 +286,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addUserRoleMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -316,8 +299,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -325,7 +307,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateUserRoleMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -334,8 +316,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -345,8 +326,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -359,8 +339,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_GROUP_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -368,7 +347,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addGroupRoleMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -378,11 +357,10 @@ public class SubjectMembershipApiController extends AbstractApiController {
             ((JsonObject) requestItem).put("subjectgrouptypeid", Constants.SUBJECT_TYPE_ROLE);
         });
 
-         try {
+        try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -390,17 +368,16 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateGroupRoleMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, SubjectMembershipService.class, requestBody,null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_GROUP_ROLE_MEMBERSHIP));
+            updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_GROUP_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -410,8 +387,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_GROUP_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -424,8 +400,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_APP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -433,7 +408,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addUserAppMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -446,8 +421,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -455,17 +429,16 @@ public class SubjectMembershipApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateUserAppMemberships(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
         //now it is time to update entities
         try {
-            updateEntities(routingContext, SubjectMembershipService.class, requestBody,null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
+            updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -475,12 +448,10 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
-
 
 
 }

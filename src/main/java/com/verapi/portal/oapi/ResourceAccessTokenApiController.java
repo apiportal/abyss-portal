@@ -31,11 +31,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 @AbyssApiController(apiSpec = "/openapi/ResourceAccessToken.yaml")
 public class ResourceAccessTokenApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(ResourceAccessTokenApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceAccessTokenApiController.class);
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -53,8 +52,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ResourceAccessTokenService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -62,7 +60,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addResourceAccessTokens(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -70,8 +68,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ResourceAccessTokenService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -79,7 +76,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateResourceAccessTokens(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -88,8 +85,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ResourceAccessTokenService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -99,8 +95,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ResourceAccessTokenService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -108,13 +103,12 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getResourceAccessToken(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, ResourceAccessTokenService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -123,7 +117,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
     public void updateResourceAccessToken(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -131,8 +125,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ResourceAccessTokenService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -143,8 +136,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, ResourceAccessTokenService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -152,7 +144,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getResourceAccessTokenBySubjectPermission(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntities(routingContext,
@@ -163,8 +155,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

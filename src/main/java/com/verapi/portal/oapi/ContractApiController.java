@@ -305,9 +305,8 @@ public class ContractApiController extends AbstractApiController {
 
         //Change request to make it suitable for subject permission
         JsonObject appendRequestBody = new JsonObject()
-                        .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                        .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME))
-        ;
+                .put("organizationid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                .put("crudsubjectid", (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME));
 
         requestBody.forEach(requestItem -> {
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {

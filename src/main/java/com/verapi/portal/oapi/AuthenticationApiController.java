@@ -28,11 +28,9 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-
 @AbyssApiController(apiSpec = "/openapi/Authentication.yaml")
 public class AuthenticationApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationApiController.class);
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -48,12 +46,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void login(RoutingContext routingContext) {
         try {
-            logger.trace("login invoked");
+            LOGGER.trace("login invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.login(routingContext, authProvider), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -61,12 +58,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void logout(RoutingContext routingContext) {
         try {
-            logger.trace("logout invoked");
+            LOGGER.trace("logout invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.logout(routingContext), HttpResponseStatus.OK.code(), false);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -74,12 +70,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void signup(RoutingContext routingContext) {
         try {
-            logger.trace("signup invoked");
+            LOGGER.trace("signup invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.signup(routingContext, authProvider), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -87,12 +82,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void forgotPassword(RoutingContext routingContext) {
         try {
-            logger.trace("forgotPassword invoked");
+            LOGGER.trace("forgotPassword invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.forgotPassword(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -100,12 +94,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void checkResetPasswordToken(RoutingContext routingContext) {
         try {
-            logger.trace("checkResetPasswordToken invoked");
+            LOGGER.trace("checkResetPasswordToken invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.checkResetPasswordToken(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -113,12 +106,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void resetPassword(RoutingContext routingContext) {
         try {
-            logger.trace("resetPassword invoked");
+            LOGGER.trace("resetPassword invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.resetPassword(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -126,12 +118,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void setCurrentOrganization(RoutingContext routingContext) {
         try {
-            logger.trace("setCurrentOrganization invoked");
+            LOGGER.trace("setCurrentOrganization invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.setCurrentOrganization(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -139,12 +130,11 @@ public class AuthenticationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void inviteUser(RoutingContext routingContext) {
         try {
-            logger.trace("inviteUser invoked");
+            LOGGER.trace("inviteUser invoked");
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.inviteUser(routingContext, authProvider), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -153,10 +143,10 @@ public class AuthenticationApiController extends AbstractApiController {
     //@AbyssApiOperationHandler //TODO: enable and define inside YAML
     public void validateToken(RoutingContext routingContext) {
         try {
-            logger.trace("validateToken invoked");
+            LOGGER.trace("validateToken invoked");
 
             // Get the parsed parameters
-            RequestParameters requestParameters = routingContext.get("parsedParameters");
+            RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
             // We get an user JSON object validated by Vert.x Open API validator
             JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -164,8 +154,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.rxValidateAccessToken(requestBody.getString("token")), HttpResponseStatus.OK.code(), true);
         } catch (Exception e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

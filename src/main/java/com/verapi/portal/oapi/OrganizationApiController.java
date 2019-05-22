@@ -35,11 +35,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 @AbyssApiController(apiSpec = "/openapi/Organization.yaml")
 public class OrganizationApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(OrganizationApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationApiController.class);
 
     /**
      * API verticle creates new API Controller instance via this constructor
@@ -57,8 +56,7 @@ public class OrganizationApiController extends AbstractApiController {
         try {
             getEntities(routingContext, OrganizationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -74,8 +72,7 @@ public class OrganizationApiController extends AbstractApiController {
         try {
             addEntities(routingContext, OrganizationService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -92,8 +89,7 @@ public class OrganizationApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, OrganizationService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -103,8 +99,7 @@ public class OrganizationApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, OrganizationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -117,8 +112,7 @@ public class OrganizationApiController extends AbstractApiController {
         try {
             getEntity(routingContext, OrganizationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -135,8 +129,7 @@ public class OrganizationApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, OrganizationService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -147,8 +140,7 @@ public class OrganizationApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, OrganizationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -156,8 +148,8 @@ public class OrganizationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getOrganizationImage(RoutingContext routingContext) {
 
-        if (routingContext.pathParam("uuid")==null || routingContext.pathParam("uuid").isEmpty()) {
-            logger.error("getOrganizationImage invoked - uuid null or empty");
+        if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
+            LOGGER.error("getOrganizationImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getOrganizationImage uuid null or empty");
         }
 

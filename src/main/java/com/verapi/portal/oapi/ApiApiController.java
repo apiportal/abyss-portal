@@ -42,13 +42,16 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/Api.yaml")
 public class ApiApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(ApiApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiApiController.class);
+    private static final String IMAGE = "image";
+    private static final String SUBJECTID = "subjectid";
+    private static final String ISPROXYAPI = "isproxyapi";
+
 
     private static List<String> jsonbColumnsList = new ArrayList<>();
 
@@ -75,24 +78,22 @@ public class ApiApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ApiService.class, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
 
-        requestBody.forEach(requestItem -> {
-            //insert default avatar image TODO: later use request base
-            if ((!((JsonObject) requestItem).containsKey("image")) ||
-                    (((JsonObject) requestItem).getValue("image") == null) ||
-                    (((JsonObject) requestItem).getValue("image") == ""))
+        requestBody.forEach((Object requestItem) -> {
+            if ((!((JsonObject) requestItem).containsKey(IMAGE)) ||
+                    (((JsonObject) requestItem).getValue(IMAGE) == null) ||
+                    (((JsonObject) requestItem).getValue(IMAGE) == "")) {
                 try {
                     InputStream in = getClass().getResourceAsStream(Constants.RESOURCE_DEFAULT_API_AVATAR);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
@@ -102,11 +103,12 @@ public class ApiApiController extends AbstractApiController {
                         sb.append(line).append("\n");
                     }
                     in.close();
-                    ((JsonObject) requestItem).put("image", "data:image/jpeg;base64," + new String(Base64.getEncoder().encode(sb.toString().getBytes()), StandardCharsets.UTF_8));
+                    ((JsonObject) requestItem).put(IMAGE, "data:image/jpeg;base64," + new String(Base64.getEncoder().encode(sb.toString().getBytes(StandardCharsets.UTF_8))
+                            , StandardCharsets.UTF_8));
                 } catch (IOException e) {
-                    logger.error(e.getLocalizedMessage());
-                    logger.error(Arrays.toString(e.getStackTrace()));
+                    LOGGER.error(EXCEPTION_LOG_FORMAT, e);
                 }
+            }
 
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
                 appendRequestBody.forEach(entry -> ((JsonObject) requestItem).put(entry.getKey(), entry.getValue()));
@@ -116,15 +118,14 @@ public class ApiApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ApiService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -133,8 +134,7 @@ public class ApiApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ApiService.class, requestBody, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -143,8 +143,7 @@ public class ApiApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ApiService.class, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -156,15 +155,14 @@ public class ApiApiController extends AbstractApiController {
                     jsonbColumnsList,
                     apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     void updateEntity(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -172,8 +170,7 @@ public class ApiApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ApiService.class, requestBody, jsonbColumnsList, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -182,8 +179,7 @@ public class ApiApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, ApiService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -233,15 +229,14 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void addApisOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam("uuid")));
     }
 
     @AbyssApiOperationHandler
@@ -265,7 +260,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addBusinessApis(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("isproxyapi", Boolean.FALSE));
+        addEntities(routingContext, new JsonObject().put(ISPROXYAPI, Boolean.FALSE));
     }
 
     @AbyssApiOperationHandler
@@ -302,7 +297,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addApiProxies(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("isproxyapi", Boolean.TRUE));
+        addEntities(routingContext, new JsonObject().put(ISPROXYAPI, Boolean.TRUE));
     }
 
     @AbyssApiOperationHandler
@@ -343,15 +338,14 @@ public class ApiApiController extends AbstractApiController {
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void addBusinessApisOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", Boolean.FALSE));
+        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam("uuid")).put(ISPROXYAPI, Boolean.FALSE));
     }
 
     @AbyssApiOperationHandler
@@ -381,15 +375,14 @@ public class ApiApiController extends AbstractApiController {
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     @AbyssApiOperationHandler
     public void addApiProxiesOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")).put("isproxyapi", Boolean.TRUE));
+        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam("uuid")).put(ISPROXYAPI, Boolean.TRUE));
     }
 
     @AbyssApiOperationHandler
@@ -418,8 +411,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -434,8 +426,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiTagService.SQL_BUSINESS_API_AGGREGATE_COUNT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -453,8 +444,7 @@ public class ApiApiController extends AbstractApiController {
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("tag"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -472,8 +462,7 @@ public class ApiApiController extends AbstractApiController {
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("category"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -491,8 +480,7 @@ public class ApiApiController extends AbstractApiController {
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("group"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -510,8 +498,7 @@ public class ApiApiController extends AbstractApiController {
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("tag"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -529,8 +516,7 @@ public class ApiApiController extends AbstractApiController {
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("category"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -548,8 +534,7 @@ public class ApiApiController extends AbstractApiController {
                                     .add(routingContext.pathParam("uuid"))
                                     .add(routingContext.pathParam("group"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -565,8 +550,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -582,8 +566,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -599,8 +582,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQueryParams(new JsonArray()
                                     .add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -615,8 +597,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_POLICY)
                             .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -625,19 +606,20 @@ public class ApiApiController extends AbstractApiController {
     public void getApiImage(RoutingContext routingContext) {
 
         if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
-            logger.error("getApiImage invoked - uuid null or empty");
+            LOGGER.error("getApiImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getApiImage uuid null or empty");
         }
 
         ApiService apiService = new ApiService(vertx);
-        Single<ResultSet> resultSetSingle = apiService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
+        Single<ResultSet> resultSetSingle = apiService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME)
+                , routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
                 .flatMap(jdbcClient -> apiService.findAll(
                         new ApiFilterQuery()
                                 .setFilterQuery(ApiService.SQL_GET_IMAGE_BY_UUID)
                                 .setFilterQueryParams(new JsonArray()
                                         .add(routingContext.pathParam("uuid"))))
                 );
-        subscribeForImage(routingContext, resultSetSingle, "getApiImage", "image");
+        subscribeForImage(routingContext, resultSetSingle, "getApiImage", IMAGE);
     }
 
     @AbyssApiOperationHandler
@@ -649,8 +631,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_PROXIES_WITH_RESOURCES_FOR_EXPLORE));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

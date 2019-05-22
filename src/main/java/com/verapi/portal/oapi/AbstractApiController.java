@@ -80,6 +80,8 @@ import static com.verapi.portal.common.Util.nnvl;
 
 public abstract class AbstractApiController implements IApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiController.class);
+    protected static final String PARSED_PARAMETERS = "parsedParameters";
+    protected static final String EXCEPTION_LOG_FORMAT = "{}";
     private static final String OPEN_API_OPERATION = "openApiOperation";
     private static final String ABYSS_COOKIE_AUTH_SECURITY_HANDLER = "abyssCookieAuthSecurityHandler";
     private static final String ABYSS_HTTP_BASIC_AUTH_SECURITY_HANDLER = "abyssHttpBasicAuthSecurityHandler";
@@ -133,6 +135,18 @@ public abstract class AbstractApiController implements IApiController {
                 .setStatusCode(HttpResponseStatus.OK.code())
                 .write(Buffer.buffer(imageByte))
                 .end();
+    }
+
+    private static void logHandler(RoutingContext routingContext) {
+/*
+        routingContext.request().bodyHandler(event -> {
+        LOGGER.warn("Request BODY handler logging: {}", event);
+        });
+        routingContext.request().endHandler(event -> {
+            LOGGER.warn("Request END handler logging: {}", event);
+        });
+*/
+
     }
 
     private void failureHandler(RoutingContext routingContext) {
@@ -555,31 +569,33 @@ public abstract class AbstractApiController implements IApiController {
             }
         }
 
-        LOGGER.trace("abyssPathAuthorizationHandler invoked,\n" +
-                        "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
-                        "[{}]\n[{}]\n[{}]\n[{}]\n[{}]\n\n" +
-                        "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
-                        "[{}]\n[{}]\n[{}]\n",
-                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME),  //user.uuid
-                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME),
-                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME),    //organization.uuid
-                routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME),
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("abyssPathAuthorizationHandler invoked,\n" +
+                            "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
+                            "[{}]\n[{}]\n[{}]\n[{}]\n[{}]\n\n" +
+                            "[{}]\n[{}]\n[{}]\n[{}]\n\n" +
+                            "[{}]\n[{}]\n[{}]\n",
+                    routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME),  //user.uuid
+                    routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_NAME_SESSION_VARIABLE_NAME),
+                    routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME),    //organization.uuid
+                    routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_NAME_COOKIE_NAME),
 
-                //Path
-                routingContext.normalisedPath(),
-                routingContext.currentRoute().getPath(),
-                routingContext.request().path(),
-                routingContext.request().absoluteURI(),
-                routingContext.request().method().name(),   //Action
+                    //Path
+                    routingContext.normalisedPath(),
+                    routingContext.currentRoute().getPath(),
+                    routingContext.request().path(),
+                    routingContext.request().absoluteURI(),
+                    routingContext.request().method().name(),   //Action
 
-                routingContext.request().host(),
-                routingContext.request().remoteAddress().host(),
-                routingContext.request().remoteAddress().port(),
-                routingContext.request().remoteAddress().path(),
+                    routingContext.request().host(),
+                    routingContext.request().remoteAddress().host(),
+                    routingContext.request().remoteAddress().port(),
+                    routingContext.request().remoteAddress().path(),
 
-                routingContext.data().keySet(),
-                routingContext.session().data().keySet(),
-                ((Operation) routingContext.data().get(OPEN_API_OPERATION)).getOperationId());  //Operation
+                    routingContext.data().keySet(),
+                    routingContext.session().data().keySet(),
+                    ((Operation) routingContext.data().get(OPEN_API_OPERATION)).getOperationId());  //Operation
+        }
 
 
         //TODO: TEST
@@ -1043,10 +1059,6 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponse(routingContext, updateAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }
 
-    <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        deleteEntities(routingContext, clazz, new ApiFilterQuery());
-    }
-
 /*
     <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
@@ -1055,6 +1067,10 @@ public abstract class AbstractApiController implements IApiController {
         subscribeAndResponseStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
     }
 */
+
+    <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        deleteEntities(routingContext, clazz, new ApiFilterQuery());
+    }
 
     <T extends IService> void deleteEntities(RoutingContext routingContext, Class<T> clazz, ApiFilterQuery apiFilterQuery) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
@@ -1116,18 +1132,6 @@ public abstract class AbstractApiController implements IApiController {
                     }
                 },
                 (Throwable throwable) -> processException(routingContext, throwable));
-    }
-
-    private static void logHandler(RoutingContext routingContext) {
-/*
-        routingContext.request().bodyHandler(event -> {
-        LOGGER.warn("Request BODY handler logging: {}", event);
-        });
-        routingContext.request().endHandler(event -> {
-            LOGGER.warn("Request END handler logging: {}", event);
-        });
-*/
-
     }
     /*
     <T extends IService> void execServiceMethod(RoutingContext routingContext, Class<T> clazz, List<String> jsonColumns, Function<RoutingContext, Single<ResultSet>> func, String method) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

@@ -18,6 +18,5 @@
  * Domain classes used to produce the OpenAPI API Controller Layer for the RESTful API controllers.
  * <p>
  * These classes contain all Business Logic RESTful APIs.
- *
  */
 package com.verapi.portal.oapi;

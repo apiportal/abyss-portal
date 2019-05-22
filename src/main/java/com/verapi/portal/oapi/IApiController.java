@@ -17,7 +17,6 @@
 package com.verapi.portal.oapi;
 
 import com.verapi.abyss.common.Constants;
-import io.vertx.reactivex.ext.web.RoutingContext;
 
 public interface IApiController {
     String mountPoint = Constants.ABYSS_ROOT + "/oapi";

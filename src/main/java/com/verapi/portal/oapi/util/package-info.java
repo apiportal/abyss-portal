@@ -18,6 +18,5 @@
  * Domain classes used to produce the Utility Service Layer for the RESTful API controllers.
  * <p>
  * These classes contain Swagger, OpenAPI, yaml file routines.
- *
  */
 package com.verapi.portal.oapi.util;

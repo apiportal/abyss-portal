@@ -33,12 +33,11 @@ import org.slf4j.LoggerFactory;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @AbyssApiController(apiSpec = "/openapi/Message.yaml")
 public class MessageApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(MessageApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageApiController.class);
 
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.JSONB_COLUMN_MESSAGE_RECEIVER);
@@ -61,8 +60,7 @@ public class MessageApiController extends AbstractApiController {
         try {
             getEntities(routingContext, MessageService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -70,7 +68,7 @@ public class MessageApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addMessages(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -78,8 +76,7 @@ public class MessageApiController extends AbstractApiController {
         try {
             addEntities(routingContext, MessageService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -87,7 +84,7 @@ public class MessageApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateMessages(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -96,8 +93,7 @@ public class MessageApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, MessageService.class, requestBody, jsonbColumnsList); //TODO: jsonbColumnsList Lazım mı?
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -107,8 +103,7 @@ public class MessageApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, MessageService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -116,13 +111,12 @@ public class MessageApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getMessage(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, MessageService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -131,7 +125,7 @@ public class MessageApiController extends AbstractApiController {
     public void updateMessage(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -139,8 +133,7 @@ public class MessageApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, MessageService.class, requestBody, jsonbColumnsList); //TODO: jsonbColumnsList Lazım mı?
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -151,8 +144,7 @@ public class MessageApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, MessageService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -163,12 +155,11 @@ public class MessageApiController extends AbstractApiController {
             String userUuid = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
             getEntities(routingContext, MessageService.class, jsonbColumnsList,
                     new ApiFilterQuery()
-                        .setFilterQuery(MessageService.SQL_FIND_BY_SUBJECT)
-                        //.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
-                        .setFilterQueryParams(new JsonArray().add(userUuid))); //Get uuid from session
+                            .setFilterQuery(MessageService.SQL_FIND_BY_SUBJECT)
+                            //.setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(userUuid))); //Get uuid from session
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

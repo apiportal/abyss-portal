@@ -44,14 +44,13 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
 @AbyssApiController(apiSpec = "/openapi/Subject.yaml")
 public class SubjectApiController extends AbstractApiController {
-    private static final Logger logger = LoggerFactory.getLogger(SubjectApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectApiController.class);
 
     private static List<String> jsonbColumnsList = new ArrayList<String>() {{
         add(Constants.NESTED_COLUMN_USER_GROUPS);
@@ -87,8 +86,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectService.class, jsonColumns, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -100,7 +98,7 @@ public class SubjectApiController extends AbstractApiController {
 
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody, boolean isCascaded) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -119,7 +117,7 @@ public class SubjectApiController extends AbstractApiController {
                     (((JsonObject) requestItem).getValue("picture") == null) ||
                     (((JsonObject) requestItem).getValue("picture") == ""))
                 try {
-                    logger.trace("addEntities - adding default avatar");
+                    LOGGER.trace("addEntities - adding default avatar");
                     InputStream in = getClass().getResourceAsStream(Constants.RESOURCE_DEFAULT_SUBJECT_AVATAR);
                     BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
                     StringBuilder sb = new StringBuilder();
@@ -130,8 +128,7 @@ public class SubjectApiController extends AbstractApiController {
                     in.close();
                     ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + new String(Base64.getEncoder().encode(sb.toString().getBytes()), StandardCharsets.UTF_8));
                 } catch (IOException e) {
-                    logger.error(e.getLocalizedMessage());
-                    logger.error(Arrays.toString(e.getStackTrace()));
+                    LOGGER.error(EXCEPTION_LOG_FORMAT, e);
                 }
 
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
@@ -145,7 +142,7 @@ public class SubjectApiController extends AbstractApiController {
         //now it is time to add entities
         try {
             if (isCascaded) {
-                logger.trace("---adding entities in a cascaded way");
+                LOGGER.trace("---adding entities in a cascaded way");
                 SubjectService subjectService = new SubjectService(routingContext.vertx());
                 //subjectService.setAutoCommit(false);
                 Single<List<JsonObject>> insertAllCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
@@ -155,15 +152,14 @@ public class SubjectApiController extends AbstractApiController {
                 addEntities(routingContext, SubjectService.class, requestBody);
             }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -172,8 +168,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectService.class, requestBody, null, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -182,8 +177,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectService.class, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -192,8 +186,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             execServiceMethod(routingContext, SubjectService.class, null, method);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -217,7 +210,7 @@ public class SubjectApiController extends AbstractApiController {
         ValidationReport report = validator.validateRequest(requestBuilder.build());
         List<ValidationReport.Message> messages = report.getMessages();
         if (!messages.isEmpty()) {
-            logger.error(messages.toString());
+            LOGGER.error(messages.toString());
             throwApiException(routingContext, UnProcessableEntity422Exception.class, HttpResponseStatus.UNPROCESSABLE_ENTITY.reasonPhrase(), messages.toString());
             return;
         }
@@ -240,20 +233,19 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubject(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     void getSubject(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext,
@@ -261,17 +253,16 @@ public class SubjectApiController extends AbstractApiController {
                     jsonbColumnsList,
                     apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
 
     void updateEntityCascaded(RoutingContext routingContext, JsonObject appendRequestBody) {
-        logger.trace("---updating entities in a cascaded way");
+        LOGGER.trace("---updating entities in a cascaded way");
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -304,7 +295,7 @@ public class SubjectApiController extends AbstractApiController {
     public void updateSubject(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -312,8 +303,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, SubjectService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -324,8 +314,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            logger.error(e.getLocalizedMessage());
-            logger.error(Arrays.toString(e.getStackTrace()));
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -477,7 +466,7 @@ public class SubjectApiController extends AbstractApiController {
     public void getSubjectImage(RoutingContext routingContext) {
 
         if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
-            logger.error("getSubjectImage invoked - uuid null or empty");
+            LOGGER.error("getSubjectImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getSubjectImage uuid null or empty");
         }
 
