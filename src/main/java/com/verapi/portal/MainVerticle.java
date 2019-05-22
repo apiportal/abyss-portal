@@ -76,6 +76,7 @@ public class MainVerticle extends AbstractVerticle {
 
     private JDBCAuth auth;
 
+    @SuppressWarnings("findbugs:RV_RETURN_VALUE_IGNORED")
     @Override
     public void start(Future<Void> startFuture) {
         LOGGER.info("MainVerticle is starting");
