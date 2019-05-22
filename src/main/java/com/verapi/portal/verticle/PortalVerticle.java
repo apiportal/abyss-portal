@@ -18,9 +18,9 @@ package com.verapi.portal.verticle;
 
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
+import com.verapi.portal.controller.AbstractPortalController;
 import com.verapi.portal.controller.AbyssController;
 import com.verapi.portal.controller.IController;
-import com.verapi.portal.controller.AbstractPortalController;
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.matchprocessor.ClassAnnotationMatchProcessor;
 import io.vertx.core.Future;
@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 public class PortalVerticle extends AbstractPortalVerticle {
 
@@ -60,22 +59,23 @@ public class PortalVerticle extends AbstractPortalVerticle {
                 .matchClassesWithAnnotation(AbyssController.class, new ClassAnnotationMatchProcessor() {
                     @Override
                     public void processMatch(Class<?> classWithAnnotation) {
-                        LOGGER.trace("AbyssController annotated class found and mounted : " + classWithAnnotation);
+                        LOGGER.trace("AbyssController annotated class found and mounted : {}", classWithAnnotation);
                         IController<AbstractPortalController> requestHandlerInstance = null;
                         try {
                             requestHandlerInstance = (IController<AbstractPortalController>) classWithAnnotation
                                     .getConstructor(JDBCAuth.class, JDBCClient.class)
                                     .newInstance(jdbcAuth, jdbcClient);
-                            if (!classWithAnnotation.getAnnotation(AbyssController.class).isPublic())
+                            if (!classWithAnnotation.getAnnotation(AbyssController.class).isPublic()) {
                                 verticleRouter.route("/" + classWithAnnotation.getAnnotation(AbyssController.class).routePathGET())
                                         .handler(authHandler).failureHandler(PortalVerticle.super::failureHandler);
+                            }
                             verticleRouter.route(HttpMethod.GET, "/" + classWithAnnotation.getAnnotation(AbyssController.class).routePathGET())
                                     .handler(requestHandlerInstance::defaultGetHandler).failureHandler(PortalVerticle.super::failureHandler);
                             verticleRouter.route(HttpMethod.POST, "/" + classWithAnnotation.getAnnotation(AbyssController.class).routePathPOST())
                                     .handler(requestHandlerInstance).failureHandler(PortalVerticle.super::failureHandler);
 
                         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                            LOGGER.error("PortalVerticle.mountControllerRouters() exception : " + e.getLocalizedMessage() + Arrays.toString(e.getStackTrace()));
+                            LOGGER.error("PortalVerticle.mountControllerRouters() exception : {}\n{}", e.getLocalizedMessage(), e.getStackTrace());
                         }
                     }
                 })

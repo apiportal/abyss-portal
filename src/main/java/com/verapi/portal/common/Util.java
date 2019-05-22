@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -77,9 +76,10 @@ public final class Util {
 
     public static String encodeFileToBase64Binary(File file) throws IOException {
         byte[] bytes;
-        try (FileInputStream fileInputStreamReader = new FileInputStream(file)) {
+
+        try (InputStream is = java.nio.file.Files.newInputStream(file.toPath())) {
             bytes = new byte[(int) file.length()];
-            int read = fileInputStreamReader.read(bytes);
+            int read = is.read(bytes);
             LOGGER.trace("encodeFileToBase64Binary read {} bytes", read);
         }
         return new String(Base64.getEncoder().encode(bytes), StandardCharsets.UTF_8);
@@ -93,9 +93,9 @@ public final class Util {
 
     public static JsonObject loadYamlFile(File yamlFileName) throws IOException {
         Map<String, Object> map;
-        try (InputStream inputStream = new FileInputStream(yamlFileName)) {
+        try (InputStream is = java.nio.file.Files.newInputStream(yamlFileName.toPath())) {
             Yaml yaml = new Yaml();
-            map = yaml.load(inputStream);
+            map = yaml.load(is);
             return new JsonObject(map);
         }
     }

@@ -44,7 +44,7 @@ public final class AbyssServiceDiscovery implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (instance != null) {
             instance.getServiceDiscovery().close();
         }

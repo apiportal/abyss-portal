@@ -46,7 +46,6 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
     private Integer subjectId;
     private String subjectUUID;
     private String email;
-    private String displayName;
     private String authToken;
 
     public ForgotPasswordPortalController(JDBCAuth authProvider, JDBCClient jdbcClient) {
@@ -94,7 +93,7 @@ public class ForgotPasswordPortalController extends AbstractPortalController {
                                     subjectId = row.getInteger("id");
                                     subjectUUID = row.getString("uuid");
                                     email = row.getString("email");
-                                    displayName = row.getString("display_name");
+                                    String displayName = row.getString("display_name");
                                     LOGGER.info("Activated account found:[{}({})]. Email:[{}] Display Name:[{}] Reset password token is going to be created..."
                                             , subjectId, subjectUUID, email, displayName);
 

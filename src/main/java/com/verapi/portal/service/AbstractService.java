@@ -172,7 +172,7 @@ public abstract class AbstractService<T> implements IService<T> {
             if (result.getResultSet() != null) {
                 LOGGER.trace("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet {}", result.getResultSet().toJson().encodePrettily());
             } else {
-                LOGGER.info("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet is null");
+                LOGGER.trace("evaluateCompositeResultAndReturnRecordStatus>> insert ResultSet is null");
             }
 
             if (result.getResultSet() != null && result.getResultSet().getNumRows() > 0) {

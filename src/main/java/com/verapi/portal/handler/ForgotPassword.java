@@ -54,7 +54,6 @@ public class ForgotPassword extends AbstractPortalHandler implements Handler<Rou
 
     private final JDBCAuth authProvider;
 
-    private Integer subjectId;
     private String email;
 
     private String authToken;
@@ -96,7 +95,7 @@ public class ForgotPassword extends AbstractPortalHandler implements Handler<Rou
                                     LOGGER.info("account connected to username is NOT activated");
                                     return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                                 } else {
-                                    subjectId = resultSet.getRows(true).get(0).getInteger("id");
+                                    Integer subjectId = resultSet.getRows(true).get(0).getInteger("id");
                                     email = resultSet.getRows(true).get(0).getString("email");
                                     LOGGER.info("Activated account found:[{}]. Email:[{}]Reset password token is going to be created...", subjectId, email);
 

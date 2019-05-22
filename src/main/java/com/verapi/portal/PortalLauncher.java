@@ -43,9 +43,10 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -57,13 +58,13 @@ import java.util.concurrent.TimeoutException;
 public class PortalLauncher extends VertxCommandLauncher implements VertxLifecycleHooks {
 
     private static final int SCAN_PERIOD = 10000;
-    private Logger LOGGER = LoggerFactory.getLogger(PortalLauncher.class);
+    private Logger logger = LoggerFactory.getLogger(PortalLauncher.class);
 
     public static void main(String[] args) {
 
         //enforce SLF4J logging set
-        if (null == System.getProperty("vertx.LOGGER-delegate-factory-class-name")) {
-            System.setProperty("vertx.LOGGER-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
+        if (null == System.getProperty("vertx.logger-delegate-factory-class-name")) {
+            System.setProperty("vertx.logger-delegate-factory-class-name", io.vertx.core.logging.SLF4JLogDelegateFactory.class.getCanonicalName());
         }
         try {
             System.setProperty("abyss-jar.name",
@@ -103,11 +104,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     private static String getProperty(String propertyName) throws IOException {
 
-        try (InputStream input = new FileInputStream("abyss-portal-config.properties")) {
+        final Path path = Paths.get("abyss-portal-config.properties");
+        try (InputStream is = java.nio.file.Files.newInputStream(path)) {
 
             // load a properties file
             Properties prop = new Properties();
-            prop.load(input);
+            prop.load(is);
 
             // get the property value and print it out
             return prop.getProperty(propertyName);
@@ -129,15 +131,6 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     @Override
     public void beforeStartingVertx(VertxOptions vertxOptions) {
         vertxOptions.setHAEnabled(true);
-/*
-        vertxOptions.setMetricsOptions(new DropwizardMetricsOptions()
-                .setEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_ENABLED, true))
-                .setJmxEnabled(Config.getInstance().getConfigJsonObject().getBoolean(Constants.METRICS_JMX_ENABLED, true))
-                .setRegistryName(Constants.ABYSS_PORTAL)
-                .setJmxDomain(Constants.ABYSS_PORTAL)
-                .setBaseName(Constants.ABYSS_PORTAL)
-        );
-*/
         try {
             vertxOptions.setMetricsOptions(new MicrometerMetricsOptions()
                     .setJmxMetricsOptions(new VertxJmxMetricsOptions()
@@ -153,9 +146,9 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                             .setEnabled(("true".equals(getProperty(Constants.INFLUXDB_LOGGER_ENABLED))))
                     )
                     .setEnabled(true));
-            LOGGER.trace("Vertx Metrics options set successfully, settings are {}", vertxOptions);
+            logger.trace("Vertx Metrics options set successfully, settings are {}", vertxOptions);
         } catch (IOException e) {
-            LOGGER.error("Error occured while setting Vertx Metrics options, error is {}\n{}", e.getLocalizedMessage(), e.getStackTrace());
+            logger.error("Error occured while setting Vertx Metrics options, error is {}\n{}", e.getLocalizedMessage(), e.getStackTrace());
             System.out.println("Error occured while setting Vertx Metrics options, error: " + e.getLocalizedMessage());
             System.out.println("Error occured while setting Vertx Metrics options, error stack: " + Arrays.toString(e.getStackTrace()));
 
@@ -166,11 +159,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
     @Override
     public void afterStartingVertx(Vertx vertx) {
         if (vertx.isClustered()) {
-            LOGGER.trace("running cluster mode");
+            logger.trace("running cluster mode");
         }
 
         if (vertx.isMetricsEnabled()) {
-            LOGGER.trace("Vertx metrics enabled");
+            logger.trace("Vertx metrics enabled");
         }
 
         //load abyss-portal-config.properties
@@ -181,19 +174,19 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         ConfigRetrieverOptions options = new ConfigRetrieverOptions()
                 .addStore(file)
                 .setScanPeriod(SCAN_PERIOD);
-        LOGGER.trace("ConfigRetrieverOptions set OK..");
+        logger.trace("ConfigRetrieverOptions set OK..");
         ConfigRetriever retriever = ConfigRetriever.create(vertx, options);
-        LOGGER.trace("ConfigRetriever OK..");
+        logger.trace("ConfigRetriever OK..");
         CompletableFuture<JsonObject> future = new CompletableFuture<>();
         retriever.getConfig((AsyncResult<JsonObject> ar) -> {
             if (ar.failed()) {
                 future.completeExceptionally(ar.cause());
-                LOGGER.error("afterStartingVertx ConfigRetriever getConfig failed: {} ", ar.cause().getLocalizedMessage());
+                logger.error("afterStartingVertx ConfigRetriever getConfig failed: {} ", ar.cause().getLocalizedMessage());
             } else {
                 Config.getInstance().setConfig(ar.result());
                 future.complete(ar.result());
-                LOGGER.info("afterStartingVertx ConfigRetriever getConfig OK..");
-                LOGGER.debug("Config loaded... \n {} ", Config.getInstance().getConfigJsonObject().encodePrettily());
+                logger.info("afterStartingVertx ConfigRetriever getConfig OK..");
+                logger.debug("Config loaded... \n {} ", Config.getInstance().getConfigJsonObject().encodePrettily());
                 ElasticSearchService elasticSearchService = new ElasticSearchService();
                 elasticSearchService.indexDocument("configuration-audit", "configuration",
                         new JsonObject()
@@ -206,13 +199,13 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         try {
             future.get(CONFIGFILEREADTIMEOUT, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            LOGGER.error("{}", e.getLocalizedMessage());
+            logger.error("{}", e.getLocalizedMessage());
             Thread.currentThread().interrupt();
         }
         retriever.listen((ConfigChange configChange) -> {
             Config.getInstance().setConfig(configChange.getNewConfiguration());
-            LOGGER.info("Config changed and reloaded... ");
-            LOGGER.debug("Config changed and reloaded...\n {} ", Config.getInstance().getConfigJsonObject().encodePrettily());
+            logger.info("Config changed and reloaded... ");
+            logger.debug("Config changed and reloaded...\n {} ", Config.getInstance().getConfigJsonObject().encodePrettily());
             ElasticSearchService elasticSearchService = new ElasticSearchService();
             elasticSearchService.indexDocument("configuration-audit", "configuration",
                     new JsonObject()
@@ -221,11 +214,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
                             .put("new", configChange.getNewConfiguration()));
         });
         vertx.exceptionHandler((Throwable event) -> {
-            LOGGER.error("vertx global uncaught exceptionHandler >>> {}\n{}", event.getLocalizedMessage(), Arrays.toString(event.getStackTrace()));
+            logger.error("vertx global uncaught exceptionHandler >>> {}\n{}", event.getLocalizedMessage(), Arrays.toString(event.getStackTrace()));
             try {
                 throw new RuntimeException(event);
             } catch (RuntimeException e) {
-                LOGGER.error("vertx global uncaught exceptionHandler >>> {}\n{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
+                logger.error("vertx global uncaught exceptionHandler >>> {}\n{}", e.getLocalizedMessage(), Arrays.toString(e.getStackTrace()));
             }
         });
 
@@ -240,11 +233,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         abyssVersionConfigRetriever.getConfig((AsyncResult<JsonObject> ar) -> {
             if (ar.failed()) {
                 future.completeExceptionally(ar.cause());
-                LOGGER.error("afterStartingVertx abyssVersionConfigRetriever getConfig failed {}", ar.cause().getLocalizedMessage());
+                logger.error("afterStartingVertx abyssVersionConfigRetriever getConfig failed {}", ar.cause().getLocalizedMessage());
             } else {
                 BuildProperties buildProperties = BuildProperties.getInstance().setBuildProperties(ar.result());
-                LOGGER.info("Build properties loaded");
-                LOGGER.debug("Build properties loaded\n{}", BuildProperties.getInstance().getConfigJsonObject().encodePrettily());
+                logger.info("Build properties loaded");
+                logger.debug("Build properties loaded\n{}", BuildProperties.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
 
@@ -264,11 +257,11 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         abyssVaultConfigRetriever.getConfig(ar -> {
             if (ar.failed()) {
                 future.completeExceptionally(ar.cause());
-                LOGGER.error("afterStartingVertx abyssVaultConfigRetriever getConfig failed " + ar.cause());
+                logger.error("afterStartingVertx abyssVaultConfigRetriever getConfig failed " + ar.cause());
             } else {
                 BuildProperties buildProperties = BuildProperties.getInstance().setBuildProperties(ar.result());
-                LOGGER.info("afterStartingVertx abyssVaultConfigRetriever getConfig OK..");
-                LOGGER.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
+                logger.info("afterStartingVertx abyssVaultConfigRetriever getConfig OK..");
+                logger.debug("Config loaded... " + Config.getInstance().getConfigJsonObject().encodePrettily());
             }
         });
         */
@@ -289,12 +282,12 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         consulConfigRetriever.getConfig(ar -> {
             if (ar.failed()) {
                 future.completeExceptionally(ar.cause());
-                LOGGER.error("afterStartingVertx consulConfigRetriever getConfig failed " + ar.cause());
+                logger.error("afterStartingVertx consulConfigRetriever getConfig failed " + ar.cause());
             } else {
                 Config.getInstance().setConfig(ar.result());
-                LOGGER.warn("consulConfigRetriever loaded\n{}", ar.result().encodePrettily());
-                LOGGER.warn("consulConfigRetriever loaded\n{}", ar.result());
-                LOGGER.warn("consulConfigRetriever loaded\n{}", ar.result().getString("hostProtocol"));
+                logger.warn("consulConfigRetriever loaded\n{}", ar.result().encodePrettily());
+                logger.warn("consulConfigRetriever loaded\n{}", ar.result());
+                logger.warn("consulConfigRetriever loaded\n{}", ar.result().getString("hostProtocol"));
             }
         });
 */
@@ -305,7 +298,7 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
         List<ch.qos.logback.classic.Logger> loggerList = loggerContext.getLoggerList();
         loggerList.forEach((ch.qos.logback.classic.Logger tmpLogger) -> {
             if (tmpLogger.getName().startsWith("com.verapi") || tmpLogger.getName().startsWith("io.vertx")) {
-                LOGGER.trace("setting log level [{}] for the class: {}"
+                logger.trace("setting log level [{}] for the class: {}"
                         , Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL)
                         , tmpLogger.getName());
                 tmpLogger.setLevel(Level.toLevel(Config.getInstance().getConfigJsonObject().getString(Constants.LOG_LEVEL)));
@@ -320,17 +313,17 @@ public class PortalLauncher extends VertxCommandLauncher implements VertxLifecyc
 
     @Override
     public void beforeDeployingVerticle(DeploymentOptions deploymentOptions) {
-        LOGGER.info("deploying verticles...");
+        logger.info("deploying verticles...");
     }
 
     @Override
     public void beforeStoppingVertx(Vertx vertx) {
-        LOGGER.info("shutdown in progres...");
+        logger.info("shutdown in progres...");
     }
 
     @Override
     public void afterStoppingVertx() {
-        LOGGER.info("shutdown");
+        logger.info("shutdown");
     }
 
     @Override
