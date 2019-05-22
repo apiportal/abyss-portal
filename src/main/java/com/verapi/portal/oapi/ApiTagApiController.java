@@ -51,7 +51,7 @@ public class ApiTagApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -67,7 +67,7 @@ public class ApiTagApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ApiTagService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -84,7 +84,7 @@ public class ApiTagApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ApiTagService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -94,7 +94,7 @@ public class ApiTagApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -107,7 +107,7 @@ public class ApiTagApiController extends AbstractApiController {
         try {
             getEntity(routingContext, ApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -124,7 +124,7 @@ public class ApiTagApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ApiTagService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -135,7 +135,7 @@ public class ApiTagApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, ApiTagService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

@@ -51,7 +51,7 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ApiVisibilityTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -67,7 +67,7 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ApiVisibilityTypeService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -84,7 +84,7 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ApiVisibilityTypeService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -94,7 +94,7 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ApiVisibilityTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -107,7 +107,7 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
         try {
             getEntity(routingContext, ApiVisibilityTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -124,7 +124,7 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ApiVisibilityTypeService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -135,7 +135,7 @@ public class ApiVisibilityTypeApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, ApiVisibilityTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

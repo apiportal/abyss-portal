@@ -61,7 +61,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         try {
             getEntities(routingContext, AccessManagerTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -77,7 +77,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         try {
             addEntities(routingContext, AccessManagerTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -94,7 +94,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, AccessManagerTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -104,7 +104,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, AccessManagerTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -114,7 +114,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         try {
             getEntity(routingContext, AccessManagerTypeService.class, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -131,7 +131,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, AccessManagerTypeService.class, requestBody, jsonbColumnsList);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -141,7 +141,7 @@ public class AccessManagerTypeApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, AccessManagerTypeService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

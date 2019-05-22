@@ -51,7 +51,7 @@ public class SubjectActivationApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectActivationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -67,7 +67,7 @@ public class SubjectActivationApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectActivationService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -84,7 +84,7 @@ public class SubjectActivationApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectActivationService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -94,7 +94,7 @@ public class SubjectActivationApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectActivationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -107,7 +107,7 @@ public class SubjectActivationApiController extends AbstractApiController {
         try {
             getEntity(routingContext, SubjectActivationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -124,7 +124,7 @@ public class SubjectActivationApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, SubjectActivationService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -135,7 +135,7 @@ public class SubjectActivationApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, SubjectActivationService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

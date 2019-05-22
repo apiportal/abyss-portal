@@ -52,7 +52,7 @@ public class LifecycleApiController extends AbstractApiController {
             LifecycleService lifecycleService = new LifecycleService(vertx);
             subscribeAndResponseJsonObject(routingContext, lifecycleService.updateLifecycle(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

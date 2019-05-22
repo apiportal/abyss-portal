@@ -52,7 +52,7 @@ public class ApiLicenseApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ApiLicenseService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -68,7 +68,7 @@ public class ApiLicenseApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ApiLicenseService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -85,7 +85,7 @@ public class ApiLicenseApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ApiLicenseService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -95,7 +95,7 @@ public class ApiLicenseApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ApiLicenseService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -108,7 +108,7 @@ public class ApiLicenseApiController extends AbstractApiController {
         try {
             getEntity(routingContext, ApiLicenseService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -125,7 +125,7 @@ public class ApiLicenseApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ApiLicenseService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -136,7 +136,7 @@ public class ApiLicenseApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, ApiLicenseService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -154,7 +154,7 @@ public class ApiLicenseApiController extends AbstractApiController {
                             .setFilterQuery(ApiLicenseService.SQL_LIST_API_LICENSES)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -172,7 +172,7 @@ public class ApiLicenseApiController extends AbstractApiController {
                             .setFilterQuery(ApiLicenseService.SQL_LIST_LICENSE_APIS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -190,7 +190,7 @@ public class ApiLicenseApiController extends AbstractApiController {
                             .setFilterQuery(ApiLicenseService.SQL_LIST_API_LICENSES_OF_USER)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

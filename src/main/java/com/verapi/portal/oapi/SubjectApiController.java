@@ -86,7 +86,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectService.class, jsonColumns, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -128,7 +128,7 @@ public class SubjectApiController extends AbstractApiController {
                     in.close();
                     ((JsonObject) requestItem).put("picture", "data:image/jpeg;base64," + new String(Base64.getEncoder().encode(sb.toString().getBytes()), StandardCharsets.UTF_8));
                 } catch (IOException e) {
-                    LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+                    LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
                 }
 
             if (appendRequestBody != null && !appendRequestBody.isEmpty()) {
@@ -152,7 +152,7 @@ public class SubjectApiController extends AbstractApiController {
                 addEntities(routingContext, SubjectService.class, requestBody);
             }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -168,7 +168,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectService.class, requestBody, null, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -177,7 +177,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectService.class, apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -186,7 +186,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             execServiceMethod(routingContext, SubjectService.class, null, method);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -238,7 +238,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             getEntity(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -253,7 +253,7 @@ public class SubjectApiController extends AbstractApiController {
                     jsonbColumnsList,
                     apiFilterQuery);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -303,7 +303,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, SubjectService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -314,7 +314,7 @@ public class SubjectApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, SubjectService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

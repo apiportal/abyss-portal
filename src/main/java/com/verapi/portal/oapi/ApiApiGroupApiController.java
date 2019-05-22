@@ -52,7 +52,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
         try {
             getEntities(routingContext, ApiApiGroupService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -68,7 +68,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
         try {
             addEntities(routingContext, ApiApiGroupService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -85,7 +85,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, ApiApiGroupService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -95,7 +95,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, ApiApiGroupService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -105,7 +105,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
         try {
             getEntity(routingContext, ApiApiGroupService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -122,7 +122,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, ApiApiGroupService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -132,7 +132,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, ApiApiGroupService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -147,7 +147,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_API_GROUPS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -162,7 +162,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_SUBJECT_API_GROUPS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -177,7 +177,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_SUBJECT_BUSINESS_API_GROUPS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -192,7 +192,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_SUBJECT_PROXY_API_GROUPS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -207,7 +207,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                             .setFilterQuery(ApiApiGroupService.SQL_API_API_GROUPS_BY_API_AND_GROUP)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")).add(routingContext.pathParam("groupuuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

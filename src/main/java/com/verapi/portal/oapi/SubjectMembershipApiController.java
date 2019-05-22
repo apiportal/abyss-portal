@@ -53,7 +53,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -69,7 +69,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -86,7 +86,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -96,7 +96,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -109,7 +109,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntity(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -126,7 +126,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntity(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -137,7 +137,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntity(routingContext, SubjectMembershipService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -155,7 +155,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.FILTER_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -173,7 +173,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.FILTER_BY_GROUP)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -187,7 +187,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.SQL_DELETE_GROUPS)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -205,7 +205,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
                             .setFilterQuery(SubjectMembershipService.FILTER_BY_DIRECTORY)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -217,7 +217,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_GROUP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -238,7 +238,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -255,7 +255,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_GROUP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -265,7 +265,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_GROUP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -278,7 +278,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -299,7 +299,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -316,7 +316,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -326,7 +326,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -339,7 +339,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_GROUP_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -360,7 +360,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -377,7 +377,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_GROUP_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -387,7 +387,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_GROUP_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -400,7 +400,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             getEntities(routingContext, SubjectMembershipService.class, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.FILTER_USER_APP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -421,7 +421,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             addEntities(routingContext, SubjectMembershipService.class, requestBody);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -438,7 +438,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             updateEntities(routingContext, SubjectMembershipService.class, requestBody, null, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -448,7 +448,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
         try {
             deleteEntities(routingContext, SubjectMembershipService.class, new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }

@@ -81,7 +81,7 @@ import static com.verapi.portal.common.Util.nnvl;
 public abstract class AbstractApiController implements IApiController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractApiController.class);
     protected static final String PARSED_PARAMETERS = "parsedParameters";
-    protected static final String EXCEPTION_LOG_FORMAT = "{}";
+    protected static final String EXCEPTION_LOG_FORMAT = "{}\n{}";
     private static final String OPEN_API_OPERATION = "openApiOperation";
     private static final String ABYSS_COOKIE_AUTH_SECURITY_HANDLER = "abyssCookieAuthSecurityHandler";
     private static final String ABYSS_HTTP_BASIC_AUTH_SECURITY_HANDLER = "abyssHttpBasicAuthSecurityHandler";

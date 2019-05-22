@@ -50,7 +50,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.login(routingContext, authProvider), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -62,7 +62,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.logout(routingContext), HttpResponseStatus.OK.code(), false);
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -74,7 +74,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.signup(routingContext, authProvider), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -86,7 +86,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.forgotPassword(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -98,7 +98,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.checkResetPasswordToken(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -110,7 +110,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.resetPassword(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -122,7 +122,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.setCurrentOrganization(routingContext), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -134,7 +134,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.inviteUser(routingContext, authProvider), HttpResponseStatus.OK.code());
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
@@ -154,7 +154,7 @@ public class AuthenticationApiController extends AbstractApiController {
             AuthenticationService authenticationService = new AuthenticationService(vertx);
             subscribeAndResponseJsonObject(routingContext, authenticationService.rxValidateAccessToken(requestBody.getString("token")), HttpResponseStatus.OK.code(), true);
         } catch (Exception e) {
-            LOGGER.error(EXCEPTION_LOG_FORMAT, e);
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }
     }
