@@ -84,7 +84,6 @@ public class Signup extends AbstractPortalHandler implements Handler<RoutingCont
         String email = routingContext.request().getFormAttribute("email");
         String password = routingContext.request().getFormAttribute("password");
         //TODO: should password consistency check be performed @FE or @BE or BOTH?
-        String password2 = routingContext.request().getFormAttribute("password2");
         String isAgreedToTerms = routingContext.request().getFormAttribute("isAgreedToTerms");
 
         //TODO: OWASP Validate & Truncate the Fields that are going to be stored

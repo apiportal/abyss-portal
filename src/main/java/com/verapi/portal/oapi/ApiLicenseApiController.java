@@ -60,7 +60,7 @@ public class ApiLicenseApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addApiLicenses(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -76,7 +76,7 @@ public class ApiLicenseApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateApiLicenses(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -103,7 +103,7 @@ public class ApiLicenseApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getApiLicense(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, ApiLicenseService.class);
@@ -117,7 +117,7 @@ public class ApiLicenseApiController extends AbstractApiController {
     public void updateApiLicense(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -143,9 +143,6 @@ public class ApiLicenseApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiLicensesOfApi(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiLicenseService.class,
@@ -161,9 +158,6 @@ public class ApiLicenseApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApisOfLicense(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiLicenseService.class,
@@ -179,9 +173,6 @@ public class ApiLicenseApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiLicensesOfUser(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiLicenseService.class,

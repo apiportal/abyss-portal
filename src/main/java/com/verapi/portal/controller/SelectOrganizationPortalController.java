@@ -47,7 +47,7 @@ public class SelectOrganizationPortalController extends AbstractPortalController
 
         LOGGER.trace("userOrganizationList: {}", (JsonArray) routingContext.session().get(USER_ORGANIZATION_ARRAY));
 
-        class OrganizationTuple {
+        final class OrganizationTuple {
             private String uuid;
             private String name;
 

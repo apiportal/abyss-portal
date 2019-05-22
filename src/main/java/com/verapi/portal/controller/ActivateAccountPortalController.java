@@ -33,6 +33,7 @@ import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
 import io.vertx.reactivex.ext.jdbc.JDBCClient;
 import io.vertx.reactivex.ext.sql.SQLConnection;
 import io.vertx.reactivex.ext.web.RoutingContext;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +89,8 @@ public class ActivateAccountPortalController extends AbstractPortalController {
 
                                 if (row.getBoolean("isDeleted")) {
                                     LOGGER.error("Received Token is deleted");
-                                    return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
+                                    //TODO: Give "User already activated" message if Subject is activated
+                                    return Single.error(new Exception("Token does not exist in our records. Please request a new token."));
                                 }
 
                                 if (!(row.getString("tokenType", "").equals(Constants.ACTIVATION_TOKEN))) {
@@ -116,7 +118,8 @@ public class ActivateAccountPortalController extends AbstractPortalController {
 
                                     return Single.just(row);
                                 } else {
-                                    LOGGER.error("Received Token is NOT valid: {}", authResult.getResultText()); //TODO: Update Token as deleted.
+                                    //TODO: Update Token as deleted.
+                                    LOGGER.error("Received Token is NOT valid: {}", authResult.getResultText());
                                     return Single.error(
                                             new Exception("Token is not valid. Please request a new activation token by singing up again with same username.")
                                     );
@@ -160,7 +163,7 @@ public class ActivateAccountPortalController extends AbstractPortalController {
                         // commit if all succeeded
                         .flatMap((UpdateResult updateResult) -> {
                             if (updateResult.getUpdated() == 1) {
-                                LOGGER.trace("Activate Account - Subject Activation Update Result information:" + updateResult.getKeys().encodePrettily());
+                                LOGGER.trace("Activate Account - Subject Activation Update Result information: {}", updateResult.getKeys().encodePrettily());
                                 return resConn.rxCommit().toSingleDefault(Boolean.TRUE);
                             } else {
                                 return Single.error(new Exception("Activation Update Error Occurred"));
@@ -187,27 +190,23 @@ public class ActivateAccountPortalController extends AbstractPortalController {
                             routingContext.vertx().getDelegate().eventBus()
                                     .<JsonObject>send(Constants.ABYSS_MAIL_CLIENT, json, (AsyncResult<Message<JsonObject>> result) -> {
                                         if (result.succeeded()) {
-                                            LOGGER.trace("Welcome Mailing Event Bus Result: {} | Result: {}"
-                                                    , result.toString(), result.result().body().encodePrettily());
+                                            LOGGER.trace("Welcome Mailing Event Bus Result: {} | Result: {}", result, result.result().body().encodePrettily());
                                         } else {
-                                            LOGGER.error("Welcome Mailing Event Bus Result:" + result.toString() + " | Cause:" + result.cause());
+                                            LOGGER.error("Welcome Mailing Event Bus Result: {} | Cause: {}", result.toString(), result.cause());
                                         }
-
-
                                     });
                             LOGGER.trace("Welcome mail is sent to Mail Verticle over Event Bus");
 
                         })
-
                         // close the connection regardless succeeded or failed
                         .doAfterTerminate(resConn::close)
 
         ).subscribe((Boolean result) -> {
                     LOGGER.trace("Subscription to ActivateAccount successful: {}", result);
-                    showTrxResult(routingContext, LOGGER, 200, "Activation Successful!", "Welcome to API Portal", "");
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_OK, "Activation Successful!", "Welcome to API Portal", "");
                 }, (Throwable t) -> {
                     LOGGER.error("ActivateAccount Error", t);
-                    showTrxResult(routingContext, LOGGER, 401, "Activation Failed!", t.getLocalizedMessage(), "");
+                    showTrxResult(routingContext, LOGGER, HttpStatus.SC_UNAUTHORIZED, "Activation Failed!", t.getLocalizedMessage(), "");
                 }
         );
 

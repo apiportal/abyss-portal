@@ -63,7 +63,7 @@ public class UtilApiController extends AbstractApiController {
         try {
             LOGGER.trace("validateOpenAPIv3Spec invoked");
             // Get the parsed parameters
-            RequestParameters requestParameters = routingContext.get("parsedParameters");
+            RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
             // We get an user JSON array validated by Vert.x Open API validator
             JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -80,7 +80,7 @@ public class UtilApiController extends AbstractApiController {
         try {
             LOGGER.trace("convertSwaggerToOpenAPIv3Spec invoked");
             // Get the parsed parameters
-            RequestParameters requestParameters = routingContext.get("parsedParameters");
+            RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
             // We get an user JSON array validated by Vert.x Open API validator
             JsonObject requestBody = requestParameters.body().getJsonObject();

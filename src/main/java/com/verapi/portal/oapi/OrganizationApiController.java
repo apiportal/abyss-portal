@@ -64,7 +64,7 @@ public class OrganizationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addOrganizations(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -80,7 +80,7 @@ public class OrganizationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateOrganizations(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -107,7 +107,7 @@ public class OrganizationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getOrganization(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, OrganizationService.class);
@@ -121,7 +121,7 @@ public class OrganizationApiController extends AbstractApiController {
     public void updateOrganization(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();

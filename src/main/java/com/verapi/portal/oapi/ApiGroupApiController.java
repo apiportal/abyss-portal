@@ -102,9 +102,6 @@ public class ApiGroupApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiGroup(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ApiGroupService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
@@ -143,9 +140,6 @@ public class ApiGroupApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiGroupsOfSubject(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
-
         try {
             getEntities(routingContext,
                     ApiGroupService.class,

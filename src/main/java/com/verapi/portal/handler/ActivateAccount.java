@@ -93,7 +93,8 @@ public class ActivateAccount extends AbstractPortalHandler implements Handler<Ro
 
                                 if (row.getBoolean("is_deleted")) {
                                     LOGGER.error("Received Token is deleted");
-                                    return Single.error(new Exception("Token does not exist in our records. Please request a new token.")); //TODO: Give "User already activated" message if Subject is activated
+                                    //TODO: Give "User already activated" message if Subject is activated
+                                    return Single.error(new Exception("Token does not exist in our records. Please request a new token."));
                                 }
 
                                 if (!(row.getString("token_type", "").equals(Constants.ACTIVATION_TOKEN))) {

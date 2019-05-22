@@ -74,7 +74,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addContracts(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -91,7 +91,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateContracts(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -120,7 +120,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContract(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, ContractService.class);
@@ -135,7 +135,7 @@ public class ContractApiController extends AbstractApiController {
     public void updateContract(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -164,7 +164,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContractsOfApi(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -183,7 +183,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContractsOfApp(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -202,7 +202,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContractsOfApiOfUser(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -221,7 +221,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContractsOfAppOfUser(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -240,7 +240,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContractsOfLicense(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -259,7 +259,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContractsOfUser(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -278,7 +278,7 @@ public class ContractApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getContractsOfPolicy(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters"); //TODO: Lazım mı?
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS); //TODO: Lazım mı?
 
         try {
             getEntities(routingContext,
@@ -298,7 +298,7 @@ public class ContractApiController extends AbstractApiController {
     public void addSubscriptions(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();

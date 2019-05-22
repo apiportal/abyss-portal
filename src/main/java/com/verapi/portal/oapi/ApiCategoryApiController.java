@@ -101,9 +101,6 @@ public class ApiCategoryApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void getApiCategory(RoutingContext routingContext) {
-        // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
-
         try {
             getEntity(routingContext, ApiCategoryService.class);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {

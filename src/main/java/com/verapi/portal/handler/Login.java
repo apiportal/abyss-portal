@@ -58,7 +58,8 @@ public class Login implements Handler<RoutingContext> {
             if (authResult.succeeded()) {
                 User user = authResult.result();
                 String userName = user.principal().getString(USERNAME);
-                routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context? 
+                //TODO: Check context. Is this usefull? Should it be vertx context?
+                routingContext.setUser(user);
                 LOGGER.info("Logged in user: {}", user.principal().encodePrettily());
                 routingContext.put(USERNAME, userName);
                 routingContext.session().regenerateId();

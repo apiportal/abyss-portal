@@ -66,7 +66,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void addSubjectDirectoryTypes(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -82,7 +82,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void updateSubjectDirectoryTypes(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -109,7 +109,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectDirectoryType(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, SubjectDirectoryTypeService.class, jsonbColumnsList);
@@ -123,7 +123,7 @@ public class SubjectDirectoryTypeApiController extends AbstractApiController {
     public void updateSubjectDirectoryType(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();

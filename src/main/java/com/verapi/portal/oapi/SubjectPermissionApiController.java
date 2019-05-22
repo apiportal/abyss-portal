@@ -58,7 +58,7 @@ public class SubjectPermissionApiController extends AbstractApiController {
 
     void addEntities(RoutingContext routingContext, JsonObject appendRequestBody) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -81,7 +81,7 @@ public class SubjectPermissionApiController extends AbstractApiController {
 
     void updateEntities(RoutingContext routingContext, ApiFilterQuery apiFilterQuery) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -123,7 +123,7 @@ public class SubjectPermissionApiController extends AbstractApiController {
         addEntities(routingContext, null);
 /*
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON array validated by Vert.x Open API validator
         JsonArray requestBody = requestParameters.body().getJsonArray();
@@ -142,7 +142,7 @@ public class SubjectPermissionApiController extends AbstractApiController {
         updateEntities(routingContext, null);
 /*
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
@@ -173,7 +173,7 @@ public class SubjectPermissionApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectPermission(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, SubjectPermissionService.class);
@@ -187,7 +187,7 @@ public class SubjectPermissionApiController extends AbstractApiController {
     public void updateSubjectPermission(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();

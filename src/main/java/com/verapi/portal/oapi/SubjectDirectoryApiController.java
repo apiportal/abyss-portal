@@ -110,7 +110,7 @@ public class SubjectDirectoryApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectDirectory(RoutingContext routingContext) {
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         try {
             getEntity(routingContext, SubjectDirectoryService.class, jsonbColumnsList);
@@ -124,7 +124,7 @@ public class SubjectDirectoryApiController extends AbstractApiController {
     public void updateSubjectDirectory(RoutingContext routingContext) {
 
         // Get the parsed parameters
-        RequestParameters requestParameters = routingContext.get("parsedParameters");
+        RequestParameters requestParameters = routingContext.get(PARSED_PARAMETERS);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
