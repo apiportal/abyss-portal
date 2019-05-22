@@ -19,6 +19,7 @@ package com.verapi.portal.service.idam;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
@@ -32,8 +33,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "")
 public class AuthorizationService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(AuthorizationService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationService.class);
 
     public AuthorizationService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -44,10 +46,14 @@ public class AuthorizationService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return ""; }
+    protected String getInsertSql() {
+        return "";
+    }
 
     @Override
-    protected String getFindByIdSql() { return ""; }
+    protected String getFindByIdSql() {
+        return "";
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -55,13 +61,12 @@ public class AuthorizationService extends AbstractService<UpdateResult> {
     }
 
     /**
-     *
-     * @param resourceApi the resource API protected by API key
+     * @param resourceApi  the resource API protected by API key
      * @param requestedApi the requested API captured from gateway uri as path parameter
      * @return <b>true</b> if the both are <b>same</b>, otherwise <b>false</b>
      */
     public Boolean authorize(UUID resourceApi, UUID requestedApi) {
-        logger.trace("authorize invoked, resourceApi: [{}] | requestedApi: [{}]", resourceApi, requestedApi);
+        LOGGER.trace("authorize invoked, resourceApi: [{}] | requestedApi: [{}]", resourceApi, requestedApi);
         return (resourceApi.compareTo(requestedApi) == 0);
     }
 

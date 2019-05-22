@@ -20,6 +20,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -36,22 +37,87 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "api__api_tag")
 public class ApiApiTagService extends AbstractService<UpdateResult> {
+    public static final String SQL_LIST_API_TAGS = "select\n" +
+            "  api_tag.uuid,\n" +
+            "  api_tag.name\n" +
+            "from\n" +
+            "api__api_tag\n" +
+            ", api_tag\n" +
+            "where apiid = CAST(? AS uuid) and apitagid = api_tag.uuid\n";
+    public static final String SQL_LIST_SUBJECT_API_TAGS = "select distinct\n" +
+            "  api_tag.uuid,\n" +
+            "  api_tag.name\n" +
+            "from\n" +
+            "api__api_tag\n" +
+            ", api_tag, api\n" +
+            "where subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
+            "      apitagid = api_tag.uuid\n";
+    public static final String SQL_API_API_TAGS_BY_API_AND_TAG = "select\n" +
+            "id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apitagid\n" +
+            "from\n" +
+            "api__api_tag\n" +
+            "where apiid = CAST(? AS uuid) and apitagid = CAST(? AS uuid)\n";
+    public static final String SQL_LIST_SUBJECT_BUSINESS_API_TAGS = SQL_LIST_SUBJECT_API_TAGS + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
+    public static final String SQL_LIST_SUBJECT_PROXY_API_TAGS = SQL_LIST_SUBJECT_API_TAGS + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;
     private static final Logger logger = LoggerFactory.getLogger(ApiApiTagService.class);
+    private static final String SQL_INSERT = "insert into api__api_tag (organizationid, crudsubjectid, apiid, apitagid)\n" +
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
+    private static final String SQL_DELETE = "update api__api_tag\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  apiid,\n" +
+            "  apitagid\n" +
+            "from\n" +
+            "api__api_tag\n";
+    private static final String SQL_UPDATE = "UPDATE api__api_tag\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , apitagid      = CAST(? AS uuid)\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     public ApiApiTagService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
+
 
     public ApiApiTagService(Vertx vertx) {
         super(vertx);
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -217,87 +283,5 @@ public class ApiApiTagService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
-
-    private static final String SQL_INSERT = "insert into api__api_tag (organizationid, crudsubjectid, apiid, apitagid)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
-
-    private static final String SQL_DELETE = "update api__api_tag\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  apiid,\n" +
-            "  apitagid\n" +
-            "from\n" +
-            "api__api_tag\n";
-
-    private static final String SQL_UPDATE = "UPDATE api__api_tag\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , apiid      = CAST(? AS uuid)\n" +
-            "  , apitagid      = CAST(? AS uuid)\n";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by name\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
-
-    public static final String SQL_LIST_API_TAGS = "select\n" +
-            "  api_tag.uuid,\n" +
-            "  api_tag.name\n" +
-            "from\n" +
-            "api__api_tag\n" +
-            ", api_tag\n" +
-            "where apiid = CAST(? AS uuid) and apitagid = api_tag.uuid\n";
-
-    public static final String SQL_LIST_SUBJECT_API_TAGS = "select distinct\n" +
-            "  api_tag.uuid,\n" +
-            "  api_tag.name\n" +
-            "from\n" +
-            "api__api_tag\n" +
-            ", api_tag, api\n" +
-            "where subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
-            "      apitagid = api_tag.uuid\n";
-
-    public static final String SQL_API_API_TAGS_BY_API_AND_TAG = "select\n" +
-            "id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apitagid\n" +
-            "from\n" +
-            "api__api_tag\n" +
-            "where apiid = CAST(? AS uuid) and apitagid = CAST(? AS uuid)\n";
-
-
-    public static final String SQL_LIST_SUBJECT_BUSINESS_API_TAGS = SQL_LIST_SUBJECT_API_TAGS + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
-
-    public static final String SQL_LIST_SUBJECT_PROXY_API_TAGS = SQL_LIST_SUBJECT_API_TAGS + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;
 
 }

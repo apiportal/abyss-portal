@@ -64,15 +64,20 @@ public abstract class AbstractService<T> implements IService<T> {
     protected Boolean autoCommit = Boolean.TRUE;
     protected SQLConnection sqlConnection = null;
     private AbyssJDBCService abyssJDBCService;
+    private String tableName;
 
 
     public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         this.vertx = vertx;
         this.abyssJDBCService = abyssJDBCService;
+        this.tableName = this.getClass().getAnnotation(AbyssTableName.class).tableName();
+        LOGGER.trace("Table name: {}", this.tableName);
     }
 
     public AbstractService(Vertx vertx) {
         this.vertx = vertx;
+        this.tableName = this.getClass().getAnnotation(AbyssTableName.class).tableName();
+        LOGGER.trace("Table name: {}", this.tableName);
     }
 
     private static String getTableNameFromSql(String sql) {

@@ -21,6 +21,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "")
 public class LifecycleService extends AbstractService<UpdateResult> {
     private static final Logger LOGGER = LoggerFactory.getLogger(LifecycleService.class);
 
@@ -63,16 +65,19 @@ public class LifecycleService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return ""; }
+    protected String getInsertSql() {
+        return "";
+    }
 
     @Override
-    protected String getFindByIdSql() { return ""; }
+    protected String getFindByIdSql() {
+        return "";
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
         return new JsonArray();
     }
-
 
 
     public Single<JsonObject> updateLifecycle(RoutingContext routingContext) {
@@ -88,8 +93,8 @@ public class LifecycleService extends AbstractService<UpdateResult> {
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject lifecycleChange = requestParameters.body().getJsonObject();
-        String currentStateId  = lifecycleChange.getString("currentstateid");
-        String nextStateId     = lifecycleChange.getString("nextstateid");
+        String currentStateId = lifecycleChange.getString("currentstateid");
+        String nextStateId = lifecycleChange.getString("nextstateid");
         String apiVisibilityId = stateToVisibilityMap.get(nextStateId);
         LOGGER.trace("Api: {} state transition from {} to {}. New Visibility Id: {}", apiId, currentStateId, nextStateId, apiVisibilityId);
 
@@ -98,34 +103,34 @@ public class LifecycleService extends AbstractService<UpdateResult> {
 
         return apiService.initJDBCClient(sessionOrganizationId)
                 .flatMap(jdbcClient -> apiService.updateLifecycle(
-                            UUID.fromString(apiId),
-                            new JsonArray().add(sessionUserId)
-                                    .add(nextStateId)
-                                    .add(apiVisibilityId)
-                            )
-                            .flatMap(compositeResult -> {
-                                if (compositeResult.getThrowable() == null) {
-                                    if (compositeResult.getUpdateResult().getUpdated() == 1) {
-                                        LOGGER.trace("updateLifecycle - api {} state changed from {} to {}", apiId, currentStateId, nextStateId);
-                                        return Single.just(compositeResult.getUpdateResult());
+                        UUID.fromString(apiId),
+                        new JsonArray().add(sessionUserId)
+                                .add(nextStateId)
+                                .add(apiVisibilityId)
+                        )
+                                .flatMap(compositeResult -> {
+                                    if (compositeResult.getThrowable() == null) {
+                                        if (compositeResult.getUpdateResult().getUpdated() == 1) {
+                                            LOGGER.trace("updateLifecycle - api {} state changed from {} to {}", apiId, currentStateId, nextStateId);
+                                            return Single.just(compositeResult.getUpdateResult());
+                                        } else {
+                                            LOGGER.error("updateLifecycle - api {} state update error from {} to {}", apiId, currentStateId, nextStateId);
+                                            return Single.error(new Exception("Api Lifecycle Update Error Occurred"));
+                                        }
                                     } else {
-                                        LOGGER.error("updateLifecycle - api {} state update error from {} to {}", apiId, currentStateId, nextStateId);
-                                        return Single.error(new Exception("Api Lifecycle Update Error Occurred"));
+                                        LOGGER.error("updateLifecycle - api {} state change error from {} to {}\n{}", apiId, currentStateId, nextStateId, compositeResult.getThrowable());
+                                        return Single.error(compositeResult.getThrowable());
                                     }
-                                } else {
-                                    LOGGER.error("updateLifecycle - api {} state change error from {} to {}\n{}", apiId, currentStateId, nextStateId, compositeResult.getThrowable());
-                                    return Single.error(compositeResult.getThrowable());
-                                }
-                            })
+                                })
                 )
                 .flatMap(updateResult -> Single.just(new ApiSchemaError()
-                                                    .setCode(HttpResponseStatus.OK.code())
-                                                    .setUsermessage("Api State Changed Successfully!")
-                                                    .setInternalmessage("")
-                                                    .setDetails("Api State Changed Successfully!")
-                                                    .setRecommendation("")
-                                                    //.setMoreinfo(new URL(""))
-                                                    .toJson())
+                        .setCode(HttpResponseStatus.OK.code())
+                        .setUsermessage("Api State Changed Successfully!")
+                        .setInternalmessage("")
+                        .setDetails("Api State Changed Successfully!")
+                        .setRecommendation("")
+                        //.setMoreinfo(new URL(""))
+                        .toJson())
                 );
     }
 

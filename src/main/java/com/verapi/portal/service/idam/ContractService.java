@@ -21,6 +21,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -41,8 +42,121 @@ import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+@AbyssTableName(tableName = "contract")
 public class ContractService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(ContractService.class);
+    public static final String SQL_SUBSCRIPTIONS_OF_API = "select\tc.uuid, c.organizationid, c.created, c.updated, c.deleted, c.isdeleted, c.crudsubjectid, c.\"name\", c.description, c.apiid, c.subjectid, c.environment, \n" +
+            "\t\tc.contractstateid, c.status, c.isrestrictedtosubsetofapi, c.licenseid, c.subjectpermissionid,\n" +
+            "\t\tapp.displayname as appdisplayname, \n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', s.uuid, 'displayname', s.displayname)\n" +
+            "\t\t\t\t\t) FROM subject s\n" +
+            "\t\t\t\t\t\twhere sm.subjectid = s.uuid and s.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'\n" +
+            "\t\t\t), '[]') as appowners,\n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, 'isdeleted', r.isdeleted, \n" +
+            "\t\t\t\t\t\t\t\t\t'crudsubjectid', r.crudsubjectid, 'resourcetypeid', r.resourcetypeid, 'resourcename', r.resourcename, 'description', r.description, \n" +
+            "\t\t\t\t\t\t\t\t\t'resourcerefid', r.resourcerefid, 'isactive', r.isactive, 'subresourcename', r.subresourcename)\n" +
+            "\t\t\t\t\t) FROM resource r\n" +
+            "\t\t\t\t\t\twhere c.uuid = r.resourcerefid\n" +
+            "\t\t\t), '[]') as resources,\n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', sp.uuid, 'organizationid', sp.organizationid, 'created', sp.created, 'updated', sp.updated, 'deleted', sp.deleted, \n" +
+            "\t\t\t\t\t\t\t\t\t'isdeleted', sp.isdeleted, 'crudsubjectid', sp.crudsubjectid, \n" +
+            "\t\t\t\t\t\t\t\t\t'permission', sp.permission, 'description', sp.description, 'effectivestartdate', sp.effectivestartdate, 'effectiveenddate', sp.effectiveenddate, \n" +
+            "\t\t\t\t\t\t\t\t\t'subjectid', sp.subjectid, 'resourceid', sp.resourceid, 'resourceactionid', sp.resourceactionid, 'accessmanagerid', sp.accessmanagerid, 'isactive', sp.isactive,\n" +
+            "\t\t\t\t\t\t\t\t\t'accesstokens', COALESCE((select json_agg(\n" +
+            "\t\t\t\t\t\t\t\t\t\t\tjson_build_object('uuid', rat.uuid, 'organizationid', rat.organizationid, 'created', rat.created, 'updated', rat.updated, 'deleted', rat.deleted, 'isdeleted', rat.isdeleted, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t'crudsubjectid', rat.crudsubjectid, 'subjectpermissionid', rat.subjectpermissionid, 'resourcetypeid', rat.resourcetypeid, 'resourcerefid', rat.resourcerefid, \n" +
+            "\t\t\t\t\t\t\t\t\t\t\t'token', rat.token, 'expiredate', rat.expiredate, 'isactive', rat.isactive)\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t) from resource_access_token rat\n" +
+            "\t\t\t\t\t\t\t\t\t\t\t\twhere rat.subjectpermissionid = sp.uuid\n" +
+            "\t\t\t\t\t\t\t\t\t\t), '[]')\t\t\t\t\t\t\t\t\t\n" +
+            "\t\t\t\t\t\t\t\t)\n" +
+            "\t\t\t\t\t) FROM subject_permission sp\n" +
+            "\t\t\t\t\t\twhere sp.uuid = c.subjectpermissionid\n" +
+            "\t\t\t), '[]') as permissions,\n" +
+            "\t\tCOALESCE((select json_agg(\n" +
+            "\t\t\t\t\tjson_build_object('uuid', l.uuid, 'organizationid', l.organizationid, 'created', l.created, 'updated', l.updated, 'deleted', l.deleted, 'isdeleted', l.isdeleted, \n" +
+            "\t\t\t\t\t\t\t\t\t'crudsubjectid', l.crudsubjectid, 'name', l.\"name\", 'version', l.\"version\", 'subjectid', l.subjectid, 'licensedocument', l.licensedocument, 'isactive', l.isactive)\n" +
+            "\t\t\t\t\t) from license l\n" +
+            "\t\t\t\t\t\twhere c.licenseid = l.uuid\n" +
+            "\t\t\t), '[]') as licenses\n" +
+            "FROM\ncontract\nc, subject app, subject_membership sm\n" +
+            "where c.subjectid = app.uuid\n" +
+            "and c.subjectid = sm.subjectgroupid and sm.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09' and sm.subjectgrouptypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6'\n" +
+            "and c.apiid = CAST(? AS uuid)";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContractService.class);
+    private static final String SQL_INSERT = "insert into contract (organizationid, crudsubjectid, name, description, apiid, subjectid, environment, contractstateid, status, isrestrictedtosubsetofapi, licenseid, subjectpermissionid)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS e_contract_status), ?, CAST(? AS uuid), CAST(? AS uuid))";
+    private static final String SQL_DELETE = "update contract\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  name,\n" +
+            "  description,\n" +
+            "  apiid,\n" +
+            "  subjectid,\n" +
+            "  environment,\n" +
+            "  contractstateid,\n" +
+            "  status,\n" +
+            "  isrestrictedtosubsetofapi,\n" +
+            "  licenseid,\n" +
+            "  subjectpermissionid\n" +
+            "from\n" +
+            "contract\n";
+    public static final String FILTER_BY_POLICY = SQL_SELECT + SQL_WHERE + "licenseid in (\n" +
+            "    select uuid\n" +
+            "    from license\n" +
+            "    where licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb)";
+    private static final String SQL_UPDATE = "UPDATE contract\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , name      = ?\n" +
+            "  , description      = ?\n" +
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
+            "  , environment      = ?\n" +
+            "  , contractstateid      = CAST(? AS uuid)\n" +
+            "  , status      = CAST(? AS e_contract_status)\n" +
+            "  , isrestrictedtosubsetofapi      = ?\n" +
+            "  , licenseid      = CAST(? AS uuid)\n" +
+            "  , subjectpermissionid      = CAST(? AS uuid)\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
+    private static final String SQL_CONDITION_APIID_IS = "apiid = CAST(? AS uuid)\n";
+    public static final String FILTER_BY_APIID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
+    private static final String SQL_CONDITION_APPID_IS = "subjectid = CAST(? AS uuid)\n";
+    public static final String FILTER_BY_APPID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPID_IS;
+    private static final String SQL_CONDITION_APIS_OF_USERID_IS = "apiid in (select distinct uuid from api where subjectid = CAST(? AS uuid) and isdeleted = false and isproxyapi = true)\n";
+    public static final String FILTER_BY_APIS_OF_USERID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIS_OF_USERID_IS;
+    private static final String SQL_CONDITION_APPS_OF_USERID_IS = "subjectid in (select distinct s.uuid from subject s, subject_membership sm where sm.subjectid = CAST(? AS uuid) and sm.subjectgroupid = s.uuid and s.subjecttypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6' and sm.subjectgrouptypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6')\n";
+    public static final String FILTER_BY_APPS_OF_USERID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPS_OF_USERID_IS;
+    private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
+    public static final String FILTER_BY_LICENSEID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
+    private static final String SQL_CONDITION_LICENSEID_IN = "licenseid in (select distinct uuid from license where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
+    public static final String FILTER_BY_LICENSES_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IN;
+    private static final String SQL_CONDITION_SUBJECTPERMISSIONID_IS = "subjectpermissionid = CAST(? AS uuid)\n";
+    static final String FILTER_BY_SUBJECTPERMISSIONID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECTPERMISSIONID_IS;
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     public ContractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -52,18 +166,18 @@ public class ContractService extends AbstractService<UpdateResult> {
         super(vertx);
     }
 
-
-    /** Subscribe APP to API
+    /**
+     * Subscribe APP to API
      *
      * @param routingContext
      * @param insertRecords
      * @return
      */
     public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
-        logger.trace("ContractService --- insertAllCascaded invoked");
+        LOGGER.trace("ContractService --- insertAllCascaded invoked");
 
-        String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
-        String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        String sessionOrganizationId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
         Observable<JsonObject> insertParamsObservable = Observable.fromIterable(insertRecords).map(o -> (JsonObject) o);
 
@@ -72,22 +186,22 @@ public class ContractService extends AbstractService<UpdateResult> {
 
                 //SUBJECT PERMISSION FOR SUBSCRIPTION
                 .flatMap(insertRequest -> {
-                        JsonObject insertRecord = new JsonObject()
-                                .put("organizationid", sessionOrganizationId)
-                                .put("crudsubjectid", sessionUserId)
-                                .put("permission", "Subscription Permission")
-                                .put("description", "Subscription Permission of " + insertRequest.getString("contractdescription"))
-                                .put("effectivestartdate", insertRequest.containsKey("effectivestartdate") ? insertRequest.getInstant("effectivestartdate") : Instant.now())
-                                .put("effectiveenddate", insertRequest.containsKey("effectiveenddate") ? insertRequest.getInstant("effectiveenddate") : Instant.now().plus(365, DAYS)) //TODO: Get from License or subscription
-                                .put("subjectid", insertRequest.getString("appid"))
-                                .put("resourceid", insertRequest.getString("resourceidofapi"))
-                                .put("resourceactionid", Constants.RESOURCE_ACTION_INVOKE_API)
-                                .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
-                                .put("isactive", Boolean.TRUE);
+                    JsonObject insertRecord = new JsonObject()
+                            .put("organizationid", sessionOrganizationId)
+                            .put("crudsubjectid", sessionUserId)
+                            .put("permission", "Subscription Permission")
+                            .put("description", "Subscription Permission of " + insertRequest.getString("contractdescription"))
+                            .put("effectivestartdate", insertRequest.containsKey("effectivestartdate") ? insertRequest.getInstant("effectivestartdate") : Instant.now())
+                            .put("effectiveenddate", insertRequest.containsKey("effectiveenddate") ? insertRequest.getInstant("effectiveenddate") : Instant.now().plus(365, DAYS)) //TODO: Get from License or subscription
+                            .put("subjectid", insertRequest.getString("appid"))
+                            .put("resourceid", insertRequest.getString("resourceidofapi"))
+                            .put("resourceactionid", Constants.RESOURCE_ACTION_INVOKE_API)
+                            .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
+                            .put("isactive", Boolean.TRUE);
 
-                        SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
-                        return subjectPermissionService.initJDBCClient(sessionOrganizationId)
-                                .flatMap(jdbcClient -> subjectPermissionService.insert(insertRecord, insertRequest)).toObservable();
+                    SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+                    return subjectPermissionService.initJDBCClient(sessionOrganizationId)
+                            .flatMap(jdbcClient -> subjectPermissionService.insert(insertRecord, insertRequest)).toObservable();
                 })
 
                 //CONTRACT
@@ -188,12 +302,15 @@ public class ContractService extends AbstractService<UpdateResult> {
                 }).toList();
     }
 
+    @Override
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
-
-    @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -213,7 +330,7 @@ public class ContractService extends AbstractService<UpdateResult> {
     }
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
-        logger.trace("---insertAll invoked");
+        LOGGER.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -237,9 +354,9 @@ public class ContractService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -250,7 +367,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -300,9 +417,9 @@ public class ContractService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("updateAll>> update/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -313,7 +430,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -367,150 +484,4 @@ public class ContractService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
-
-    private static final String SQL_INSERT = "insert into contract (organizationid, crudsubjectid, name, description, apiid, subjectid, environment, contractstateid, status, isrestrictedtosubsetofapi, licenseid, subjectpermissionid)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS e_contract_status), ?, CAST(? AS uuid), CAST(? AS uuid))";
-
-    private static final String SQL_DELETE = "update contract\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  name,\n" +
-            "  description,\n" +
-            "  apiid,\n" +
-            "  subjectid,\n" +
-            "  environment,\n" +
-            "  contractstateid,\n" +
-            "  status,\n" +
-            "  isrestrictedtosubsetofapi,\n" +
-            "  licenseid,\n" +
-            "  subjectpermissionid\n" +
-            "from\n" +
-            "contract\n";
-
-    private static final String SQL_UPDATE = "UPDATE contract\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , name      = ?\n" +
-            "  , description      = ?\n" +
-            "  , apiid      = CAST(? AS uuid)\n" +
-            "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , environment      = ?\n" +
-            "  , contractstateid      = CAST(? AS uuid)\n" +
-            "  , status      = CAST(? AS e_contract_status)\n" +
-            "  , isrestrictedtosubsetofapi      = ?\n" +
-            "  , licenseid      = CAST(? AS uuid)\n" +
-            "  , subjectpermissionid      = CAST(? AS uuid)\n";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
-
-    private static final String SQL_CONDITION_APIID_IS = "apiid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_APPID_IS = "subjectid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_APIS_OF_USERID_IS = "apiid in (select distinct uuid from api where subjectid = CAST(? AS uuid) and isdeleted = false and isproxyapi = true)\n";
-
-    private static final String SQL_CONDITION_APPS_OF_USERID_IS = "subjectid in (select distinct s.uuid from subject s, subject_membership sm where sm.subjectid = CAST(? AS uuid) and sm.subjectgroupid = s.uuid and s.subjecttypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6' and sm.subjectgrouptypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6')\n";
-
-    private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_LICENSEID_IN = "licenseid in (select distinct uuid from license where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
-
-    private static final String SQL_CONDITION_SUBJECTPERMISSIONID_IS = "subjectpermissionid = CAST(? AS uuid)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by name\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    public static final String FILTER_BY_APIID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
-
-    public static final String FILTER_BY_APPID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPID_IS;
-
-    public static final String FILTER_BY_APIS_OF_USERID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIS_OF_USERID_IS;
-
-    public static final String FILTER_BY_APPS_OF_USERID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APPS_OF_USERID_IS;
-
-    static final String FILTER_BY_SUBJECTPERMISSIONID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECTPERMISSIONID_IS;
-
-    public static final String FILTER_BY_LICENSEID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
-
-    public static final String FILTER_BY_LICENSES_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IN;
-
-    public static final String FILTER_BY_POLICY = SQL_SELECT + SQL_WHERE + "licenseid in (\n" +
-            "    select uuid\n" +
-            "    from license\n" +
-            "    where licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb)";
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
-
-
-    public static final String SQL_SUBSCRIPTIONS_OF_API = "select\tc.uuid, c.organizationid, c.created, c.updated, c.deleted, c.isdeleted, c.crudsubjectid, c.\"name\", c.description, c.apiid, c.subjectid, c.environment, \n" +
-            "\t\tc.contractstateid, c.status, c.isrestrictedtosubsetofapi, c.licenseid, c.subjectpermissionid,\n" +
-            "\t\tapp.displayname as appdisplayname, \n" +
-            "\t\tCOALESCE((select json_agg(\n" +
-            "\t\t\t\t\tjson_build_object('uuid', s.uuid, 'displayname', s.displayname)\n" +
-            "\t\t\t\t\t) FROM subject s\n" +
-            "\t\t\t\t\t\twhere sm.subjectid = s.uuid and s.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09'\n" +
-            "\t\t\t), '[]') as appowners,\n" +
-            "\t\tCOALESCE((select json_agg(\n" +
-            "\t\t\t\t\tjson_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, 'isdeleted', r.isdeleted, \n" +
-            "\t\t\t\t\t\t\t\t\t'crudsubjectid', r.crudsubjectid, 'resourcetypeid', r.resourcetypeid, 'resourcename', r.resourcename, 'description', r.description, \n" +
-            "\t\t\t\t\t\t\t\t\t'resourcerefid', r.resourcerefid, 'isactive', r.isactive, 'subresourcename', r.subresourcename)\n" +
-            "\t\t\t\t\t) FROM resource r\n" +
-            "\t\t\t\t\t\twhere c.uuid = r.resourcerefid\n" +
-            "\t\t\t), '[]') as resources,\n" +
-            "\t\tCOALESCE((select json_agg(\n" +
-            "\t\t\t\t\tjson_build_object('uuid', sp.uuid, 'organizationid', sp.organizationid, 'created', sp.created, 'updated', sp.updated, 'deleted', sp.deleted, \n" +
-            "\t\t\t\t\t\t\t\t\t'isdeleted', sp.isdeleted, 'crudsubjectid', sp.crudsubjectid, \n" +
-            "\t\t\t\t\t\t\t\t\t'permission', sp.permission, 'description', sp.description, 'effectivestartdate', sp.effectivestartdate, 'effectiveenddate', sp.effectiveenddate, \n" +
-            "\t\t\t\t\t\t\t\t\t'subjectid', sp.subjectid, 'resourceid', sp.resourceid, 'resourceactionid', sp.resourceactionid, 'accessmanagerid', sp.accessmanagerid, 'isactive', sp.isactive,\n" +
-            "\t\t\t\t\t\t\t\t\t'accesstokens', COALESCE((select json_agg(\n" +
-            "\t\t\t\t\t\t\t\t\t\t\tjson_build_object('uuid', rat.uuid, 'organizationid', rat.organizationid, 'created', rat.created, 'updated', rat.updated, 'deleted', rat.deleted, 'isdeleted', rat.isdeleted, \n" +
-            "\t\t\t\t\t\t\t\t\t\t\t'crudsubjectid', rat.crudsubjectid, 'subjectpermissionid', rat.subjectpermissionid, 'resourcetypeid', rat.resourcetypeid, 'resourcerefid', rat.resourcerefid, \n" +
-            "\t\t\t\t\t\t\t\t\t\t\t'token', rat.token, 'expiredate', rat.expiredate, 'isactive', rat.isactive)\n" +
-            "\t\t\t\t\t\t\t\t\t\t\t) from resource_access_token rat\n" +
-            "\t\t\t\t\t\t\t\t\t\t\t\twhere rat.subjectpermissionid = sp.uuid\n" +
-            "\t\t\t\t\t\t\t\t\t\t), '[]')\t\t\t\t\t\t\t\t\t\n" +
-            "\t\t\t\t\t\t\t\t)\n" +
-            "\t\t\t\t\t) FROM subject_permission sp\n" +
-            "\t\t\t\t\t\twhere sp.uuid = c.subjectpermissionid\n" +
-            "\t\t\t), '[]') as permissions,\n" +
-            "\t\tCOALESCE((select json_agg(\n" +
-            "\t\t\t\t\tjson_build_object('uuid', l.uuid, 'organizationid', l.organizationid, 'created', l.created, 'updated', l.updated, 'deleted', l.deleted, 'isdeleted', l.isdeleted, \n" +
-            "\t\t\t\t\t\t\t\t\t'crudsubjectid', l.crudsubjectid, 'name', l.\"name\", 'version', l.\"version\", 'subjectid', l.subjectid, 'licensedocument', l.licensedocument, 'isactive', l.isactive)\n" +
-            "\t\t\t\t\t) from license l\n" +
-            "\t\t\t\t\t\twhere c.licenseid = l.uuid\n" +
-            "\t\t\t), '[]') as licenses\n" +
-            "FROM\ncontract\nc, subject app, subject_membership sm\n" +
-            "where c.subjectid = app.uuid\n" +
-            "and c.subjectid = sm.subjectgroupid and sm.subjecttypeid = '21371a15-04f8-445e-a899-006ee11c0e09' and sm.subjectgrouptypeid = 'ca80dd37-7484-46d3-b4a1-a8af93b2d3c6'\n" +
-            "and c.apiid = CAST(? AS uuid)";
 }

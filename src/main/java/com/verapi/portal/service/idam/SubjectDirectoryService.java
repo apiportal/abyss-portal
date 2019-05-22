@@ -22,6 +22,7 @@ import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -30,7 +31,6 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.sql.UpdateResult;
-import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -41,8 +41,62 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "subject_directory")
 public class SubjectDirectoryService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(SubjectDirectoryService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectDirectoryService.class);
+    private static final String SQL_INSERT = "insert into subject_directory (organizationid, crudsubjectid, directoryname, description, isactive, istemplate,\n" +
+            "                               directorytypeid, directorypriorityorder, directoryattributes, lastsyncronizedat, lastsyncronizationduration)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?,\n" +
+            "  CAST(? AS uuid), ?, ?::JSON, ?, ?);";
+    private static final String SQL_DELETE = "update subject_directory\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  directoryname,\n" +
+            "  description,\n" +
+            "  isactive,\n" +
+            "  istemplate,\n" +
+            "  directorytypeid,\n" +
+            "  directorypriorityorder,\n" +
+            "  directoryattributes,\n" +
+            "  lastsyncronizedat,\n" +
+            "  lastsyncronizationduration\n" +
+            "from\n" +
+            "subject_directory\n";
+    private static final String SQL_UPDATE = "UPDATE subject_directory\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , directoryname      = ?\n" +
+            "  , description       = ?\n" +
+            "  , isactive            = ?\n" +
+            "  , istemplate            = ?\n" +
+            "  , directorytypeid                 = CAST(? AS uuid)\n" +
+            "  , directorypriorityorder    = ?\n" +
+            "  , directoryattributes = ?::JSON\n" +
+            "  , lastsyncronizedat = ?\n" +
+            "  , lastsyncronizationduration = ?\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(directoryname) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(directoryname) like lower(?)\n";
+    private static final String SQL_ORDERBY_NAME = "order by directoryname\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     public SubjectDirectoryService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -53,10 +107,14 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -75,7 +133,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
     }
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
-        logger.trace("---insertAll invoked");
+        LOGGER.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -99,9 +157,9 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -112,7 +170,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -162,9 +220,9 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("updateAll>> update/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -175,7 +233,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -230,17 +288,16 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
         return apiFilter;
     }
 
-
     public Single<JsonObject> startSync(RoutingContext routingContext) {
-        logger.trace("startSync invoked");
+        LOGGER.trace("startSync invoked");
 
         String directoryUuid = routingContext.pathParam("uuid");
-        logger.trace("Received directory uuid:" + directoryUuid);
+        LOGGER.trace("Received directory uuid:" + directoryUuid);
 
         return initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient1 -> findById(UUID.fromString(directoryUuid)))
                 .flatMap(resultSet -> {
-                    if (resultSet.getNumRows()>0) {
+                    if (resultSet.getNumRows() > 0) {
                         JsonObject directoryJson = resultSet.getRows().get(0);
                         JsonObject directoryattributesJson = new JsonObject(directoryJson.getString("directoryattributes"));
 
@@ -248,16 +305,16 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                         directoryJson.put("updated", Instant.now());
                         return update(UUID.fromString(directoryUuid), directoryJson);
                     } else {
-                        logger.trace("Subject Directory not Found");
+                        LOGGER.trace("Subject Directory not Found");
                         return Single.error(new NotFound404Exception("Subject Directory not Found"));
                     }
                 })
                 .flatMap(compositeResult -> {
-                    if (compositeResult.getThrowable()==null) {
-                        logger.trace("Subject Directory state updated as syncing");
+                    if (compositeResult.getThrowable() == null) {
+                        LOGGER.trace("Subject Directory state updated as syncing");
                         return findById(UUID.fromString(directoryUuid));
                     } else {
-                        logger.error("Error in Subject Directory state update as syncing");
+                        LOGGER.error("Error in Subject Directory state update as syncing");
                         return Single.error(compositeResult.getThrowable());
                     }
                 })
@@ -267,7 +324,7 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
     private JsonObject updateConnectionSettingsSyncValues(JsonObject directoryattributesJson, String syncState) {
 
         if (syncState == null || syncState.isEmpty()) {
-            logger.error("updateConnectionSettingsSyncValues syncState received null or empty");
+            LOGGER.error("updateConnectionSettingsSyncValues syncState received null or empty");
             return directoryattributesJson;
         }
 
@@ -294,22 +351,22 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
             directoryattributesJson.getJsonObject("connection.settings").put("connection.settings.sync", connectionSettingsSync);
 
         } else {
-            logger.error("updateConnectionSettingsSyncValues unknown syncState: {} received", syncState);
+            LOGGER.error("updateConnectionSettingsSyncValues unknown syncState: {} received", syncState);
         }
 
         return directoryattributesJson;
     }
 
     public Single<JsonObject> finishSync(RoutingContext routingContext) {
-        logger.trace("finishSync invoked");
+        LOGGER.trace("finishSync invoked");
 
         String directoryUuid = routingContext.pathParam("uuid");
-        logger.trace("Received directory uuid:" + directoryUuid);
+        LOGGER.trace("Received directory uuid:" + directoryUuid);
 
         return initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient1 -> findById(UUID.fromString(directoryUuid)))
                 .flatMap(resultSet -> {
-                    if (resultSet.getNumRows()>0) {
+                    if (resultSet.getNumRows() > 0) {
                         JsonObject directoryJson = resultSet.getRows().get(0);
                         JsonObject directoryattributesJson = new JsonObject(directoryJson.getString("directoryattributes"));
 
@@ -318,16 +375,16 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                         directoryJson.put("lastsyncronizedat", Instant.now());
                         return update(UUID.fromString(directoryUuid), directoryJson);
                     } else {
-                        logger.trace("Subject Directory not Found");
+                        LOGGER.trace("Subject Directory not Found");
                         return Single.error(new NotFound404Exception("Subject Directory not Found"));
                     }
                 })
                 .flatMap(compositeResult -> {
-                    if (compositeResult.getThrowable()==null) {
-                        logger.trace("Subject Directory state updated as syncFailed");
+                    if (compositeResult.getThrowable() == null) {
+                        LOGGER.trace("Subject Directory state updated as syncFailed");
                         return findById(UUID.fromString(directoryUuid));
                     } else {
-                        logger.error("Error in Subject Directory state update as syncFailed");
+                        LOGGER.error("Error in Subject Directory state update as syncFailed");
                         return Single.error(compositeResult.getThrowable());
                     }
                 })
@@ -335,15 +392,15 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
     }
 
     public Single<JsonObject> failSync(RoutingContext routingContext) {
-        logger.trace("failSync invoked");
+        LOGGER.trace("failSync invoked");
 
         String directoryUuid = routingContext.pathParam("uuid");
-        logger.trace("Received directory uuid:" + directoryUuid);
+        LOGGER.trace("Received directory uuid:" + directoryUuid);
 
         return initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient1 -> findById(UUID.fromString(directoryUuid)))
                 .flatMap(resultSet -> {
-                    if (resultSet.getNumRows()>0) {
+                    if (resultSet.getNumRows() > 0) {
                         JsonObject directoryJson = resultSet.getRows().get(0);
                         JsonObject directoryattributesJson = new JsonObject(directoryJson.getString("directoryattributes"));
 
@@ -352,92 +409,20 @@ public class SubjectDirectoryService extends AbstractService<UpdateResult> {
                         directoryJson.put("lastsyncronizedat", Instant.now());
                         return update(UUID.fromString(directoryUuid), directoryJson);
                     } else {
-                        logger.trace("Subject Directory not Found");
+                        LOGGER.trace("Subject Directory not Found");
                         return Single.error(new NotFound404Exception("Subject Directory not Found"));
                     }
                 })
                 .flatMap(compositeResult -> {
-                    if (compositeResult.getThrowable()==null) {
-                        logger.trace("Subject Directory state updated as idle");
+                    if (compositeResult.getThrowable() == null) {
+                        LOGGER.trace("Subject Directory state updated as idle");
                         return findById(UUID.fromString(directoryUuid));
                     } else {
-                        logger.error("Error in Subject Directory state update as idle");
+                        LOGGER.error("Error in Subject Directory state update as idle");
                         return Single.error(compositeResult.getThrowable());
                     }
                 })
                 .flatMap(resultSet -> Single.just(resultSet.getRows().get(0)));
     }
-
-
-
-    private static final String SQL_INSERT = "insert into subject_directory (organizationid, crudsubjectid, directoryname, description, isactive, istemplate,\n" +
-            "                               directorytypeid, directorypriorityorder, directoryattributes, lastsyncronizedat, lastsyncronizationduration)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, ?, ?,\n" +
-            "  CAST(? AS uuid), ?, ?::JSON, ?, ?);";
-
-    private static final String SQL_DELETE = "update subject_directory\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  directoryname,\n" +
-            "  description,\n" +
-            "  isactive,\n" +
-            "  istemplate,\n" +
-            "  directorytypeid,\n" +
-            "  directorypriorityorder,\n" +
-            "  directoryattributes,\n" +
-            "  lastsyncronizedat,\n" +
-            "  lastsyncronizationduration\n" +
-            "from\n" +
-            "subject_directory\n";
-
-    private static final String SQL_UPDATE = "UPDATE subject_directory\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , directoryname      = ?\n" +
-            "  , description       = ?\n" +
-            "  , isactive            = ?\n" +
-            "  , istemplate            = ?\n" +
-            "  , directorytypeid                 = CAST(? AS uuid)\n" +
-            "  , directorypriorityorder    = ?\n" +
-            "  , directoryattributes = ?::JSON\n" +
-            "  , lastsyncronizedat = ?\n" +
-            "  , lastsyncronizationduration = ?\n";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "lower(directoryname) = lower(?)\n";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(directoryname) like lower(?)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by directoryname\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

@@ -21,6 +21,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -41,8 +42,80 @@ import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+@AbyssTableName(tableName = "license")
 public class LicenseService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(LicenseService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LicenseService.class);
+    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument, isactive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON, ?)";
+    private static final String SQL_DELETE = "update license\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  name,\n" +
+            "  version,\n" +
+            "  subjectid,\n" +
+            "  licensedocument::JSON,\n" +
+            "  isactive\n" +
+            "from\n" +
+            "license\n";
+    public static final String FILTER_BY_POLICY = SQL_SELECT + SQL_WHERE + "licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb";
+    private static final String SQL_UPDATE = "UPDATE license\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , name      = ?\n" +
+            "  , version      = ?\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
+            "  , licensedocument      = ?::JSON\n" +
+            "  , isactive = ?\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
+    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+    public static final String FILTER_BY_SUBJECT_WITH_RESOURCES_AND_PERMISSIONS =
+            "SELECT l.uuid, l.organizationid, l.created, l.updated, l.deleted, l.isdeleted, l.crudsubjectid, l.\"name\", l.\"version\", l.subjectid, l.licensedocument, l.isactive,\n" +
+                    "COALESCE((select json_agg(\n" +
+                    "json_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, 'isdeleted', r.isdeleted, \n" +
+                    "\t\t\t\t\t'crudsubjectid', r.crudsubjectid, 'resourcetypeid', r.resourcetypeid, 'resourcename', r.resourcename, 'description', r.description, \n" +
+                    "\t\t\t\t\t'resourcerefid', r.resourcerefid, 'isactive', r.isactive, 'subresourcename', r.subresourcename,\n" +
+                    "\t\t\t\t\t'permissions', COALESCE((select json_agg(\n" +
+                    "\t\t\t\t\t\t\t\tjson_build_object('uuid', sp.uuid, 'organizationid', sp.organizationid, 'created', sp.created, 'updated', sp.updated, 'deleted', sp.deleted, \n" +
+                    "\t\t\t\t\t\t\t\t\t\t\t\t'isdeleted', sp.isdeleted, 'crudsubjectid', sp.crudsubjectid, \n" +
+                    "\t\t\t\t\t\t\t\t\t\t\t\t'permission', sp.permission, 'description', sp.description, 'effectivestartdate', sp.effectivestartdate, 'effectiveenddate', sp.effectiveenddate, \n" +
+                    "\t\t\t\t\t\t\t\t\t\t\t\t'subjectid', sp.subjectid, 'resourceid', sp.resourceid, 'resourceactionid', sp.resourceactionid, 'accessmanagerid', sp.accessmanagerid, 'isactive', sp.isactive)\n" +
+                    "\t\t\t\t\t\t\t\t\t\t\t\t) FROM subject_permission sp\n" +
+                    "\t\t\t\t\t\t\t\t\t\t\t\t\twhere sp.resourceid = r.uuid\n" +
+                    "\t\t\t\t\t\t\t\t\t), '[]')\n" +
+                    "\t\t\t\t)\n" +
+                    "\t\t) FROM resource r\n" +
+                    "\t\t\twhere l.uuid = r.resourcerefid\n" +
+                    "\t\t\t), '[]') as resources\n" +
+                    "from\n" +
+                    "license\nl\n" +
+                    SQL_WHERE + " l." + SQL_CONDITION_SUBJECT_IS;
+    private static final String SQL_CONDITION_UUID_IN = "uuid in (select distinct licenseid from contract where apiid = CAST(? AS uuid))\n";
+    public static final String FILTER_BY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IN;
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    public static final String SQL_DELETE_BY_SUBJECT = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_SUBJECT_IS;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
+
 
     public LicenseService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -53,10 +126,10 @@ public class LicenseService extends AbstractService<UpdateResult> {
     }
 
     public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
-        logger.trace("LicenseService --- insertAllCascaded invoked");
+        LOGGER.trace("LicenseService --- insertAllCascaded invoked");
 
-        String sessionOrganizationId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
-        String sessionUserId = (String)routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        String sessionOrganizationId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
         Observable<JsonObject> insertParamsObservable = Observable.fromIterable(insertRecords).map(o -> (JsonObject) o);
 
@@ -74,13 +147,13 @@ public class LicenseService extends AbstractService<UpdateResult> {
                                 .put("resourcename", licenseInsertResult.getString("name") + " LICENSE")
                                 .put("description", new JsonObject(licenseInsertResult.getString("licensedocument"))
                                         .getJsonObject("info")
-                                        .getString("description") )
+                                        .getString("description"))
                                 .put("resourcerefid", licenseInsertResult.getString("uuid"))
                                 .put("isactive", Boolean.TRUE);
 
                         ResourceService resourceService = new ResourceService(routingContext.vertx());
                         return resourceService.initJDBCClient(sessionOrganizationId)
-                            .flatMap(jdbcClient -> resourceService.insert(insertRecord, recordStatus)).toObservable();
+                                .flatMap(jdbcClient -> resourceService.insert(insertRecord, recordStatus)).toObservable();
                     } else {
                         return Observable.just(recordStatus);
                     }
@@ -128,10 +201,14 @@ public class LicenseService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
         return new JsonArray()
@@ -144,9 +221,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 .add(insertRecord.getBoolean("isactive"));
     }
 
-
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
-        logger.trace("---insertAll invoked");
+        LOGGER.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -208,9 +284,9 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("updateAll>> update/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -221,7 +297,7 @@ public class LicenseService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -275,99 +351,5 @@ public class LicenseService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
-
-    private static final String SQL_INSERT = "insert into license (organizationid, crudsubjectid, name, version, subjectid, licensedocument, isactive)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), ?, ?, CAST(? AS uuid), ?::JSON, ?)";
-
-    private static final String SQL_DELETE = "update license\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  name,\n" +
-            "  version,\n" +
-            "  subjectid,\n" +
-            "  licensedocument::JSON,\n" +
-            "  isactive\n" +
-            "from\n" +
-            "license\n";
-
-    private static final String SQL_UPDATE = "UPDATE license\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , name      = ?\n" +
-            "  , version      = ?\n" +
-            "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , licensedocument      = ?::JSON\n" +
-            "  , isactive = ?\n";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by name\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_UUID_IN = "uuid in (select distinct licenseid from contract where apiid = CAST(? AS uuid))\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    public static final String SQL_DELETE_BY_SUBJECT = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_SUBJECT_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
-
-    public static final String FILTER_BY_API = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IN;
-
-    public static final String FILTER_BY_SUBJECT_WITH_RESOURCES_AND_PERMISSIONS =
-            "SELECT l.uuid, l.organizationid, l.created, l.updated, l.deleted, l.isdeleted, l.crudsubjectid, l.\"name\", l.\"version\", l.subjectid, l.licensedocument, l.isactive,\n" +
-            "COALESCE((select json_agg(\n" +
-            "json_build_object('uuid', r.uuid, 'organizationid', r.organizationid, 'created', r.created, 'updated', r.updated, 'deleted', r.deleted, 'isdeleted', r.isdeleted, \n" +
-            "\t\t\t\t\t'crudsubjectid', r.crudsubjectid, 'resourcetypeid', r.resourcetypeid, 'resourcename', r.resourcename, 'description', r.description, \n" +
-            "\t\t\t\t\t'resourcerefid', r.resourcerefid, 'isactive', r.isactive, 'subresourcename', r.subresourcename,\n" +
-            "\t\t\t\t\t'permissions', COALESCE((select json_agg(\n" +
-            "\t\t\t\t\t\t\t\tjson_build_object('uuid', sp.uuid, 'organizationid', sp.organizationid, 'created', sp.created, 'updated', sp.updated, 'deleted', sp.deleted, \n" +
-            "\t\t\t\t\t\t\t\t\t\t\t\t'isdeleted', sp.isdeleted, 'crudsubjectid', sp.crudsubjectid, \n" +
-            "\t\t\t\t\t\t\t\t\t\t\t\t'permission', sp.permission, 'description', sp.description, 'effectivestartdate', sp.effectivestartdate, 'effectiveenddate', sp.effectiveenddate, \n" +
-            "\t\t\t\t\t\t\t\t\t\t\t\t'subjectid', sp.subjectid, 'resourceid', sp.resourceid, 'resourceactionid', sp.resourceactionid, 'accessmanagerid', sp.accessmanagerid, 'isactive', sp.isactive)\n" +
-            "\t\t\t\t\t\t\t\t\t\t\t\t) FROM subject_permission sp\n" +
-            "\t\t\t\t\t\t\t\t\t\t\t\t\twhere sp.resourceid = r.uuid\n" +
-            "\t\t\t\t\t\t\t\t\t), '[]')\n" +
-            "\t\t\t\t)\n" +
-            "\t\t) FROM resource r\n" +
-            "\t\t\twhere l.uuid = r.resourcerefid\n" +
-            "\t\t\t), '[]') as resources\n" +
-            "from\n" +
-            "license\nl\n" +
-            SQL_WHERE + " l." + SQL_CONDITION_SUBJECT_IS;
-
-    public static final String FILTER_BY_POLICY = SQL_SELECT + SQL_WHERE + "licensedocument -> 'termsOfService' -> 'policyKey' @> ?::jsonb";
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

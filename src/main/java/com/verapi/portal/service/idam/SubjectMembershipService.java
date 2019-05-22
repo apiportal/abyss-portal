@@ -21,6 +21,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -37,8 +38,71 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "subject_membership")
 public class SubjectMembershipService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(SubjectMembershipService.class);
+    public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
+    public static final String SQL_CONDITION_USER_GROUP_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
+    public static final String SQL_CONDITION_USER_ROLE_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
+    public static final String SQL_CONDITION_GROUP_ROLE_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
+    public static final String SQL_CONDITION_USER_APP_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_APP + "' AS uuid)\n";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SubjectMembershipService.class);
+    private static final String SQL_INSERT = "insert into subject_membership (organizationid, crudsubjectid, subjectid, subjectgroupid, subjectdirectoryid,\n" +
+            "subjecttypeid, subjectgrouptypeid, isactive)\n" +
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid)," +
+            "CAST(? AS uuid) ,CAST(? AS uuid), ?)";
+    private static final String SQL_DELETE = "update subject_membership\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  subjectid,\n" +
+            "  subjectgroupid,\n" +
+            "  subjectdirectoryid,\n" +
+            "  subjecttypeid,\n" +
+            "  subjectgrouptypeid,\n" +
+            "  isactive\n" +
+            "from\n" +
+            "subject_membership\n";
+    public static final String FILTER_BY_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_DIRECTORY;
+    public static final String FILTER_USER_GROUP_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_GROUP_MEMBERSHIP;
+    public static final String FILTER_USER_ROLE_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_ROLE_MEMBERSHIP;
+    public static final String FILTER_GROUP_ROLE_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_GROUP_ROLE_MEMBERSHIP;
+    public static final String FILTER_USER_APP_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_APP_MEMBERSHIP;
+    private static final String SQL_UPDATE = "UPDATE subject_membership\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , subjectid      = CAST(? AS uuid)\n" +
+            "  , subjectgroupid      = CAST(? AS uuid)\n" +
+            "  , subjectdirectoryid      = CAST(? AS uuid)\n" +
+            //"  , subjecttypeid      = CAST(? AS uuid)\n" +
+            //"  , subjectgrouptypeid      = CAST(? AS uuid)\n" +
+            "  , isactive      = CAST(? AS uuid)\n";
+    private static final String SQL_CONDITION_NAME_IS = "";
+    private static final String SQL_CONDITION_NAME_LIKE = "";
+    private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
+    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
+    private static final String SQL_CONDITION_GROUP_IS = "subjectgroupid = CAST(? AS uuid)\n";
+    public static final String FILTER_BY_GROUP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_GROUP_IS;
+    private static final String SQL_ORDERBY_NAME = "order by id\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT; //+ SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT; //+ SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    public static final String SQL_DELETE_GROUPS = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_GROUP_IS;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     public SubjectMembershipService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -49,10 +113,14 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -62,18 +130,17 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .add(insertRecord.getString("subjectid"))
                 .add(insertRecord.getString("subjectgroupid"))
                 .add(insertRecord.getString("subjectdirectoryid"))
-                .add(insertRecord.containsKey("subjecttypeid")?insertRecord.getString("subjecttypeid"):Constants.SUBJECT_TYPE_USER)
-                .add(insertRecord.containsKey("subjectgrouptypeid")?insertRecord.getString("subjectgrouptypeid"):Constants.SUBJECT_TYPE_GROUP)
+                .add(insertRecord.containsKey("subjecttypeid") ? insertRecord.getString("subjecttypeid") : Constants.SUBJECT_TYPE_USER)
+                .add(insertRecord.containsKey("subjectgrouptypeid") ? insertRecord.getString("subjectgrouptypeid") : Constants.SUBJECT_TYPE_GROUP)
                 .add(insertRecord.getBoolean("isactive"));
     }
 
     /**
-     *
      * @param insertRecord
      * @return recordStatus
      */
     public Single<JsonObject> insert(JsonObject insertRecord, JsonObject parentRecordStatus) {
-        logger.trace("---insert invoked");
+        LOGGER.trace("---insert invoked");
 
         JsonArray insertParam = prepareInsertParameters(insertRecord);
         return insert(insertParam, SQL_INSERT)
@@ -88,9 +155,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .flatMap(result -> Single.just(evaluateCompositeResultAndReturnRecordStatus(result, parentRecordStatus)));
     }
 
-
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
-        logger.trace("---insertAll invoked");
+        LOGGER.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -102,8 +168,8 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString("subjectid"))
                             .add(jsonObj.getString("subjectgroupid"))
                             .add(jsonObj.getString("subjectdirectoryid"))
-                            .add(jsonObj.containsKey("subjecttypeid")?jsonObj.getString("subjecttypeid"):Constants.SUBJECT_TYPE_USER)
-                            .add(jsonObj.containsKey("subjectgrouptypeid")?jsonObj.getString("subjectgrouptypeid"):Constants.SUBJECT_TYPE_GROUP)
+                            .add(jsonObj.containsKey("subjecttypeid") ? jsonObj.getString("subjecttypeid") : Constants.SUBJECT_TYPE_USER)
+                            .add(jsonObj.containsKey("subjectgrouptypeid") ? jsonObj.getString("subjectgrouptypeid") : Constants.SUBJECT_TYPE_GROUP)
                             .add(jsonObj.getBoolean("isactive"));
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
@@ -123,9 +189,9 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -136,7 +202,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -198,9 +264,9 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("updateAll>> update/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -211,7 +277,7 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -265,100 +331,5 @@ public class SubjectMembershipService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
-
-    private static final String SQL_INSERT = "insert into subject_membership (organizationid, crudsubjectid, subjectid, subjectgroupid, subjectdirectoryid,\n" +
-            "subjecttypeid, subjectgrouptypeid, isactive)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid)," +
-                "CAST(? AS uuid) ,CAST(? AS uuid), ?)";
-
-    private static final String SQL_DELETE = "update subject_membership\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  subjectid,\n" +
-            "  subjectgroupid,\n" +
-            "  subjectdirectoryid,\n" +
-            "  subjecttypeid,\n" +
-            "  subjectgrouptypeid,\n" +
-            "  isactive\n" +
-            "from\n" +
-            "subject_membership\n";
-
-    private static final String SQL_UPDATE = "UPDATE subject_membership\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , subjectid      = CAST(? AS uuid)\n" +
-            "  , subjectgroupid      = CAST(? AS uuid)\n" +
-            "  , subjectdirectoryid      = CAST(? AS uuid)\n" +
-            //"  , subjecttypeid      = CAST(? AS uuid)\n" +
-            //"  , subjectgrouptypeid      = CAST(? AS uuid)\n" +
-            "  , isactive      = CAST(? AS uuid)\n";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "";
-
-    private static final String SQL_CONDITION_SUBJECT_IS = "subjectid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_GROUP_IS = "subjectgroupid = CAST(? AS uuid)\n";
-
-    public static final String SQL_CONDITION_DIRECTORY = "subjectdirectoryid=CAST(? AS uuid)\n";
-
-    public static final String SQL_CONDITION_USER_GROUP_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n";
-
-    public static final String SQL_CONDITION_USER_ROLE_MEMBERSHIP  = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
-
-    public static final String SQL_CONDITION_GROUP_ROLE_MEMBERSHIP = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_GROUP + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_ROLE + "' AS uuid)\n";
-
-    public static final String SQL_CONDITION_USER_APP_MEMBERSHIP   = "subjecttypeid=CAST('" + Constants.SUBJECT_TYPE_USER + "' AS uuid)\n" + SQL_AND + "subjectgrouptypeid=CAST('" + Constants.SUBJECT_TYPE_APP + "' AS uuid)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by id\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT; //+ SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT; //+ SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    public static final String FILTER_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_IS;
-
-    public static final String FILTER_BY_GROUP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_GROUP_IS;
-
-    public static final String SQL_DELETE_GROUPS = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_GROUP_IS;
-
-    public static final String FILTER_BY_DIRECTORY = SQL_SELECT + SQL_WHERE + SQL_CONDITION_DIRECTORY;
-
-    public static final String FILTER_USER_GROUP_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_GROUP_MEMBERSHIP;
-
-    public static final String FILTER_USER_ROLE_MEMBERSHIP  = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_ROLE_MEMBERSHIP;
-
-    public static final String FILTER_GROUP_ROLE_MEMBERSHIP = SQL_SELECT + SQL_WHERE + SQL_CONDITION_GROUP_ROLE_MEMBERSHIP;
-
-    public static final String FILTER_USER_APP_MEMBERSHIP   = SQL_SELECT + SQL_WHERE + SQL_CONDITION_USER_APP_MEMBERSHIP;
-
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }

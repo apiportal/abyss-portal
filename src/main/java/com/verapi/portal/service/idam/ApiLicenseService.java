@@ -20,6 +20,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -36,8 +37,56 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "api_license")
 public class ApiLicenseService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(ApiLicenseService.class);
+    private static final String SQL_INSERT = "insert into api_license (organizationid, crudsubjectid, apiid, licenseid, isactive)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?)";
+    private static final String SQL_DELETE = "update api_license\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  apiid,\n" +
+            "  licenseid,\n" +
+            "  isactive\n" +
+            "from\n" +
+            "api_license\n";
+    private static final String SQL_UPDATE = "UPDATE api_license\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , licenseid      = CAST(? AS uuid)\n" +
+            "  , isactive = ?\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    private static final String SQL_CONDITION_APIID_IS = "apiid = CAST(? AS uuid)\n";
+    public static final String SQL_LIST_API_LICENSES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
+    private static final String SQL_CONDITION_APIID_IN = "apiid in (select distinct uuid from api where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
+    public static final String SQL_LIST_API_LICENSES_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IN;
+    private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
+    public static final String SQL_LIST_LICENSE_APIS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
+    private static final String SQL_CONDITION_LICENSEID_IN = "licenseid in (select distinct uuid from license where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
+    public static final String SQL_LIST_LICENSE_APIS_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IN;
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
     public ApiLicenseService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -48,10 +97,14 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -193,76 +246,4 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
-
-    private static final String SQL_INSERT = "insert into api_license (organizationid, crudsubjectid, apiid, licenseid, isactive)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?)";
-
-    private static final String SQL_DELETE = "update api_license\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  apiid,\n" +
-            "  licenseid,\n" +
-            "  isactive\n" +
-            "from\n" +
-            "api_license\n";
-
-    private static final String SQL_UPDATE = "UPDATE api_license\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , apiid      = CAST(? AS uuid)\n" +
-            "  , licenseid      = CAST(? AS uuid)\n" +
-            "  , isactive = ?\n";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by name\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_CONDITION_APIID_IS = "apiid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_APIID_IN = "apiid in (select distinct uuid from api where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
-
-    private static final String SQL_CONDITION_LICENSEID_IS = "licenseid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_LICENSEID_IN = "licenseid in (select distinct uuid from license where subjectid = CAST(? AS uuid) and isdeleted = false)\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
-
-    public static final String SQL_LIST_API_LICENSES = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IS;
-
-    public static final String SQL_LIST_API_LICENSES_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_APIID_IN;
-
-    public static final String SQL_LIST_LICENSE_APIS = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IS;
-
-    public static final String SQL_LIST_LICENSE_APIS_OF_USER = SQL_SELECT + SQL_WHERE + SQL_CONDITION_LICENSEID_IN;
 }

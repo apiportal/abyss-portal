@@ -27,6 +27,7 @@ import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.MailUtil;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -58,6 +59,7 @@ import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
+@AbyssTableName(tableName = "")
 public class AuthenticationService extends AbstractService<UpdateResult> {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 

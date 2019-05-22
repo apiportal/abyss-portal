@@ -20,6 +20,7 @@ import com.verapi.abyss.exception.ApiSchemaError;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
+import com.verapi.portal.service.AbyssTableName;
 import com.verapi.portal.service.ApiFilterQuery;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Observable;
@@ -36,9 +37,89 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+@AbyssTableName(tableName = "message")
 public class MessageService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(MessageService.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageService.class);
+    private static final String SQL_INSERT = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, \n" +
+            "ownersubjectid, conversationid, folder, sender, receiver, \n" +
+            "subject, bodycontenttype, body, priority, isread, sentat, readat)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
+            "CAST(? AS uuid), ?, ?, ?::JSON, ?::JSON,\n" +
+            "?, ?, ?, ?, false, now(), null)";
+    private static final String SQL_INSERT_NEW_CONVERSATION = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, \n" +
+            "ownersubjectid, folder, sender, receiver, \n" +
+            "subject, bodycontenttype, body, priority, isread, sentat, readat)\n" +
+            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
+            "CAST(? AS uuid), ?, ?::JSON, ?::JSON,\n" +
+            "?, ?, ?, ?, false, now(), null)";
+    private static final String SQL_DELETE = "update message\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  messagetypeid,\n" +
+            "  parentmessageid,\n" +
+            "  ownersubjectid, \n" +
+            "  conversationid, \n" +
+            "  folder, \n" +
+            "  sender::JSON,\n" +
+            "  receiver::JSON,\n" +
+            "  subject,\n" +
+            "  bodycontenttype,\n" +
+            "  body,\n" +
+            "  priority,\n" +
+            "  isstarred,\n" +
+            "  isread,\n" +
+            "  sentat,\n" +
+            "  readat,\n" +
+            "  istrashed\n" +
+            "from\n" +
+            "message\n";
+    private static final String SQL_UPDATE = "UPDATE message\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated           = now()\n" +
+            "  , crudsubjectid     = CAST(? AS uuid)\n" +
+            "  , messagetypeid     = CAST(? AS uuid)\n" +
+            "  , parentmessageid   = CAST(? AS uuid)\n" +
+            "  , ownersubjectid    = CAST(? AS uuid)\n" +
+            "  , conversationid    = ?\n" +
+            "  , folder            = ?\n" +
+            "  , sender            = ?::JSON\n" +
+            "  , receiver          = ?::JSON\n" +
+            "  , subject           = ?\n" +
+            "  , bodycontenttype   = ?\n" +
+            "  , body              = ?\n" +
+            "  , priority          = ?\n" +
+            "  , isstarred         = ?\n" +
+            "  , isread            = ?\n" +
+            "  , sentat            = ?\n" +
+            "  , readat            = ?\n" +
+            "  , istrashed         = ?";
+    private static final String SQL_CONDITION_NAME_IS = "lower(subject) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(subject) like lower(?)\n";
+    private static final String SQL_ORDERBY_NAME = "order by subject\n";
+    private static final String SQL_ORDERBY_CONVERSATION_AND_SENTAT = "order by conversationid desc, sentat desc\n";
+    private static final String SQL_CONDITION_SUBJECT_UUID_IS = "ownersubjectid = CAST(? AS uuid)\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    public static final String SQL_FIND_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_UUID_IS +
+            SQL_AND + SQL_CONDITION_ONLY_NOTDELETED +
+            SQL_ORDERBY_CONVERSATION_AND_SENTAT;
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
     private Integer senderRecordId;
     private Integer conversationId = null;
     private JsonObject senderJson;
@@ -112,7 +193,7 @@ public class MessageService extends AbstractService<UpdateResult> {
     }
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
-        logger.trace("---insertAll invoked");
+        LOGGER.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
@@ -169,9 +250,9 @@ public class MessageService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -182,7 +263,7 @@ public class MessageService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -232,9 +313,9 @@ public class MessageService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("updateAll>> update/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.error(result.getThrowable().getLocalizedMessage());
+                        LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put("uuid", "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -245,7 +326,7 @@ public class MessageService extends AbstractService<UpdateResult> {
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
@@ -299,106 +380,5 @@ public class MessageService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
-
-    private static final String SQL_INSERT = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, \n" +
-            "ownersubjectid, conversationid, folder, sender, receiver, \n" +
-            "subject, bodycontenttype, body, priority, isread, sentat, readat)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
-            "CAST(? AS uuid), ?, ?, ?::JSON, ?::JSON,\n" +
-            "?, ?, ?, ?, false, now(), null)";
-
-    private static final String SQL_INSERT_NEW_CONVERSATION = "insert into message (organizationid, crudsubjectid, messagetypeid, parentmessageid, \n" +
-            "ownersubjectid, folder, sender, receiver, \n" +
-            "subject, bodycontenttype, body, priority, isread, sentat, readat)\n" +
-            "values (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), \n" +
-            "CAST(? AS uuid), ?, ?::JSON, ?::JSON,\n" +
-            "?, ?, ?, ?, false, now(), null)";
-
-    private static final String SQL_DELETE = "update message\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  messagetypeid,\n" +
-            "  parentmessageid,\n" +
-            "  ownersubjectid, \n" +
-            "  conversationid, \n" +
-            "  folder, \n" +
-            "  sender::JSON,\n" +
-            "  receiver::JSON,\n" +
-            "  subject,\n" +
-            "  bodycontenttype,\n" +
-            "  body,\n" +
-            "  priority,\n" +
-            "  isstarred,\n" +
-            "  isread,\n" +
-            "  sentat,\n" +
-            "  readat,\n" +
-            "  istrashed\n" +
-            "from\n" +
-            "message\n";
-
-    private static final String SQL_UPDATE = "UPDATE message\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated           = now()\n" +
-            "  , crudsubjectid     = CAST(? AS uuid)\n" +
-            "  , messagetypeid     = CAST(? AS uuid)\n" +
-            "  , parentmessageid   = CAST(? AS uuid)\n" +
-            "  , ownersubjectid    = CAST(? AS uuid)\n" +
-            "  , conversationid    = ?\n" +
-            "  , folder            = ?\n" +
-            "  , sender            = ?::JSON\n" +
-            "  , receiver          = ?::JSON\n" +
-            "  , subject           = ?\n" +
-            "  , bodycontenttype   = ?\n" +
-            "  , body              = ?\n" +
-            "  , priority          = ?\n" +
-            "  , isstarred         = ?\n" +
-            "  , isread            = ?\n" +
-            "  , sentat            = ?\n" +
-            "  , readat            = ?\n" +
-            "  , istrashed         = ?";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "lower(subject) = lower(?)\n";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(subject) like lower(?)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by subject\n";
-
-    private static final String SQL_ORDERBY_CONVERSATION_AND_SENTAT = "order by conversationid desc, sentat desc\n";
-
-    private static final String SQL_CONDITION_SUBJECT_UUID_IS = "ownersubjectid = CAST(? AS uuid)\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    public static final String SQL_FIND_BY_SUBJECT = SQL_SELECT + SQL_WHERE + SQL_CONDITION_SUBJECT_UUID_IS +
-            SQL_AND + SQL_CONDITION_ONLY_NOTDELETED +
-            SQL_ORDERBY_CONVERSATION_AND_SENTAT;
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
 
 }
