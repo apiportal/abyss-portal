@@ -25,6 +25,7 @@ import com.datastax.driver.extras.codecs.jdk8.InstantCodec;
 import com.verapi.abyss.common.Config;
 import com.verapi.abyss.common.Constants;
 import io.vertx.cassandra.CassandraClientOptions;
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.cassandra.CassandraClient;
@@ -35,8 +36,12 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.UUID;
 
-public class CassandraService {
+public final class CassandraService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraService.class);
+    private static final int LOCAL_CORE_NUM_OF_CONN = 4;
+    private static final int LOCAL_MAX_NUM_OF_CONN = 10;
+    private static final int REMOTE_CORE_NUM_OF_CONN = 2;
+    private static final int REMOTE_MAX_NUM_OF_CONN = 4;
 
     private static CassandraService instance;
     private CassandraClient cassandraClient;
@@ -65,8 +70,8 @@ public class CassandraService {
 
         PoolingOptions poolingOptions = new PoolingOptions();
         poolingOptions
-                .setConnectionsPerHost(HostDistance.LOCAL, 4, 10)
-                .setConnectionsPerHost(HostDistance.REMOTE, 2, 4);
+                .setConnectionsPerHost(HostDistance.LOCAL, LOCAL_CORE_NUM_OF_CONN, LOCAL_MAX_NUM_OF_CONN)
+                .setConnectionsPerHost(HostDistance.REMOTE, REMOTE_CORE_NUM_OF_CONN, REMOTE_MAX_NUM_OF_CONN);
 
         cassandraClientOptions.dataStaxClusterBuilder()
                 .withCredentials(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_DBUSER_NAME)
@@ -78,17 +83,17 @@ public class CassandraService {
                 //.withPoolingOptions(poolingOptions)
                 .getConfiguration().getCodecRegistry().register(InstantCodec.instance);
 
-        CassandraClient cassandraClient = CassandraClient.createShared(getRoutingContext().vertx(), cassandraClientOptions);
-        cassandraClient.connect(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_KEYSPACE), event -> {
+        CassandraClient sharedCassandraClient = CassandraClient.createShared(getRoutingContext().vertx(), cassandraClientOptions);
+        sharedCassandraClient.connect(Config.getInstance().getConfigJsonObject().getString(Constants.CASSANDRA_KEYSPACE), (AsyncResult<Void> event) -> {
             if (event.succeeded()) {
                 LOGGER.info("Cassandra client connected");
                 String insertStatement = "insert into platform_api_log (id, httpmethod, httppath, httpsession, \"index\", remoteaddress, source, timestamp,username)\n" +
                         "values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                cassandraClient.prepare(insertStatement,  prepareResult -> {
+                sharedCassandraClient.prepare(insertStatement, (AsyncResult<PreparedStatement> prepareResult) -> {
                     if (prepareResult.succeeded()) {
                         LOGGER.trace("Cassandra client prepared statement");
                         preparedStatement = prepareResult.result();
-                        setCassandraClient(cassandraClient);
+                        setCassandraClient(sharedCassandraClient);
                     } else {
                         LOGGER.error("Cassandra client is unable to prepare statement, error: {} \n stack trace:{}"
                                 , event.cause().getLocalizedMessage(), event.cause().getStackTrace());
@@ -116,7 +121,8 @@ public class CassandraService {
     public void indexDocument(String index, UUID id, JsonObject source) {
         if (cassandraClient == null) {
             LOGGER.warn("Cassandra client initialization not completed yet");
-            return; //TODO: fix to wait cassandraClient instance creation asynch block
+            //TODO: fix to wait cassandraClient instance creation asynch block
+            return;
         }
 
         cassandraClient

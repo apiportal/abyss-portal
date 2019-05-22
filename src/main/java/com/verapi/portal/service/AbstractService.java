@@ -45,6 +45,7 @@ import java.util.UUID;
 public abstract class AbstractService<T> implements IService<T> {
 
     public static final String SQL_AND = "and\n";
+    protected static final String EXCEPTION_LOG_FORMAT = "{}\n{}";
     protected static final String SQL_WHERE = "where\n";
     protected static final String SQL_CONDITION_ID_IS = "id = ?\n";
     protected static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";

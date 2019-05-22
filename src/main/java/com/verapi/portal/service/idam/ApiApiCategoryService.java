@@ -34,24 +34,92 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class ApiApiCategoryService extends AbstractService<UpdateResult> {
-    private static final Logger logger = LoggerFactory.getLogger(ApiApiCategoryService.class);
+    public static final String SQL_LIST_API_CATEGORIES = "select\n" +
+            "  api_category.uuid,\n" +
+            "  api_category.name\n" +
+            "from\n" +
+            "api__api_category\n" +
+            ", api_category\n" +
+            "where apiid = CAST(? AS uuid) and apicategoryid = api_category.uuid\n";
+    public static final String SQL_LIST_SUBJECT_API_CATEGORIES = "select distinct\n" +
+            "  api_category.uuid,\n" +
+            "  api_category.name\n" +
+            "from\n" +
+            "api__api_category\n" +
+            ", api_category, api\n" +
+            "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
+            "      apicategoryid = api_category.uuid\n";
+    public static final String SQL_API_API_CATEGORIES_BY_API_AND_CATEGORY = "select\n" +
+            "  id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apicategoryid\n" +
+            "from\n" +
+            "api__api_category\n" +
+            "where apiid = CAST(? AS uuid) and apicategoryid = CAST(? AS uuid)\n";
+    public static final String SQL_LIST_SUBJECT_BUSINESS_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
+    public static final String SQL_LIST_SUBJECT_PROXY_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApiApiCategoryService.class);
+    private static final String SQL_INSERT = "insert into api__api_category (organizationid, crudsubjectid, apiid, apicategoryid)\n" +
+            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
+    private static final String SQL_DELETE = "update api__api_category\n" +
+            "set\n" +
+            "  deleted     = now()\n" +
+            "  , isdeleted = true\n";
+    private static final String SQL_SELECT = "select\n" +
+            "  uuid,\n" +
+            "  organizationid,\n" +
+            "  created,\n" +
+            "  updated,\n" +
+            "  deleted,\n" +
+            "  isdeleted,\n" +
+            "  crudsubjectid,\n" +
+            "  apiid,\n" +
+            "  apicategoryid\n" +
+            "from\n" +
+            "api__api_category\n";
+    private static final String SQL_UPDATE = "UPDATE api__api_category\n" +
+            "SET\n" +
+            "  organizationid      = CAST(? AS uuid)\n" +
+            "  , updated               = now()\n" +
+            "  , crudsubjectid      = CAST(? AS uuid)\n" +
+            "  , apiid      = CAST(? AS uuid)\n" +
+            "  , apicategoryid      = CAST(? AS uuid)\n";
+    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
+    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
+    private static final String SQL_ORDERBY_NAME = "order by name\n";
+    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
+    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
+    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final String SQL_FIND_BY_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_IS;
+    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
+    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
+    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
+    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
+    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
+    private static final String STATUS = "status";
+    private static final String RESPONSE = "response";
+    private static final String ERROR = "error";
 
     public ApiApiCategoryService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
     }
+
 
     public ApiApiCategoryService(Vertx vertx) {
         super(vertx);
     }
 
     @Override
-    protected String getInsertSql() { return SQL_INSERT; }
+    protected String getInsertSql() {
+        return SQL_INSERT;
+    }
 
     @Override
-    protected String getFindByIdSql() { return SQL_FIND_BY_ID; }
+    protected String getFindByIdSql() {
+        return SQL_FIND_BY_ID;
+    }
 
     @Override
     protected JsonArray prepareInsertParameters(JsonObject insertRecord) {
@@ -63,20 +131,21 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
     }
 
     public Single<List<JsonObject>> insertAll(JsonArray insertRecords) {
-        logger.trace("---insertAll invoked");
+        LOGGER.trace("---insertAll invoked");
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(jsonObj -> {
+                .flatMap((JsonObject jsonObj) -> {
                     JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
-                .flatMap(insertResult -> {
+                .flatMap((CompositeResult insertResult) -> {
                     if (insertResult.getThrowable() == null) {
                         return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .onErrorResumeNext(ex -> {
+                                .onErrorResumeNext((Throwable ex) -> {
                                     insertResult.setThrowable(ex);
-                                    return Single.just(insertResult.getResultSet()); //TODO: insertResult.throwable kayıp mı?
+                                    //TODO: insertResult.throwable kayıp mı?
+                                    return Single.just(insertResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)))
                                 .toObservable();
@@ -84,30 +153,29 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
                         return Observable.just(insertResult);
                     }
                 })
-                .flatMap(result -> {
+                .flatMap((CompositeResult result) -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("insertAll>> insert/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.error("insertAll>> insert/find exception {}", result.getThrowable().getMessage());
+                        LOGGER.error(EXCEPTION_LOG_FORMAT, result.getThrowable().getMessage(), result.getThrowable().getStackTrace());
                         recordStatus
                                 .put("uuid", "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(RESPONSE, new JsonObject())
+                                .put(ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("insertAll>> insert getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STATUS, HttpResponseStatus.CREATED.code())
+                                .put(RESPONSE, arr.getJsonObject(0))
+                                .put(ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })
@@ -122,24 +190,23 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
 
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
-        updateRecords.forEach(updateRow -> {
-            jsonArray.add(new JsonObject(updateRow.getValue().toString())
-                    .put("uuid", updateRow.getKey()));
-        });
+        updateRecords.forEach((Map.Entry<String, Object> updateRow) -> jsonArray.add(new JsonObject(updateRow.getValue().toString())
+                .put("uuid", updateRow.getKey())));
         Observable<Object> updateParamsObservable = Observable.fromIterable(jsonArray);
         return updateParamsObservable
-                .flatMap(o -> {
+                .flatMap((Object o) -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = prepareInsertParameters(jsonObj)
                             .add(jsonObj.getString("uuid"));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
-                .flatMap(updateResult -> {
+                .flatMap((CompositeResult updateResult) -> {
                     if (updateResult.getThrowable() == null) {
                         return findById(updateResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .onErrorResumeNext(ex -> {
+                                .onErrorResumeNext((Throwable ex) -> {
                                     updateResult.setThrowable(ex);
-                                    return Single.just(updateResult.getResultSet()); //TODO: updateResult.throwable kayıp mı?
+                                    //TODO: updateResult.throwable kayıp mı?
+                                    return Single.just(updateResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(updateResult.setResultSet(resultSet)))
                                 .toObservable();
@@ -147,30 +214,29 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
                         return Observable.just(updateResult);
                     }
                 })
-                .flatMap(result -> {
+                .flatMap((CompositeResult result) -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        logger.trace("updateAll>> update/find exception {}", result.getThrowable());
-                        logger.error(result.getThrowable().getLocalizedMessage());
-                        logger.error(Arrays.toString(result.getThrowable().getStackTrace()));
+                        LOGGER.error("updateAll>> update/find exception {}", result.getThrowable().getMessage());
+                        LOGGER.error(EXCEPTION_LOG_FORMAT, result.getThrowable().getMessage(), result.getThrowable().getStackTrace());
                         recordStatus
                                 .put("uuid", "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(RESPONSE, new JsonObject())
+                                .put(ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
                                         .toJson());
                     } else {
-                        logger.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
+                        LOGGER.trace("updateAll>> update getKeys {}", result.getUpdateResult().getKeys().encodePrettily());
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STATUS, HttpResponseStatus.CREATED.code())
+                                .put(RESPONSE, arr.getJsonObject(0))
+                                .put(ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })
@@ -217,86 +283,5 @@ public class ApiApiCategoryService extends AbstractService<UpdateResult> {
     public ApiFilterQuery.APIFilter getAPIFilter() {
         return apiFilter;
     }
-
-    private static final String SQL_INSERT = "insert into api__api_category (organizationid, crudsubjectid, apiid, apicategoryid)\n" +
-            "values (CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid) ,CAST(? AS uuid))";
-
-    private static final String SQL_DELETE = "update api__api_category\n" +
-            "set\n" +
-            "  deleted     = now()\n" +
-            "  , isdeleted = true\n";
-
-    private static final String SQL_SELECT = "select\n" +
-            "  uuid,\n" +
-            "  organizationid,\n" +
-            "  created,\n" +
-            "  updated,\n" +
-            "  deleted,\n" +
-            "  isdeleted,\n" +
-            "  crudsubjectid,\n" +
-            "  apiid,\n" +
-            "  apicategoryid\n" +
-            "from\n" +
-            "api__api_category\n";
-
-    private static final String SQL_UPDATE = "UPDATE api__api_category\n" +
-            "SET\n" +
-            "  organizationid      = CAST(? AS uuid)\n" +
-            "  , updated               = now()\n" +
-            "  , crudsubjectid      = CAST(? AS uuid)\n" +
-            "  , apiid      = CAST(? AS uuid)\n" +
-            "  , apicategoryid      = CAST(? AS uuid)\n";
-
-
-    private static final String SQL_CONDITION_NAME_IS = "lower(name) = lower(?)\n";
-
-    private static final String SQL_CONDITION_NAME_LIKE = "lower(name) like lower(?)\n";
-
-    private static final String SQL_ORDERBY_NAME = "order by name\n";
-
-    private static final String SQL_CONDITION_ONLY_NOTDELETED = "isdeleted=false\n";
-
-    private static final String SQL_FIND_BY_ID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_ID_IS;
-
-    private static final String SQL_FIND_BY_UUID = SQL_SELECT + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_FIND_BY_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_IS;
-
-    private static final String SQL_FIND_LIKE_NAME = SQL_SELECT;// + SQL_WHERE + SQL_CONDITION_NAME_LIKE;
-
-    private static final String SQL_DELETE_ALL = SQL_DELETE + SQL_WHERE + SQL_CONDITION_ONLY_NOTDELETED;
-
-    private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
-
-    private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
-
-    private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
-
-    public static final String SQL_LIST_API_CATEGORIES = "select\n" +
-            "  api_category.uuid,\n" +
-            "  api_category.name\n" +
-            "from\n" +
-            "api__api_category\n" +
-            ", api_category\n" +
-            "where apiid = CAST(? AS uuid) and apicategoryid = api_category.uuid\n";
-
-    public static final String SQL_LIST_SUBJECT_API_CATEGORIES = "select distinct\n" +
-            "  api_category.uuid,\n" +
-            "  api_category.name\n" +
-            "from\n" +
-            "api__api_category\n" +
-            ", api_category, api\n" +
-            "where api.subjectid = CAST(? AS uuid) and apiid = api.uuid and\n" +
-            "      apicategoryid = api_category.uuid\n";
-
-    public static final String SQL_API_API_CATEGORIES_BY_API_AND_CATEGORY = "select\n" +
-            "  id, uuid, organizationid, created, updated, deleted, isdeleted, crudsubjectid, apiid, apicategoryid\n" +
-            "from\n" +
-            "api__api_category\n" +
-            "where apiid = CAST(? AS uuid) and apicategoryid = CAST(? AS uuid)\n";
-
-    public static final String SQL_LIST_SUBJECT_BUSINESS_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI;
-
-    public static final String SQL_LIST_SUBJECT_PROXY_API_CATEGORIES = SQL_LIST_SUBJECT_API_CATEGORIES + SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI;
 
 }

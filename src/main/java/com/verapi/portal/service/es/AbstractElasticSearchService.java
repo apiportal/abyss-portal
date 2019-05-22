@@ -36,14 +36,26 @@ import java.time.Instant;
 
 public abstract class AbstractElasticSearchService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractElasticSearchService.class);
-    private static RestHighLevelClient client;
+    private RestHighLevelClient client;
+    private ActionListener<IndexResponse> listener;
 
     AbstractElasticSearchService() {
         LOGGER.trace("AbstractElasticSearchService() invoked");
         client = new RestHighLevelClient(RestClient.builder(new HttpHost(Config.getInstance().getConfigJsonObject().getString(Constants.ES_SERVER_HOST),
                 Config.getInstance().getConfigJsonObject().getInteger(Constants.ES_SERVER_PORT),
                 Config.getInstance().getConfigJsonObject().getString(Constants.ES_SERVER_SCHEME))));
-        LOGGER.trace("RestHighLevelClient instance created : {}", client.toString());
+        LOGGER.trace("RestHighLevelClient instance created : {}", client);
+        listener = new ActionListener<IndexResponse>() {
+            @Override
+            public void onResponse(IndexResponse indexResponse) {
+                LOGGER.trace("listener onResponse : {}", indexResponse);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                LOGGER.error("listener onFailure : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
+            }
+        };
     }
 
     public void close() {
@@ -54,32 +66,19 @@ public abstract class AbstractElasticSearchService {
         }
     }
 
-    private ActionListener<IndexResponse> listener = new ActionListener<IndexResponse>() {
-        @Override
-        public void onResponse(IndexResponse indexResponse) {
-            LOGGER.trace("listener onResponse : {}", indexResponse);
-            //close();
-        }
-
-        @Override
-        public void onFailure(Exception e) {
-            LOGGER.error("listener onFailure : {} | {}", e.getLocalizedMessage(), e.getStackTrace());
-            //close();
-        }
-    };
-
     void indexDocument(RoutingContext routingContext, String index, String type, String id, JsonObject source) {
         LOGGER.trace("indexDocument() invoked");
         Boolean isESLoggerEnabled = Config.getInstance().getConfigJsonObject().getBoolean(Constants.ES_LOGGER_ENABLED);
-        if (!isESLoggerEnabled)
+        if (!isESLoggerEnabled) {
             return;
+        }
 
         IndexRequest request = new IndexRequest(index, type, id);
         JsonObject sourceMap = source.copy();
 
         sourceMap.put("@timestamp", Instant.now());
         if (routingContext != null) {
-            if (routingContext.user()==null || routingContext.user().principal()==null || !routingContext.user().principal().containsKey("username")) {
+            if (routingContext.user() == null || routingContext.user().principal() == null || !routingContext.user().principal().containsKey("username")) {
                 sourceMap.put("@username", "no_user");
             } else {
                 sourceMap.put("@username", routingContext.user().principal().getString("username"));
@@ -91,7 +90,6 @@ public abstract class AbstractElasticSearchService {
         }
 
         try {
-            //request.source(sourceMap.getMap(), XContentType.JSON);
             request.source(sourceMap.encode(), XContentType.JSON);
             client.indexAsync(request, RequestOptions.DEFAULT, listener);
         } catch (Exception e) {
