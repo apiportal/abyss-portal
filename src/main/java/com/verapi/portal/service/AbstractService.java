@@ -165,9 +165,9 @@ public abstract class AbstractService<T> implements IService<T> {
             LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
             recordStatus
                     .put(STR_UUID, "0")
-                    .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                    .put("response", new JsonObject())
-                    .put("error", new ApiSchemaError()
+                    .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                    .put(STR_RESPONSE, new JsonObject())
+                    .put(STR_ERROR, new ApiSchemaError()
                             .setUsermessage(result.getThrowable().getLocalizedMessage())
                             .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                             .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -185,9 +185,9 @@ public abstract class AbstractService<T> implements IService<T> {
                 result.getResultSet().getRows().forEach(arr::add);
                 recordStatus
                         .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
-                        .put("status", HttpResponseStatus.CREATED.code())
-                        .put("response", arr.getJsonObject(0))
-                        .put("error", new ApiSchemaError().toJson());
+                        .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                        .put(STR_RESPONSE, arr.getJsonObject(0))
+                        .put(STR_ERROR, new ApiSchemaError().toJson());
             }
             if (parentRecordStatus != null) {
                 recordStatus.put("parentRecordStatus", parentRecordStatus);
@@ -563,9 +563,9 @@ public abstract class AbstractService<T> implements IService<T> {
                     resp.getRows().forEach(arr::add);
                     JsonObject recordStatus = new JsonObject()
                             .put(STR_UUID, resp.getRows().get(0).getString(STR_UUID))
-                            .put("status", httpResponseStatus)
-                            .put("response", arr.getJsonObject(0))
-                            .put("error", new ApiSchemaError().toJson());
+                            .put(STR_STATUS, httpResponseStatus)
+                            .put(STR_RESPONSE, arr.getJsonObject(0))
+                            .put(STR_ERROR, new ApiSchemaError().toJson());
                     result.add(recordStatus);
                 },
                 (Throwable throwable) -> {
@@ -573,9 +573,9 @@ public abstract class AbstractService<T> implements IService<T> {
                     //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
                     JsonObject recordStatus = new JsonObject()
                             .put(STR_UUID, "0")
-                            .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                            .put("response", new JsonObject()) //TODO: fill with empty Subject response json
-                            .put("error", new ApiSchemaError()
+                            .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                            .put(STR_RESPONSE, new JsonObject()) //TODO: fill with empty Subject response json
+                            .put(STR_ERROR, new ApiSchemaError()
                                     .setUsermessage(throwable.getLocalizedMessage())
                                     .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                     .setInternalmessage(Arrays.toString(throwable.getStackTrace()))
@@ -590,9 +590,9 @@ public abstract class AbstractService<T> implements IService<T> {
                     resp.getRows().forEach(arr::add);
                     JsonObject recordStatus = new JsonObject()
                             .put(STR_UUID, resp.getRows().get(0).getString(STR_UUID))
-                            .put("status", httpResponseStatus)
-                            .put("response", arr.getJsonObject(0))
-                            .put("error", new ApiSchemaError().toJson());
+                            .put(STR_STATUS, httpResponseStatus)
+                            .put(STR_RESPONSE, arr.getJsonObject(0))
+                            .put(STR_ERROR, new ApiSchemaError().toJson());
                     result.add(recordStatus);
                 },
                 (Throwable throwable) -> {
@@ -600,9 +600,9 @@ public abstract class AbstractService<T> implements IService<T> {
                     //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
                     JsonObject recordStatus = new JsonObject()
                             .put(STR_UUID, "0")
-                            .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                            .put("response", new JsonObject()) //TODO: fill with empty Subject response json
-                            .put("error", new ApiSchemaError()
+                            .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                            .put(STR_RESPONSE, new JsonObject()) //TODO: fill with empty Subject response json
+                            .put(STR_ERROR, new ApiSchemaError()
                                     .setUsermessage(throwable.getLocalizedMessage())
                                     .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                     .setInternalmessage(Arrays.toString(throwable.getStackTrace()))

@@ -207,8 +207,8 @@ public class ContractService extends AbstractService<UpdateResult> {
                 //CONTRACT
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        //JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        //JsonObject permissionInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
                         JsonObject insertRequest = recordStatus.getJsonObject("parentRecordStatus");
 
                         JsonObject insertRecord = new JsonObject()
@@ -220,7 +220,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                                 .put("subjectid", insertRequest.getString("appid"))
                                 .put("environment", insertRequest.getString("environment"))
                                 .put("contractstateid", Constants.CONTRACT_STATE_IS_ACTIVATED)
-                                .put("status", Constants.CONTRACT_STATUS_IS_INFORCE)
+                                .put(STR_STATUS, Constants.CONTRACT_STATUS_IS_INFORCE)
                                 .put("isrestrictedtosubsetofapi", Boolean.FALSE)
                                 .put("licenseid", insertRequest.getString("licenseid"))
                                 .put("subjectpermissionid", recordStatus.getString(STR_UUID));
@@ -234,8 +234,8 @@ public class ContractService extends AbstractService<UpdateResult> {
                 //RESOURCE OF CONTRACT
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject contractInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject contractInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
                                 .put("crudsubjectid", sessionUserId)
@@ -256,14 +256,14 @@ public class ContractService extends AbstractService<UpdateResult> {
                 //RESOURCE ACCESS TOKEN
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
                         String subjectPermissionId = recordStatus
                                 .getJsonObject("parentRecordStatus")
                                 .getJsonObject("parentRecordStatus")
                                 .getString(STR_UUID);
 
                         String apiId = recordStatus.getJsonObject("parentRecordStatus")
-                                .getJsonObject("response").getString("apiid");
+                                .getJsonObject(STR_RESPONSE).getString("apiid");
 
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
@@ -283,15 +283,15 @@ public class ContractService extends AbstractService<UpdateResult> {
 
                 //PREPARE RESULT
                 .flatMap(recordStatus -> {
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject accessTokenInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject accessTokenInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
                         JsonObject resourceRecordStatus = recordStatus.getJsonObject("parentRecordStatus");
                         JsonObject contractRecordStatus = resourceRecordStatus.getJsonObject("parentRecordStatus");
                         JsonObject permissionRecordStatus = contractRecordStatus.getJsonObject("parentRecordStatus");
 
-                        permissionRecordStatus.getJsonObject("response").put("accesstokens", accessTokenInsertResult);
-                        resourceRecordStatus.getJsonObject("response").put("permissions", permissionRecordStatus.getJsonObject("response"));
-                        contractRecordStatus.getJsonObject("response").put("resources", resourceRecordStatus.getJsonObject("response"));
+                        permissionRecordStatus.getJsonObject(STR_RESPONSE).put("accesstokens", accessTokenInsertResult);
+                        resourceRecordStatus.getJsonObject(STR_RESPONSE).put("permissions", permissionRecordStatus.getJsonObject(STR_RESPONSE));
+                        contractRecordStatus.getJsonObject(STR_RESPONSE).put("resources", resourceRecordStatus.getJsonObject(STR_RESPONSE));
                         contractRecordStatus.remove("parentRecordStatus");
 
                         return Observable.just(contractRecordStatus);
@@ -323,7 +323,7 @@ public class ContractService extends AbstractService<UpdateResult> {
                 .add(insertRecord.getString("subjectid"))
                 .add(insertRecord.getString("environment"))
                 .add(insertRecord.getString("contractstateid"))
-                .add(insertRecord.getString("status"))
+                .add(insertRecord.getString(STR_STATUS))
                 .add(insertRecord.getBoolean("isrestrictedtosubsetofapi"))
                 .add(insertRecord.getString("licenseid"))
                 .add(insertRecord.getString("subjectpermissionid"));
@@ -359,9 +359,9 @@ public class ContractService extends AbstractService<UpdateResult> {
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put(STR_UUID, "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -372,9 +372,9 @@ public class ContractService extends AbstractService<UpdateResult> {
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })
@@ -422,9 +422,9 @@ public class ContractService extends AbstractService<UpdateResult> {
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put(STR_UUID, "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -435,9 +435,9 @@ public class ContractService extends AbstractService<UpdateResult> {
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })

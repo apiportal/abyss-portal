@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @AbyssTableName(tableName = "api_license")
@@ -121,16 +122,17 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(jsonObj -> {
+                .flatMap((JsonObject jsonObj) -> {
                     JsonArray insertParam = prepareInsertParameters(jsonObj);
                     return insert(insertParam, SQL_INSERT).toObservable();
                 })
-                .flatMap(insertResult -> {
+                .flatMap((CompositeResult insertResult) -> {
                     if (insertResult.getThrowable() == null) {
                         return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .onErrorResumeNext(ex -> {
+                                .onErrorResumeNext((Throwable ex) -> {
                                     insertResult.setThrowable(ex);
-                                    return Single.just(insertResult.getResultSet()); //TODO: insertResult.throwable kayıp mı?
+                                    //TODO: insertResult.throwable kayıp mı?
+                                    return Single.just(insertResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)))
                                 .toObservable();
@@ -151,7 +153,7 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
 
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
-        updateRecords.forEach(updateRow -> {
+        updateRecords.forEach((Map.Entry<String, Object> updateRow) -> {
             jsonArray.add(new JsonObject(updateRow.getValue().toString())
                     .put(STR_UUID, updateRow.getKey()));
         });
@@ -184,9 +186,9 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put(STR_UUID, "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -197,9 +199,9 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })

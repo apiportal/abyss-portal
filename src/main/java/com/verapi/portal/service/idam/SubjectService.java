@@ -327,8 +327,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 .flatMap(insertRecord -> insert(insertRecord, null).toObservable()) //insert app
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject appInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject appInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
                                 .put("crudsubjectid", sessionUserId)
@@ -348,8 +348,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 })
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject resourceInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject resourceInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
                         String description = "Ownership of " + resourceInsertResult.getString("resourcename") + " by " + routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_DISPLAY_NAME_SESSION_VARIABLE_NAME);
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
@@ -374,8 +374,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 })
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject permissionInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
 
                         String appUuid = recordStatus.getJsonObject("parentRecordStatus")
                                 .getJsonObject("parentRecordStatus").getString(STR_UUID);
@@ -397,13 +397,13 @@ public class SubjectService extends AbstractService<UpdateResult> {
                 })
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        //JsonObject resourceAccessTokenInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        //JsonObject resourceAccessTokenInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
 
                         JsonObject appRecord = recordStatus.getJsonObject("parentRecordStatus")
                                 .getJsonObject("parentRecordStatus")
                                 .getJsonObject("parentRecordStatus")
-                                .getJsonObject("response");
+                                .getJsonObject(STR_RESPONSE);
 
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
@@ -423,23 +423,23 @@ public class SubjectService extends AbstractService<UpdateResult> {
                     }
                 })
                 .flatMap(recordStatus -> {
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        //JsonObject subjectMembershipInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        //JsonObject subjectMembershipInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
 
                         JsonObject resourceAccessTokenRecordStatus = recordStatus.getJsonObject("parentRecordStatus");
-                        JsonObject resourceAccessTokenInsertResult = resourceAccessTokenRecordStatus.getJsonObject("response");
+                        JsonObject resourceAccessTokenInsertResult = resourceAccessTokenRecordStatus.getJsonObject(STR_RESPONSE);
 
                         JsonObject subjectPermissionRecordStatus = resourceAccessTokenRecordStatus.getJsonObject("parentRecordStatus");
-                        JsonObject subjectPermissionInsertResult = subjectPermissionRecordStatus.getJsonObject("response")
+                        JsonObject subjectPermissionInsertResult = subjectPermissionRecordStatus.getJsonObject(STR_RESPONSE)
                                 .put("tokens", resourceAccessTokenInsertResult);
 
                         JsonObject resourceRecordStatus = subjectPermissionRecordStatus.getJsonObject("parentRecordStatus");
-                        JsonObject resourceInsertResult = resourceRecordStatus.getJsonObject("response")
+                        JsonObject resourceInsertResult = resourceRecordStatus.getJsonObject(STR_RESPONSE)
                                 .put("permissions", subjectPermissionInsertResult);
 
                         JsonObject appRecordStatus = resourceRecordStatus.getJsonObject("parentRecordStatus");
-                        appRecordStatus.getJsonObject("response").put("resources", resourceInsertResult);
-                        appRecordStatus.getJsonObject("response").put("contracts", new JsonArray()); //Empty contracts
+                        appRecordStatus.getJsonObject(STR_RESPONSE).put("resources", resourceInsertResult);
+                        appRecordStatus.getJsonObject(STR_RESPONSE).put("contracts", new JsonArray()); //Empty contracts
 
                         return Observable.just(appRecordStatus);
                     } else {
@@ -620,9 +620,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put(STR_UUID, "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -633,9 +633,9 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })

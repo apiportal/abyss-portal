@@ -185,9 +185,9 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put(STR_UUID, "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -198,9 +198,9 @@ public class PolicyTypeService extends AbstractService<UpdateResult> {
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })

@@ -138,8 +138,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 .flatMap(insertRecord -> insert(insertRecord, null).toObservable()) //insert license
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject licenseInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject licenseInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
                                 .put("crudsubjectid", sessionUserId)
@@ -160,8 +160,8 @@ public class LicenseService extends AbstractService<UpdateResult> {
                 })
                 .flatMap(recordStatus -> {
                     //Convert recordStatus to insertRecord Json Object
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject resourceInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject resourceInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
                                 .put("crudsubjectid", sessionUserId)
@@ -183,14 +183,14 @@ public class LicenseService extends AbstractService<UpdateResult> {
                     }
                 })
                 .flatMap(recordStatus -> {
-                    if (recordStatus.getInteger("status") == HttpResponseStatus.CREATED.code()) {
-                        JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
+                    if (recordStatus.getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
+                        JsonObject permissionInsertResult = recordStatus.getJsonObject(STR_RESPONSE);
 
                         JsonObject resourceRecordStatus = recordStatus.getJsonObject("parentRecordStatus");
-                        resourceRecordStatus.getJsonObject("response").put("permissions", permissionInsertResult);
+                        resourceRecordStatus.getJsonObject(STR_RESPONSE).put("permissions", permissionInsertResult);
 
                         JsonObject licenseRecordStatus = resourceRecordStatus.getJsonObject("parentRecordStatus");
-                        licenseRecordStatus.getJsonObject("response").put("resources", resourceRecordStatus.getJsonObject("response"));
+                        licenseRecordStatus.getJsonObject(STR_RESPONSE).put("resources", resourceRecordStatus.getJsonObject(STR_RESPONSE));
 
                         return Observable.just(licenseRecordStatus);
                     } else {
@@ -289,9 +289,9 @@ public class LicenseService extends AbstractService<UpdateResult> {
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
                                 .put(STR_UUID, "0")
-                                .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put("response", new JsonObject())
-                                .put("error", new ApiSchemaError()
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -302,9 +302,9 @@ public class LicenseService extends AbstractService<UpdateResult> {
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
                                 .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
-                                .put("status", HttpResponseStatus.CREATED.code())
-                                .put("response", arr.getJsonObject(0))
-                                .put("error", new ApiSchemaError().toJson());
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })

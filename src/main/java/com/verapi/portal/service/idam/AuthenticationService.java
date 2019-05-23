@@ -440,13 +440,13 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                         return signupMetadata.subjectService.insertAll(new JsonArray().add(userRecord))
                                 .flatMap(jsonObjects -> {
-                                    if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                                    if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
                                         return Single.just(new UpdateResult(jsonObjects.size(),
                                                 new JsonArray().add(jsonObjects.get(0).getString(STR_UUID))));
                                     } else {
                                         if (!jsonObjects.isEmpty()) {
                                             LOGGER.trace("Signup insert subject error: {}", jsonObjects.get(0));
-                                            return Single.error(new RuntimeException(jsonObjects.get(0).getJsonObject("error").encode()));
+                                            return Single.error(new RuntimeException(jsonObjects.get(0).getJsonObject(STR_ERROR).encode()));
                                         } else {
                                             return Single.error(new RuntimeException("User could not be created during signup"));
                                         }
@@ -491,12 +491,12 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                     return signupMetadata.subjectActivationService.insertAll(new JsonArray().add(userActivationRecord))
                             .flatMap(jsonObjects -> {
-                                if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                                if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
                                     return Single.just(new UpdateResult(jsonObjects.size(),
                                             new JsonArray().add(jsonObjects.get(0).getString(STR_UUID))));
                                 } else {
                                     if (!jsonObjects.isEmpty()) {
-                                        ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue("error");
+                                        ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue(STR_ERROR);
                                         return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
                                     } else {
                                         return Single.error(new RuntimeException("User Activation could not be created during signup"));
@@ -615,12 +615,12 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                     return forgotPasswordMetadata.subjectActivationService.insertAll(new JsonArray().add(resetPasswordRecord))
                             .flatMap(jsonObjects -> {
-                                if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
+                                if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger(STR_STATUS) == HttpResponseStatus.CREATED.code()) {
                                     return Single.just(new UpdateResult(jsonObjects.size(),
                                             new JsonArray().add(jsonObjects.get(0).getString(STR_UUID))));
                                 } else {
                                     if (!jsonObjects.isEmpty()) {
-                                        ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue("error");
+                                        ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue(STR_ERROR);
                                         LOGGER.trace("forgotPassword - " + apiSchemaError.getUsermessage());
                                         return Single.error(new RuntimeException(apiSchemaError.getUsermessage()));
                                     } else {
@@ -940,7 +940,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                             .put("contractsubjectid", contractResultSet.getRows().get(0).getString("subjectid"))
                                                             .put("contractenvironment", contractResultSet.getRows().get(0).getString("environment"))
                                                             .put("contractstateid", contractResultSet.getRows().get(0).getString("contractstateid"))
-                                                            .put("contractstatus", contractResultSet.getRows().get(0).getString("status"))
+                                                            .put("contractstatus", contractResultSet.getRows().get(0).getString(STR_STATUS))
                                                     );
                                                 }
                                             });
@@ -955,7 +955,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
     public Single<JsonObject> validateAccessToken(String token) {
         LOGGER.trace("validateAccessToken invoked");
-        JsonObject validationStatus = new JsonObject().put("status", Boolean.FALSE).put("error", "").put("validationreport", new JsonObject());
+        JsonObject validationStatus = new JsonObject().put(STR_STATUS, Boolean.FALSE).put(STR_ERROR, "").put("validationreport", new JsonObject());
 
         return rxValidateToken(token)
                 .flatMap(jsonObject -> {
@@ -998,22 +998,22 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                     if (!Objects.equals(jsonObject.getString("contractstatus"), Constants.CONTRACT_STATUS_IS_INFORCE))
                         return Single.error(new Exception("contract status is not 'inforce'"));
 
-                    return Single.just(validationStatus.put("status", Boolean.TRUE));
+                    return Single.just(validationStatus.put(STR_STATUS, Boolean.TRUE));
                 });
-        //.doAfterSuccess(validateAccessTokenStatus -> validationStatus.put("status", true).put("error", "").put("validationreport", validateAccessTokenStatus))
+        //.doAfterSuccess(validateAccessTokenStatus -> validationStatus.put(STR_STATUS, true).put(STR_ERROR, "").put("validationreport", validateAccessTokenStatus))
 /*
                 .doOnError(throwable -> {
                             Single.error(throwable);
-                            //return Single.just(validationStatus.put("status", false).put("error", throwable.getLocalizedMessage()));
+                            //return Single.just(validationStatus.put(STR_STATUS, false).put(STR_ERROR, throwable.getLocalizedMessage()));
                         }
                 );
 */
 /*
                 .subscribe(validateAccessTokenStatus -> {
-                            validationStatus.put("status", true).put("error", "").put("validationreport", validateAccessTokenStatus);
+                            validationStatus.put(STR_STATUS, true).put(STR_ERROR, "").put("validationreport", validateAccessTokenStatus);
                         }
                         , throwable -> {
-                            validationStatus.put("status", false).put("error", throwable.getLocalizedMessage());
+                            validationStatus.put(STR_STATUS, false).put(STR_ERROR, throwable.getLocalizedMessage());
                         });
 */
         //return validationStatus;
