@@ -94,7 +94,8 @@ public class ApiService extends AbstractService<UpdateResult> {
             "  (CAST(? AS uuid), CAST(? AS uuid), CAST(? AS uuid), ?, CAST(? AS uuid), CAST(? AS uuid), ?, ?,\n" +
             "                    ?, ?, ?::JSON, ?::JSON, CAST(? AS uuid), ?, ?, ?, ?,\n" +
             "                             ?, ?, ?, ?, ?, CAST(? AS uuid), CAST(? AS uuid));";
-    private static final String SQL_INSERT_BUSINESS_API = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi, apistateid, apivisibilityid, languagename, languageversion,\n" +
+    private static final String SQL_INSERT_BUSINESS_API = "insert into api (organizationid, crudsubjectid, subjectid, isproxyapi,\n" +
+            "                 apistateid, apivisibilityid, languagename, languageversion,\n" +
             "                 languageformat, originaldocument, openapidocument, extendeddocument, image, color, deployed, changelog,\n" +
             "                 version, issandbox, islive, isdefaultversion, islatestversion, apioriginid, apiparentid)\n" +
             "values\n" +
@@ -315,17 +316,17 @@ public class ApiService extends AbstractService<UpdateResult> {
         Observable<Object> insertParamsObservable = Observable.fromIterable(insertRecords);
         return insertParamsObservable
                 .flatMap(o -> Observable.just((JsonObject) o))
-                .flatMap(jsonObj -> {
+                .flatMap((JsonObject jsonObj) -> {
                     JsonArray insertParam = prepareInsertParameters(jsonObj);
 
                     return insert(insertParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_INSERT : SQL_INSERT_BUSINESS_API).toObservable();
                 })
-                .flatMap(insertResult -> {
+                .flatMap((CompositeResult insertResult) -> {
                     if (insertResult.getThrowable() == null) {
                         return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .onErrorResumeNext(ex -> {
+                                .onErrorResumeNext((Throwable ex) -> {
                                     insertResult.setThrowable(ex);
-                                    return Single.just(insertResult.getResultSet()); //TODO: insertResult.throwable kayıp mı?
+                                    return Single.just(insertResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)))
                                 .toObservable();
@@ -333,10 +334,10 @@ public class ApiService extends AbstractService<UpdateResult> {
                         return Observable.just(insertResult);
                     }
                 })
-                .flatMap(result -> {
+                .flatMap((CompositeResult result) -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable());
+                        LOGGER.trace("insertAll>> insert/find exception {}", result.getThrowable().getMessage());
                         LOGGER.error(result.getThrowable().getLocalizedMessage());
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
@@ -369,7 +370,7 @@ public class ApiService extends AbstractService<UpdateResult> {
         return update(updateParams, (updateRecord.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID);
     }
 
-    public Single<CompositeResult> updateLifecycle(UUID uuid, JsonArray updateParams) {
+    Single<CompositeResult> updateLifecycle(UUID uuid, JsonArray updateParams) {
         return update(updateParams.add(uuid.toString()), SQL_UPDATE_API_LIFECYCLE);
     }
 
@@ -384,12 +385,12 @@ public class ApiService extends AbstractService<UpdateResult> {
                             .add(jsonObj.getString(STR_UUID));
                     return update(updateParam, (jsonObj.getBoolean("isproxyapi")) ? SQL_UPDATE_BY_UUID : SQL_UPDATE_BUSINESS_API_BY_UUID).toObservable();
                 })
-                .flatMap(updateResult -> {
+                .flatMap((CompositeResult updateResult) -> {
                     if (updateResult.getThrowable() == null) {
                         return findById(updateResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .onErrorResumeNext(ex -> {
+                                .onErrorResumeNext((Throwable ex) -> {
                                     updateResult.setThrowable(ex);
-                                    return Single.just(updateResult.getResultSet()); //TODO: updateResult.throwable kayıp mı?
+                                    return Single.just(updateResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(updateResult.setResultSet(resultSet)))
                                 .toObservable();
@@ -397,10 +398,10 @@ public class ApiService extends AbstractService<UpdateResult> {
                         return Observable.just(updateResult);
                     }
                 })
-                .flatMap(result -> {
+                .flatMap((CompositeResult result) -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable().getMessage());
                         LOGGER.error(result.getThrowable().getLocalizedMessage());
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus

@@ -131,7 +131,6 @@ public class AccessManagerService extends AbstractService<UpdateResult> {
                         return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
                                 .onErrorResumeNext((Throwable ex) -> {
                                     insertResult.setThrowable(ex);
-                                    //TODO: insertResult.throwable kayıp mı?
                                     return Single.just(insertResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)))
@@ -192,7 +191,6 @@ public class AccessManagerService extends AbstractService<UpdateResult> {
                         return findById(updateResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
                                 .onErrorResumeNext((Throwable ex) -> {
                                     updateResult.setThrowable(ex);
-                                    //TODO: updateResult.throwable kayıp mı?
                                     return Single.just(updateResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(updateResult.setResultSet(resultSet)))

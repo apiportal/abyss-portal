@@ -131,7 +131,6 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
                         return findById(insertResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
                                 .onErrorResumeNext((Throwable ex) -> {
                                     insertResult.setThrowable(ex);
-                                    //TODO: insertResult.throwable kayıp mı?
                                     return Single.just(insertResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(insertResult.setResultSet(resultSet)))
@@ -153,24 +152,22 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
 
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
-        updateRecords.forEach((Map.Entry<String, Object> updateRow) -> {
-            jsonArray.add(new JsonObject(updateRow.getValue().toString())
-                    .put(STR_UUID, updateRow.getKey()));
-        });
+        updateRecords.forEach((Map.Entry<String, Object> updateRow) -> jsonArray.add(new JsonObject(updateRow.getValue().toString())
+                .put(STR_UUID, updateRow.getKey())));
         Observable<Object> updateParamsObservable = Observable.fromIterable(jsonArray);
         return updateParamsObservable
-                .flatMap(o -> {
+                .flatMap((Object o) -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = prepareInsertParameters(jsonObj)
                             .add(jsonObj.getString(STR_UUID));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
-                .flatMap(updateResult -> {
+                .flatMap((CompositeResult updateResult) -> {
                     if (updateResult.getThrowable() == null) {
                         return findById(updateResult.getUpdateResult().getKeys().getInteger(0), SQL_FIND_BY_ID)
-                                .onErrorResumeNext(ex -> {
+                                .onErrorResumeNext((Throwable ex) -> {
                                     updateResult.setThrowable(ex);
-                                    return Single.just(updateResult.getResultSet()); //TODO: updateResult.throwable kayıp mı?
+                                    return Single.just(updateResult.getResultSet());
                                 })
                                 .flatMap(resultSet -> Single.just(updateResult.setResultSet(resultSet)))
                                 .toObservable();
@@ -178,10 +175,10 @@ public class ApiLicenseService extends AbstractService<UpdateResult> {
                         return Observable.just(updateResult);
                     }
                 })
-                .flatMap(result -> {
+                .flatMap((CompositeResult result) -> {
                     JsonObject recordStatus = new JsonObject();
                     if (result.getThrowable() != null) {
-                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable());
+                        LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable().getMessage());
                         LOGGER.error(result.getThrowable().getLocalizedMessage());
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
