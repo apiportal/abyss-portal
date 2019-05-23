@@ -438,7 +438,7 @@ public class SubjectMembershipApiController extends AbstractApiController {
             updateEntities(routingContext
                     , SubjectMembershipService.class
                     , requestBody, null
-                    , new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_ROLE_MEMBERSHIP));
+                    , new ApiFilterQuery().setFilterQuery(SubjectMembershipService.SQL_CONDITION_USER_APP_MEMBERSHIP));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
