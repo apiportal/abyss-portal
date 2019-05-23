@@ -146,7 +146,7 @@ public class SubjectOrganizationApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(SubjectOrganizationService.FILTER_BY_SUBJECT)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -161,7 +161,7 @@ public class SubjectOrganizationApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(SubjectOrganizationService.FILTER_BY_ORGANIZATION)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

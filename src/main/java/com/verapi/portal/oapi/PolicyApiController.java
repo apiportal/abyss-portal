@@ -174,26 +174,26 @@ public class PolicyApiController extends AbstractApiController {
     public void getPoliciesOfSubject(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(PolicyService.FILTER_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void addPoliciesOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam(STR_UUID)));
     }
 
     @AbyssApiOperationHandler
     public void updatePoliciesOfSubject(RoutingContext routingContext) {
         updateEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(PolicyService.FILTER_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void deletePoliciesOfSubject(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(PolicyService.SQL_DELETE_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
 }

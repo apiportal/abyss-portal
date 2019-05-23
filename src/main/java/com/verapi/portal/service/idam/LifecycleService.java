@@ -89,7 +89,7 @@ public class LifecycleService extends AbstractService<UpdateResult> {
         // Get the parsed parameters
         RequestParameters requestParameters = routingContext.get("parsedParameters");
 
-        String apiId = routingContext.pathParam("uuid");
+        String apiId = routingContext.pathParam(STR_UUID);
 
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject lifecycleChange = requestParameters.body().getJsonObject();

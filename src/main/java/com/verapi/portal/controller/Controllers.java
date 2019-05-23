@@ -31,15 +31,16 @@ public class Controllers {
     public static final ControllerDef SUBJECTGROUP = new ControllerDef(SubjectGroupPortalController.class, "user-groups", "user-groups", "user-groups.html");
     public static final ControllerDef MYAPIS = new ControllerDef(MyApisPortalController.class, "my-apis", "my-apis", "my-apis.html");
 
-    public Controllers() {
+    protected Controllers() {
+        //no need for instantiation
     }
 
     public static final class ControllerDef {
-        public Class className;
-        public String routePathGET;
-        public String routePathPOST;
-        public String templateFileName;
-        public Boolean isPublic = Boolean.FALSE;
+        public final Class className;
+        public final String routePathGET;
+        public final String routePathPOST;
+        public final String templateFileName;
+        public final Boolean isPublic;
 
         ControllerDef(Class className, String routePathGET, String routePathPOST, String templateFileName, Boolean isPublic) {
             this.className = className;
@@ -54,6 +55,7 @@ public class Controllers {
             this.routePathGET = routePathGET;
             this.routePathPOST = routePathPOST;
             this.templateFileName = templateFileName;
+            this.isPublic = Boolean.FALSE;
         }
 
     }

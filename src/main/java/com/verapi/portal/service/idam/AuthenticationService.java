@@ -131,7 +131,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                 .flatMap(result -> {
                     //result.toJson().getValue("rows")
                     LOGGER.trace(result.toJson().encodePrettily());
-                    userUUID = result.getRows().get(0).getString("uuid");
+                    userUUID = result.getRows().get(0).getString(STR_UUID);
                     userOrganizationUUID = result.getRows().get(0).getString("organizationid");
                     String displayName = result.getRows().get(0).getString("displayname");
                     temporaryOrganizationName = "Organization of " + displayName;
@@ -172,7 +172,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                                                 //userOrganizationArray.add(
                                                 return Observable.just(new JsonObject()
-                                                        .put("uuid", resultSet.getRows().get(0).getString("uuid"))
+                                                        .put(STR_UUID, resultSet.getRows().get(0).getString(STR_UUID))
                                                         .put("name", resultSet.getRows().get(0).getString("name"))
                                                         .put("isactive", resultSet.getRows().get(0).getBoolean("isactive")) //TODO:? kontrol sql'de mi olmalı?
                                                         .put("isdeleted", resultSet.getRows().get(0).getBoolean("isdeleted")) //TODO:? kontrol sql'de mi olmalı?
@@ -200,7 +200,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 .flatMap(jsonObjects2 -> {
                                     LOGGER.trace("CreateOrganizationPortalController - organizationService.insertAll successfull: {}", jsonObjects2.get(0).encodePrettily());
 
-                                    organizationUuid = jsonObjects2.get(0).getString("uuid");
+                                    organizationUuid = jsonObjects2.get(0).getString(STR_UUID);
 
                                     return loginMetadata.subjectOrganizationService.initJDBCClient();
                                 })
@@ -271,7 +271,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                         routingContext.session().put("userOrganizationArray", jsonArray);
 
                         for (JsonObject organizationJsonObject : organizationJsonObjects) {
-                            if (userOrganizationUUID.equals(organizationJsonObject.getString("uuid"))) {
+                            if (userOrganizationUUID.equals(organizationJsonObject.getString(STR_UUID))) {
                                 if (isOrganizationUndeleletedAndActive(organizationJsonObject)) break;
                             }
                         }
@@ -297,7 +297,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
     private boolean isOrganizationUndeleletedAndActive(JsonObject organizationJsonObject) throws UnsupportedEncodingException {
         if ((!organizationJsonObject.getBoolean("isdeleted")) && (organizationJsonObject.getBoolean("isactive"))) {
             //Url Encode for cookie compliance
-            organizationUuid = URLEncoder.encode(organizationJsonObject.getString("uuid"), StandardCharsets.UTF_8.toString());
+            organizationUuid = URLEncoder.encode(organizationJsonObject.getString(STR_UUID), StandardCharsets.UTF_8.toString());
             temporaryOrganizationName = URLEncoder.encode(organizationJsonObject.getString("name"), StandardCharsets.UTF_8.toString());
             return true;
         }
@@ -401,7 +401,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
 
                     if (resultSet.getNumRows() > 0) {
                         LOGGER.trace("user found: {}", resultSet.toJson().encodePrettily());
-                        signupMetadata.subjectUUID = resultSet.getRows(true).get(0).getString("uuid");
+                        signupMetadata.subjectUUID = resultSet.getRows(true).get(0).getString(STR_UUID);
 
                         if (resultSet.getRows(true).get(0).getBoolean("isactivated")) {
                             return Single.error(new Forbidden403Exception("Username already exists / Username already taken", true)); // TODO: How to trigger activation mail resend: Option 1 -> If not activated THEN resend activation mail ELSE display error message
@@ -442,7 +442,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                 .flatMap(jsonObjects -> {
                                     if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
                                         return Single.just(new UpdateResult(jsonObjects.size(),
-                                                new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
+                                                new JsonArray().add(jsonObjects.get(0).getString(STR_UUID))));
                                     } else {
                                         if (!jsonObjects.isEmpty()) {
                                             LOGGER.trace("Signup insert subject error: {}", jsonObjects.get(0));
@@ -493,7 +493,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                             .flatMap(jsonObjects -> {
                                 if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
                                     return Single.just(new UpdateResult(jsonObjects.size(),
-                                            new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
+                                            new JsonArray().add(jsonObjects.get(0).getString(STR_UUID))));
                                 } else {
                                     if (!jsonObjects.isEmpty()) {
                                         ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue("error");
@@ -575,7 +575,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                             LOGGER.error("forgotPassword - account connected to username is NOT activated");
                             return Single.error(new Exception("Please activate your account by clicking the link inside activation mail."));
                         } else {
-                            forgotPasswordMetadata.subjectUUID = row.getString("uuid");
+                            forgotPasswordMetadata.subjectUUID = row.getString(STR_UUID);
                             forgotPasswordMetadata.email = row.getString("email");
                             forgotPasswordMetadata.displayName = row.getString("displayname");
                             forgotPasswordMetadata.subjectRow = row;
@@ -617,7 +617,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                             .flatMap(jsonObjects -> {
                                 if (!jsonObjects.isEmpty() && jsonObjects.get(0).getInteger("status") == HttpResponseStatus.CREATED.code()) {
                                     return Single.just(new UpdateResult(jsonObjects.size(),
-                                            new JsonArray().add(jsonObjects.get(0).getString("uuid"))));
+                                            new JsonArray().add(jsonObjects.get(0).getString(STR_UUID))));
                                 } else {
                                     if (!jsonObjects.isEmpty()) {
                                         ApiSchemaError apiSchemaError = (ApiSchemaError) jsonObjects.get(0).getValue("error");
@@ -836,7 +836,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                         .put("accesstokenisdeleted", ratResultSet.getRows().get(0).getBoolean("isdeleted"))
                                         .put("accesstokenisactive", ratResultSet.getRows().get(0).getBoolean("isactive"))
                                         .put("accesstokenexpiredate", ratResultSet.getRows().get(0).getInstant("expiredate"))
-                                        .put("subjectpermissionid", spResultSet.getRows().get(0).getString("uuid"))
+                                        .put("subjectpermissionid", spResultSet.getRows().get(0).getString(STR_UUID))
                                         .put("subjectid", spResultSet.getRows().get(0).getString("subjectid"))
                                         .put("resourceid", spResultSet.getRows().get(0).getString("resourceid"))
                                         .put("resourceactionid", spResultSet.getRows().get(0).getString("resourceactionid"))
@@ -889,7 +889,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                     LOGGER.error("rxValidateToken error: {} uuid:{}", "no row for proxy api", jsonObject.getString("resourcerefid"));
                                                     return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
                                                 } else {
-                                                    return Single.just(jsonObject.put("apiuuid", apiResultSet.getRows().get(0).getString("uuid"))
+                                                    return Single.just(jsonObject.put("apiuuid", apiResultSet.getRows().get(0).getString(STR_UUID))
                                                             .put("apiisproxyapi", apiResultSet.getRows().get(0).getBoolean("isproxyapi"))
                                                             .put("apiissandbox", apiResultSet.getRows().get(0).getBoolean("issandbox"))
                                                             .put("apiislive", apiResultSet.getRows().get(0).getBoolean("islive"))
@@ -912,7 +912,7 @@ public class AuthenticationService extends AbstractService<UpdateResult> {
                                                 LOGGER.error("rxValidateToken error: {} uuid:{}", "no row for business api", jsonObject.getString("businessapiid"));
                                                 return Single.error(new UnAuthorized401Exception(HttpResponseStatus.UNAUTHORIZED.reasonPhrase()));
                                             } else {
-                                                return Single.just(jsonObject.put("businessapiuuid", apiResultSet.getRows().get(0).getString("uuid"))
+                                                return Single.just(jsonObject.put("businessapiuuid", apiResultSet.getRows().get(0).getString(STR_UUID))
                                                         .put("businessapiisproxyapi", apiResultSet.getRows().get(0).getBoolean("isproxyapi"))
                                                         .put("businessapiissandbox", apiResultSet.getRows().get(0).getBoolean("issandbox"))
                                                         .put("businessapiislive", apiResultSet.getRows().get(0).getBoolean("islive"))

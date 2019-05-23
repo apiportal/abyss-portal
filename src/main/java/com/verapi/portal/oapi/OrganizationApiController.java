@@ -145,7 +145,7 @@ public class OrganizationApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getOrganizationImage(RoutingContext routingContext) {
 
-        if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
+        if (routingContext.pathParam(STR_UUID) == null || routingContext.pathParam(STR_UUID).isEmpty()) {
             LOGGER.error("getOrganizationImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getOrganizationImage uuid null or empty");
         }
@@ -158,7 +158,7 @@ public class OrganizationApiController extends AbstractApiController {
                         new ApiFilterQuery()
                                 .setFilterQuery(OrganizationService.SQL_GET_IMAGE_BY_UUID)
                                 .setFilterQueryParams(new JsonArray()
-                                        .add(routingContext.pathParam("uuid"))))
+                                        .add(routingContext.pathParam(STR_UUID))))
                 );
         subscribeForImage(routingContext, resultSetSingle, "getOrganizationImage", "picture");
     }

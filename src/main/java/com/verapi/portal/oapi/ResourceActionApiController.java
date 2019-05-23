@@ -146,7 +146,7 @@ public class ResourceActionApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ResourceActionService.FILTER_BY_RESOURCETYPE)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

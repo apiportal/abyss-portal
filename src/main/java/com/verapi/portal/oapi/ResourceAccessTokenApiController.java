@@ -147,7 +147,7 @@ public class ResourceAccessTokenApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ResourceAccessTokenService.SQL_FIND_BY_SUBJECT_PERMISSION_UUID)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))));
+                                    .add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

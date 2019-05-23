@@ -93,23 +93,20 @@ public abstract class AbstractApiController implements IApiController {
     private static final String NO_DATA_FOUND = "no_data_found";
     private static final String API_CONTROLLER = "ApiController";
     private static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=utf-8";
+    private static final String USERNAME = "username";
     private static ElasticSearchService elasticSearchService = new ElasticSearchService();
     protected Vertx vertx;
     protected JDBCAuth authProvider;
     private String mountPoint = Constants.ABYSS_ROOT + "/oapi";
     private Router abyssRouter;
     private String apiSpec;
+    protected static final String STR_UUID = "uuid";
 
     protected AbstractApiController(Vertx vertx, Router router, JDBCAuth authProvider) {
         this.vertx = vertx;
         this.abyssRouter = router;
         this.authProvider = authProvider;
         this.apiSpec = this.getClass().getAnnotation(AbyssApiController.class).apiSpec();
-/*
-        final SwaggerRequestResponseValidator validator = SwaggerRequestResponseValidator
-                .createFor(this.apiSpec)
-                .build();
-*/
         this.init();
     }
 
@@ -133,7 +130,7 @@ public abstract class AbstractApiController implements IApiController {
                 .putHeader(HttpHeaders.CONTENT_DISPOSITION,
                         //HttpHeaderValues.ATTACHMENT + "; " +
                         //"inline; " +
-                        HttpHeaderValues.FILENAME + "=\"" + routingContext.pathParam("uuid") + imageFormat + "\"")
+                        HttpHeaderValues.FILENAME + "=\"" + routingContext.pathParam(STR_UUID) + imageFormat + "\"")
                 .setChunked(true)
                 .setStatusCode(HttpResponseStatus.OK.code())
                 .write(Buffer.buffer(imageByte))
@@ -363,7 +360,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssCookieAuthSecurityHandler(RoutingContext routingContext) {
-        String methodName = "abyssCookieAuthSecurityHandler";
+        String methodName = ABYSS_COOKIE_AUTH_SECURITY_HANDLER;
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
@@ -385,7 +382,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssHttpBasicAuthSecurityHandler(RoutingContext routingContext) {
-        String methodName = "abyssHttpBasicAuthSecurityHandler";
+        String methodName = ABYSS_HTTP_BASIC_AUTH_SECURITY_HANDLER;
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
@@ -405,7 +402,7 @@ public abstract class AbstractApiController implements IApiController {
             throwApiException(routingContext, UnAuthorized401Exception.class);
         } else {
             JsonObject creds = new JsonObject()
-                    .put("username", basicTokenParseResult.getUsername())
+                    .put(USERNAME, basicTokenParseResult.getUsername())
                     .put("password", basicTokenParseResult.getPassword());
 
             authProvider.authenticate(creds, (AsyncResult<User> authResult) -> {
@@ -424,14 +421,14 @@ public abstract class AbstractApiController implements IApiController {
                         apiResponse.subscribe((JsonObject resp) -> {
                                     LOGGER.trace("abyssHttpBasicAuthSecurityHandler() subjectService.findBySubjectName replied successfully {}", resp.encodePrettily());
                                     User user = authResult.result();
-                                    String userUUID = resp.getString("uuid");
+                                    String userUUID = resp.getString(STR_UUID);
                                     user.principal().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
                                     routingContext.setUser(user); //TODO: Check context. Is this usefull? Should it be vertx context?
                                     routingContext.session().put(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME, userUUID);
                                     routingContext.addCookie(Cookie.cookie(Constants.AUTH_ABYSS_PORTAL_PRINCIPAL_UUID_COOKIE_NAME, userUUID)); //TODO: Remove for OWASP
 //                                            .setMaxAge(Config.getInstance().getConfigJsonObject().getInteger(Constants.SESSION_IDLE_TIMEOUT) * 60));
                                     LOGGER.trace("Logged in user: {}", user.principal().encodePrettily());
-                                    routingContext.put("username", user.principal().getString("username"));
+                                    routingContext.put(USERNAME, user.principal().getString(USERNAME));
 
                                     //if authorized then set this security handler's flag and route next
                                     routingContext.session().put(methodName, "OK");
@@ -455,7 +452,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssApiKeyAuthSecurityHandler(RoutingContext routingContext) {
-        String methodName = "abyssApiKeyAuthSecurityHandler";
+        String methodName = ABYSS_API_KEY_AUTH_SECURITY_HANDLER;
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
@@ -547,11 +544,11 @@ public abstract class AbstractApiController implements IApiController {
         routingContext.put(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID, operationId);
 
         //Get and check resource ID is a valid uuid
-        String resourceIdTemp = routingContext.pathParam("uuid");
+        String resourceIdTemp = routingContext.pathParam(STR_UUID);
         if (resourceIdTemp != null) {
             String[] components = resourceIdTemp.split("-");
             if (components.length != 5) {
-                //remove the following useless assignment
+                //TODO: remove the following useless assignment
                 resourceIdTemp = null;
             }
         }
@@ -981,7 +978,7 @@ public abstract class AbstractApiController implements IApiController {
                 .initJDBCClient(routingContext
                         .session()
                         .get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME), routingContext.get(Constants.AUTH_ABYSS_PORTAL_ROUTING_CONTEXT_OPERATION_ID))
-                .flatMap(jdbcClient -> (apiFilterQuery == null) ? service.findById(UUID.fromString(routingContext.pathParam("uuid"))) : service.findAll(apiFilterQuery));
+                .flatMap(jdbcClient -> (apiFilterQuery == null) ? service.findById(UUID.fromString(routingContext.pathParam(STR_UUID))) : service.findAll(apiFilterQuery));
         subscribeAndResponse(routingContext, findAllResult, jsonColumns, HttpResponseStatus.OK.code());
     }
 
@@ -1034,10 +1031,10 @@ public abstract class AbstractApiController implements IApiController {
                         .get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
                 .flatMap(jdbcClient -> service
                         //TODO:  an overloaded version of update() using ApiFilterQuery param should be developed, now suppressing apiFilterQuery param
-                        .update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
+                        .update(UUID.fromString(routingContext.pathParam(STR_UUID)), requestBody))
                 .flatMap(resultSet -> service
                         //TODO: CompositeResult success & # of rows should be checked
-                        .findById(UUID.fromString(routingContext.pathParam("uuid"))))
+                        .findById(UUID.fromString(routingContext.pathParam(STR_UUID))))
                 .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException(NO_DATA_FOUND));
@@ -1052,7 +1049,7 @@ public abstract class AbstractApiController implements IApiController {
     <T extends IService> void deleteEntity(RoutingContext routingContext, Class<T> clazz) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<CompositeResult> deleteResult = service.initJDBCClient()
-                .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))));
+                .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam(STR_UUID))));
         subscribeAndResponseStatusOnly(routingContext, deleteResult, HttpResponseStatus.NO_CONTENT.code());
     }
 */
@@ -1073,8 +1070,8 @@ public abstract class AbstractApiController implements IApiController {
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         IService<T> service = clazz.getConstructor(Vertx.class).newInstance(vertx);
         Single<ResultSet> deleteResult = service.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam("uuid"))))
-                .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam("uuid"))))
+                .flatMap(jdbcClient -> service.delete(UUID.fromString(routingContext.pathParam(STR_UUID))))
+                .flatMap(resultSet -> service.findById(UUID.fromString(routingContext.pathParam(STR_UUID))))
                 .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
                         return Single.error(new NoDataFoundException(NO_DATA_FOUND));
@@ -1112,14 +1109,14 @@ public abstract class AbstractApiController implements IApiController {
                     if (resultSet.getNumRows() > 0) {
                         String sourceData = resultSet.getRows().get(0).getString(imageColumnName);
                         if (sourceData == null || sourceData.isEmpty()) {
-                            String errorMessage = methodName + " - picture not found for uuid: " + routingContext.pathParam("uuid");
+                            String errorMessage = methodName + " - picture not found for uuid: " + routingContext.pathParam(STR_UUID);
                             LOGGER.error(errorMessage);
                             throwApiException(routingContext, NotFound404Exception.class, errorMessage);
                         } else {
                             returnAsImage(routingContext, resultSet, imageColumnName);
                         }
                     } else {
-                        String errorMessage = methodName + " - record not found for uuid: " + routingContext.pathParam("uuid");
+                        String errorMessage = methodName + " - record not found for uuid: " + routingContext.pathParam(STR_UUID);
                         LOGGER.error(errorMessage);
                         throwApiException(routingContext, NotFound404Exception.class, errorMessage);
                     }

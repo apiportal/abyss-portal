@@ -161,7 +161,7 @@ public class ContractApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.FILTER_BY_APIID)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -176,7 +176,7 @@ public class ContractApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.FILTER_BY_APPID)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -191,7 +191,7 @@ public class ContractApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.FILTER_BY_APIS_OF_USERID)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -206,7 +206,7 @@ public class ContractApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.FILTER_BY_APPS_OF_USERID)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -221,7 +221,7 @@ public class ContractApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.FILTER_BY_LICENSEID)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -236,7 +236,7 @@ public class ContractApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.FILTER_BY_LICENSES_OF_USER)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -251,7 +251,7 @@ public class ContractApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.FILTER_BY_POLICY)
-                            .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
+                            .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam(STR_UUID) + "\"]")));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -301,7 +301,7 @@ public class ContractApiController extends AbstractApiController {
                     jsonbColumnsList,
                     new ApiFilterQuery()
                             .setFilterQuery(ContractService.SQL_SUBSCRIPTIONS_OF_API)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

@@ -335,7 +335,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                                 .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
                                 .put("resourcename", appInsertResult.getString("displayname") + " APP")
                                 .put("description", appInsertResult.getString("description"))
-                                .put("resourcerefid", appInsertResult.getString("uuid"))
+                                .put("resourcerefid", appInsertResult.getString(STR_UUID))
                                 .put("isactive", Boolean.TRUE);
 
                         ResourceService resourceService = new ResourceService(routingContext.vertx());
@@ -359,7 +359,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                                 .put("effectivestartdate", Instant.now())
                                 .put("effectiveenddate", Instant.now().plus(180, DAYS)) //TODO: Null mı bıraksak?
                                 .put("subjectid", sessionUserId)
-                                .put("resourceid", resourceInsertResult.getString("uuid"))
+                                .put("resourceid", resourceInsertResult.getString(STR_UUID))
                                 .put("resourceactionid", Constants.RESOURCE_ACTION_ALL_APP_ACTION)
                                 .put("accessmanagerid", Constants.DEFAULT_ACCESS_MANAGER_UUID)
                                 .put("isactive", Boolean.TRUE);
@@ -378,12 +378,12 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         JsonObject permissionInsertResult = recordStatus.getJsonObject("response");
 
                         String appUuid = recordStatus.getJsonObject("parentRecordStatus")
-                                .getJsonObject("parentRecordStatus").getString("uuid");
+                                .getJsonObject("parentRecordStatus").getString(STR_UUID);
 
                         JsonObject insertRecord = new JsonObject()
                                 .put("organizationid", sessionOrganizationId)
                                 .put("crudsubjectid", sessionUserId)
-                                .put("subjectpermissionid", permissionInsertResult.getString("uuid"))
+                                .put("subjectpermissionid", permissionInsertResult.getString(STR_UUID))
                                 .put("resourcetypeid", Constants.RESOURCE_TYPE_APP)
                                 .put("resourcerefid", appUuid)
                                 .put("isactive", Boolean.TRUE);
@@ -409,7 +409,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                                 .put("organizationid", sessionOrganizationId)
                                 .put("crudsubjectid", sessionUserId)
                                 .put("subjectid", sessionUserId)
-                                .put("subjectgroupid", appRecord.getString("uuid"))
+                                .put("subjectgroupid", appRecord.getString(STR_UUID))
                                 .put("subjectdirectoryid", appRecord.getString("subjectdirectoryid"))
                                 .put("subjecttypeid", Constants.SUBJECT_TYPE_USER)
                                 .put("subjectgrouptypeid", Constants.SUBJECT_TYPE_APP)
@@ -578,7 +578,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
         JsonArray jsonArray = new JsonArray();
         updateRecords.forEach(updateRow -> {
             jsonArray.add(new JsonObject(updateRow.getValue().toString())
-                    .put("uuid", updateRow.getKey()));
+                    .put(STR_UUID, updateRow.getKey()));
         });
         Observable<Object> updateParamsObservable = Observable.fromIterable(jsonArray);
         return updateParamsObservable
@@ -596,7 +596,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         }
                     }
                     JsonArray updateParam = prepareUpdateParameters(jsonObj)
-                            .add(jsonObj.getString("uuid"));
+                            .add(jsonObj.getString(STR_UUID));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
                 .flatMap(updateResult -> {
@@ -619,7 +619,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         LOGGER.error(result.getThrowable().getLocalizedMessage());
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
-                                .put("uuid", "0")
+                                .put(STR_UUID, "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                 .put("response", new JsonObject())
                                 .put("error", new ApiSchemaError()
@@ -632,7 +632,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
-                                .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
+                                .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
                                 .put("status", HttpResponseStatus.CREATED.code())
                                 .put("response", arr.getJsonObject(0))
                                 .put("error", new ApiSchemaError().toJson());
@@ -687,7 +687,7 @@ public class SubjectService extends AbstractService<UpdateResult> {
         // We get an user JSON object validated by Vert.x Open API validator
         JsonObject requestBody = requestParameters.body().getJsonObject();
 
-        UUID subjectUUID = UUID.fromString(routingContext.pathParam("uuid"));
+        UUID subjectUUID = UUID.fromString(routingContext.pathParam(STR_UUID));
         String oldPassword = requestBody.getString("oldpassword");
         String newPassword = requestBody.getString("newpassword");
         String confirmPassword = requestBody.getString("confirmpassword");

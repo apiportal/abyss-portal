@@ -67,7 +67,8 @@ public class FailurePortalController extends AbstractPortalController {
 
         renderTemplate(routingContext, templateContext, Controllers.TRX_NOK.templateFileName, statusCode);
 
-        super.handle(routingContext); //TODO: bu satır çağrılmalı mı?
+        //TODO: bu satır çağrılmalı mı?
+        super.handle(routingContext);
     }
 
 }

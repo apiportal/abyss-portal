@@ -145,7 +145,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_API_GROUPS)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -160,7 +160,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_SUBJECT_API_GROUPS)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -175,7 +175,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_SUBJECT_BUSINESS_API_GROUPS)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -190,7 +190,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiGroupService.SQL_LIST_SUBJECT_PROXY_API_GROUPS)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -205,7 +205,7 @@ public class ApiApiGroupApiController extends AbstractApiController {
                     null,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiApiGroupService.SQL_API_API_GROUPS_BY_API_AND_GROUP)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")).add(routingContext.pathParam("groupuuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID)).add(routingContext.pathParam("groupuuid"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());

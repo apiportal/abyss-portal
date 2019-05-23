@@ -65,6 +65,11 @@ public abstract class AbstractService<T> implements IService<T> {
     protected SQLConnection sqlConnection = null;
     private AbyssJDBCService abyssJDBCService;
     private String tableName;
+    protected static final String STR_UUID = "uuid";
+    protected static final String STR_STATUS = "status";
+    protected static final String STR_RESPONSE = "response";
+    protected static final String STR_ERROR = "error";
+
 
 
     public AbstractService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
@@ -159,7 +164,7 @@ public abstract class AbstractService<T> implements IService<T> {
             LOGGER.error(result.getThrowable().getLocalizedMessage());
             LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
             recordStatus
-                    .put("uuid", "0")
+                    .put(STR_UUID, "0")
                     .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .put("response", new JsonObject())
                     .put("error", new ApiSchemaError()
@@ -179,7 +184,7 @@ public abstract class AbstractService<T> implements IService<T> {
                 JsonArray arr = new JsonArray();
                 result.getResultSet().getRows().forEach(arr::add);
                 recordStatus
-                        .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
+                        .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
                         .put("status", HttpResponseStatus.CREATED.code())
                         .put("response", arr.getJsonObject(0))
                         .put("error", new ApiSchemaError().toJson());
@@ -557,7 +562,7 @@ public abstract class AbstractService<T> implements IService<T> {
                     JsonArray arr = new JsonArray();
                     resp.getRows().forEach(arr::add);
                     JsonObject recordStatus = new JsonObject()
-                            .put("uuid", resp.getRows().get(0).getString("uuid"))
+                            .put(STR_UUID, resp.getRows().get(0).getString(STR_UUID))
                             .put("status", httpResponseStatus)
                             .put("response", arr.getJsonObject(0))
                             .put("error", new ApiSchemaError().toJson());
@@ -567,7 +572,7 @@ public abstract class AbstractService<T> implements IService<T> {
                     //SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(apiSpec, null, OpenApi3Utils.getParseOptions());
                     //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
                     JsonObject recordStatus = new JsonObject()
-                            .put("uuid", "0")
+                            .put(STR_UUID, "0")
                             .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                             .put("response", new JsonObject()) //TODO: fill with empty Subject response json
                             .put("error", new ApiSchemaError()
@@ -584,7 +589,7 @@ public abstract class AbstractService<T> implements IService<T> {
                     JsonArray arr = new JsonArray();
                     resp.getRows().forEach(arr::add);
                     JsonObject recordStatus = new JsonObject()
-                            .put("uuid", resp.getRows().get(0).getString("uuid"))
+                            .put(STR_UUID, resp.getRows().get(0).getString(STR_UUID))
                             .put("status", httpResponseStatus)
                             .put("response", arr.getJsonObject(0))
                             .put("error", new ApiSchemaError().toJson());
@@ -594,7 +599,7 @@ public abstract class AbstractService<T> implements IService<T> {
                     //SwaggerParseResult swaggerParseResult = new OpenAPIV3Parser().readLocation(apiSpec, null, OpenApi3Utils.getParseOptions());
                     //swaggerParseResult.getOpenAPI().getPaths().get("/subjects").getGet().getResponses().get("207")
                     JsonObject recordStatus = new JsonObject()
-                            .put("uuid", "0")
+                            .put(STR_UUID, "0")
                             .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                             .put("response", new JsonObject()) //TODO: fill with empty Subject response json
                             .put("error", new ApiSchemaError()

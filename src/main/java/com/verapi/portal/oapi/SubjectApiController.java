@@ -246,11 +246,11 @@ public class SubjectApiController extends AbstractApiController {
 
         SubjectService subjectService = new SubjectService(routingContext.vertx());
         Single<ResultSet> updateCascadedResult = subjectService.initJDBCClient(routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
-                .flatMap(jdbcClient -> subjectService.update(UUID.fromString(routingContext.pathParam("uuid")), requestBody))
+                .flatMap(jdbcClient -> subjectService.update(UUID.fromString(routingContext.pathParam(STR_UUID)), requestBody))
                 .flatMap(resultSet -> subjectService.findAll(new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS)
                         .setFilterQueryParams(new JsonArray().add((String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME)))
                         .addFilterQuery(SubjectService.FILTER_APP_UUID)
-                        .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid")))
+                        .addFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID)))
                 ))
                 .flatMap((ResultSet resultSet) -> {
                     if (resultSet.getNumRows() == 0) {
@@ -385,26 +385,26 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getUserWithGroupsAndPermissions(RoutingContext routingContext) {
         getSubject(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USER_WITH_GROUPS_AND_PERMISSIONS)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void getUsersUnderDirectory(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_USERS_UNDER_DIRECTORY)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void getGroupsUnderDirectory(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_GROUPS_UNDER_DIRECTORY)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
 
     @AbyssApiOperationHandler
     public void getAppsOfUser(RoutingContext routingContext) {
         getEntities(routingContext, jsonbColumnsList, new ApiFilterQuery().setFilterQuery(SubjectService.FILTER_APP_WITH_CONTRACTS_AND_ACCESS_TOKENS)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -436,7 +436,7 @@ public class SubjectApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getSubjectImage(RoutingContext routingContext) {
 
-        if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
+        if (routingContext.pathParam(STR_UUID) == null || routingContext.pathParam(STR_UUID).isEmpty()) {
             LOGGER.error("getSubjectImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getSubjectImage uuid null or empty");
         }
@@ -448,7 +448,7 @@ public class SubjectApiController extends AbstractApiController {
                         new ApiFilterQuery()
                                 .setFilterQuery(SubjectService.SQL_GET_IMAGE_BY_UUID)
                                 .setFilterQueryParams(new JsonArray()
-                                        .add(routingContext.pathParam("uuid"))))
+                                        .add(routingContext.pathParam(STR_UUID))))
                 );
         subscribeForImage(routingContext, resultSetSingle, "getSubjectImage", PICTURE);
     }

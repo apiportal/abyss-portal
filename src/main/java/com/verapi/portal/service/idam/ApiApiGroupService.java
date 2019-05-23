@@ -100,9 +100,6 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
     private static final String SQL_DELETE_BY_UUID = SQL_DELETE_ALL + SQL_AND + SQL_CONDITION_UUID_IS;
     private static final String SQL_UPDATE_BY_UUID = SQL_UPDATE + SQL_WHERE + SQL_CONDITION_UUID_IS;
     private static final ApiFilterQuery.APIFilter apiFilter = new ApiFilterQuery.APIFilter(SQL_CONDITION_NAME_IS, SQL_CONDITION_NAME_LIKE);
-    private static final String STATUS = "status";
-    private static final String RESPONSE = "response";
-    private static final String ERROR = "error";
 
     public ApiApiGroupService(Vertx vertx, AbyssJDBCService abyssJDBCService) {
         super(vertx, abyssJDBCService);
@@ -161,10 +158,10 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
                         LOGGER.error("insertAll>> insert/find exception {}", result.getThrowable().getMessage());
                         LOGGER.error(EXCEPTION_LOG_FORMAT, result.getThrowable().getMessage(), result.getThrowable().getStackTrace());
                         recordStatus
-                                .put("uuid", "0")
-                                .put(STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put(RESPONSE, new JsonObject())
-                                .put(ERROR, new ApiSchemaError()
+                                .put(STR_UUID, "0")
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -174,10 +171,10 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
-                                .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                                .put(STATUS, HttpResponseStatus.CREATED.code())
-                                .put(RESPONSE, arr.getJsonObject(0))
-                                .put(ERROR, new ApiSchemaError().toJson());
+                                .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })
@@ -193,13 +190,13 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
     public Single<List<JsonObject>> updateAll(JsonObject updateRecords) {
         JsonArray jsonArray = new JsonArray();
         updateRecords.forEach((Map.Entry<String, Object> updateRow) -> jsonArray.add(new JsonObject(updateRow.getValue().toString())
-                .put("uuid", updateRow.getKey())));
+                .put(STR_UUID, updateRow.getKey())));
         Observable<Object> updateParamsObservable = Observable.fromIterable(jsonArray);
         return updateParamsObservable
                 .flatMap((Object o) -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = prepareInsertParameters(jsonObj)
-                            .add(jsonObj.getString("uuid"));
+                            .add(jsonObj.getString(STR_UUID));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
                 .flatMap((CompositeResult updateResult) -> {
@@ -222,10 +219,10 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
                         LOGGER.trace("updateAll>> update/find exception {}", result.getThrowable().getMessage());
                         LOGGER.error(EXCEPTION_LOG_FORMAT, result.getThrowable().getMessage(), result.getThrowable().getStackTrace());
                         recordStatus
-                                .put("uuid", "0")
-                                .put(STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                                .put(RESPONSE, new JsonObject())
-                                .put(ERROR, new ApiSchemaError()
+                                .put(STR_UUID, "0")
+                                .put(STR_STATUS, HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
+                                .put(STR_RESPONSE, new JsonObject())
+                                .put(STR_ERROR, new ApiSchemaError()
                                         .setUsermessage(result.getThrowable().getLocalizedMessage())
                                         .setCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                         .setInternalmessage(Arrays.toString(result.getThrowable().getStackTrace()))
@@ -235,10 +232,10 @@ public class ApiApiGroupService extends AbstractService<UpdateResult> {
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
-                                .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
-                                .put(STATUS, HttpResponseStatus.CREATED.code())
-                                .put(RESPONSE, arr.getJsonObject(0))
-                                .put(ERROR, new ApiSchemaError().toJson());
+                                .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
+                                .put(STR_STATUS, HttpResponseStatus.CREATED.code())
+                                .put(STR_RESPONSE, arr.getJsonObject(0))
+                                .put(STR_ERROR, new ApiSchemaError().toJson());
                     }
                     return Observable.just(recordStatus);
                 })

@@ -150,7 +150,7 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
                         LOGGER.error(result.getThrowable().getLocalizedMessage());
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
-                                .put("uuid", "0")
+                                .put(STR_UUID, "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                 .put("response", new JsonObject())
                                 .put("error", new ApiSchemaError()
@@ -163,7 +163,7 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
-                                .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
+                                .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
                                 .put("status", HttpResponseStatus.CREATED.code())
                                 .put("response", arr.getJsonObject(0))
                                 .put("error", new ApiSchemaError().toJson());
@@ -183,14 +183,14 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
         JsonArray jsonArray = new JsonArray();
         updateRecords.forEach(updateRow -> {
             jsonArray.add(new JsonObject(updateRow.getValue().toString())
-                    .put("uuid", updateRow.getKey()));
+                    .put(STR_UUID, updateRow.getKey()));
         });
         Observable<Object> updateParamsObservable = Observable.fromIterable(jsonArray);
         return updateParamsObservable
                 .flatMap(o -> {
                     JsonObject jsonObj = (JsonObject) o;
                     JsonArray updateParam = prepareUpdateParameters(jsonObj)
-                            .add(jsonObj.getString("uuid"));
+                            .add(jsonObj.getString(STR_UUID));
                     return update(updateParam, SQL_UPDATE_BY_UUID).toObservable();
                 })
                 .flatMap(updateResult -> {
@@ -213,7 +213,7 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
                         LOGGER.error(result.getThrowable().getLocalizedMessage());
                         LOGGER.error(Arrays.toString(result.getThrowable().getStackTrace()));
                         recordStatus
-                                .put("uuid", "0")
+                                .put(STR_UUID, "0")
                                 .put("status", HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                                 .put("response", new JsonObject())
                                 .put("error", new ApiSchemaError()
@@ -226,7 +226,7 @@ public class SubjectDirectoryTypeService extends AbstractService<UpdateResult> {
                         JsonArray arr = new JsonArray();
                         result.getResultSet().getRows().forEach(arr::add);
                         recordStatus
-                                .put("uuid", result.getResultSet().getRows().get(0).getString("uuid"))
+                                .put(STR_UUID, result.getResultSet().getRows().get(0).getString(STR_UUID))
                                 .put("status", HttpResponseStatus.CREATED.code())
                                 .put("response", arr.getJsonObject(0))
                                 .put("error", new ApiSchemaError().toJson());

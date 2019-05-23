@@ -227,7 +227,7 @@ public class ApiApiController extends AbstractApiController {
                     jsonbColumnsList,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -236,21 +236,21 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addApisOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam("uuid")));
+        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam(STR_UUID)));
     }
 
     @AbyssApiOperationHandler
     public void updateApisOfSubject(RoutingContext routingContext) {
         updateEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void deleteApisOfSubject(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.SQL_DELETE_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -277,7 +277,7 @@ public class ApiApiController extends AbstractApiController {
     public void getBusinessApi(RoutingContext routingContext) {
         getEntity(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.SQL_FIND_BY_UUID + ApiService.SQL_AND + ApiService.SQL_CONDITION_IS_BUSINESSAPI)
-                .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .addFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -314,7 +314,7 @@ public class ApiApiController extends AbstractApiController {
     public void getApiProxy(RoutingContext routingContext) {
         getEntity(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.SQL_FIND_BY_UUID + ApiService.SQL_AND + ApiService.SQL_CONDITION_IS_PROXYAPI)
-                .addFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .addFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -336,7 +336,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -345,7 +345,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addBusinessApisOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam("uuid")).put(ISPROXYAPI, Boolean.FALSE));
+        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam(STR_UUID)).put(ISPROXYAPI, Boolean.FALSE));
     }
 
     @AbyssApiOperationHandler
@@ -353,7 +353,7 @@ public class ApiApiController extends AbstractApiController {
         updateEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                 .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -361,7 +361,7 @@ public class ApiApiController extends AbstractApiController {
         deleteEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.SQL_DELETE_BY_SUBJECT)
                 .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -373,7 +373,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -382,7 +382,7 @@ public class ApiApiController extends AbstractApiController {
 
     @AbyssApiOperationHandler
     public void addApiProxiesOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam("uuid")).put(ISPROXYAPI, Boolean.TRUE));
+        addEntities(routingContext, new JsonObject().put(SUBJECTID, routingContext.pathParam(STR_UUID)).put(ISPROXYAPI, Boolean.TRUE));
     }
 
     @AbyssApiOperationHandler
@@ -390,7 +390,7 @@ public class ApiApiController extends AbstractApiController {
         updateEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
                 .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -398,7 +398,7 @@ public class ApiApiController extends AbstractApiController {
         deleteEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(ApiService.SQL_DELETE_BY_SUBJECT)
                 .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -409,7 +409,7 @@ public class ApiApiController extends AbstractApiController {
                     jsonbColumnsList,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -424,7 +424,7 @@ public class ApiApiController extends AbstractApiController {
                     jsonbColumnsList,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiTagService.SQL_BUSINESS_API_AGGREGATE_COUNT)
-                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                            .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -441,7 +441,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_TAG)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam(STR_UUID))
                                     .add(routingContext.pathParam("tag"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
@@ -459,7 +459,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_CATEGORY)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam(STR_UUID))
                                     .add(routingContext.pathParam("category"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
@@ -477,7 +477,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_GROUP)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_BUSINESSAPI)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam(STR_UUID))
                                     .add(routingContext.pathParam("group"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
@@ -495,7 +495,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_TAG)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam(STR_UUID))
                                     .add(routingContext.pathParam("tag"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
@@ -513,7 +513,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_CATEGORY)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam(STR_UUID))
                                     .add(routingContext.pathParam("category"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
@@ -531,7 +531,7 @@ public class ApiApiController extends AbstractApiController {
                             .setFilterQuery(ApiService.FILTER_BY_SUBJECT_AND_GROUP)
                             .addFilterQuery(ApiService.SQL_CONDITION_IS_PROXYAPI)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))
+                                    .add(routingContext.pathParam(STR_UUID))
                                     .add(routingContext.pathParam("group"))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
@@ -548,7 +548,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_APIS_SHARED_WITH_SUBJECT)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))));
+                                    .add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -564,7 +564,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_APIS_SHARED_BY_SUBJECT)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))));
+                                    .add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -580,7 +580,7 @@ public class ApiApiController extends AbstractApiController {
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_LICENSE)
                             .setFilterQueryParams(new JsonArray()
-                                    .add(routingContext.pathParam("uuid"))));
+                                    .add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -595,7 +595,7 @@ public class ApiApiController extends AbstractApiController {
                     jsonbColumnsList,
                     new ApiFilterQuery()
                             .setFilterQuery(ApiService.FILTER_BY_POLICY)
-                            .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
+                            .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam(STR_UUID) + "\"]")));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
@@ -605,7 +605,7 @@ public class ApiApiController extends AbstractApiController {
     @AbyssApiOperationHandler
     public void getApiImage(RoutingContext routingContext) {
 
-        if (routingContext.pathParam("uuid") == null || routingContext.pathParam("uuid").isEmpty()) {
+        if (routingContext.pathParam(STR_UUID) == null || routingContext.pathParam(STR_UUID).isEmpty()) {
             LOGGER.error("getApiImage invoked - uuid null or empty");
             throwApiException(routingContext, BadRequest400Exception.class, "getApiImage uuid null or empty");
         }
@@ -617,7 +617,7 @@ public class ApiApiController extends AbstractApiController {
                         new ApiFilterQuery()
                                 .setFilterQuery(ApiService.SQL_GET_IMAGE_BY_UUID)
                                 .setFilterQueryParams(new JsonArray()
-                                        .add(routingContext.pathParam("uuid"))))
+                                        .add(routingContext.pathParam(STR_UUID))))
                 );
         subscribeForImage(routingContext, resultSetSingle, "getApiImage", IMAGE);
     }

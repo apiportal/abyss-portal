@@ -192,47 +192,47 @@ public class LicenseApiController extends AbstractApiController {
     public void getLicensesOfSubject(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(LicenseService.FILTER_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void addLicensesOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam(STR_UUID)));
     }
 
     @AbyssApiOperationHandler
     public void updateLicensesOfSubject(RoutingContext routingContext) {
         updateEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(LicenseService.FILTER_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void deleteLicensesOfSubject(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(LicenseService.SQL_DELETE_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void getLicensesOfApi(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(LicenseService.FILTER_BY_API)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void getLicensesOfApiInUse(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(LicenseService.FILTER_BY_API)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void getLicensesOfSubjectCascaded(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(LicenseService.FILTER_BY_SUBJECT_WITH_RESOURCES_AND_PERMISSIONS)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
@@ -249,7 +249,7 @@ public class LicenseApiController extends AbstractApiController {
     public void getLicensesOfPolicy(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(LicenseService.FILTER_BY_POLICY)
-                .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam("uuid") + "\"]")));
+                .setFilterQueryParams(new JsonArray().add("[\"" + routingContext.pathParam(STR_UUID) + "\"]")));
     }
 
 }

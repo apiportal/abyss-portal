@@ -166,40 +166,40 @@ public class SubjectPermissionApiController extends AbstractApiController {
     public void getApiSubscriptionsOfSubject(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(SubjectPermissionService.SQL_LIST_SUBJECT_API_SUBSCRIPTIONS)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void addApiSubscriptionsOfSubject(RoutingContext routingContext) {
-        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam("uuid")));
+        addEntities(routingContext, new JsonObject().put("subjectid", routingContext.pathParam(STR_UUID)));
     }
 
     @AbyssApiOperationHandler
     public void updateApiSubscriptionsOfSubject(RoutingContext routingContext) {
         updateEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(SubjectPermissionService.FILTER_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void deleteApiSubscriptionsOfSubject(RoutingContext routingContext) {
         deleteEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(SubjectPermissionService.SQL_DELETE_BY_SUBJECT)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void getApiSubscriptionsToMyApis(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(SubjectPermissionService.SQL_LIST_SUBSCRIPTIONS_TO_MY_APIS)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
     @AbyssApiOperationHandler
     public void getPermissionsOfSubject(RoutingContext routingContext) {
         getEntities(routingContext, new ApiFilterQuery()
                 .setFilterQuery(SubjectPermissionService.SQL_FIND_BY_SUBJECTID)
-                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam("uuid"))));
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
     }
 
 }
