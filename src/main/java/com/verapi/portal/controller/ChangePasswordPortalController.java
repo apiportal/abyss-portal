@@ -96,7 +96,7 @@ public class ChangePasswordPortalController extends AbstractPortalController {
                         .toSingleDefault(Boolean.FALSE)
                         .flatMap(checkAuth -> authProvider.rxAuthenticate(creds))
                         .flatMap((User user) -> {
-                            LOGGER.trace("Authenticated User with Old Password: {}",user.principal().encodePrettily());
+                            LOGGER.trace("Authenticated User with Old Password: {}", user.principal().encodePrettily());
 
                             LOGGER.trace("Updating user records...");
                             String salt = authProvider.generateSalt();

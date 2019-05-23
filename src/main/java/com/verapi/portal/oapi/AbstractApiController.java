@@ -363,7 +363,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssCookieAuthSecurityHandler(RoutingContext routingContext) {
-        String methodName = this.getClass().getEnclosingMethod().getName();
+        String methodName = "abyssCookieAuthSecurityHandler";
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
@@ -385,7 +385,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssHttpBasicAuthSecurityHandler(RoutingContext routingContext) {
-        String methodName = this.getClass().getEnclosingMethod().getName();
+        String methodName = "abyssHttpBasicAuthSecurityHandler";
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
@@ -455,7 +455,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssApiKeyAuthSecurityHandler(RoutingContext routingContext) {
-        String methodName = this.getClass().getEnclosingMethod().getName();
+        String methodName = "abyssApiKeyAuthSecurityHandler";
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
@@ -489,7 +489,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssJWTBearerAuthSecurityHandler(RoutingContext routingContext) {
-        String methodName = this.getClass().getEnclosingMethod().getName();
+        String methodName = "abyssJWTBearerAuthSecurityHandler";
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         //firstly clear this security handler's flag
@@ -528,7 +528,7 @@ public abstract class AbstractApiController implements IApiController {
     }
 
     private void abyssPathAuthorizationHandler(RoutingContext routingContext) {
-        String methodName = this.getClass().getEnclosingMethod().getName();
+        String methodName = "abyssPathAuthorizationHandler";
         LOGGER.trace(METHOD_INVOKED, methodName);
 
         String organizationUuidTemp = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
