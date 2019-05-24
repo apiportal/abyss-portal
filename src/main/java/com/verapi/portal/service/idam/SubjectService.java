@@ -317,8 +317,8 @@ public class SubjectService extends AbstractService<UpdateResult> {
     public Single<List<JsonObject>> insertAllCascaded(RoutingContext routingContext, JsonArray insertRecords) {
         LOGGER.trace("SubjectService --- insertAllCascaded invoked");
 
-        String sessionOrganizationId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
-        String sessionUserId = (String) routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
+        String sessionOrganizationId = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+        String sessionUserId = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_USER_UUID_SESSION_VARIABLE_NAME);
 
         Observable<JsonObject> insertParamsObservable = Observable.fromIterable(insertRecords).map(o -> (JsonObject) o);
 

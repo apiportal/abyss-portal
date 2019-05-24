@@ -336,7 +336,7 @@ paths:
       parameters:
         - name: uuid
           in: path
-          description: 'The uuid of Subscription that needs to be deleted'
+          description: 'The uuid of Contract of Subscription that needs to be deleted'
           required: true
           schema:
             type: string

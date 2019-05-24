@@ -50,10 +50,10 @@ public abstract class AbstractService<T> implements IService<T> {
     protected static final String SQL_CONDITION_ID_IS = "id = ?\n";
     protected static final String SQL_CONDITION_UUID_IS = "uuid = CAST(? AS uuid)\n";
     protected static final String SQL_CONDITION_ORGANIZATION_IS = "organizationid = CAST(? AS uuid)\n";
-    protected static final String SQL_CONDITION_ORGANIZATION_INSIDE = "organizationid in (CAST(? AS uuid), '" + Constants.DEFAULT_ORGANIZATION_UUID + "'::uuid)\n";
-    protected static final String SQL_FROM = "from\n";
-    protected static final String SQL_UPDATE_VERB = "update ";
-    protected static final String SQL_INSERT_INTO_VERB = "insert into ";
+    private static final String SQL_CONDITION_ORGANIZATION_INSIDE = "organizationid in (CAST(? AS uuid), '" + Constants.DEFAULT_ORGANIZATION_UUID + "'::uuid)\n";
+    private static final String SQL_FROM = "from\n";
+    private static final String SQL_UPDATE_VERB = "update ";
+    private static final String SQL_INSERT_INTO_VERB = "insert into ";
     protected static final String STR_UUID = "uuid";
     protected static final String STR_STATUS = "status";
     protected static final String STR_RESPONSE = "response";

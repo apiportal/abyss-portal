@@ -24,6 +24,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.web.api.RequestParameters;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.auth.jdbc.JDBCAuth;
@@ -303,6 +304,23 @@ public class ContractApiController extends AbstractApiController {
                             .setFilterQuery(ContractService.SQL_SUBSCRIPTIONS_OF_API)
                             .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID))));
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException | UnsupportedEncodingException e) {
+            LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
+            throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
+        }
+    }
+
+    @AbyssApiOperationHandler
+    public void deleteSubscription(RoutingContext routingContext) {
+
+        try {
+            LOGGER.trace("---deleting entities in a cascaded way for unsubscription");
+            ContractService contractService = new ContractService(routingContext.vertx());
+            Single<ResultSet> deleteCascadedResult = contractService.initJDBCClient(routingContext
+                    .session()
+                    .get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME))
+                    .flatMap(jdbcClient -> contractService.deleteCascaded(routingContext));
+            subscribeAndResponseDeleteStatusOnly(routingContext, deleteCascadedResult, HttpResponseStatus.NO_CONTENT.code());
+        } catch (Exception e) {
             LOGGER.error(EXCEPTION_LOG_FORMAT, e.getMessage(), e.getStackTrace());
             throwApiException(routingContext, InternalServerError500Exception.class, e.getLocalizedMessage());
         }

@@ -704,7 +704,7 @@ public abstract class AbstractApiController implements IApiController {
                 (Throwable throwable) -> processException(routingContext, throwable));
     }
 
-    private void subscribeAndResponseDeleteStatusOnly(RoutingContext routingContext, Single<ResultSet> updateResultSingle, int httpResponseStatus) {
+    protected void subscribeAndResponseDeleteStatusOnly(RoutingContext routingContext, Single<ResultSet> updateResultSingle, int httpResponseStatus) {
         updateResultSingle.subscribe((ResultSet resp) -> {
                     resp.getRows().forEach((JsonObject jsonObject) -> elasticSearchService
                             .indexDocument(routingContext, this.getClass().getSimpleName().replace(API_CONTROLLER, "")

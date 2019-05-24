@@ -18,6 +18,7 @@ package com.verapi.portal.service.idam;
 
 import com.verapi.abyss.common.Constants;
 import com.verapi.abyss.exception.ApiSchemaError;
+import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.oapi.CompositeResult;
 import com.verapi.portal.service.AbstractService;
@@ -44,6 +45,21 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 @AbyssTableName(tableName = "contract")
 public class ContractService extends AbstractService<UpdateResult> {
+
+    private static final String NO_DATA_FOUND = "no_data_found";
+
+    private static final String SQL_UNSUBSCRIBE = "select\tc.uuid, \n" +
+            "\t\tr.uuid as resource_uuid,\n" +
+            "\t\tsp.uuid as subject_permission_uuid,\n" +
+            "\t\tCOALESCE((select json_agg(rat.uuid\n" +
+            "\t\t\t\t\t) from resource_access_token rat\n" +
+            "\t\t\t\t\t\twhere rat.subjectpermissionid = sp.uuid\n" +
+            "\t\t\t\t), '[]') as resource_access_token_uuid\n" +
+            "FROM\ncontract\nc\n" +
+            "\tleft outer join resource r on r.resourcerefid = c.uuid\n" +
+            "\tleft outer join subject_permission sp on sp.uuid = c.subjectpermissionid\n" +
+            "where c.uuid = CAST(? AS uuid)";
+
     public static final String SQL_SUBSCRIPTIONS_OF_API = "select\tc.uuid, c.organizationid, c.created, c.updated, c.deleted, c.isdeleted, c.crudsubjectid, c.\"name\", c.description, c.apiid, c.subjectid, c.environment, \n" +
             "\t\tc.contractstateid, c.status, c.isrestrictedtosubsetofapi, c.licenseid, c.subjectpermissionid,\n" +
             "\t\tapp.displayname as appdisplayname, \n" +
@@ -455,6 +471,98 @@ public class ContractService extends AbstractService<UpdateResult> {
     public Single<CompositeResult> deleteAll(ApiFilterQuery apiFilterQuery) {
         ApiFilterQuery sqlDeleteAllQuery = new ApiFilterQuery().setFilterQuery(SQL_DELETE_ALL).addFilterQuery(apiFilterQuery.getFilterQuery());
         return deleteAll(sqlDeleteAllQuery.getFilterQuery());
+    }
+
+    public Single<ResultSet> deleteCascaded(RoutingContext routingContext) {
+        LOGGER.trace("ContractService --- deleteCascaded invoked");
+
+        String sessionOrganizationId = routingContext.session().get(Constants.AUTH_ABYSS_PORTAL_ORGANIZATION_UUID_COOKIE_NAME);
+
+        ApiFilterQuery subscriptionEntitiesQuery = new ApiFilterQuery()
+                .setFilterQuery(ContractService.SQL_UNSUBSCRIBE)
+                .setFilterQueryParams(new JsonArray().add(routingContext.pathParam(STR_UUID)));
+
+        ResultSet subscriptionEntitiesResult = new ResultSet();
+        ResourceAccessTokenService resourceAccessTokenService = new ResourceAccessTokenService(routingContext.vertx());
+        SubjectPermissionService subjectPermissionService = new SubjectPermissionService(routingContext.vertx());
+        ResourceService resourceService = new ResourceService(routingContext.vertx());
+
+        return findAll(subscriptionEntitiesQuery)
+            .flatMap(resultSet -> {
+                if (resultSet.getNumRows() > 0) {
+                    LOGGER.trace("Subscription Entities Uuidies:{}",resultSet.getRows().get(0).encodePrettily());
+                    subscriptionEntitiesResult.setResults(resultSet.getResults());
+                    subscriptionEntitiesResult.setColumnNames(resultSet.getColumnNames());
+
+                    return resourceAccessTokenService.initJDBCClient(sessionOrganizationId);
+                } else {
+                    return Single.error(new NotFound404Exception(NO_DATA_FOUND));
+                }
+            })
+            .flatMap(jdbcClient -> {
+                LOGGER.trace("subscriptionEntitiesResult:{}",subscriptionEntitiesResult.getRows().get(0).encodePrettily());
+                JsonArray resourceAccessTokensArray = new JsonArray(subscriptionEntitiesResult.getRows().get(0).getString("resource_access_token_uuid"));
+                LOGGER.trace("resourceAccessTokens:{}", resourceAccessTokensArray.encodePrettily());
+                return Observable.fromIterable(resourceAccessTokensArray)
+                    .map(o -> (String) o)
+                    .flatMap(s -> resourceAccessTokenService.delete(UUID.fromString(s)).toObservable())
+                    .flatMap(compositeResult -> {
+                        if (compositeResult.getThrowable() == null) {
+                            LOGGER.trace("Deleted Resource Access Token: {}", compositeResult.getUpdateResult().getKeys().getString(1));
+                        } else {
+                            LOGGER.trace("Error during deletion of Resource Access Token: Error:{}\n{}",
+                                    compositeResult.getThrowable().getLocalizedMessage(),
+                                    compositeResult.getThrowable().getStackTrace());
+                        }
+                        return Observable.just(compositeResult);
+                    }).toList();
+            })
+            .flatMap(objects -> {
+                LOGGER.trace("# of processed Resource Access Tokens:{}", objects.size());
+                //TODO: Print Update results and error codes.
+
+                return subjectPermissionService.initJDBCClient(sessionOrganizationId);
+            })
+            .flatMap(jdbcClient -> subjectPermissionService.delete(UUID.fromString(subscriptionEntitiesResult.getRows().get(0).getString("subject_permission_uuid")))
+            )
+            .flatMap(compositeResult -> {
+                if (compositeResult.getThrowable() == null) {
+                    LOGGER.trace("Deleted Subject Permission: {}", compositeResult.getUpdateResult().getKeys().getString(1));
+                } else {
+                    LOGGER.trace("Error during deletion of Subject Permission: Error:{}\n{}",
+                            compositeResult.getThrowable().getLocalizedMessage(),
+                            compositeResult.getThrowable().getStackTrace());
+                }
+                return resourceService.initJDBCClient(sessionOrganizationId);
+            })
+            .flatMap(jdbcClient -> {
+                if (subscriptionEntitiesResult.getRows().get(0).getString("resource_uuid") != null) {
+                    return resourceService.delete(UUID.fromString(subscriptionEntitiesResult.getRows().get(0).getString("resource_uuid")));
+                } else {
+                    return Single.just(new CompositeResult(new NotFound404Exception(NO_DATA_FOUND)));
+                }
+            })
+            .flatMap(compositeResult -> {
+                if (compositeResult.getThrowable() == null) {
+                    LOGGER.trace("Deleted Resource: {}", compositeResult.getUpdateResult().getKeys().getString(1));
+                } else {
+                    LOGGER.trace("Error during deletion of Resource: Error:{}\n{}",
+                            compositeResult.getThrowable().getLocalizedMessage(),
+                            compositeResult.getThrowable().getStackTrace());
+                }
+                return this.initJDBCClient(sessionOrganizationId);
+            })
+            .flatMap(jdbcClient -> this.delete(UUID.fromString(subscriptionEntitiesResult.getRows().get(0).getString("uuid")))
+            )
+            .flatMap(compositeResult -> this.findById(UUID.fromString(subscriptionEntitiesResult.getRows().get(0).getString("uuid")))
+            )
+            .flatMap((ResultSet resultSet) -> {
+                if (resultSet.getNumRows() == 0) {
+                    return Single.error(new NotFound404Exception(NO_DATA_FOUND));
+                } else {
+                    return Single.just(resultSet);
+                }
+            });
     }
 
     public Single<ResultSet> findById(long id) {
