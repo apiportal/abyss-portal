@@ -214,7 +214,7 @@ public abstract class AbyssAbstractVerticle extends AbstractVerticle {
         //Handler which adds a header `x-response-time` in the response of matching requests containing the time taken in ms to process the request.
         abyssRouter.route().handler(ResponseTimeHandler.create());
 
-        abyssRouter.get("/").handler(StaticHandler.create("webroot/index-new.html"));
+        abyssRouter.get("/app").handler(StaticHandler.create("webroot/index-new.html"));
 
         abyssRouter.get("/static/*").handler(StaticHandler.create("webroot/static"));
 
