@@ -53,6 +53,7 @@ public class LifecycleService extends AbstractService<UpdateResult> {
         stateToVisibilityMap.put(Constants.API_STATE_DEMOTED, Constants.API_VISIBILITY_PUBLIC);
         stateToVisibilityMap.put(Constants.API_STATE_DEPRECATED, Constants.API_VISIBILITY_PUBLIC);
         stateToVisibilityMap.put(Constants.API_STATE_RETIRED, Constants.API_VISIBILITY_PRIVATE);
+        stateToVisibilityMap.put(Constants.API_STATE_ARCHIVED, Constants.API_VISIBILITY_PRIVATE);
         stateToVisibilityMap.put(Constants.API_STATE_REMOVED, Constants.API_VISIBILITY_PRIVATE);
     }
 
