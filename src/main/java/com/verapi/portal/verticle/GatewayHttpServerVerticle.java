@@ -199,8 +199,10 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                                                         }));
                                                         // set router factory behaviours
                                                         RouterFactoryOptions factoryOptions = new RouterFactoryOptions()
-                                                                .setMountValidationFailureHandler(true) // Disable mounting of dedicated validation failure handler
-                                                                .setMountResponseContentTypeHandler(true) // Mount ResponseContentTypeHandler automatically
+                                                                // Disable mounting of dedicated validation failure handler
+                                                                .setMountValidationFailureHandler(true)
+                                                                // Mount ResponseContentTypeHandler automatically
+                                                                .setMountResponseContentTypeHandler(true)
                                                                 .setMountNotImplementedHandler(true);
 
                                                         // Now you have to generate the router
@@ -231,7 +233,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                                                 });
                                 return Single.just(o);
                             })
-//                            .doOnError(throwable -> LOGGER.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
+//                          .doOnError(throwable -> LOGGER.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace()))
 
                             .onErrorResumeNext((Throwable throwable) -> {
                                 LOGGER.error("loading API proxy error {} | {} | {}", apiUUID, throwable.getLocalizedMessage(), throwable.getStackTrace());
@@ -241,6 +243,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             .doAfterSuccess(swaggerParseResult -> LOGGER.trace("successfully loaded API proxy {}", apiUUID))
                             .toObservable();
                 })
+                //Prepare Discovery Record for Proxy API
                 .flatMap((JsonObject o) -> {
                             if (o == null) {
                                 return Observable.just(new Record());
@@ -261,6 +264,7 @@ public class GatewayHttpServerVerticle extends AbstractGatewayVerticle implement
                             }
                         }
                 )
+                //Add Proxy API to Discovery
                 .flatMap((Record record) -> {
                     if (record == null) {
                         return Observable.empty();

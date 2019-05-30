@@ -23,6 +23,7 @@ import com.verapi.abyss.exception.AbyssApiException;
 import com.verapi.abyss.exception.InternalServerError500Exception;
 import com.verapi.abyss.exception.NotFound404Exception;
 import com.verapi.abyss.exception.UnAuthorized401Exception;
+import com.verapi.auth.BasicTokenParser;
 import com.verapi.portal.common.AbyssJDBCService;
 import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.service.idam.AuthenticationService;
@@ -31,6 +32,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
@@ -73,6 +76,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +97,33 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
     VerticleConf verticleConf;
     private AbyssJDBCService abyssJDBCService;
     private JDBCClient jdbcClient;
+
+
+    /**
+     * @see "http://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml"
+     */
+    public static enum HttpAuthenticationScheme {
+        BASIC("Basic"),
+        BEARER("Bearer"),
+        DIGEST("Digest"),
+        HOBA("HOBA"),
+        MUTUAL("Mutual"),
+        NEGOTIATE("Negotiate"),
+        OAUTH("OAuth"),
+        SCRAMSHA1("SCRAM-SHA-1"),
+        SCRAMSHA256("SCRAM-SHA-256"),
+        VAPID("vapid");
+
+        private String value;
+
+        private HttpAuthenticationScheme(String value) {
+            this.value = value;
+        }
+
+        public String toString() {
+            return String.valueOf(this.value);
+        }
+    }
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
@@ -580,10 +611,12 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         class BusinessApi {
             private URL serverURL;
             private HttpVersion protocolVersion;
+            private String httpAuthorizationHeaderValue;
 
-            private BusinessApi(URL serverURL, HttpVersion protocolVersion) {
+            private BusinessApi(URL serverURL, HttpVersion protocolVersion, String httpAuthorizationHeaderValue) {
                 this.serverURL = serverURL;
                 this.protocolVersion = protocolVersion;
+                this.httpAuthorizationHeaderValue = httpAuthorizationHeaderValue;
             }
         }
 
@@ -605,12 +638,14 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
         OpenAPIUtil.openAPIParser(apiSpec)
                 .flatMap((SwaggerParseResult swaggerParseResult) -> {
+                    //Select Business API Server from OAS Servers List - develop Round Robin
                     List<Server> serversList = swaggerParseResult.getOpenAPI().getServers();
                     URL businessApiServerURL;
                     int serverPosition = new SecureRandom().nextInt(serversList.size());
                     String businessApiServerURLStr = serversList.get(serverPosition).getUrl();
-                    HttpVersion businessApiServerHttpProtocolVersion;
 
+                    //Get Business API Http Protocol Version
+                    HttpVersion businessApiServerHttpProtocolVersion;
                     if (serversList.get(serverPosition).getExtensions() != null
                             && serversList.get(serverPosition).getExtensions().containsKey(Constants.OPENAPI_HTTP_PROTOCOL_VERSION)) {
                         businessApiServerHttpProtocolVersion = HttpVersion.valueOf(serversList
@@ -622,9 +657,68 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                         businessApiServerHttpProtocolVersion = HttpVersion.HTTP_1_1;
                     }
 
+                    //Check Security Requirements of Business API (Input: swaggerParseResult, Output: securityRequirementSet)
+                    Set<String> securityRequirementSet = new HashSet<>();
+
+                    List<SecurityRequirement> securityRequirementsOfOperation = swaggerParseResult.getOpenAPI().getPaths().get(pathParameters).readOperationsMap()
+                            .get(PathItem.HttpMethod.valueOf(routingContext.request().method().name()))
+                            .getSecurity();
+
+                    if (securityRequirementsOfOperation == null || securityRequirementsOfOperation.isEmpty()) {
+                        List<SecurityRequirement> globalSecurityRequirements = swaggerParseResult.getOpenAPI().getSecurity();
+                        if (globalSecurityRequirements != null && !globalSecurityRequirements.isEmpty()) {
+                            for (SecurityRequirement securityRequirement: globalSecurityRequirements) {
+                                if (!securityRequirement.isEmpty()) {
+                                    securityRequirementSet.addAll(securityRequirement.keySet());
+                                }
+                            }
+                        }
+                    } else {
+                        for (SecurityRequirement securityRequirement: securityRequirementsOfOperation) {
+                            if (!securityRequirement.isEmpty()) {
+                                securityRequirementSet.addAll(securityRequirement.keySet());
+                            }
+                        }
+                    }
+
+                    //Find Security Scheme corresponding to the Security Requirement Set of Business API (Input: securityRequirementSet, Output: Http Authentication Header)
+                    Map<String, SecurityScheme> securitySchemes = null;
+                    if (!securityRequirementSet.isEmpty()) {
+
+                        securityRequirementSet.retainAll(swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().keySet());
+
+                        securitySchemes = new HashMap<>();
+                        for (String key : securityRequirementSet) {
+                            securitySchemes.put(key, swaggerParseResult.getOpenAPI().getComponents().getSecuritySchemes().get(key));
+                        }
+                    }
+
+                    //Add Authentication Headers for Business API (Input: securityRequirementSet, Output: Http Authentication Header)
+                    String httpAuthorizationHeaderValue = "";
+                    if (securitySchemes != null && !securitySchemes.isEmpty()) {
+                        for (SecurityScheme securityScheme : securitySchemes.values()) {
+                            //Api Key
+                            if (securityScheme.getType().equals(SecurityScheme.Type.APIKEY)) {
+                                if (securityScheme.getIn().equals(SecurityScheme.In.HEADER)) {
+                                    //TODO: Use name of header for API Key
+                                    httpAuthorizationHeaderValue = "Bearer " + (String) securityScheme.getExtensions().get("x-abyss-apikey");
+                                } else if (securityScheme.getIn().equals(SecurityScheme.In.COOKIE)) {
+                                    //TODO: In Query + In Cookie
+                                }
+                                break;
+                            //Only Http Basic is supported.
+                            } else if (securityScheme.getType().equals(SecurityScheme.Type.HTTP) && securityScheme.getScheme().equals(HttpAuthenticationScheme.BASIC.value)) {
+                                httpAuthorizationHeaderValue = BasicTokenParser.basicTokenEncoder((String) securityScheme.getExtensions().get("x-abyss-username"),
+                                        (String) securityScheme.getExtensions().get("x-abyss-password"), true);
+                                break;
+                            }
+                        }
+                    }
+
+
                     try {
                         businessApiServerURL = new URL(businessApiServerURLStr + pathParameters);
-                        return Single.just(new BusinessApi(businessApiServerURL, businessApiServerHttpProtocolVersion));
+                        return Single.just(new BusinessApi(businessApiServerURL, businessApiServerHttpProtocolVersion, httpAuthorizationHeaderValue));
                     } catch (MalformedURLException e) {
                         LOGGER.error("malformed server url {}", businessApiServerURLStr);
                         return Single.error(e);
@@ -653,6 +747,7 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                     .setSsl("https".equals(businessApi.serverURL.getProtocol()))
                                     .setURI(businessApi.serverURL.getPath());
 
+                            //Add query parameters to business api request from proxy request
                             if (routingContext.request().params().size() > 0) {
                                 String apiQueryParams = "?";
 
@@ -669,6 +764,9 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                             // pass through http request headers
                             request.headers().setAll(routingContext.request().headers());
 
+                            //Add Auth Headers for Http Basic
+                            //TODO: Add Support for ApiKey Custom Header Name : Value
+                            request.headers().add(HttpHeaders.AUTHORIZATION, businessApi.httpAuthorizationHeaderValue);
 /*
                             request.endHandler(event -> {
                                 LOGGER.trace("request stream ended");
