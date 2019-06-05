@@ -761,8 +761,11 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                             HttpClientRequest request = httpClient.request(routingContext.request().method(), requestOptions);
                             request.setChunked(true);
                             routingContext.response().setChunked(true);
-                            // pass through http request headers
+                            // pass through http request headers //TODO: Should we pass all headers from proxy request?
                             request.headers().setAll(routingContext.request().headers());
+                            request.headers().set(HttpHeaders.HOST, requestOptions.getHost()+":"+requestOptions.getPort());
+                            request.headers().remove(Constants.AUTH_ABYSS_GATEWAY_API_ACCESSTOKEN_NAME);
+
 
                             //Add Auth Headers for Http Basic
                             //TODO: Add Support for ApiKey Custom Header Name : Value
@@ -781,13 +784,16 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                 request.end();
                             });
 */
+                            LOGGER.trace("Business API Request -> {} {} | headers:\n{}", request.method(), request.absoluteURI(), request.headers().entries());
+
                             request
                                     .toFlowable()
                                     .flatMap(httpClientResponse -> {
-                                        LOGGER.trace("httpClientResponse statusCode: {} | statusMessage: {}", httpClientResponse.statusCode(), httpClientResponse.statusMessage());
+                                        LOGGER.trace("Business API httpClientResponse statusCode: {} | statusMessage: {} | headers:\n{}",
+                                                httpClientResponse.statusCode(), httpClientResponse.statusMessage(), httpClientResponse.headers().entries());
                                         routingContext.response()
                                                 .setStatusCode(httpClientResponse.statusCode())
-                                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8");
+                                                .putHeader(HttpHeaders.CONTENT_TYPE, httpClientResponse.getHeader(HttpHeaders.CONTENT_TYPE));
                                         return httpClientResponse.toFlowable();
                                     })
                                     .doFinally(() -> {
@@ -799,10 +805,8 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                                     .subscribe(data -> {
                                         //LOGGER.trace("httpClientResponse subcribe data: {}", data);
                                         //////routingContext.response().write(data);
-                                        routingContext.response().headers().setAll(request.headers());
                                         routingContext.response().setChunked(true); //TODO: Http Chunked Serving per request
                                         routingContext.response()
-                                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json; charset=utf-8")
                                                 .write(data);
                                         //routingContext.next();
                                     }, throwable -> {
