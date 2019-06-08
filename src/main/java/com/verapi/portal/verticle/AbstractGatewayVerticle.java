@@ -29,6 +29,8 @@ import com.verapi.portal.common.AbyssServiceDiscovery;
 import com.verapi.portal.service.idam.AuthenticationService;
 import com.verapi.portal.service.idam.AuthorizationService;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.cookie.ClientCookieEncoder;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
 import io.reactivex.Single;
@@ -611,12 +613,17 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
         class BusinessApi {
             private URL serverURL;
             private HttpVersion protocolVersion;
-            private String httpAuthorizationHeaderValue;
+            private SecurityScheme.In httpAuthorizationIn;
+            private String httpAuthorizationKey;
+            private String httpAuthorizationValue;
 
-            private BusinessApi(URL serverURL, HttpVersion protocolVersion, String httpAuthorizationHeaderValue) {
+            private BusinessApi(URL serverURL, HttpVersion protocolVersion, SecurityScheme.In httpAuthorizationIn,
+                                String httpAuthorizationKey, String httpAuthorizationValue) {
                 this.serverURL = serverURL;
                 this.protocolVersion = protocolVersion;
-                this.httpAuthorizationHeaderValue = httpAuthorizationHeaderValue;
+                this.httpAuthorizationIn = httpAuthorizationIn;
+                this.httpAuthorizationKey = httpAuthorizationKey;
+                this.httpAuthorizationValue = httpAuthorizationValue;
             }
         }
 
@@ -694,21 +701,28 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
                     }
 
                     //Add Authentication Headers for Business API (Input: securityRequirementSet, Output: Http Authentication Header)
-                    String httpAuthorizationHeaderValue = "";
+                    SecurityScheme.In httpAuthorizationIn = SecurityScheme.In.HEADER;
+                    String httpAuthorizationKey = "";
+                    String httpAuthorizationValue = "";
                     if (securitySchemes != null && !securitySchemes.isEmpty()) {
                         for (SecurityScheme securityScheme : securitySchemes.values()) {
                             //Api Key
                             if (securityScheme.getType().equals(SecurityScheme.Type.APIKEY)) {
+                                httpAuthorizationIn = securityScheme.getIn();
+                                httpAuthorizationKey = securityScheme.getName();
                                 if (securityScheme.getIn().equals(SecurityScheme.In.HEADER)) {
-                                    //TODO: Use name of header for API Key
-                                    httpAuthorizationHeaderValue = "Bearer " + (String) securityScheme.getExtensions().get("x-abyss-apikey");
+                                    httpAuthorizationValue = "Bearer " + (String) securityScheme.getExtensions().get("x-abyss-apikey");
                                 } else if (securityScheme.getIn().equals(SecurityScheme.In.COOKIE)) {
-                                    //TODO: In Query + In Cookie
+                                    httpAuthorizationValue = (String) securityScheme.getExtensions().get("x-abyss-apikey");
+                                } else {
+                                    //TODO: Test In Query
                                 }
                                 break;
                             //Only Http Basic is supported.
                             } else if (securityScheme.getType().equals(SecurityScheme.Type.HTTP) && securityScheme.getScheme().equals(HttpAuthenticationScheme.BASIC.value)) {
-                                httpAuthorizationHeaderValue = BasicTokenParser.basicTokenEncoder((String) securityScheme.getExtensions().get("x-abyss-username"),
+                                httpAuthorizationIn = SecurityScheme.In.HEADER;
+                                httpAuthorizationKey = HttpHeaders.AUTHORIZATION.toString();
+                                httpAuthorizationValue = BasicTokenParser.basicTokenEncoder((String) securityScheme.getExtensions().get("x-abyss-username"),
                                         (String) securityScheme.getExtensions().get("x-abyss-password"), true);
                                 break;
                             }
@@ -718,7 +732,8 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
                     try {
                         businessApiServerURL = new URL(businessApiServerURLStr + pathParameters);
-                        return Single.just(new BusinessApi(businessApiServerURL, businessApiServerHttpProtocolVersion, httpAuthorizationHeaderValue));
+                        return Single.just(new BusinessApi(businessApiServerURL, businessApiServerHttpProtocolVersion,
+                                            httpAuthorizationIn, httpAuthorizationKey, httpAuthorizationValue));
                     } catch (MalformedURLException e) {
                         LOGGER.error("malformed server url {}", businessApiServerURLStr);
                         return Single.error(e);
@@ -768,8 +783,13 @@ public abstract class AbstractGatewayVerticle extends AbstractVerticle {
 
 
                             //Add Auth Headers for Http Basic
-                            //TODO: Add Support for ApiKey Custom Header Name : Value
-                            request.headers().add(HttpHeaders.AUTHORIZATION, businessApi.httpAuthorizationHeaderValue);
+                            if (businessApi.httpAuthorizationIn.equals(SecurityScheme.In.HEADER)) {
+                                request.headers().add(businessApi.httpAuthorizationKey, businessApi.httpAuthorizationValue);
+                            } else if (businessApi.httpAuthorizationIn.equals(SecurityScheme.In.COOKIE)) {
+                                //TODO: Test In Cookie
+                                DefaultCookie cookie = new DefaultCookie(businessApi.httpAuthorizationKey, businessApi.httpAuthorizationValue);
+                                request.putHeader(HttpHeaders.COOKIE, ClientCookieEncoder.STRICT.encode(cookie));
+                            }
 /*
                             request.endHandler(event -> {
                                 LOGGER.trace("request stream ended");
